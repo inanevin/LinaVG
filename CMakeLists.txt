@@ -47,7 +47,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD_MODE BATCH UNITY_BU
 #--------------------------------------------------------------------
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-include(../CMake/ProjectSettings.cmake)
+include(CMake/ProjectSettings.cmake)
 
 #--------------------------------------------------------------------
 # Folder structuring in visual studio

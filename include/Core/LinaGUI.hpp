@@ -45,7 +45,7 @@ namespace Lina::GUI
     {   
         GUIVector4(){};
         GUIVector4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {};
-        GUIVector4(const GUIVector3& v)
+        GUIVector4(const GUIVector4& v)
         {
             this->x = v.x;
             this->y = v.y;
@@ -56,7 +56,7 @@ namespace Lina::GUI
         float y = 0.0f;
         float z = 0.0f;
         float w = 0.0f;
-    }
+    };
 
     struct GUIVector2
     {   
@@ -70,7 +70,7 @@ namespace Lina::GUI
 
         float x = 0.0f;
         float y = 0.0f;
-    }
+    };
 
     struct GUIVertex
     {
