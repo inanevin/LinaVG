@@ -39,13 +39,21 @@ Timestamp: 12/29/2018 10:43:46 PM
 #ifndef LinaGUI_HPP
 #define LinaGUI_HPP
 
+#include <vector>
+
+
+#ifdef LINAGUI_CUSTOM_LINE_SHADER
+    #define DONTINIT_LINE_SHADER
+#endif
+
 namespace Lina::GUI
 {
-    struct GUIVector4
-    {   
-        GUIVector4(){};
-        GUIVector4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {};
-        GUIVector4(const GUIVector4& v)
+    struct LGVec4
+    {
+        LGVec4(){};
+        LGVec4(float x, float y, float z, float w)
+            : x(x), y(y), z(z), w(w){};
+        LGVec4(const LGVec4& v)
         {
             this->x = v.x;
             this->y = v.y;
@@ -58,11 +66,12 @@ namespace Lina::GUI
         float w = 0.0f;
     };
 
-    struct GUIVector2
-    {   
-        GUIVector2(){};
-        GUIVector2(float x, float y) : x(x), y(y){};
-        GUIVector2(const GUIVector2& v)
+    struct LGVec2
+    {
+        LGVec2(){};
+        LGVec2(float x, float y)
+            : x(x), y(y){};
+        LGVec2(const LGVec2& v)
         {
             x = v.x;
             y = v.y;
@@ -72,18 +81,46 @@ namespace Lina::GUI
         float y = 0.0f;
     };
 
-    struct GUIVertex
+    struct LGVertex
     {
-        GUIVector2 m_pos;
-        GUIVector2 m_uv;
-        GUIVector4 m_col;
-    };
-    
-    struct DrawData
-    {
-
+        LGVec2 m_pos;
+        LGVec2 m_uv;
+        LGVec4 m_col;
     };
 
-}; // namespace Lina:GUI
+    typedef unsigned int LGIndex;
+
+    struct LGDrawData
+    {
+        std::vector<LGVertex> m_vertexBuffer;
+        std::vector<LGIndex>  m_indexBuffer;
+        LGIndex               m_indexCounter = 0;
+    };
+
+    extern LGDrawData g_drawData;
+
+    struct LGInitOptions
+    {
+        char* m_customLineFragShader = nullptr;
+        char* m_customLineVertexShader = nullptr;
+    };
+
+    // ************************************************
+    // *                   CONTROLS                   *
+    // ************************************************
+    static void Initialize(const LGInitOptions& initOptions);
+    static void Start();
+    static void Render();
+    static void End();
+
+    // ************************************************
+    // *                   MATH                       *
+    // ************************************************
+
+    static float  Mag(const LGVec2& v);
+    static LGVec2 Normalized(const LGVec2& v);
+    static LGVec2 Rotate90(const LGVec2& v, bool cw = true);
+
+}; // namespace Lina::GUI
 
 #endif

@@ -1,4 +1,4 @@
-/*
+/* 
 This file is a part of: Lina Engine
 https://github.com/inanevin/LinaEngine
 
@@ -26,53 +26,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "Core/LinaGUI.hpp"
-#include "Core/LinaGUIGLBackend.hpp"
-#include <math.h>
+/*
+Class: LinaGUIGLBackend
 
+
+
+Timestamp: 3/24/2022 11:33:52 PM
+*/
+
+#pragma once
+
+#ifndef LinaGUIGLBackend_HPP
+#define LinaGUIGLBackend_HPP
+
+// Headers here.
+#include "LinaGUI.hpp"
+#include <glad/glad.h>
+
+namespace Lina
+{
+    namespace GUI
+    {
+        struct LGInitOptions;
+    }
+}
 namespace Lina::GUI
 {
-    LGDrawData g_drawData;
-
-    void Initialize(const LGInitOptions& initOptions)
+    class Backend
     {
-        Backend::Initialize(initOptions);
-    }
+        static GLchar* g_lineVertexShader;
+        static GLchar* g_lineFragShader;
+        static unsigned int g_lineShader;
 
-    void Start()
-    {
+        static void Initialize(const LGInitOptions& initOptions);
+        static void Start();
+        static void Render();
+        static void End();
+    };
+}
 
-    }
-
-    void Render()
-    {
-        
-    }
-
-    void End()
-    {
-        g_drawData.m_indexCounter = 0;
-        g_drawData.m_indexBuffer.clear();
-        g_drawData.m_vertexBuffer.clear();
-    }
-
-    float Mag(const LGVec2& v)
-    {
-        return sqrt(v.x * v.x + v.y * v.y);
-    }
-
-    LGVec2 Normalized(const LGVec2& v)
-    {
-        const float mag = Mag(v);
-        return LGVec2(v.x / mag, v.y / mag);
-    }
-
-    LGVec2 Rotate90(const LGVec2& v, bool cw)
-    {
-        if (cw)
-            return LGVec2(v.y, -v.x);
-        else
-            return LGVec2(-v.y, v.x);
-    }
-
-} // namespace Lina::GUI
+#endif

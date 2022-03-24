@@ -26,53 +26,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "Core/LinaGUI.hpp"
-#include "Core/LinaGUIGLBackend.hpp"
-#include <math.h>
+#include "Core/LinaGUIDrawer.hpp"
 
 namespace Lina::GUI
 {
-    LGDrawData g_drawData;
-
-    void Initialize(const LGInitOptions& initOptions)
+    void DrawLine(const LGVec2& p1, const LGVec2& p2, const LGVec4& color, float thickness)
     {
-        Backend::Initialize(initOptions);
-    }
+        const float  halfThickness = thickness / 2.0f;
+        const LGVec2 dir           = Normalized(LGVec2(p2.y - p1.x, p2.x - p1.x));
+        const LGVec2 up            = Rotate90(dir, false);
+        const LGVec2 down          = Rotate90(dir, true);
+        LGVertex     p1U, p1D, p2U, p2D;
+        p1U.m_pos = LGVec2(p1.x + up.x * halfThickness, p1.y + up.y * halfThickness);
+        p1D.m_pos = LGVec2(p1.x + dir.x * halfThickness, p1.y + dir.y * halfThickness);
+        p2U.m_pos = LGVec2(p2.x + up.x * halfThickness, p2.y + up.y * halfThickness);
+        p2D.m_pos = LGVec2(p2.x + dir.x * halfThickness, p2.y + dir.y * halfThickness);
+        g_drawData.m_vertexBuffer.insert(g_drawData.m_vertexBuffer.end(), {p1U, p1D, p2U, p2D});
 
-    void Start()
-    {
-
-    }
-
-    void Render()
-    {
-        
-    }
-
-    void End()
-    {
-        g_drawData.m_indexCounter = 0;
-        g_drawData.m_indexBuffer.clear();
-        g_drawData.m_vertexBuffer.clear();
-    }
-
-    float Mag(const LGVec2& v)
-    {
-        return sqrt(v.x * v.x + v.y * v.y);
-    }
-
-    LGVec2 Normalized(const LGVec2& v)
-    {
-        const float mag = Mag(v);
-        return LGVec2(v.x / mag, v.y / mag);
-    }
-
-    LGVec2 Rotate90(const LGVec2& v, bool cw)
-    {
-        if (cw)
-            return LGVec2(v.y, -v.x);
-        else
-            return LGVec2(-v.y, v.x);
+        const LGIndex curr = g_drawData.m_indexCounter;
+        g_drawData.m_indexBuffer.insert(g_drawData.m_indexBuffer.end(), {curr, curr + 1, curr + 2, curr + 1, curr + 3, curr + 2});
     }
 
 } // namespace Lina::GUI

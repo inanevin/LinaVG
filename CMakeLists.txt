@@ -23,6 +23,8 @@ set(LINAGUI_SOURCES
 
 # Core
 include/Core/LinaGUI.hpp
+include/Core/LinaGUIDrawer.hpp
+include/Core/LinaGUIGLBackend.hpp
 
 )
 
@@ -31,6 +33,8 @@ set(LINAGUI_HEADERS
 
 # Core
 src/Core/LinaGUI.cpp
+src/Core/LinaGUIDrawer.cpp
+src/Core/LinaGUIGLBackend.cpp
 
 )
 
@@ -42,10 +46,24 @@ add_library(Lina::GUI ALIAS ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON UNITY_BUILD_UNIQUE_ID "LinaGUI")
 set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD_MODE BATCH UNITY_BUILD_BATCH_SIZE 16)
 
+
+
 #--------------------------------------------------------------------
-# Options & Definitions
+# Set include directories
 #--------------------------------------------------------------------
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glad/include)
+
+#--------------------------------------------------------------------
+# Subdirectories & linking
+#--------------------------------------------------------------------
+
+target_link_libraries(${PROJECT_NAME} 
+	PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glad/lib/${TARGET_ARCHITECTURE}/$<CONFIGURATION>/glad.lib
+)
+	
 
 include(CMake/ProjectSettings.cmake)
 
