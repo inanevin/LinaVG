@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: Lina Engine
 https://github.com/inanevin/LinaEngine
 
@@ -45,24 +45,26 @@ Timestamp: 3/24/2022 11:33:52 PM
 
 namespace Lina
 {
-    namespace GUI
-    {
-        struct LGInitOptions;
-    }
-}
-namespace Lina::GUI
+    struct LGInitOptions;
+} // namespace Lina
+namespace Lina
 {
     class Backend
     {
-        static GLchar* g_lineVertexShader;
-        static GLchar* g_lineFragShader;
+    public:
+        static GLchar*      g_lineVertexShader;
+        static GLchar*      g_lineFragShader;
+        static GLint        g_projMatrixLoc;
+        static GLuint       g_vbo;
+        static GLuint       g_ebo;
+        static GLuint       g_vao;
         static unsigned int g_lineShader;
 
-        static void Initialize(const LGInitOptions& initOptions);
-        static void Start();
-        static void Render();
-        static void End();
+        static void InitializeBackend();
+        static void StartBackend();
+        static void RenderBackend();
+        static void EndBackend();
     };
-}
+} // namespace Lina
 
 #endif

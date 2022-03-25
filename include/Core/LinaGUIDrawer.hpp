@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: Lina Engine
 https://github.com/inanevin/LinaEngine
 
@@ -42,9 +42,13 @@ Timestamp: 3/24/2022 10:57:37 PM
 // Headers here.
 #include "LinaGUI.hpp"
 
-namespace Lina::GUI
+namespace Lina
 {
-    static void DrawLine(const LGVec2& p1, const LGVec2& p2, const LGVec4& color, float thickness = 1.0f);
-}
+    class Drawer
+    {
+    public:
+        static void DrawLine(const LGVec2& p1, const LGVec2& p2, const LGVec4& color, float thickness = 1.0f);
+    };
+} // namespace Lina
 
 #endif

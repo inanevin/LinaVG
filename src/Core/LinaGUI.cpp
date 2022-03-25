@@ -30,44 +30,47 @@ SOFTWARE.
 #include "Core/LinaGUIGLBackend.hpp"
 #include <math.h>
 
-namespace Lina::GUI
+namespace Lina
 {
-    LGDrawData g_drawData;
+    LGDrawData GUI::g_drawData;
+    LGOptions  GUI::g_options;
 
-    void Initialize(const LGInitOptions& initOptions)
+    void       GUI::Initialize(const LGOptions& initOptions)
     {
-        Backend::Initialize(initOptions);
+        g_options = initOptions;
+        Backend::InitializeBackend();
     }
 
-    void Start()
+    void GUI::Start()
     {
-
+        Backend::StartBackend();
     }
 
-    void Render()
+    void GUI::Render()
     {
-        
+        Backend::RenderBackend();
     }
 
-    void End()
+    void GUI::End()
     {
+        Backend::EndBackend();
         g_drawData.m_indexCounter = 0;
         g_drawData.m_indexBuffer.clear();
         g_drawData.m_vertexBuffer.clear();
     }
 
-    float Mag(const LGVec2& v)
+    float GUI::Mag(const LGVec2& v)
     {
         return sqrt(v.x * v.x + v.y * v.y);
     }
 
-    LGVec2 Normalized(const LGVec2& v)
+    LGVec2 GUI::Normalized(const LGVec2& v)
     {
         const float mag = Mag(v);
         return LGVec2(v.x / mag, v.y / mag);
     }
 
-    LGVec2 Rotate90(const LGVec2& v, bool cw)
+    LGVec2 GUI::Rotate90(const LGVec2& v, bool cw)
     {
         if (cw)
             return LGVec2(v.y, -v.x);
@@ -75,4 +78,4 @@ namespace Lina::GUI
             return LGVec2(-v.y, v.x);
     }
 
-} // namespace Lina::GUI
+} // namespace Lina
