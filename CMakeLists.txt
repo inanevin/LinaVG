@@ -13,13 +13,13 @@
 # and limitations under the License.
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 cmake_minimum_required (VERSION 3.6)
-project(LinaGUI)
+project(Lina2D)
 
 #--------------------------------------------------------------------
 # Set sources
 #--------------------------------------------------------------------
 
-set(LINAGUI_SOURCES 
+set(Lina2D_SOURCES 
 
 # Core
 include/Lina2D/Core/Renderer.hpp
@@ -30,7 +30,7 @@ include/Lina2D/Core/Math.hpp
 )
 
 
-set(LINAGUI_HEADERS
+set(Lina2D_HEADERS
 
 # Core
 src/Lina2D/Core/Renderer.cpp
@@ -43,9 +43,9 @@ src/Lina2D/Core/Math.cpp
 #--------------------------------------------------------------------
 # Create executable project
 #--------------------------------------------------------------------
-add_library(${PROJECT_NAME} ${LINAGUI_SOURCES} ${LINAGUI_HEADERS})
+add_library(${PROJECT_NAME} ${Lina2D_SOURCES} ${Lina2D_HEADERS})
 add_library(Lina::GUI ALIAS ${PROJECT_NAME}) 
-set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON UNITY_BUILD_UNIQUE_ID "LinaGUI")
+set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON UNITY_BUILD_UNIQUE_ID "Lina2D")
 set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD_MODE BATCH UNITY_BUILD_BATCH_SIZE 16)
 
 
@@ -73,7 +73,7 @@ include(CMake/ProjectSettings.cmake)
 # Folder structuring in visual studio
 #--------------------------------------------------------------------
 if(MSVC_IDE)
-	foreach(source IN LISTS LINAGUI_HEADERS LINAGUI_SOURCES)
+	foreach(source IN LISTS Lina2D_HEADERS Lina2D_SOURCES)
 		get_filename_component(source_path "${source}" PATH)
 		string(REPLACE "${LINAEDITOR_SOURCE_DIR}" "" relative_source_path "${source_path}")
 		string(REPLACE "/" "\\" source_path_msvc "${relative_source_path}")
