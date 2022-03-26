@@ -26,56 +26,48 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "Core/LinaGUI.hpp"
-#include "Core/LinaGUIGLBackend.hpp"
-#include <math.h>
+/*
+Class: LinaGUIGLBackend
 
-namespace Lina
+
+
+Timestamp: 3/24/2022 11:33:52 PM
+*/
+
+#pragma once
+
+#ifndef Lina2DGLBackend_HPP
+#define Lina2DGLBackend_HPP
+
+// Headers here.
+#include <glad/glad.h>
+
+namespace Lina2D
 {
-    LGDrawData GUI::g_drawData;
-    LGOptions  GUI::g_options;
-
-    void       GUI::Initialize(const LGOptions& initOptions)
+    class Backend
     {
-        g_options = initOptions;
-        Backend::InitializeBackend();
-    }
+    public:
 
-    void GUI::Start()
-    {
-        Backend::StartBackend();
-    }
+        Backend()
+        {
+        };
+        ~Backend() = default;
 
-    void GUI::Render()
-    {
-        Backend::RenderBackend();
-    }
+        void Initialize();
+        void StartFrame();
+        void Render();
+        void EndFrame();
 
-    void GUI::End()
-    {
-        Backend::EndBackend();
-        g_drawData.m_indexCounter = 0;
-        g_drawData.m_indexBuffer.clear();
-        g_drawData.m_vertexBuffer.clear();
-    }
+    private:
+        GLchar*      g_lineVertexShader = nullptr;
+        GLchar*      g_lineFragShader   = nullptr;
+        GLint        g_projMatrixLoc    = 0;
+        GLuint       g_vbo              = 0;
+        GLuint       g_ebo              = 0;
+        GLuint       g_vao              = 0;
+        unsigned int g_lineShader       = 0;
+    };
 
-    float GUI::Mag(const LGVec2& v)
-    {
-        return sqrt(v.x * v.x + v.y * v.y);
-    }
+} // namespace Lina2D
 
-    LGVec2 GUI::Normalized(const LGVec2& v)
-    {
-        const float mag = Mag(v);
-        return LGVec2(v.x / mag, v.y / mag);
-    }
-
-    LGVec2 GUI::Rotate90(const LGVec2& v, bool cw)
-    {
-        if (cw)
-            return LGVec2(v.y, -v.x);
-        else
-            return LGVec2(-v.y, v.x);
-    }
-
-} // namespace Lina
+#endif

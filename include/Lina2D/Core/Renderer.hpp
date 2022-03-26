@@ -27,44 +27,61 @@ SOFTWARE.
 */
 
 /*
-Class: LinaGUIGLBackend
+Class: Application
 
+Central application class, responsible for managing all the engines like input, physics, rendering etc.
+as well as defining the game loop.
 
-
-Timestamp: 3/24/2022 11:33:52 PM
+Timestamp: 12/29/2018 10:43:46 PM
 */
 
 #pragma once
+#ifndef LinaGUI_HPP
+#define LinaGUI_HPP
 
-#ifndef LinaGUIGLBackend_HPP
-#define LinaGUIGLBackend_HPP
+#include "GLBackend.hpp"
+#include "Drawer.hpp"
+#include "Common.hpp"
+#include <vector>
+#include <list>
+#include <memory>
+#include <set>
+#include <functional>
 
-// Headers here.
-#include "LinaGUI.hpp"
-#include <glad/glad.h>
+#ifdef LINA2D_CUSTOM_LINE_SHADER
+#define DONTINIT_LINE_SHADER
+#endif
 
-namespace Lina
+namespace Lina2D
 {
-    struct LGInitOptions;
-} // namespace Lina
-namespace Lina
-{
-    class Backend
+    class Renderer
     {
     public:
-        static GLchar*      g_lineVertexShader;
-        static GLchar*      g_lineFragShader;
-        static GLint        g_projMatrixLoc;
-        static GLuint       g_vbo;
-        static GLuint       g_ebo;
-        static GLuint       g_vao;
-        static unsigned int g_lineShader;
+        void Initialize(const Options& initOptions);
+        void StartFrame();
+        void Render();
+        void EndFrame();
 
-        static void InitializeBackend();
-        static void StartBackend();
-        static void RenderBackend();
-        static void EndBackend();
+        std::function<float()> m_mouseScrollCallback;
+        std::function<Vec2()>  m_keyAxisCallback;
+
+        inline Drawer& GetDrawer()
+        {
+            return m_drawer;
+        }
+
+    private:
+        friend class Drawer;
+        friend class Backend;
+
+        static Renderer* g_renderer;
+        Backend          m_backend;
+        Drawer           m_drawer;
+        Options          m_options;
+        DrawData         m_drawData;
+        int              m_gcFrameCounter;
     };
-} // namespace Lina
+
+}; // namespace Lina2D
 
 #endif

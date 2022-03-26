@@ -26,29 +26,53 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Class: Draw
+#include "Lina2D/Core/Renderer.hpp"
+#include "Lina2D/Core/GLBackend.hpp"
+#include "Lina2D/Core/Drawer.hpp"
+#include <math.h>
 
-
-
-Timestamp: 3/24/2022 10:57:37 PM
-*/
-
-#pragma once
-
-#ifndef LinaGUIDrawer_HPP
-#define LinaGUIDrawer_HPP
-
-// Headers here.
-#include "LinaGUI.hpp"
-
-namespace Lina
+namespace Lina2D
 {
-    class Drawer
-    {
-    public:
-        static void DrawLine(const LGVec2& p1, const LGVec2& p2, const LGVec4& color, float thickness = 1.0f);
-    };
-} // namespace Lina
+    Renderer* Renderer::g_renderer = nullptr;
 
-#endif
+    void Renderer::Initialize(const Options& initOptions)
+    {
+        g_renderer = this;
+        m_options  = initOptions;
+        m_backend.Initialize();
+    }
+
+    void Renderer::StartFrame()
+    {
+        m_backend.StartFrame();
+    }
+
+    void Renderer::Render()
+    {
+        m_backend.Render();
+    }
+
+    void Renderer::EndFrame()
+    {
+        m_backend.EndFrame();
+        m_drawer.ResetLineJointData();
+
+        m_gcFrameCounter++;
+
+        if (m_gcFrameCounter > m_options.m_gcCollectInterval)
+        {
+            m_drawData.m_indexBuffer.clear();
+            m_drawData.m_vertexBuffer.clear();
+            m_gcFrameCounter = 0;
+        }
+        else
+        {
+            // g_drawData.m_indexBuffer.resize(0);
+            // g_drawData.m_vertexBuffer.resize(0);
+            m_drawData.m_indexBuffer.clear();
+            m_drawData.m_vertexBuffer.clear();
+        }
+        m_drawData.m_indexCounter = 0;
+    }
+
+} // namespace Lina2D

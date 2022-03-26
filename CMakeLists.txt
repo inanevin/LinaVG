@@ -22,20 +22,22 @@ project(LinaGUI)
 set(LINAGUI_SOURCES 
 
 # Core
-include/Core/LinaGUI.hpp
-include/Core/LinaGUIDrawer.hpp
-include/Core/LinaGUIGLBackend.hpp
-
+include/Lina2D/Core/Renderer.hpp
+include/Lina2D/Core/Drawer.hpp
+include/Lina2D/Core/GLBackend.hpp
+include/Lina2D/Core/Common.hpp
+include/Lina2D/Core/Math.hpp
 )
 
 
 set(LINAGUI_HEADERS
 
 # Core
-src/Core/LinaGUI.cpp
-src/Core/LinaGUIDrawer.cpp
-src/Core/LinaGUIGLBackend.cpp
-
+src/Lina2D/Core/Renderer.cpp
+src/Lina2D/Core/Drawer.cpp
+src/Lina2D/Core/GLBackend.cpp
+src/Lina2D/Core/Common.cpp
+src/Lina2D/Core/Math.cpp
 )
 
 #--------------------------------------------------------------------
