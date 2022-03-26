@@ -38,7 +38,7 @@ namespace Lina2D
     {
         CheckStartLineJoint();
 
-        const float   halfMag              = Math::Mag(Vec2(p2.x - p1.x, p2.y - p1.y)) / 2.0;
+        const float   halfMag              = Math::Mag(Vec2(p2.x - p1.x, p2.y - p1.y)) / 2.0f;
         const Vec2 center               = Vec2((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f);
         const Vec2 dir                  = Vec2(p2.x - p1.x, p2.y - p1.y);
         float         angle1               = Math::GetAngleFromCenter(center, p1);
@@ -263,10 +263,6 @@ namespace Lina2D
            //Renderer::g_renderer->m_drawData.m_vertexBuffer.push_back(p2DD);
            //Renderer::g_renderer->m_drawData.m_vertexBuffer.push_back(p1DD);
 
-            std::cout << "P1U: " << p1U.m_pos.ToString() << " P1UU: " << p1UU.m_pos.ToString() << std::endl;
-            std::cout << "P2U: " << p2U.m_pos.ToString() << " P2UU: " << p2UU.m_pos.ToString() << std::endl;
-            std::cout << "P1D: " << p1D.m_pos.ToString() << " P1DD: " << p1DD.m_pos.ToString() << std::endl;
-            std::cout << "P2D: " << p2D.m_pos.ToString() << " P2DD: " << p2DD.m_pos.ToString() << std::endl;
            // Renderer::g_renderer->m_drawData.m_indexBuffer.push_back(featherCurr);
            // Renderer::g_renderer->m_drawData.m_indexBuffer.push_back(featherCurr + 1);
            // Renderer::g_renderer->m_drawData.m_indexBuffer.push_back(featherCurr - 4);

@@ -45,10 +45,6 @@ src/Lina2D/Core/Math.cpp
 #--------------------------------------------------------------------
 add_library(${PROJECT_NAME} ${Lina2D_SOURCES} ${Lina2D_HEADERS})
 add_library(Lina::2D ALIAS ${PROJECT_NAME}) 
-set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ON UNITY_BUILD_UNIQUE_ID "Lina2D")
-set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD_MODE BATCH UNITY_BUILD_BATCH_SIZE 16)
-
-
 
 #--------------------------------------------------------------------
 # Set include directories
@@ -75,7 +71,7 @@ include(CMake/ProjectSettings.cmake)
 if(MSVC_IDE)
 	foreach(source IN LISTS Lina2D_HEADERS Lina2D_SOURCES)
 		get_filename_component(source_path "${source}" PATH)
-		string(REPLACE "${LINAEDITOR_SOURCE_DIR}" "" relative_source_path "${source_path}")
+		string(REPLACE "${LINA2D_SOURCE_DIR}" "" relative_source_path "${source_path}")
 		string(REPLACE "/" "\\" source_path_msvc "${relative_source_path}")
 				source_group("${source_path_msvc}" FILES "${source}")
 	endforeach()

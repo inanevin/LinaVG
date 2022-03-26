@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: Lina Engine
 https://github.com/inanevin/LinaEngine
 
@@ -28,20 +28,20 @@ SOFTWARE.
 
 #include "Lina2D/Core/Math.hpp"
 
-namespace Lina2D::Math
+namespace Lina2D
 {
-    float Mag(const Vec2& v)
+    float Math::Mag(const Vec2& v)
     {
         return sqrt(v.x * v.x + v.y * v.y);
     }
 
-    Vec2 Normalized(const Vec2& v)
+    Vec2 Math::Normalized(const Vec2& v)
     {
         const float mag = Mag(v);
         return Vec2(v.x / mag, v.y / mag);
     }
 
-    Vec2 Rotate90(const Vec2& v, bool cw)
+    Vec2 Math::Rotate90(const Vec2& v, bool cw)
     {
         if (cw)
             return Vec2(v.y, -v.x);
@@ -49,27 +49,27 @@ namespace Lina2D::Math
             return Vec2(-v.y, v.x);
     }
 
-    float GetAngleFromCenter(const Vec2& center, const Vec2& point)
+    float Math::GetAngleFromCenter(const Vec2& center, const Vec2& point)
     {
         return L2D_RAD2DEG * (std::atan2(point.y - center.y, point.x - center.x));
     }
 
-    float GetAngleBetween(const Vec2& p1, const Vec2& p2)
+    float Math::GetAngleBetween(const Vec2& p1, const Vec2& p2)
     {
         return L2D_RAD2DEG * (std::atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
     }
 
-    bool IsEqual(const Vec2& v1, const Vec2& v2)
+    bool Math::IsEqual(const Vec2& v1, const Vec2& v2)
     {
         return (v1.x == v2.x && v1.y == v2.y);
     }
 
-    bool IsEqual(const Vec4& v1, const Vec4& v2)
+    bool Math::IsEqual(const Vec4& v1, const Vec4& v2)
     {
         return (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z && v1.w == v2.w);
     }
 
-    int GetAreaIndex(const Vec2& diff)
+    int Math::GetAreaIndex(const Vec2& diff)
     {
         if (diff.x >= 0 && diff.y >= 0)
             return 0;
@@ -79,16 +79,18 @@ namespace Lina2D::Math
             return 2;
         if (diff.x <= 0 && diff.y >= 0)
             return 3;
+
+        return -1;
     }
 
-    Vec2 GetPointOnSphere(const Vec2& center, float radius, float angle)
+    Vec2 Math::GetPointOnSphere(const Vec2& center, float radius, float angle)
     {
         float x = radius * std::cos(L2D_DEG2RAD * angle) + center.x;
         float y = radius * std::sin(L2D_DEG2RAD * angle) + center.y;
         return Vec2(x, y);
     }
 
-    Vec2 SampleParabola(const Vec2& p1, const Vec2& p2, const Vec2& direction, float height, float t)
+    Vec2 Math::SampleParabola(const Vec2& p1, const Vec2& p2, const Vec2& direction, float height, float t)
     {
         float parabolicT = t * 2.0f - 1.0f;
         float h          = (-parabolicT * parabolicT + 1) * height;
@@ -99,7 +101,7 @@ namespace Lina2D::Math
         return Vec2(p1.x + (t * travelDir.x) + upAddition.x, p1.y + (t * travelDir.y) + upAddition.y);
     }
 
-    Vec2 SampleBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, float t)
+    Vec2 Math::SampleBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, float t)
     {
         float tt  = t * t;
         float ttt = t * tt;
@@ -116,4 +118,12 @@ namespace Lina2D::Math
         B.y += ttt * p3.y;
         return B;
     }
-}
+
+    Vec4 Math::Lerp(const Vec4& val, const Vec4& val2, float amt)
+    {
+        float t  = (1.0f - amt);
+        Vec4  c1 = Vec4(val.x * t, val.y * t, val.z * t, val.w * t);
+        Vec4  c2 = Vec4(val2.x * amt, val2.y * amt, val2.z * amt, val2.w * amt);
+        return Vec4(c1.x + c2.x, c1.y + c2.y, c1.z + c2.z, c1.w + c2.w);
+    }
+} // namespace Lina2D

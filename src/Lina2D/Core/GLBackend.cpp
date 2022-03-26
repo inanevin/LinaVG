@@ -161,8 +161,8 @@ namespace Lina2D
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+       // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         // glEnable(GL_SCISSOR_TEST);
 
