@@ -39,49 +39,17 @@ Timestamp: 12/29/2018 10:43:46 PM
 #ifndef LinaGUI_HPP
 #define LinaGUI_HPP
 
-#include "GLBackend.hpp"
-#include "Drawer.hpp"
 #include "Common.hpp"
-#include <vector>
-#include <list>
-#include <memory>
-#include <set>
 #include <functional>
-
-#ifdef LINA2D_CUSTOM_LINE_SHADER
-#define DONTINIT_LINE_SHADER
-#endif
 
 namespace Lina2D
 {
-    class Renderer
-    {
-    public:
-        void Initialize(const Options& initOptions);
-        void StartFrame();
-        void Render();
-        void EndFrame();
-
-        std::function<float()> m_mouseScrollCallback;
-        std::function<Vec2()>  m_keyAxisCallback;
-
-        inline Drawer& GetDrawer()
-        {
-            return m_drawer;
-        }
-
-    private:
-        friend class Drawer;
-        friend class Backend;
-
-        static Renderer* g_renderer;
-        Backend          m_backend;
-        Drawer           m_drawer;
-        Options          m_options;
-        DrawData         m_drawData;
-        int              m_gcFrameCounter;
-    };
-
+    LINA2D_API void          Initialize();
+    LINA2D_API void          Terminate();
+    LINA2D_API void          StartFrame();
+    LINA2D_API void          Render();
+    LINA2D_API void          EndFrame();
+    extern LINA2D_API Configuration Config;
 }; // namespace Lina2D
 
 #endif

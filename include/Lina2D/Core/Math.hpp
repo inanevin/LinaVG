@@ -58,6 +58,10 @@ namespace Lina2D
         static Vec2  GetPointOnSphere(const Vec2& center, float radius, float angle); // Angle in degrees.
         static Vec2  SampleParabola(const Vec2& p1, const Vec2& p2, const Vec2& direction, float height, float t);
         static Vec2  SampleBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, float t);
+        static Vec2  LineIntersection(const Vec2& p00, const Vec2& p01, const Vec2& p10, const Vec2& p11);
+        static Vec2  RotateAround(const Vec2& point, const Vec2& center, float angle);
+        static Vec2  Abs(const Vec2& v);
+        static float Abs(float f);
 
         template <typename T, typename U>
         static T Lerp(const T& val1, const T& val2, const U& amt)

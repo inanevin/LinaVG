@@ -29,50 +29,63 @@ SOFTWARE.
 #include "Lina2D/Core/Renderer.hpp"
 #include "Lina2D/Core/GLBackend.hpp"
 #include "Lina2D/Core/Drawer.hpp"
+#include "Lina2D/Core/Internal.hpp"
 #include <math.h>
 
 namespace Lina2D
 {
-    Renderer* Renderer::g_renderer = nullptr;
+    Configuration Config;
 
-    void Renderer::Initialize(const Options& initOptions)
+    void Initialize()
     {
-        g_renderer = this;
-        m_options  = initOptions;
-        m_backend.Initialize();
+        Backend::Initialize();
     }
 
-    void Renderer::StartFrame()
+    void Terminate()
     {
-        m_backend.StartFrame();
+        Backend::Terminate();
     }
 
-    void Renderer::Render()
+    void StartFrame()
     {
-        m_backend.Render();
+        Backend::StartFrame();
     }
 
-    void Renderer::EndFrame()
+    void Render()
     {
-        m_backend.EndFrame();
-        m_drawer.ResetLineJointData();
+        Backend::DrawDefault(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer);
+    }
 
-        m_gcFrameCounter++;
+    void EndFrame()
+    {
+        Backend::EndFrame();
 
-        if (m_gcFrameCounter > m_options.m_gcCollectInterval)
+        Internal::g_rendererData.m_gcFrameCounter++;
+
+        if (Internal::g_rendererData.m_gcFrameCounter > Config.m_gcCollectInterval)
         {
-            m_drawData.m_indexBuffer.clear();
-            m_drawData.m_vertexBuffer.clear();
-            m_gcFrameCounter = 0;
+            Internal::g_rendererData.m_defaultBuffer.Clear();
+
+           // for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
+           // {
+           //     DrawBufferGradient& buf = Internal::g_rendererData.m_gradientBuffers[i];
+           //     buf.Clear();
+           // }
+           //
+            Internal::g_rendererData.m_gcFrameCounter = 0;
         }
         else
         {
-            // g_drawData.m_indexBuffer.resize(0);
-            // g_drawData.m_vertexBuffer.resize(0);
-            m_drawData.m_indexBuffer.clear();
-            m_drawData.m_vertexBuffer.clear();
+            Internal::g_rendererData.m_defaultBuffer.Clear();
+            // m_defaultBuffer.ResizeZero();
+
+          // for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
+          // {
+          //     DrawBufferGradient& buf = Internal::g_rendererData.m_gradientBuffers[i];
+          //     buf.Clear();
+          //     // buf.ResizeZero();
+          // }
         }
-        m_drawData.m_indexCounter = 0;
     }
 
 } // namespace Lina2D

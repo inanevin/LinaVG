@@ -22,7 +22,9 @@ project(Lina2D)
 set(Lina2D_SOURCES 
 
 # Core
+include/Lina2D/Lina2D.hpp
 include/Lina2D/Core/Renderer.hpp
+include/Lina2D/Core/Internal.hpp
 include/Lina2D/Core/Drawer.hpp
 include/Lina2D/Core/GLBackend.hpp
 include/Lina2D/Core/Common.hpp
@@ -34,6 +36,7 @@ set(Lina2D_HEADERS
 
 # Core
 src/Lina2D/Core/Renderer.cpp
+src/Lina2D/Core/Internal.cpp
 src/Lina2D/Core/Drawer.cpp
 src/Lina2D/Core/GLBackend.cpp
 src/Lina2D/Core/Common.cpp

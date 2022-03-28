@@ -42,11 +42,14 @@ Timestamp: 3/26/2022 10:36:46 AM
 // Headers here.
 #include <iostream>
 #include <sstream>
+#include <functional>
+#include <unordered_map>
 
 namespace Lina2D
 {
 #define L2D_RAD2DEG 57.2957f
 #define L2D_DEG2RAD 0.0174533f
+#define LINA2D_API  // TODO
 
     template <typename T>
     class Array
@@ -65,10 +68,7 @@ namespace Lina2D
 
         ~Array()
         {
-            if (m_data)
-            {
-                std::free(m_data);
-            }
+            clear();
         }
 
         inline void clear()
@@ -139,12 +139,13 @@ namespace Lina2D
             m_capacity = newCapacity;
         }
 
-        inline void push_back(const T& v)
+        inline T* push_back(const T& v)
         {
             if (m_size == m_capacity)
                 reserve(growCapacity(m_size + 1));
             std::memcpy(&m_data[m_size], &v, sizeof(v));
             m_size++;
+            return last();
         }
 
         inline T* last()
@@ -183,6 +184,14 @@ namespace Lina2D
         float w = 0.0f;
     };
 
+    enum class GradientType
+    {
+        Horizontal   = 0,
+        Vertical     = 1,
+        Radial       = 2,
+        RadialCorner = 3
+    };
+
     struct Vec4Grad
     {
         Vec4Grad(){};
@@ -192,8 +201,10 @@ namespace Lina2D
         Vec4Grad(const Vec4& c1, const Vec4& c2)
             : m_start(c1), m_end(c2){};
 
-        Vec4 m_start = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
-        Vec4 m_end   = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        Vec4         m_start        = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
+        Vec4         m_end          = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        GradientType m_gradientType = GradientType::Horizontal;
+        float        m_radialSize   = 1.0f;
     };
 
     struct Vec2
@@ -232,6 +243,23 @@ namespace Lina2D
 
     typedef float Thickness;
 
+    /// <summary>
+    /// Multicolors: If you want to use one color for each vertex, should point to an array of N colors, while drawing a convex shape.
+    /// Passing a pointer to an array with wrong size is undefined behavior. Set to nullptr if you want to use a gradient instead. Construct your gradient with
+    /// a single color if you want to use a single color instead.
+    /// Rounding: between 0.0f - 1.0f
+    /// </summary>
+    struct StyleOptions
+    {
+        Vec4Grad      m_color           = Vec4Grad(Vec4(1, 1, 1, 1));
+        ThicknessGrad m_thickness       = ThicknessGrad(1.0f);
+        float         m_rounding        = 0.0f;
+        float         m_borderRadius    = 0.0f;
+        Vec4          m_borderColor     = Vec4(0, 0, 0, 1);
+        Vec2          m_dropShadow      = Vec2(0.0f, 0.0f);
+        Vec4          m_dropShadowColor = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    };
+
     struct Vertex
     {
         Vec2 m_pos;
@@ -240,40 +268,91 @@ namespace Lina2D
     };
 
     typedef unsigned int Index;
-
-    struct DrawData
-    {
-        Array<Vertex> m_vertexBuffer;
-        Array<Index>  m_indexBuffer;
-        Index         m_indexCounter = 0;
-    };
+    typedef unsigned int BackendHandle;
 
     enum class JointType
     {
         None,
-        VertexAvg,
+        Miter,
         Bevel,
-        Round
+        MiterBevelAuto,
+        Round,
     };
 
-    enum class FeatherType
+    enum class AAType
     {
         None,
-        Light,
-        Strong
+        VertexAA,
+        GPU
     };
 
-    struct Options
+    struct Configuration
     {
-        char*       m_customLineFragShader   = nullptr;
-        char*       m_customLineVertexShader = nullptr;
-        Vec2        m_displayPos             = Vec2(0, 0);
-        Vec2        m_displaySize            = Vec2(0, 0);
-        Vec2        m_framebufferScale       = Vec2(0, 0);
-        JointType   m_lineJointType          = JointType::None;
-        FeatherType m_featheringType         = FeatherType::None;
-        float       m_featheringDistance     = 0.0f;
-        int         m_gcCollectInterval      = 180;
+        Vec2                   m_displayPos         = Vec2(0, 0);
+        Vec2                   m_displaySize        = Vec2(0, 0);
+        Vec2                   m_framebufferScale   = Vec2(0, 0);
+        JointType              m_lineJointType      = JointType::None;
+        AAType                 m_featheringType     = AAType::None;
+        float                  m_featheringDistance = 0.0f;
+        int                    m_gcCollectInterval  = 180;
+        bool                   m_wireframeEnabled   = false;
+        std::function<float()> m_mouseScrollCallback;
+        std::function<Vec2()>  m_keyAxisCallback;
+    };
+
+    struct DrawBuffer
+    {
+        Array<Vertex> m_vertexBuffer;
+        Array<Index>  m_indexBuffer;
+
+        inline void Clear()
+        {
+            m_vertexBuffer.clear();
+            m_indexBuffer.clear();
+        }
+
+        inline void ResizeZero()
+        {
+            m_vertexBuffer.resize(0);
+            m_indexBuffer.resize(0);
+        }
+
+        inline void PushVertex(const Vertex& v)
+        {
+            m_vertexBuffer.push_back(v);
+        }
+
+        inline void PushIndex(Index i)
+        {
+            m_indexBuffer.push_back(i);
+        }
+
+        inline Vertex* LastVertex()
+        {
+            return m_vertexBuffer.last();
+        }
+    };
+
+    struct RendererData
+    {
+        int        m_gcFrameCounter;
+        DrawBuffer m_defaultBuffer;
+    };
+
+    struct BackendData
+    {
+        BackendHandle                                                                     m_vbo                  = 0;
+        BackendHandle                                                                     m_vao                  = 0;
+        BackendHandle                                                                     m_ebo                  = 0;
+        BackendHandle                                                                     m_defaultShaderHandle  = 0;
+        BackendHandle                                                                     m_gradientShaderHandle = 0;
+        std::unordered_map<BackendHandle, std::unordered_map<std::string, BackendHandle>> m_shaderUniformMap;
+        float                                                                             m_proj[4][4]                = {0};
+        char*                                                                             m_defaultVtxShader          = nullptr;
+        char*                                                                             m_roundedGradientVtxShader  = nullptr;
+        char*                                                                             m_defaultFragShader         = nullptr;
+        char*                                                                             m_roundedGradientFragShader = nullptr;
+        bool                                                                              m_skipDraw                  = false;
     };
 
 } // namespace Lina2D

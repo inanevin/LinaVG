@@ -1,11 +1,11 @@
-/*
+/* 
 This file is a part of: Lina Engine
 https://github.com/inanevin/LinaEngine
 
 Author: Inan Evin
 http://www.inanevin.com
 
-Copyright (c) [2018-] [Inan Evin]
+Copyright (c) [2018] [Inan Evin]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,32 +27,17 @@ SOFTWARE.
 */
 
 /*
-Class: LinaGUIGLBackend
+Class: Lina2D
 
 
 
-Timestamp: 3/24/2022 11:33:52 PM
+Timestamp: 3/28/2022 2:38:21 PM
 */
 
 #pragma once
 
-#ifndef Lina2DGLBackend_HPP
-#define Lina2DGLBackend_HPP
-
-// Headers here.
-#include "Common.hpp"
-
-namespace Lina2D::Backend
-{
-    void          Initialize();
-    void          Terminate();
-    void          StartFrame();
-    void          DrawGradient(Array<Vertex>& vertices, Array<Index>& indices, const Vec4& startColor, const Vec4& endColor, GradientType type, float radialGradientSize);
-    void          DrawDefault(Array<Vertex>& vertices, Array<Index>& indices);
-    void          EndFrame();
-    void          AddShaderUniforms(BackendHandle shader);
-    BackendHandle CreateShader(const char* vert, const char* frag);
-
-} // namespace Lina2D::Backend
-
+#ifndef Lina2D_HPP
+#define Lina2D_HPP
+#include "Core/Renderer.hpp"
+#include "Core/Drawer.hpp"
 #endif

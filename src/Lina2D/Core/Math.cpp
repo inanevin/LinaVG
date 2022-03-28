@@ -119,6 +119,47 @@ namespace Lina2D
         return B;
     }
 
+    Vec2 Math::LineIntersection(const Vec2& p00, const Vec2& p01, const Vec2& p10, const Vec2& p11)
+    {
+        // Line 1
+        float a1 = p01.y - p00.y;
+        float b1 = p00.x - p01.x;
+        float c1 = a1 * (p00.x) + b1 * (p00.y);
+
+        // Line 2
+        float a2 = p11.y - p10.y;
+        float b2 = p10.x - p11.x;
+        float c2 = a2 * (p10.x) + b2 * (p10.y);
+
+        float det = a1 * b2 - a2 * b1;
+
+        // Parallel
+        _ASSERT(det != 0.0f);
+
+        float x = (b2 * c1 - b1 * c2) / det;
+        float y = (a1 * c2 - a2 * c1) / det;
+
+        return Vec2(x, y);
+    }
+
+    Vec2 Math::RotateAround(const Vec2& point, const Vec2& center, float angle)
+    {
+        const float angleRads = L2D_DEG2RAD * angle;
+        float       x         = std::cos(angleRads) * (point.x - center.x) - std::sin(angleRads) * (point.y - center.y) + center.x;
+        float       y         = std::sin(angleRads) * (point.x - center.x) + std::cos(angleRads) * (point.y - center.y) + center.y;
+        return Vec2(x, y);
+    }
+
+    Vec2 Math::Abs(const Vec2& v)
+    {
+        return Vec2(Abs(v.x), Abs(v.y));
+    }
+
+    float Math::Abs(float f)
+    {
+        return f < 0.0f ? -f : f;
+    }
+
     Vec4 Math::Lerp(const Vec4& val, const Vec4& val2, float amt)
     {
         float t  = (1.0f - amt);
