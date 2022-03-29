@@ -77,10 +77,11 @@ namespace Lina2D::Backend
                                                        "in float fYPos;\n"
                                                        "uniform sampler2D diffuse;\n"
                                                        "uniform vec2 tiling;\n"
+                                                       "uniform vec2 offset;\n"
                                                        "void main()\n"
                                                        "{\n"
                                                        "   vec2 tiled = vec2(fUV.x * tiling.x, fUV.y * tiling.y);\n"
-                                                       "   fragColor = texture(diffuse, fUV * tiling);\n"
+                                                       "   fragColor = texture(diffuse, fUV * tiling + offset);\n"
                                                        "}\n\0";
 
         Internal::g_backendData.m_roundedGradientVtxShader = "#version 330 core\n"
@@ -139,10 +140,7 @@ namespace Lina2D::Backend
         glBindVertexArray(Internal::g_backendData.m_vao);
 
         glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
-        // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
-        // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
@@ -163,8 +161,8 @@ namespace Lina2D::Backend
         // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
         glBindVertexArray(0);
 
-        // buffer->m_vertexBuffer.reserve(8000);
-        // buffer->m_indexBuffer.reserve(16000);
+        Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer.reserve(8000);
+        Internal::g_rendererData.m_defaultBuffer.m_indexBuffer.reserve(24000);
     }
 
     void Terminate()
@@ -284,7 +282,7 @@ namespace Lina2D::Backend
 
         glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["diffuse"], 0);
         glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["tiling"], (GLfloat)uv.x, (GLfloat)uv.y);
-       // glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["offset"], (GLfloat)uvOffset.x, (GLfloat)uvOffset.y);
+        glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["offset"], (GLfloat)uvOffset.x, (GLfloat)uvOffset.y);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
 
