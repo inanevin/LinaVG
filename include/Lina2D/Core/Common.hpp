@@ -164,6 +164,17 @@ namespace Lina2D
             _ASSERT(i >= 0 && i < m_size);
             return m_data[i];
         }
+
+        inline int find(const T& t) const
+        {
+            for (int i = 0; i < m_size; i++)
+            {
+                if (m_data[i] == t)
+                    return i;
+            }
+
+            return -1;
+        }
     };
     struct Vec4
     {
@@ -258,6 +269,7 @@ namespace Lina2D
         Vec4          m_borderColor     = Vec4(0, 0, 0, 1);
         Vec2          m_dropShadow      = Vec2(0.0f, 0.0f);
         Vec4          m_dropShadowColor = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        Array<int>    m_onlyRoundTheseCorners;
     };
 
     struct Vertex

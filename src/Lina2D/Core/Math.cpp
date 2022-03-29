@@ -59,6 +59,16 @@ namespace Lina2D
         return L2D_RAD2DEG * (std::atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
     }
 
+    float Math::GetAngleBetweenShort(const Vec2& p1, const Vec2& p2)
+    {
+        float ang = L2D_RAD2DEG * (std::atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
+
+        if (ang > 180.0f)
+            ang = 360.0f - ang;
+
+        return ang;
+    }
+
     bool Math::IsEqual(const Vec2& v1, const Vec2& v2)
     {
         return (v1.x == v2.x && v1.y == v2.y);
@@ -155,9 +165,32 @@ namespace Lina2D
         return Vec2(Abs(v.x), Abs(v.y));
     }
 
+    Vec2 Math::Clamp(const Vec2& v, const Vec2& min, const Vec2& max)
+    {
+        return Vec2(Clamp(v.x, min.x, max.x), Clamp(v.y, min.y, max.y));
+    }
+
     float Math::Abs(float f)
     {
         return f < 0.0f ? -f : f;
+    }
+
+    float Math::Clamp(float f, float min, float max)
+    {
+        if (f < min)
+            return min;
+        if (f > max)
+            return max;
+    }
+
+    float Math::Min(float a, float b)
+    {
+        return a < b ? a : b;
+    }
+
+    float Math::Max(float a, float b)
+    {
+        return a > b ? a : b;
     }
 
     Vec4 Math::Lerp(const Vec4& val, const Vec4& val2, float amt)
@@ -166,5 +199,13 @@ namespace Lina2D
         Vec4  c1 = Vec4(val.x * t, val.y * t, val.z * t, val.w * t);
         Vec4  c2 = Vec4(val2.x * amt, val2.y * amt, val2.z * amt, val2.w * amt);
         return Vec4(c1.x + c2.x, c1.y + c2.y, c1.z + c2.z, c1.w + c2.w);
+    }
+
+    Vec2 Math::Lerp(const Vec2& val, const Vec2& val2, float amt)
+    {
+        float t  = (1.0f - amt);
+        Vec2  c1 = Vec2(val.x * t, val.y * t);
+        Vec2  c2 = Vec2(val2.x * amt, val2.y * amt);
+        return Vec2(c1.x + c2.x, c1.y + c2.y);
     }
 } // namespace Lina2D

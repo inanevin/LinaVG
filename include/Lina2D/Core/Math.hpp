@@ -51,6 +51,7 @@ namespace Lina2D
         static int   GetAreaIndex(const Vec2& diff);
         static float GetAngleFromCenter(const Vec2& center, const Vec2& point);
         static float GetAngleBetween(const Vec2& p1, const Vec2& p2);
+        static float GetAngleBetweenShort(const Vec2& p1, const Vec2& p2);
         static bool  IsEqual(const Vec2& v1, const Vec2& v2);
         static bool  IsEqual(const Vec4& v1, const Vec4& v2);
         static Vec2  Normalized(const Vec2& v);
@@ -61,8 +62,11 @@ namespace Lina2D
         static Vec2  LineIntersection(const Vec2& p00, const Vec2& p01, const Vec2& p10, const Vec2& p11);
         static Vec2  RotateAround(const Vec2& point, const Vec2& center, float angle);
         static Vec2  Abs(const Vec2& v);
+        static Vec2  Clamp(const Vec2&v, const Vec2& min, const Vec2& max);
         static float Abs(float f);
-
+        static float Clamp(float f, float min, float max);
+        static float Min(float a, float b);
+        static float Max(float a, float b);
         template <typename T, typename U>
         static T Lerp(const T& val1, const T& val2, const U& amt)
         {
@@ -70,6 +74,7 @@ namespace Lina2D
         }
 
         static Vec4 Lerp(const Vec4& val, const Vec4& val2, float amt);
+        static Vec2 Lerp(const Vec2& val, const Vec2& val2, float amt);
 
         template <typename T>
         static T Remap(const T& val, const T& fromLow, const T& fromHigh, const T& toLow, const T& toHigh)
