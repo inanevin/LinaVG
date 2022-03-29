@@ -56,7 +56,7 @@ namespace Lina2D
         static bool  IsEqual(const Vec4& v1, const Vec4& v2);
         static Vec2  Normalized(const Vec2& v);
         static Vec2  Rotate90(const Vec2& v, bool cw = true);
-        static Vec2  GetPointOnSphere(const Vec2& center, float radius, float angle); // Angle in degrees.
+        static Vec2  GetPointOnCircle(const Vec2& center, float radius, float angle); // Angle in degrees.
         static Vec2  SampleParabola(const Vec2& p1, const Vec2& p2, const Vec2& direction, float height, float t);
         static Vec2  SampleBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, float t);
         static Vec2  LineIntersection(const Vec2& p00, const Vec2& p01, const Vec2& p10, const Vec2& p11);

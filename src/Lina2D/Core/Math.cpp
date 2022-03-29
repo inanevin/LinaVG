@@ -93,7 +93,7 @@ namespace Lina2D
         return -1;
     }
 
-    Vec2 Math::GetPointOnSphere(const Vec2& center, float radius, float angle)
+    Vec2 Math::GetPointOnCircle(const Vec2& center, float radius, float angle)
     {
         float x = radius * std::cos(L2D_DEG2RAD * angle) + center.x;
         float y = radius * std::sin(L2D_DEG2RAD * angle) + center.y;

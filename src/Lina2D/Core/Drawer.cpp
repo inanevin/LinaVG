@@ -64,7 +64,7 @@ namespace Lina2D
             Vec2 p = Vec2(0, 0);
 
             if (radius == 0.0f)
-                p = Math::GetPointOnSphere(center, halfMag, i);
+                p = Math::GetPointOnCircle(center, halfMag, i);
             else
             {
                 const Vec2 out = Math::Normalized(Math::Rotate90(dir, !flip));
@@ -484,6 +484,36 @@ namespace Lina2D
         }
     }
 
+    void DrawNGonFilled(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle)
+    {
+
+        if (Math::IsEqual(style.m_color.m_start, style.m_color.m_end))
+        {
+            Internal::FillNGon_SC(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, center, radius, n, style.m_color.m_start);
+        }
+        else
+        {
+            if (style.m_color.m_gradientType == GradientType::Horizontal)
+            {
+                // Horizontal, non rounded
+                Internal::FillNGon_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, true);
+            }
+            else if (style.m_color.m_gradientType == GradientType::Vertical)
+            {
+                // Vertical, non rounded
+                Internal::FillNGon_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, false);
+            }
+            else if (style.m_color.m_gradientType == GradientType::Radial || style.m_color.m_gradientType == GradientType::RadialCorner)
+            {
+                // // Radial, non rounded
+                Array<Vertex> vertices;
+                Array<Index>  indices;
+                Internal::FillNGon_RadialGra(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end);
+                Backend::DrawGradient(vertices, indices, style.m_color.m_start, style.m_color.m_end, style.m_color.m_gradientType, style.m_color.m_radialSize);
+            }
+        }
+    }
+
     void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices)
     {
         // i = 0 is center.
@@ -651,7 +681,7 @@ namespace Lina2D
             // After a vector is inflated, we use it as a center to draw an arc, arc range is based on which corner we are currently drawing.
             for (float k = startAngle; k < endAngle + 2.5f; k += angleIncrease)
             {
-                const Vec2 p = Math::GetPointOnSphere(inf1, roundingMag, k);
+                const Vec2 p = Math::GetPointOnCircle(inf1, roundingMag, k);
 
                 Vertex cornerVertex;
                 cornerVertex.m_pos = p;
@@ -916,7 +946,6 @@ namespace Lina2D
 
     void Internal::FillTriData(Vertex* v, bool hasCenter, const Vec2& p1, const Vec2& p2, const Vec2& p3)
     {
-
         const int  i      = hasCenter ? 1 : 0;
         const Vec2 center = Vec2((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f);
         if (hasCenter)
@@ -931,6 +960,80 @@ namespace Lina2D
         v[i].m_uv      = Vec2(0.0f, 1.0f);
         v[i + 1].m_uv  = Vec2(1.0f, 1.0f);
         v[i + 2].m_uv  = Vec2(0.5f, 0.0f);
+    }
+
+    void Internal::FillNGon_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color)
+    {
+        Array<Vertex> v;
+        FillNGonData(v, true, center, radius, n);
+
+        const int start = vertices.m_size;
+
+        for (int i = 0; i < v.m_size; i++)
+        {
+            v[i].m_col = color;
+            vertices.push_back(v[i]);
+        }
+
+        RotateVertices(vertices, center, start + 1, start + n, rotateAngle);
+        ConvexFillVertices(start, start + n, indices);
+    }
+
+    void Internal::FillNGon_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor)
+    {
+        Array<Vertex> v;
+        FillNGonData(v, true, center, radius, n);
+
+        const int start = vertices.m_size;
+
+        for (int i = 0; i < v.m_size; i++)
+        {
+            v[i].m_col = Math::Lerp(colorStart, colorEnd, isHor ? v[i].m_uv.x : v[i].m_uv.y);
+            vertices.push_back(v[i]);
+        }
+
+        RotateVertices(vertices, center, start + 1, start + n, rotateAngle);
+        ConvexFillVertices(start, start + n, indices);
+    }
+
+    void Internal::FillNGon_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd)
+    {
+        Array<Vertex> v;
+        FillNGonData(v, true, center, radius, n);
+
+        const int start = vertices.m_size;
+
+        for (int i = 0; i < v.m_size; i++)
+        {
+            vertices.push_back(v[i]);
+        }
+
+        RotateVertices(vertices, center, start + 1, start + n, rotateAngle);
+        ConvexFillVertices(start, start + n, indices);
+    }
+
+    void Internal::FillNGonData(Array<Vertex>& vertArray, bool hasCenter, const Vec2& center, float radius, int n)
+    {
+        const float angleIncrease = 360.0f / (float)n;
+
+        if (hasCenter)
+        {
+            Vertex v;
+            v.m_pos = center;
+            v.m_uv  = Vec2(0.5f, 0.5f);
+            vertArray.push_back(v);
+        }
+        const Vec2 min = Vec2(center.x - radius, center.y - radius);
+        const Vec2 max = Vec2(center.x + radius, center.y + radius);
+
+        for (float i = 0.0f; i < 360.0f; i += angleIncrease)
+        {
+            Vertex v;
+            v.m_pos  = Math::GetPointOnCircle(center, radius, i);
+            v.m_uv.x = Math::Remap(v.m_pos.x, min.x, max.x, 0.0f, 1.0f);
+            v.m_uv.y = Math::Remap(v.m_pos.y, min.y, max.y, 0.0f, 1.0f);
+            vertArray.push_back(v);
+        }
     }
 
     float Internal::GetAngleIncrease(float rounding)
@@ -1014,7 +1117,7 @@ namespace Lina2D
             Vec2 p = Vec2(0, 0);
 
             if (radius == 0.0f)
-                p = Math::GetPointOnSphere(center, halfMag, i);
+                p = Math::GetPointOnCircle(center, halfMag, i);
             else
             {
                 const Vec2 out = Math::Normalized(Math::Rotate90(dir, !flip));

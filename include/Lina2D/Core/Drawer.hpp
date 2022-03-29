@@ -53,6 +53,10 @@ namespace Lina2D
     void DrawArc(const Vec2& p1, const Vec2& p2, const Vec4Grad& color, float radius = 0.0f, ThicknessGrad thickness = ThicknessGrad(), int segments = 36, bool flip = false);
     void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4Grad& color, ThicknessGrad thickness = ThicknessGrad(), int segments = 50);
     void DrawLine(const Vec2& p1, const Vec2& p2, const Vec4Grad& col, ThicknessGrad thickness = ThicknessGrad());
+
+    /// <summary>
+    /// Draws a single point with the given color & position.
+    /// </summary>
     void DrawPoint(const Vec2& p1, const Vec4& col);
 
     /// <summary>
@@ -65,8 +69,20 @@ namespace Lina2D
     /// <param name="style"> Style options to apply.</param>
     /// <param name="rotateAngle"> Rotate angles around the center of the triangle. </param>
     void DrawTriangleFilled(const Vec2& left, const Vec2& right, const Vec2& top, StyleOptions& style, float rotateAngle = 0.0f);
+
+    /// <summary>
+    /// Draws a filled rectangle between min & max with the given style options & rotation angle.
+    /// </summary>
     void DrawRectFilled(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f);
 
+    /// <summary>
+    /// Draws a convex polygon with N corners. !Rounding options do not apply to NGons!
+    /// </summary>
+    void DrawNGonFilled(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f);
+
+    /// <summary>
+    /// Triangulates & fills the index array given a start and end vertex index.
+    /// </summary>
     void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices);
 
     void GenerateLine(const Vec2& p1, const Vec2& p2, const Vec4Grad& col, ThicknessGrad thickness);
@@ -124,6 +140,17 @@ namespace Lina2D
         // Fill rect impl.
         void FillTriData(Vertex* vertArray, bool hasCenter, const Vec2& p1, const Vec2& p2, const Vec2& p3);
 
+        // No rounding, single color
+        void FillNGon_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color);
+
+        // No rounding, horizontal or vertical gradient
+        void FillNGon_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor);
+
+        // No rounding, radial gradient
+        void FillNGon_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd);
+
+        // Fill NGon imp
+        void FillNGonData(Array<Vertex>&, bool hasCenter, const Vec2& center, float radius, int n);
 
         float GetAngleIncrease(float rounding);
     }; // namespace Internal
