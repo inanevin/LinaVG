@@ -51,6 +51,9 @@ namespace Lina2D
 #define L2D_DEG2RAD 0.0174533f
 #define LINA2D_API  // TODO
 
+    typedef unsigned int Index;
+    typedef unsigned int BackendHandle;
+
     template <typename T>
     class Array
     {
@@ -262,14 +265,38 @@ namespace Lina2D
     /// </summary>
     struct StyleOptions
     {
-        Vec4Grad      m_color           = Vec4Grad(Vec4(1, 1, 1, 1));
-        ThicknessGrad m_thickness       = ThicknessGrad(1.0f);
-        float         m_rounding        = 0.0f;
-        float         m_borderRadius    = 0.0f;
-        Vec4          m_borderColor     = Vec4(0, 0, 0, 1);
-        Vec2          m_dropShadow      = Vec2(0.0f, 0.0f);
-        Vec4          m_dropShadowColor = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        Array<int>    m_onlyRoundTheseCorners;
+        /// Color for the shape, you can set this to 2 different colors & define a gradient type, or construct with a single color for flat shading.
+        Vec4Grad m_color = Vec4Grad(Vec4(1, 1, 1, 1));
+
+        /// Works on lines, defines the thickness of the line either by fixed thickness or by gradient.
+        ThicknessGrad m_thickness = ThicknessGrad(1.0f);
+
+        /// Rounding for shapes such as rectangles and triangles.
+        float m_rounding = 0.0f;
+
+        /// If rounding is to be applied, you can fill this array to only apply rounding to specific corners of the shape.
+        Array<int> m_onlyRoundTheseCorners;
+
+        /// For both lines and shapes, defines the border radius.
+        float m_borderRadius = 0.0f;
+
+        /// For both lines and shapes, defines the border color.
+        Vec4 m_borderColor = Vec4(0, 0, 0, 1);
+
+        /// For both lines and shapes, defines drop shadow angle & radius;
+        Vec2 m_dropShadow = Vec2(0.0f, 0.0f);
+
+        /// For both lines and shapes, defines the drop shadow color.
+        Vec4 m_dropShadowColor = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+        /// Set this to a texture handle you've created on your program to draw a texture on top of the shape/line. Set to 0 to clear.
+        BackendHandle m_textureHandle = 0;
+
+        /// Defines the texture repetition.
+        Vec2 m_textureUVTiling = Vec2(1.0f, 1.0f);
+
+        /// Defines the texture offset.
+        Vec2 m_textureUVOffset = Vec2(0.0f, 0.0f);
     };
 
     struct Vertex
@@ -278,9 +305,6 @@ namespace Lina2D
         Vec2 m_uv;
         Vec4 m_col;
     };
-
-    typedef unsigned int Index;
-    typedef unsigned int BackendHandle;
 
     enum class JointType
     {
@@ -300,16 +324,34 @@ namespace Lina2D
 
     struct Configuration
     {
-        Vec2                   m_displayPos         = Vec2(0, 0);
-        Vec2                   m_displaySize        = Vec2(0, 0);
-        Vec2                   m_framebufferScale   = Vec2(0, 0);
-        JointType              m_lineJointType      = JointType::None;
-        AAType                 m_featheringType     = AAType::None;
-        float                  m_featheringDistance = 0.0f;
-        int                    m_gcCollectInterval  = 180;
-        bool                   m_wireframeEnabled   = false;
+        Vec2      m_displayPos         = Vec2(0, 0);
+        Vec2      m_displaySize        = Vec2(0, 0);
+        Vec2      m_framebufferScale   = Vec2(0, 0);
+
+        JointType m_lineJointType      = JointType::None;
+        AAType    m_featheringType     = AAType::None;
+        float     m_featheringDistance = 0.0f;
+        
+        /// Every m_gcCollectInterval ticks, the system will call garbage collection on vertex & index buffers.
+        int       m_gcCollectInterval  = 180;
+
+        /// For debugging purposes, sets to draw polygon/wireframe mode.
+        bool m_wireframeEnabled = false;
+
         std::function<float()> m_mouseScrollCallback;
         std::function<Vec2()>  m_keyAxisCallback;
+
+        /// Set this to your own function to receive error callbacks from Lina2D.
+        std::function<void(const std::string&, int)> m_errorCallback;
+
+        /// For debugging purposes, current count of the trianlges being drawn.
+        int m_currentTriangleCount = 0;
+
+        /// For debugging purposes, current draw calls.
+        int m_currentDrawCalls = 0;
+
+        /// Flips the Y coordinate of texture UVs.
+        bool m_flipTextureUVs = false;
     };
 
     struct DrawBuffer
@@ -358,12 +400,14 @@ namespace Lina2D
         BackendHandle                                                                     m_ebo                  = 0;
         BackendHandle                                                                     m_defaultShaderHandle  = 0;
         BackendHandle                                                                     m_gradientShaderHandle = 0;
+        BackendHandle                                                                     m_texturedShaderHandle = 0;
         std::unordered_map<BackendHandle, std::unordered_map<std::string, BackendHandle>> m_shaderUniformMap;
         float                                                                             m_proj[4][4]                = {0};
         char*                                                                             m_defaultVtxShader          = nullptr;
         char*                                                                             m_roundedGradientVtxShader  = nullptr;
         char*                                                                             m_defaultFragShader         = nullptr;
         char*                                                                             m_roundedGradientFragShader = nullptr;
+        char*                                                                             m_texturedFragShader        = nullptr;
         bool                                                                              m_skipDraw                  = false;
     };
 

@@ -48,6 +48,7 @@ namespace Lina2D::Backend
     void          Terminate();
     void          StartFrame();
     void          DrawGradient(Array<Vertex>& vertices, Array<Index>& indices, const Vec4& startColor, const Vec4& endColor, GradientType type, float radialGradientSize);
+    void          DrawTextured(Array<Vertex>& vertices, Array<Index>& indices, BackendHandle texture, const Vec2& uvOffset, const Vec2& uvTiling);
     void          DrawDefault(Array<Vertex>& vertices, Array<Index>& indices);
     void          EndFrame();
     void          AddShaderUniforms(BackendHandle shader);

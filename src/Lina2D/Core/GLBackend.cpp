@@ -70,6 +70,19 @@ namespace Lina2D::Backend
                                                       "   fragColor = fCol;\n"
                                                       "}\n\0";
 
+        Internal::g_backendData.m_texturedFragShader = "#version 330 core\n"
+                                                       "out vec4 fragColor;\n"
+                                                       "in vec2 fUV;\n"
+                                                       "in vec4 fCol;\n"
+                                                       "in float fYPos;\n"
+                                                       "uniform sampler2D diffuse;\n"
+                                                       "uniform vec2 tiling;\n"
+                                                       "void main()\n"
+                                                       "{\n"
+                                                       "   vec2 tiled = vec2(fUV.x * tiling.x, fUV.y * tiling.y);\n"
+                                                       "   fragColor = texture(diffuse, fUV * tiling);\n"
+                                                       "}\n\0";
+
         Internal::g_backendData.m_roundedGradientVtxShader = "#version 330 core\n"
                                                              "layout (location = 0) in vec2 pos;\n"
                                                              "layout (location = 1) in vec2 uv;\n"
@@ -116,6 +129,7 @@ namespace Lina2D::Backend
 
         Internal::g_backendData.m_defaultShaderHandle  = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_defaultFragShader);
         Internal::g_backendData.m_gradientShaderHandle = CreateShader(Internal::g_backendData.m_roundedGradientVtxShader, Internal::g_backendData.m_roundedGradientFragShader);
+        Internal::g_backendData.m_texturedShaderHandle = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_texturedFragShader);
 
         glGenVertexArrays(1, &Internal::g_backendData.m_vao);
         glGenBuffers(1, &Internal::g_backendData.m_vbo);
@@ -159,6 +173,9 @@ namespace Lina2D::Backend
 
     void StartFrame()
     {
+        Config.m_currentDrawCalls = 0;
+        Config.m_currentTriangleCount = 0;
+
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -252,6 +269,35 @@ namespace Lina2D::Backend
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawElements(GL_TRIANGLES, (GLsizei)indices.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
+        Config.m_currentDrawCalls++;
+        Config.m_currentTriangleCount += int((float)indices.m_size / 3.0f);
+    }
+
+    void DrawTextured(Array<Vertex>& vertices, Array<Index>& indices, BackendHandle texture, const Vec2& uvOffset, const Vec2& uvTiling)
+    {
+        if (Internal::g_backendData.m_skipDraw)
+            return;
+        const Vec2 uv = Config.m_flipTextureUVs ? Vec2(uvTiling.x, -uvTiling.y) : uvTiling;
+
+        glUseProgram(Internal::g_backendData.m_texturedShaderHandle);
+        glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+
+        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["diffuse"], 0);
+        glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["tiling"], (GLfloat)uv.x, (GLfloat)uv.y);
+       // glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["offset"], (GLfloat)uvOffset.x, (GLfloat)uvOffset.y);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
+        glBufferData(GL_ARRAY_BUFFER, vertices.m_size * sizeof(Vertex), (const GLvoid*)vertices.begin(), GL_STREAM_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.m_size * sizeof(Index), (const GLvoid*)indices.begin(), GL_STREAM_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glDrawElements(GL_TRIANGLES, (GLsizei)indices.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
+        Config.m_currentDrawCalls++;
+        Config.m_currentTriangleCount += int((float)indices.m_size / 3.0f);
     }
 
     void DrawDefault(Array<Vertex>& vertices, Array<Index>& indices)
@@ -270,7 +316,8 @@ namespace Lina2D::Backend
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawElements(GL_TRIANGLES, (GLsizei)indices.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-
+        Config.m_currentDrawCalls++;
+        Config.m_currentTriangleCount += int((float)indices.m_size / 3.0f);
     }
 
     void EndFrame()

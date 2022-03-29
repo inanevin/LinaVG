@@ -80,17 +80,22 @@ namespace Lina2D
     /// </summary>
     void DrawNGonFilled(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f);
 
+    void DrawConvexFilled(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f);
+
     /// <summary>
-    /// Draws a filled circle/semi circle with the given radius & center. 
-    /// Segments are clamped to 8 - 180 (180 being perfect circle, 8 being 8-gon)
+    /// Draws a filled circle with the given radius & center.
+    /// You can change the start and end angles to create a filled semi-circle or a filled arc.
+    /// Segments are clamped to 6 - 360 (360 being perfect circle, 8 being 6-gon)
+    /// Higher the segment cause more weight on the performance. 18-54 is a good range for balance.
+    /// Always recommended to use segments that leave no remainder when 360 is divided by it.
     /// !Rounding options have no effect.!
     /// </summary>
-    void DrawCircleFilled(const Vec2& center, float radius, StyleOptions& style, int segments = 36, bool isSemiCircle = false, float rotateAngle = 0.0f);
+    void DrawCircleFilled(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f);
 
     /// <summary>
     /// Triangulates & fills the index array given a start and end vertex index.
     /// </summary>
-    void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices);
+    void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices, bool skipLastTriangle = false);
 
     void GenerateLine(const Vec2& p1, const Vec2& p2, const Vec4Grad& col, ThicknessGrad thickness);
 
@@ -145,7 +150,7 @@ namespace Lina2D
         void FillTri_Round(Array<Vertex>& vertices, Array<Index>& indices, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& col, float rounding);
 
         // Fill rect impl.
-        void FillTriData(Vertex* vertArray, bool hasCenter, const Vec2& p1, const Vec2& p2, const Vec2& p3);
+        void FillTriData(Vertex* vertArray, bool hasCenter, bool calculateUV, const Vec2& p1, const Vec2& p2, const Vec2& p3);
 
         // No rounding, single color
         void FillNGon_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color);
@@ -160,16 +165,35 @@ namespace Lina2D
         void FillNGonData(Array<Vertex>&, bool hasCenter, const Vec2& center, float radius, int n);
 
         // Single color
-        void FillCircle_SC(Array<Vertex>& vertices, Array<Index>& indices, bool semiCircle, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color);
+        void FillCircle_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color, float startAngle, float endAngle);
 
         // Vertical or horizontal gradinet.
-        void FillCircle_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, bool semiCircle, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor);
+        void FillCircle_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle);
 
         // Radial gradient
-        void FillCircle_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, bool semiCircle, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd);
+        void FillCircle_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle);
 
         // Fill circle impl
-        void FillCircleData(Array<Vertex>& v, bool semiCircle, bool hasCenter, const Vec2& center, float radius, int segments);
+        void FillCircleData(Array<Vertex>& v, bool hasCenter, const Vec2& center, float radius, int segments, float startAngle, float endAngle);
+
+        // Single color
+        void FillConvex_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& color);
+
+        // Vertical horizontal gradient
+        void FillConvex_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor);
+
+        // Radial gradient.
+        void FillConvex_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd);
+
+        /// <summary>
+        /// Returns the centroid of a given polygon.
+        /// https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon
+        /// </summary>
+        /// <returns></returns>
+        Vec2 GetPolygonCentroid(Vec2* points, int size);
+
+        void GetTriangleBoundingBox(const Vec2& p1, const Vec2& p2, const Vec2& p3, Vec2& outMin, Vec2& outMax);
+        void GetConvexBoundingBox(Vec2* points, int size, Vec2& outMin, Vec2& outMax);
 
         float GetAngleIncrease(float rounding);
     }; // namespace Internal
