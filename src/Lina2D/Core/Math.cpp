@@ -181,6 +181,16 @@ namespace Lina2D
             return min;
         if (f > max)
             return max;
+        return f;
+    }
+
+    int Math::Clamp(int i, int min, int max)
+    {
+        if (i < min)
+            return min;
+        if (i > max)
+            return max;
+        return i;
     }
 
     float Math::Min(float a, float b)

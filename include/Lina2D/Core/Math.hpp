@@ -62,9 +62,10 @@ namespace Lina2D
         static Vec2  LineIntersection(const Vec2& p00, const Vec2& p01, const Vec2& p10, const Vec2& p11);
         static Vec2  RotateAround(const Vec2& point, const Vec2& center, float angle);
         static Vec2  Abs(const Vec2& v);
-        static Vec2  Clamp(const Vec2&v, const Vec2& min, const Vec2& max);
+        static Vec2  Clamp(const Vec2& v, const Vec2& min, const Vec2& max);
         static float Abs(float f);
         static float Clamp(float f, float min, float max);
+        static int   Clamp(int i, int min, int max);
         static float Min(float a, float b);
         static float Max(float a, float b);
         template <typename T, typename U>

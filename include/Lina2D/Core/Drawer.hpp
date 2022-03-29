@@ -81,6 +81,13 @@ namespace Lina2D
     void DrawNGonFilled(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f);
 
     /// <summary>
+    /// Draws a filled circle/semi circle with the given radius & center. 
+    /// Segments are clamped to 8 - 180 (180 being perfect circle, 8 being 8-gon)
+    /// !Rounding options have no effect.!
+    /// </summary>
+    void DrawCircleFilled(const Vec2& center, float radius, StyleOptions& style, int segments = 36, bool isSemiCircle = false, float rotateAngle = 0.0f);
+
+    /// <summary>
     /// Triangulates & fills the index array given a start and end vertex index.
     /// </summary>
     void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices);
@@ -151,6 +158,18 @@ namespace Lina2D
 
         // Fill NGon imp
         void FillNGonData(Array<Vertex>&, bool hasCenter, const Vec2& center, float radius, int n);
+
+        // Single color
+        void FillCircle_SC(Array<Vertex>& vertices, Array<Index>& indices, bool semiCircle, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color);
+
+        // Vertical or horizontal gradinet.
+        void FillCircle_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, bool semiCircle, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor);
+
+        // Radial gradient
+        void FillCircle_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, bool semiCircle, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd);
+
+        // Fill circle impl
+        void FillCircleData(Array<Vertex>& v, bool semiCircle, bool hasCenter, const Vec2& center, float radius, int segments);
 
         float GetAngleIncrease(float rounding);
     }; // namespace Internal

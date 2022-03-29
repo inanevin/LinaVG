@@ -486,7 +486,6 @@ namespace Lina2D
 
     void DrawNGonFilled(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle)
     {
-
         if (Math::IsEqual(style.m_color.m_start, style.m_color.m_end))
         {
             Internal::FillNGon_SC(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, center, radius, n, style.m_color.m_start);
@@ -509,6 +508,36 @@ namespace Lina2D
                 Array<Vertex> vertices;
                 Array<Index>  indices;
                 Internal::FillNGon_RadialGra(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end);
+                Backend::DrawGradient(vertices, indices, style.m_color.m_start, style.m_color.m_end, style.m_color.m_gradientType, style.m_color.m_radialSize);
+            }
+        }
+    }
+
+    void DrawCircleFilled(const Vec2& center, float radius, StyleOptions& style, int segments, bool isSemiCircle, float rotateAngle)
+    {
+
+        if (Math::IsEqual(style.m_color.m_start, style.m_color.m_end))
+        {
+            Internal::FillCircle_SC(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, isSemiCircle, rotateAngle, center, radius, segments, style.m_color.m_start);
+        }
+        else
+        {
+            if (style.m_color.m_gradientType == GradientType::Horizontal)
+            {
+                // Horizontal, non rounded
+                Internal::FillCircle_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, isSemiCircle, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, true);
+            }
+            else if (style.m_color.m_gradientType == GradientType::Vertical)
+            {
+                // Vertical, non rounded
+                Internal::FillCircle_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, isSemiCircle, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, false);
+            }
+            else if (style.m_color.m_gradientType == GradientType::Radial || style.m_color.m_gradientType == GradientType::RadialCorner)
+            {
+                // // Radial, non rounded
+                Array<Vertex> vertices;
+                Array<Index>  indices;
+                Internal::FillCircle_RadialGra(vertices, indices, isSemiCircle, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end);
                 Backend::DrawGradient(vertices, indices, style.m_color.m_start, style.m_color.m_end, style.m_color.m_gradientType, style.m_color.m_radialSize);
             }
         }
@@ -741,7 +770,7 @@ namespace Lina2D
         v[i + 3].m_uv    = Vec2(0.0f, 1.0f);
     }
 
-    void Internal::FillTri_NoRound_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop)
+    void Internal::FillTri_NoRound_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop)
     {
         Vertex v[3];
         FillTriData(v, false, p1, p2, p3);
@@ -1033,6 +1062,89 @@ namespace Lina2D
             v.m_uv.x = Math::Remap(v.m_pos.x, min.x, max.x, 0.0f, 1.0f);
             v.m_uv.y = Math::Remap(v.m_pos.y, min.y, max.y, 0.0f, 1.0f);
             vertArray.push_back(v);
+        }
+    }
+
+    void Internal::FillCircle_SC(Array<Vertex>& vertices, Array<Index>& indices, bool semiCircle, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color)
+    {
+        Array<Vertex> v;
+        FillCircleData(v, semiCircle, true, center, radius, segments);
+
+        const int start = vertices.m_size;
+
+        for (int i = 0; i < v.m_size; i++)
+        {
+            v[i].m_col = color;
+            vertices.push_back(v[i]);
+        }
+
+        RotateVertices(vertices, center, start + 1, start + v.m_size - 1, rotateAngle);
+        ConvexFillVertices(start, start + v.m_size - 1, indices);
+    }
+
+    void Internal::FillCircle_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, bool semiCircle, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor)
+    {
+        Array<Vertex> v;
+        FillCircleData(v, semiCircle, true, center, radius, segments);
+
+        const int start = vertices.m_size;
+
+        for (int i = 0; i < v.m_size; i++)
+        {
+            v[i].m_col = Math::Lerp(colorStart, colorEnd, isHor ? v[i].m_uv.x : v[i].m_uv.y);
+            vertices.push_back(v[i]);
+        }
+
+        RotateVertices(vertices, center, start + 1, start + v.m_size - 1, rotateAngle);
+        ConvexFillVertices(start, start + v.m_size - 1, indices);
+    }
+
+    void Internal::FillCircle_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, bool semiCircle, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd)
+    {
+        Array<Vertex> v;
+        FillCircleData(v, semiCircle, true, center, radius, segments);
+
+        const int start = vertices.m_size;
+
+        for (int i = 0; i < v.m_size; i++)
+        {
+            vertices.push_back(v[i]);
+        }
+
+        RotateVertices(vertices, center, start + 1, start + v.m_size - 1, rotateAngle);
+        ConvexFillVertices(start, start + v.m_size - 1, indices);
+    }
+
+    void Internal::FillCircleData(Array<Vertex>& vertices, bool semiCircle, bool hasCenter, const Vec2& center, float radius, int segments)
+    {
+        segments                  = Math::Clamp(segments, 8, 180);
+        const float angleIncrease = 360.0f / (float)segments;
+
+        if (hasCenter)
+        {
+            Vertex c;
+            c.m_pos = center;
+            c.m_uv  = Vec2(0.5f, 0.5f);
+            vertices.push_back(c);
+        }
+
+        const float startAngle = semiCircle ? 180.0f : 0.0f;
+        for (float i = startAngle; i < 360.0f; i += angleIncrease)
+        {
+            Vertex v;
+            v.m_pos             = Math::GetPointOnCircle(center, radius, i);
+            const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.m_pos.x, center.y - v.m_pos.y));
+            v.m_uv              = Vec2(0.5f - toCenter.x, 0.5f - toCenter.y);
+            vertices.push_back(v);
+        }
+
+        if (semiCircle)
+        {
+            Vertex v;
+            v.m_pos = Math::GetPointOnCircle(center, radius, 0);
+            const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.m_pos.x, center.y - v.m_pos.y));
+            v.m_uv              = Vec2(0.5f - toCenter.x, 0.5f - toCenter.y);
+            vertices.push_back(v);
         }
     }
 
