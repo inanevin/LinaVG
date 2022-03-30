@@ -170,6 +170,13 @@ namespace Lina2D
         return Vec2(Clamp(v.x, min.x, max.x), Clamp(v.y, min.y, max.y));
     }
 
+    Vec2 Math::ScalePoint(const Vec2& p, const Vec2& center, float scale)
+    {
+        const Vec2 aroundOrigin = Vec2(p.x - center.x, p.y - center.y);
+        const Vec2 scaled       = Vec2(aroundOrigin.x * scale, aroundOrigin.y * scale);
+        return Vec2(scaled.x + center.x, scaled.y + center.y);
+    }
+
     float Math::Abs(float f)
     {
         return f < 0.0f ? -f : f;

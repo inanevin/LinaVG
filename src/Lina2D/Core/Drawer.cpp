@@ -36,6 +36,10 @@ SOFTWARE.
 
 namespace Lina2D
 {
+
+#define DEF_VTX_BUF   Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer
+#define DEF_INDEX_BUF Internal::g_rendererData.m_defaultBuffer.m_indexBuffer
+
     void DrawArc(const Vec2& p1, const Vec2& p2, const Vec4Grad& color, float radius, ThicknessGrad thickness, int segments, bool flip)
     {
 
@@ -356,10 +360,40 @@ namespace Lina2D
 
     void DrawPoint(const Vec2& p1, const Vec4& col)
     {
+#ifdef NONDEBUG
         StyleOptions style;
         style.m_color        = col;
         const float distance = Config.m_framebufferScale.x / 2.0f;
         DrawRectFilled(Vec2(p1.x - distance, p1.y - distance), Vec2(p1.x + distance, p1.y + distance), style);
+#else
+        const float distance = Config.m_framebufferScale.x;
+        Vertex      p1u, p2u, p1d, p2d;
+        p1u.m_pos.x = p1.x - distance;
+        p1u.m_pos.y = p1.y + distance;
+        p2u.m_pos.x = p1.x + distance;
+        p2u.m_pos.y = p1.y + distance;
+        p1d.m_pos.x = p1.x - distance;
+        p1d.m_pos.y = p1.y - distance;
+        p2d.m_pos.x = p1.x + distance;
+        p2d.m_pos.y = p1.y - distance;
+        p1u.m_col   = col;
+        p2u.m_col   = col;
+        p2d.m_col   = col;
+        p1d.m_col   = col;
+
+        const Index curr = DEF_VTX_BUF.m_size;
+        DEF_VTX_BUF.push_back(p1u);
+        DEF_VTX_BUF.push_back(p2u);
+        DEF_VTX_BUF.push_back(p2d);
+        DEF_VTX_BUF.push_back(p1d);
+
+        DEF_INDEX_BUF.push_back(curr);
+        DEF_INDEX_BUF.push_back(curr + 1);
+        DEF_INDEX_BUF.push_back(curr + 3);
+        DEF_INDEX_BUF.push_back(curr + 1);
+        DEF_INDEX_BUF.push_back(curr + 2);
+        DEF_INDEX_BUF.push_back(curr + 3);
+#endif
     }
 
     void DrawTriangleFilled(const Vec2& left, const Vec2& right, const Vec2& top, StyleOptions& style, float rotateAngle)
@@ -369,12 +403,12 @@ namespace Lina2D
             if (Math::IsEqual(style.m_color.m_start, style.m_color.m_end))
             {
                 if (style.m_textureHandle == 0)
-                    Internal::FillTri_NoRound_SC(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, left, right, top, style.m_color.m_start);
+                    Internal::FillTri_NoRound_SC(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, left, right, top, style.m_color.m_start, style);
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillTri_NoRound_SC(vertices, indices, rotateAngle, left, right, top, style.m_color.m_start);
+                    Internal::FillTri_NoRound_SC(vertices, indices, rotateAngle, left, right, top, style.m_color.m_start, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -384,12 +418,12 @@ namespace Lina2D
                 {
                     // Horizontal, non rounded
                     if (style.m_textureHandle == 0)
-                        Internal::FillTri_NoRound_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, left, right, top, style.m_color.m_start, style.m_color.m_end, style.m_color.m_end);
+                        Internal::FillTri_NoRound_VerHorGra(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, left, right, top, style.m_color.m_start, style.m_color.m_end, style.m_color.m_end, style);
                     else
                     {
                         Array<Vertex> vertices;
                         Array<Index>  indices;
-                        Internal::FillTri_NoRound_VerHorGra(vertices, indices, rotateAngle, left, right, top, style.m_color.m_start, style.m_color.m_end, style.m_color.m_end);
+                        Internal::FillTri_NoRound_VerHorGra(vertices, indices, rotateAngle, left, right, top, style.m_color.m_start, style.m_color.m_end, style.m_color.m_end, style);
                         Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                     }
                 }
@@ -397,12 +431,12 @@ namespace Lina2D
                 {
                     // Vertical, non rounded
                     if (style.m_textureHandle == 0)
-                        Internal::FillTri_NoRound_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, left, right, top, style.m_color.m_end, style.m_color.m_end, style.m_color.m_start);
+                        Internal::FillTri_NoRound_VerHorGra(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, left, right, top, style.m_color.m_end, style.m_color.m_end, style.m_color.m_start, style);
                     else
                     {
                         Array<Vertex> vertices;
                         Array<Index>  indices;
-                        Internal::FillTri_NoRound_VerHorGra(vertices, indices, rotateAngle, left, right, top, style.m_color.m_end, style.m_color.m_end, style.m_color.m_start);
+                        Internal::FillTri_NoRound_VerHorGra(vertices, indices, rotateAngle, left, right, top, style.m_color.m_end, style.m_color.m_end, style.m_color.m_start, style);
                         Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                     }
                 }
@@ -413,14 +447,14 @@ namespace Lina2D
                     {
                         Array<Vertex> vertices;
                         Array<Index>  indices;
-                        Internal::FillTri_NoRound_RadialGra(vertices, indices, rotateAngle, left, right, top, style.m_color.m_start, style.m_color.m_end);
+                        Internal::FillTri_NoRound_RadialGra(vertices, indices, rotateAngle, left, right, top, style.m_color.m_start, style.m_color.m_end, style);
                         Backend::DrawGradient(vertices, indices, style.m_color.m_start, style.m_color.m_end, style.m_color.m_gradientType, style.m_color.m_radialSize);
                     }
                     else
                     {
                         Array<Vertex> vertices;
                         Array<Index>  indices;
-                        Internal::FillTri_NoRound_RadialGra(vertices, indices, rotateAngle, left, right, top, style.m_color.m_start, style.m_color.m_end);
+                        Internal::FillTri_NoRound_RadialGra(vertices, indices, rotateAngle, left, right, top, style.m_color.m_start, style.m_color.m_end, style);
                         Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                     }
                 }
@@ -432,12 +466,12 @@ namespace Lina2D
             {
                 // Rounded, single color.
                 if (style.m_textureHandle == 0)
-                    Internal::FillTri_Round(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, style.m_onlyRoundTheseCorners, rotateAngle, left, right, top, style.m_color.m_start, style.m_rounding);
+                    Internal::FillTri_Round(DEF_VTX_BUF, DEF_INDEX_BUF, style.m_onlyRoundTheseCorners, rotateAngle, left, right, top, style.m_color.m_start, style.m_rounding, style);
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillTri_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, left, right, top, style.m_color.m_start, style.m_rounding);
+                    Internal::FillTri_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, left, right, top, style.m_color.m_start, style.m_rounding, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -448,14 +482,14 @@ namespace Lina2D
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillTri_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, left, right, top, style.m_color.m_start, style.m_rounding);
+                    Internal::FillTri_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, left, right, top, style.m_color.m_start, style.m_rounding, style);
                     Backend::DrawGradient(vertices, indices, style.m_color.m_start, style.m_color.m_end, style.m_color.m_gradientType, style.m_color.m_radialSize);
                 }
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillTri_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, left, right, top, style.m_color.m_start, style.m_rounding);
+                    Internal::FillTri_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, left, right, top, style.m_color.m_start, style.m_rounding, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -470,12 +504,12 @@ namespace Lina2D
             if (Math::IsEqual(style.m_color.m_start, style.m_color.m_end))
             {
                 if (style.m_textureHandle == 0)
-                    Internal::FillRect_NoRound_SC(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, min, max, style.m_color.m_start);
+                    Internal::FillRect_NoRound_SC(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, min, max, style.m_color.m_start, style);
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillRect_NoRound_SC(vertices, indices, rotateAngle, min, max, style.m_color.m_start);
+                    Internal::FillRect_NoRound_SC(vertices, indices, rotateAngle, min, max, style.m_color.m_start, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -486,15 +520,15 @@ namespace Lina2D
                     // Horizontal, non rounded
                     if (style.m_textureHandle == 0)
                     {
-                        Internal::FillRect_NoRound_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, min, max,
-                                                             style.m_color.m_start, style.m_color.m_end, style.m_color.m_end, style.m_color.m_start);
+                        Internal::FillRect_NoRound_VerHorGra(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, min, max,
+                                                             style.m_color.m_start, style.m_color.m_end, style.m_color.m_end, style.m_color.m_start, style);
                     }
                     else
                     {
                         Array<Vertex> vertices;
                         Array<Index>  indices;
                         Internal::FillRect_NoRound_VerHorGra(vertices, indices, rotateAngle, min, max,
-                                                             style.m_color.m_start, style.m_color.m_end, style.m_color.m_end, style.m_color.m_start);
+                                                             style.m_color.m_start, style.m_color.m_end, style.m_color.m_end, style.m_color.m_start, style);
                         Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                     }
                 }
@@ -503,15 +537,15 @@ namespace Lina2D
                     // Vertical, non rounded
                     if (style.m_textureHandle == 0)
                     {
-                        Internal::FillRect_NoRound_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, min, max,
-                                                             style.m_color.m_start, style.m_color.m_start, style.m_color.m_end, style.m_color.m_end);
+                        Internal::FillRect_NoRound_VerHorGra(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, min, max,
+                                                             style.m_color.m_start, style.m_color.m_start, style.m_color.m_end, style.m_color.m_end, style);
                     }
                     else
                     {
                         Array<Vertex> vertices;
                         Array<Index>  indices;
                         Internal::FillRect_NoRound_VerHorGra(vertices, indices, rotateAngle, min, max,
-                                                             style.m_color.m_start, style.m_color.m_start, style.m_color.m_end, style.m_color.m_end);
+                                                             style.m_color.m_start, style.m_color.m_start, style.m_color.m_end, style.m_color.m_end, style);
                         Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                     }
                 }
@@ -522,14 +556,14 @@ namespace Lina2D
                     {
                         Array<Vertex> vertices;
                         Array<Index>  indices;
-                        Internal::FillRect_NoRound_RadialGra(vertices, indices, rotateAngle, min, max, style.m_color.m_start, style.m_color.m_end);
+                        Internal::FillRect_NoRound_RadialGra(vertices, indices, rotateAngle, min, max, style.m_color.m_start, style.m_color.m_end, style);
                         Backend::DrawGradient(vertices, indices, style.m_color.m_start, style.m_color.m_end, style.m_color.m_gradientType, style.m_color.m_radialSize);
                     }
                     else
                     {
                         Array<Vertex> vertices;
                         Array<Index>  indices;
-                        Internal::FillRect_NoRound_RadialGra(vertices, indices, rotateAngle, min, max, style.m_color.m_start, style.m_color.m_end);
+                        Internal::FillRect_NoRound_RadialGra(vertices, indices, rotateAngle, min, max, style.m_color.m_start, style.m_color.m_end, style);
                         Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                     }
                 }
@@ -542,13 +576,13 @@ namespace Lina2D
                 // Rounded, single color.
                 if (style.m_textureHandle == 0)
                 {
-                    Internal::FillRect_Round(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, style.m_onlyRoundTheseCorners, rotateAngle, min, max, style.m_color.m_start, style.m_rounding);
+                    Internal::FillRect_Round(DEF_VTX_BUF, DEF_INDEX_BUF, style.m_onlyRoundTheseCorners, rotateAngle, min, max, style.m_color.m_start, style.m_rounding, style);
                 }
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillRect_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, min, max, style.m_color.m_start, style.m_rounding);
+                    Internal::FillRect_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, min, max, style.m_color.m_start, style.m_rounding, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -559,7 +593,7 @@ namespace Lina2D
                     // Rounded, gradient.
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillRect_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, min, max, style.m_color.m_start, style.m_rounding);
+                    Internal::FillRect_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, min, max, style.m_color.m_start, style.m_rounding, style);
                     Backend::DrawGradient(vertices, indices, style.m_color.m_start, style.m_color.m_end, style.m_color.m_gradientType, style.m_color.m_radialSize);
                 }
                 else
@@ -567,7 +601,7 @@ namespace Lina2D
                     // Rounded, gradient.
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillRect_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, min, max, style.m_color.m_start, style.m_rounding);
+                    Internal::FillRect_Round(vertices, indices, style.m_onlyRoundTheseCorners, rotateAngle, min, max, style.m_color.m_start, style.m_rounding, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -579,12 +613,12 @@ namespace Lina2D
         if (Math::IsEqual(style.m_color.m_start, style.m_color.m_end))
         {
             if (style.m_textureHandle == 0)
-                Internal::FillNGon_SC(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, center, radius, n, style.m_color.m_start);
+                Internal::FillNGon_SC(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, center, radius, n, style.m_color.m_start, style);
             else
             {
                 Array<Vertex> vertices;
                 Array<Index>  indices;
-                Internal::FillNGon_SC(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start);
+                Internal::FillNGon_SC(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start, style);
                 Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
             }
         }
@@ -594,12 +628,12 @@ namespace Lina2D
             {
                 // Horizontal, non rounded
                 if (style.m_textureHandle == 0)
-                    Internal::FillNGon_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, true);
+                    Internal::FillNGon_VerHorGra(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, true, style);
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillNGon_VerHorGra(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, true);
+                    Internal::FillNGon_VerHorGra(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, true, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -607,12 +641,12 @@ namespace Lina2D
             {
                 // Vertical, non rounded
                 if (style.m_textureHandle == 0)
-                    Internal::FillNGon_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, false);
+                    Internal::FillNGon_VerHorGra(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, false, style);
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillNGon_VerHorGra(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, false);
+                    Internal::FillNGon_VerHorGra(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, false, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -623,14 +657,14 @@ namespace Lina2D
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillNGon_RadialGra(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end);
+                    Internal::FillNGon_RadialGra(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, style);
                     Backend::DrawGradient(vertices, indices, style.m_color.m_start, style.m_color.m_end, style.m_color.m_gradientType, style.m_color.m_radialSize);
                 }
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillNGon_RadialGra(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end);
+                    Internal::FillNGon_RadialGra(vertices, indices, rotateAngle, center, radius, n, style.m_color.m_start, style.m_color.m_end, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -655,12 +689,12 @@ namespace Lina2D
         if (Math::IsEqual(style.m_color.m_start, style.m_color.m_end))
         {
             if (style.m_textureHandle == 0)
-                Internal::FillConvex_SC(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, points, size, avgCenter, style.m_color.m_start);
+                Internal::FillConvex_SC(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, points, size, avgCenter, style.m_color.m_start, style);
             else
             {
                 Array<Vertex> vertices;
                 Array<Index>  indices;
-                Internal::FillConvex_SC(vertices, indices, rotateAngle, points, size, avgCenter, style.m_color.m_start);
+                Internal::FillConvex_SC(vertices, indices, rotateAngle, points, size, avgCenter, style.m_color.m_start, style);
                 Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
             }
         }
@@ -670,12 +704,12 @@ namespace Lina2D
             {
                 // Horizontal, non rounded
                 if (style.m_textureHandle == 0)
-                    Internal::FillConvex_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end, true);
+                    Internal::FillConvex_VerHorGra(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end, true, style);
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillConvex_VerHorGra(vertices, indices, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end, true);
+                    Internal::FillConvex_VerHorGra(vertices, indices, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end, true, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -683,12 +717,12 @@ namespace Lina2D
             {
                 // Vertical, non rounded
                 if (style.m_textureHandle == 0)
-                    Internal::FillConvex_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end, false);
+                    Internal::FillConvex_VerHorGra(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end, false, style);
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillConvex_VerHorGra(vertices, indices, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end, false);
+                    Internal::FillConvex_VerHorGra(vertices, indices, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end, false, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -699,14 +733,14 @@ namespace Lina2D
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillConvex_RadialGra(vertices, indices, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end);
+                    Internal::FillConvex_RadialGra(vertices, indices, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end, style);
                     Backend::DrawGradient(vertices, indices, style.m_color.m_start, style.m_color.m_end, style.m_color.m_gradientType, style.m_color.m_radialSize);
                 }
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillConvex_RadialGra(vertices, indices, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end);
+                    Internal::FillConvex_RadialGra(vertices, indices, rotateAngle, points, size, avgCenter, style.m_color.m_start, style.m_color.m_end, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -718,12 +752,12 @@ namespace Lina2D
         if (Math::IsEqual(style.m_color.m_start, style.m_color.m_end))
         {
             if (style.m_textureHandle == 0)
-                Internal::FillCircle_SC(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, center, radius, segments, style.m_color.m_start, startAngle, endAngle);
+                Internal::FillCircle_SC(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, center, radius, segments, style.m_color.m_start, startAngle, endAngle, style);
             else
             {
                 Array<Vertex> vertices;
                 Array<Index>  indices;
-                Internal::FillCircle_SC(vertices, indices, rotateAngle, center, radius, segments, style.m_color.m_start, startAngle, endAngle);
+                Internal::FillCircle_SC(vertices, indices, rotateAngle, center, radius, segments, style.m_color.m_start, startAngle, endAngle, style);
                 Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
             }
         }
@@ -733,12 +767,12 @@ namespace Lina2D
             {
                 // Horizontal, non rounded
                 if (style.m_textureHandle == 0)
-                    Internal::FillCircle_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, true, startAngle, endAngle);
+                    Internal::FillCircle_VerHorGra(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, true, startAngle, endAngle, style);
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillCircle_VerHorGra(vertices, indices, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, true, startAngle, endAngle);
+                    Internal::FillCircle_VerHorGra(vertices, indices, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, true, startAngle, endAngle, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -746,12 +780,12 @@ namespace Lina2D
             {
                 // Vertical, non rounded
                 if (style.m_textureHandle == 0)
-                    Internal::FillCircle_VerHorGra(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, false, startAngle, endAngle);
+                    Internal::FillCircle_VerHorGra(DEF_VTX_BUF, DEF_INDEX_BUF, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, false, startAngle, endAngle, style);
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillCircle_VerHorGra(vertices, indices, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, false, startAngle, endAngle);
+                    Internal::FillCircle_VerHorGra(vertices, indices, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, false, startAngle, endAngle, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -762,14 +796,14 @@ namespace Lina2D
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillCircle_RadialGra(vertices, indices, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, startAngle, endAngle);
+                    Internal::FillCircle_RadialGra(vertices, indices, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, startAngle, endAngle, style);
                     Backend::DrawGradient(vertices, indices, style.m_color.m_start, style.m_color.m_end, style.m_color.m_gradientType, style.m_color.m_radialSize);
                 }
                 else
                 {
                     Array<Vertex> vertices;
                     Array<Index>  indices;
-                    Internal::FillCircle_RadialGra(vertices, indices, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, startAngle, endAngle);
+                    Internal::FillCircle_RadialGra(vertices, indices, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, startAngle, endAngle, style);
                     Backend::DrawTextured(vertices, indices, style.m_textureHandle, style.m_textureUVOffset, style.m_textureUVTiling);
                 }
             }
@@ -906,7 +940,7 @@ namespace Lina2D
         }
     }
 
-    void Internal::FillRect_NoRound_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL)
+    void Internal::FillRect_NoRound_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts)
     {
         Vertex v[4];
         FillRectData(v, false, min, max);
@@ -919,17 +953,26 @@ namespace Lina2D
         for (int i = 0; i < 4; i++)
             vertices.push_back(v[i]);
 
-        RotateVertices(vertices, Vec2((min.x + max.x) / 2.0f, (min.y + max.y) / 2.0f), current, current + 3, rotateAngle);
+        const Vec2 center = Vec2((min.x + max.x) / 2.0f, (min.y + max.y) / 2.0f);
+        RotateVertices(vertices, center, current, current + 3, rotateAngle);
 
-        indices.push_back(current);
-        indices.push_back(current + 1);
-        indices.push_back(current + 3);
-        indices.push_back(current + 1);
-        indices.push_back(current + 2);
-        indices.push_back(current + 3);
+        if (opts.m_isFilled)
+        {
+            indices.push_back(current);
+            indices.push_back(current + 1);
+            indices.push_back(current + 3);
+            indices.push_back(current + 1);
+            indices.push_back(current + 2);
+            indices.push_back(current + 3);
+        }
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, current, current + 3, opts.m_thickness.m_start);
+
+        // if (opts.m_outlineOptions.m_radius != 0.0f)
+        //  ConvexOutline(vertices, current, current + 3, center, opts.m_outlineOptions);
     }
 
-    void Internal::FillRect_NoRound_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& color)
+    void Internal::FillRect_NoRound_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& color, StyleOptions& opts)
     {
         Vertex v[4];
         FillRectData(v, false, min, max);
@@ -943,30 +986,48 @@ namespace Lina2D
         for (int i = 0; i < 4; i++)
             vertices.push_back(v[i]);
 
-        RotateVertices(vertices, Vec2((min.x + max.x) / 2.0f, (min.y + max.y) / 2.0f), current, current + 3, rotateAngle);
+        const Vec2 center = Vec2((min.x + max.x) / 2.0f, (min.y + max.y) / 2.0f);
+        RotateVertices(vertices, center, current, current + 3, rotateAngle);
 
-        indices.push_back(current);
-        indices.push_back(current + 1);
-        indices.push_back(current + 3);
-        indices.push_back(current + 1);
-        indices.push_back(current + 2);
-        indices.push_back(current + 3);
+        if (opts.m_isFilled)
+        {
+            indices.push_back(current);
+            indices.push_back(current + 1);
+            indices.push_back(current + 3);
+            indices.push_back(current + 1);
+            indices.push_back(current + 2);
+            indices.push_back(current + 3);
+        }
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, current, current + 3, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, current, current + 3, center, opts.m_outlineOptions);
     }
 
-    void Internal::FillRect_NoRound_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& startColor, const Vec4& endColor)
+    void Internal::FillRect_NoRound_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts)
     {
         Vertex v[5];
         FillRectData(v, true, min, max);
         int startIndex = vertices.m_size;
 
-        for (int i = 0; i < 5; i++)
+        const int loopStart = opts.m_isFilled ? 0 : 1;
+        for (int i = 1; i < 5; i++)
             vertices.push_back(v[i]);
 
-        RotateVertices(vertices, Vec2((min.x + max.x) / 2.0f, (min.y + max.y) / 2.0f), startIndex + 1, startIndex + 4, rotateAngle);
-        ConvexFillVertices(startIndex, startIndex + 4, indices);
+        const Vec2 center = Vec2((min.x + max.x) / 2.0f, (min.y + max.y) / 2.0f);
+        RotateVertices(vertices, center, opts.m_isFilled ? startIndex + 1 : 0, opts.m_isFilled ? startIndex + 4 : startIndex + 3, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(startIndex, startIndex + 4, indices);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, startIndex, startIndex + 3, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, startIndex + 1, startIndex + 4, center, opts.m_outlineOptions);
     }
 
-    void Internal::FillRect_Round(Array<Vertex>& vertices, Array<Index>& indices, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& col, float rounding)
+    void Internal::FillRect_Round(Array<Vertex>& vertices, Array<Index>& indices, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& col, float rounding, StyleOptions& opts)
     {
         rounding = Math::Clamp(rounding, 0.0f, 1.0f);
 
@@ -999,11 +1060,14 @@ namespace Lina2D
 
         // Eventually we will be filling a convex shape, so we need a center vertex, it's position is already "center",
         // now calculate it's vertex color & push it down the pipeline.
-        Vertex c;
-        c.m_pos = center;
-        c.m_col = col;
-        c.m_uv  = Vec2(0.5f, 0.5f);
-        vertices.push_back(c);
+        if (opts.m_isFilled)
+        {
+            Vertex c;
+            c.m_pos = center;
+            c.m_col = col;
+            c.m_uv  = Vec2(0.5f, 0.5f);
+            vertices.push_back(c);
+        }
 
         for (int i = 0; i < 4; i++)
         {
@@ -1044,8 +1108,15 @@ namespace Lina2D
         }
 
         // Fill vertices, don't forget to add the center too.
-        RotateVertices(vertices, center, startIndex + 1, startIndex + vertexCount, rotateAngle);
-        ConvexFillVertices(startIndex, startIndex + vertexCount, indices);
+        RotateVertices(vertices, center, opts.m_isFilled ? startIndex + 1 : startIndex, startIndex + vertexCount - 1, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(startIndex, startIndex + vertexCount, indices);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, startIndex, startIndex + vertexCount - 1, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, startIndex + 1, startIndex + vertexCount, center, opts.m_outlineOptions);
     }
 
     void Internal::FillRectData(Vertex* v, bool hasCenter, const Vec2& min, const Vec2& max)
@@ -1072,7 +1143,7 @@ namespace Lina2D
         v[i + 3].m_uv    = Vec2(0.0f, 1.0f);
     }
 
-    void Internal::FillTri_NoRound_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop)
+    void Internal::FillTri_NoRound_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts)
     {
         Vertex v[3];
         FillTriData(v, false, true, p1, p2, p3);
@@ -1085,14 +1156,23 @@ namespace Lina2D
         for (int i = 0; i < 3; i++)
             vertices.push_back(v[i]);
 
-        RotateVertices(vertices, Vec2((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f), start, start + 2, rotateAngle);
+        const Vec2 center = Vec2((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f);
+        RotateVertices(vertices, center, start, start + 2, rotateAngle);
 
-        indices.push_back(start);
-        indices.push_back(start + 1);
-        indices.push_back(start + 2);
+        if (opts.m_isFilled)
+        {
+            indices.push_back(start);
+            indices.push_back(start + 1);
+            indices.push_back(start + 2);
+        }
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, start, start + 2, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, start, start + 2, center, opts.m_outlineOptions);
     }
 
-    void Internal::FillTri_NoRound_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& color)
+    void Internal::FillTri_NoRound_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& color, StyleOptions& opts)
     {
         Vertex v[3];
         FillTriData(v, false, true, p1, p2, p3);
@@ -1105,28 +1185,46 @@ namespace Lina2D
         for (int i = 0; i < 3; i++)
             vertices.push_back(v[i]);
 
-        RotateVertices(vertices, Vec2((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f), start, start + 2, rotateAngle);
+        const Vec2 center = Vec2((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f);
+        RotateVertices(vertices, center, start, start + 2, rotateAngle);
 
-        indices.push_back(start);
-        indices.push_back(start + 1);
-        indices.push_back(start + 2);
+        if (opts.m_isFilled)
+        {
+            indices.push_back(start);
+            indices.push_back(start + 1);
+            indices.push_back(start + 2);
+        }
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, start, start + 2, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, start, start + 2, center, opts.m_outlineOptions);
     }
 
-    void Internal::FillTri_NoRound_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& startcolor, const Vec4& endColor)
+    void Internal::FillTri_NoRound_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& startcolor, const Vec4& endColor, StyleOptions& opts)
     {
         Vertex v[4];
         Vec2   points[3] = {p1, p2, p3};
         FillTriData(v, true, true, p1, p2, p3);
         int startIndex = vertices.m_size;
 
-        for (int i = 0; i < 4; i++)
+        const int loopStart = opts.m_isFilled ? 0 : 1;
+        for (int i = loopStart; i < 4; i++)
             vertices.push_back(v[i]);
 
-        RotateVertices(vertices, Vec2((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f), startIndex + 1, startIndex + 3, rotateAngle);
-        ConvexFillVertices(startIndex, startIndex + 3, indices);
+        const Vec2 center = Vec2((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f);
+        RotateVertices(vertices, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + 3 : startIndex + 2, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(startIndex, startIndex + 3, indices);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, startIndex, startIndex + 2, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, startIndex + 1, startIndex + 3, center, opts.m_outlineOptions);
     }
 
-    void Internal::FillTri_Round(Array<Vertex>& vertices, Array<Index>& indices, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& col, float rounding)
+    void Internal::FillTri_Round(Array<Vertex>& vertices, Array<Index>& indices, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& col, float rounding, StyleOptions& opts)
     {
         rounding = Math::Clamp(rounding, 0.0f, 1.0f);
 
@@ -1161,12 +1259,16 @@ namespace Lina2D
 
         // Eventually we will be filling a convex shape, so we need a center vertex, it's position is already "center",
         // now calculate it's vertex color & push it down the pipeline.
-        Vertex c;
-        c.m_pos  = center;
-        c.m_col  = col;
-        c.m_uv.x = Math::Remap(c.m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-        c.m_uv.y = Math::Remap(c.m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-        vertices.push_back(c);
+        if (opts.m_isFilled)
+        {
+            Vertex c;
+            c.m_pos  = center;
+            c.m_col  = col;
+            c.m_uv.x = Math::Remap(c.m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+            c.m_uv.y = Math::Remap(c.m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+            vertices.push_back(c);
+        }
+
         const float angleOffset = maxAngle > 90.0f ? maxAngle - 90.0f : 45.0f;
 
         for (int i = 2; i > -1; i--)
@@ -1261,8 +1363,15 @@ namespace Lina2D
         }
 
         // Fill vertices
-        RotateVertices(vertices, center, startIndex + 1, startIndex + vertexCount, rotateAngle);
-        ConvexFillVertices(startIndex, startIndex + vertexCount, indices);
+        RotateVertices(vertices, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + vertexCount : startIndex + vertexCount - 1, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(startIndex, startIndex + vertexCount, indices);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, startIndex, startIndex + vertexCount - 1, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, startIndex + 1, startIndex + vertexCount, center, opts.m_outlineOptions);
     }
 
     void Internal::FillTriData(Vertex* v, bool hasCenter, bool calculateUV, const Vec2& p1, const Vec2& p2, const Vec2& p3)
@@ -1299,10 +1408,10 @@ namespace Lina2D
         }
     }
 
-    void Internal::FillNGon_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color)
+    void Internal::FillNGon_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color, StyleOptions& opts)
     {
         Array<Vertex> v;
-        FillNGonData(v, true, center, radius, n);
+        FillNGonData(v, opts.m_isFilled, center, radius, n);
 
         const int start = vertices.m_size;
 
@@ -1312,14 +1421,21 @@ namespace Lina2D
             vertices.push_back(v[i]);
         }
 
-        RotateVertices(vertices, center, start + 1, start + n, rotateAngle);
-        ConvexFillVertices(start, start + n, indices);
+        RotateVertices(vertices, center, opts.m_isFilled ? start + 1 : start, opts.m_isFilled ? start + n : start + n - 1, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(start, start + n, indices);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, start, start + n - 1, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, start + 1, start + n, center, opts.m_outlineOptions);
     }
 
-    void Internal::FillNGon_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor)
+    void Internal::FillNGon_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts)
     {
         Array<Vertex> v;
-        FillNGonData(v, true, center, radius, n);
+        FillNGonData(v, opts.m_isFilled, center, radius, n);
 
         const int start = vertices.m_size;
 
@@ -1329,14 +1445,21 @@ namespace Lina2D
             vertices.push_back(v[i]);
         }
 
-        RotateVertices(vertices, center, start + 1, start + n, rotateAngle);
-        ConvexFillVertices(start, start + n, indices);
+        RotateVertices(vertices, center, opts.m_isFilled ? start + 1 : start, opts.m_isFilled ? start + n : start + n - 1, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(start, start + n, indices);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, start, start + n - 1, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, start + 1, start + n, center, opts.m_outlineOptions);
     }
 
-    void Internal::FillNGon_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd)
+    void Internal::FillNGon_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts)
     {
         Array<Vertex> v;
-        FillNGonData(v, true, center, radius, n);
+        FillNGonData(v, opts.m_isFilled, center, radius, n);
 
         const int start = vertices.m_size;
 
@@ -1345,8 +1468,15 @@ namespace Lina2D
             vertices.push_back(v[i]);
         }
 
-        RotateVertices(vertices, center, start + 1, start + n, rotateAngle);
-        ConvexFillVertices(start, start + n, indices);
+        RotateVertices(vertices, center, opts.m_isFilled ? start + 1 : start, opts.m_isFilled ? start + n : start + n - 1, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(start, start + n, indices);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, start, start + n - 1, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, start + 1, start + n, center, opts.m_outlineOptions);
     }
 
     void Internal::FillNGonData(Array<Vertex>& vertArray, bool hasCenter, const Vec2& center, float radius, int n)
@@ -1363,6 +1493,7 @@ namespace Lina2D
             vertArray.push_back(v);
         }
 
+        int count = 0;
         for (float i = 0.0f; i < 360.0f; i += angleIncrease)
         {
             Vertex v;
@@ -1370,13 +1501,17 @@ namespace Lina2D
             v.m_uv.x = Math::Remap(v.m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
             v.m_uv.y = Math::Remap(v.m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
             vertArray.push_back(v);
+            count++;
+
+            if (count == n)
+                return;
         }
     }
 
-    void Internal::FillCircle_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color, float startAngle, float endAngle)
+    void Internal::FillCircle_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color, float startAngle, float endAngle, StyleOptions& opts)
     {
         Array<Vertex> v;
-        FillCircleData(v, true, center, radius, segments, startAngle, endAngle);
+        FillCircleData(v, opts.m_isFilled, center, radius, segments, startAngle, endAngle);
 
         const int start = vertices.m_size;
 
@@ -1386,14 +1521,29 @@ namespace Lina2D
             vertices.push_back(v[i]);
         }
 
-        RotateVertices(vertices, center, start + 1, start + v.m_size - 1, rotateAngle);
-        ConvexFillVertices(start, start + v.m_size - 1, indices, Math::Abs(endAngle - startAngle) != 360.0f);
+        const bool isFullCircle = Math::Abs(endAngle - startAngle) == 360.0f;
+        const int  totalSize    = v.m_size - 1;
+
+        RotateVertices(vertices, center, opts.m_isFilled ? start + 1 : start, opts.m_isFilled ? start + totalSize : start + totalSize - 1, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(start, start + totalSize, indices, !isFullCircle);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, start, start + totalSize, opts.m_thickness.m_start, !isFullCircle);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+        {
+            ConvexOutline(vertices, start + 1, start + totalSize, center, opts.m_outlineOptions, !isFullCircle);
+
+            if (!isFullCircle)
+                CircleOutlineClosing(vertices[start], opts, totalSize, radius, startAngle, endAngle);
+        }
     }
 
-    void Internal::FillCircle_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle)
+    void Internal::FillCircle_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle, StyleOptions& opts)
     {
         Array<Vertex> v;
-        FillCircleData(v, true, center, radius, segments, startAngle, endAngle);
+        FillCircleData(v, opts.m_isFilled, center, radius, segments, startAngle, endAngle);
 
         const int start = vertices.m_size;
 
@@ -1403,14 +1553,29 @@ namespace Lina2D
             vertices.push_back(v[i]);
         }
 
-        RotateVertices(vertices, center, start + 1, start + v.m_size - 1, rotateAngle);
-        ConvexFillVertices(start, start + v.m_size - 1, indices, Math::Abs(endAngle - startAngle) != 360.0f);
+        const bool isFullCircle = Math::Abs(endAngle - startAngle) == 360.0f;
+        const int  totalSize    = v.m_size - 1;
+
+        RotateVertices(vertices, center, opts.m_isFilled ? start + 1 : start, opts.m_isFilled ? start + totalSize : start + totalSize - 1, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(start, start + totalSize, indices, !isFullCircle);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, start, start + totalSize, opts.m_thickness.m_start, !isFullCircle);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+        {
+            ConvexOutline(vertices, start + 1, start + totalSize, center, opts.m_outlineOptions, !isFullCircle);
+
+            if (!isFullCircle)
+                CircleOutlineClosing(vertices[start], opts, totalSize, radius, startAngle, endAngle);
+        }
     }
 
-    void Internal::FillCircle_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle)
+    void Internal::FillCircle_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle, StyleOptions& opts)
     {
         Array<Vertex> v;
-        FillCircleData(v, true, center, radius, segments, startAngle, endAngle);
+        FillCircleData(v, opts.m_isFilled, center, radius, segments, startAngle, endAngle);
 
         const int start = vertices.m_size;
 
@@ -1419,8 +1584,23 @@ namespace Lina2D
             vertices.push_back(v[i]);
         }
 
-        RotateVertices(vertices, center, start + 1, start + v.m_size - 1, rotateAngle);
-        ConvexFillVertices(start, start + v.m_size - 1, indices, Math::Abs(endAngle - startAngle) != 360.0f);
+        const bool isFullCircle = Math::Abs(endAngle - startAngle) == 360.0f;
+        const int  totalSize    = v.m_size - 1;
+
+        RotateVertices(vertices, center, opts.m_isFilled ? start + 1 : start, opts.m_isFilled ? start + totalSize : start + totalSize - 1, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(start, start + totalSize, indices, !isFullCircle);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, start, start + totalSize, opts.m_thickness.m_start, !isFullCircle);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+        {
+            ConvexOutline(vertices, start + 1, start + totalSize, center, opts.m_outlineOptions, !isFullCircle);
+
+            if (!isFullCircle)
+                CircleOutlineClosing(vertices[start], opts, totalSize, radius, startAngle, endAngle);
+        }
     }
 
     void Internal::FillCircleData(Array<Vertex>& vertices, bool hasCenter, const Vec2& center, float radius, int segments, float startAngle, float endAngle)
@@ -1448,18 +1628,21 @@ namespace Lina2D
         }
     }
 
-    void Internal::FillConvex_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& color)
+    void Internal::FillConvex_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& color, StyleOptions& opts)
     {
         const int start = vertices.m_size;
         Vec2      bbMin, bbMax;
         GetConvexBoundingBox(points, size, bbMin, bbMax);
 
-        Vertex c;
-        c.m_pos  = center;
-        c.m_uv.x = Math::Remap(c.m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-        c.m_uv.y = Math::Remap(c.m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-        c.m_col  = color;
-        vertices.push_back(c);
+        if (opts.m_isFilled)
+        {
+            Vertex c;
+            c.m_pos  = center;
+            c.m_uv.x = Math::Remap(c.m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+            c.m_uv.y = Math::Remap(c.m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+            c.m_col  = color;
+            vertices.push_back(c);
+        }
 
         for (int i = 0; i < size; i++)
         {
@@ -1472,22 +1655,32 @@ namespace Lina2D
             vertices.push_back(v);
         }
 
-        RotateVertices(vertices, center, start + 1, start + size, rotateAngle);
-        ConvexFillVertices(start, start + size, indices);
+        RotateVertices(vertices, center, opts.m_isFilled ? start + 1 : start, opts.m_isFilled ? start + size : start + size - 1, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(start, start + size, indices);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, start, start + size - 1, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, start + 1, start + size, center, opts.m_outlineOptions);
     }
 
-    void Internal::FillConvex_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor)
+    void Internal::FillConvex_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts)
     {
         const int start = vertices.m_size;
         Vec2      bbMin, bbMax;
         GetConvexBoundingBox(points, size, bbMin, bbMax);
 
-        Vertex c;
-        c.m_pos  = center;
-        c.m_col  = Math::Lerp(colorStart, colorEnd, 0.5f);
-        c.m_uv.x = Math::Remap(c.m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-        c.m_uv.y = Math::Remap(c.m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-        vertices.push_back(c);
+        if (opts.m_isFilled)
+        {
+            Vertex c;
+            c.m_pos  = center;
+            c.m_col  = Math::Lerp(colorStart, colorEnd, 0.5f);
+            c.m_uv.x = Math::Remap(c.m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+            c.m_uv.y = Math::Remap(c.m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+            vertices.push_back(c);
+        }
 
         for (int i = 0; i < size; i++)
         {
@@ -1500,22 +1693,32 @@ namespace Lina2D
             vertices.push_back(v);
         }
 
-        RotateVertices(vertices, center, start + 1, start + size, rotateAngle);
-        ConvexFillVertices(start, start + size, indices);
+        RotateVertices(vertices, center, opts.m_isFilled ? start + 1 : start, opts.m_isFilled ? start + size : start + size - 1, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(start, start + size, indices);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, start, start + size - 1, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, start + 1, start + size, center, opts.m_outlineOptions);
     }
 
-    void Internal::FillConvex_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd)
+    void Internal::FillConvex_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts)
     {
         const int start = vertices.m_size;
 
         Vec2 bbMin, bbMax;
         GetConvexBoundingBox(points, size, bbMin, bbMax);
 
-        Vertex c;
-        c.m_pos  = center;
-        c.m_uv.x = Math::Remap(c.m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-        c.m_uv.y = Math::Remap(c.m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-        vertices.push_back(c);
+        if (opts.m_isFilled)
+        {
+            Vertex c;
+            c.m_pos  = center;
+            c.m_uv.x = Math::Remap(c.m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+            c.m_uv.y = Math::Remap(c.m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+            vertices.push_back(c);
+        }
 
         for (int i = 0; i < size; i++)
         {
@@ -1527,19 +1730,27 @@ namespace Lina2D
             vertices.push_back(v);
         }
 
-        RotateVertices(vertices, center, start + 1, start + size, rotateAngle);
-        ConvexFillVertices(start, start + size, indices);
+      
+        RotateVertices(vertices, center, opts.m_isFilled ? start + 1 : start, opts.m_isFilled ? start + size : start + size - 1, rotateAngle);
+
+        if (opts.m_isFilled)
+            ConvexFillVertices(start, start + size, indices);
+        else
+            ExtrudeAndFillShapeBorders(vertices, indices, center, start, start + size - 1, opts.m_thickness.m_start);
+
+        if (opts.m_outlineOptions.m_radius != 0.0f)
+            ConvexOutline(vertices, start + 1, start + size, center, opts.m_outlineOptions);
     }
 
     Vec2 Internal::GetPolygonCentroid(Vec2* vertices, int vertexCount)
     {
-        Vec2   centroid   = {0, 0};
-        double signedArea = 0.0;
-        double x0         = 0.0; // Current vertex X
-        double y0         = 0.0; // Current vertex Y
-        double x1         = 0.0; // Next vertex X
-        double y1         = 0.0; // Next vertex Y
-        double a          = 0.0; // Partial signed area
+        Vec2  centroid   = {0, 0};
+        float signedArea = 0.0f;
+        float x0         = 0.0f; // Current vertex X
+        float y0         = 0.0f; // Current vertex Y
+        float x1         = 0.0f; // Next vertex X
+        float y1         = 0.0f; // Next vertex Y
+        float a          = 0.0f; // Partial signed area
 
         // For all vertices except last
         int i = 0;
@@ -1566,9 +1777,9 @@ namespace Lina2D
         centroid.x += (x0 + x1) * a;
         centroid.y += (y0 + y1) * a;
 
-        signedArea *= 0.5;
-        centroid.x /= (6.0 * signedArea);
-        centroid.y /= (6.0 * signedArea);
+        signedArea *= 0.5f;
+        centroid.x /= (6.0f * signedArea);
+        centroid.y /= (6.0f * signedArea);
 
         return centroid;
     }
@@ -1607,6 +1818,189 @@ namespace Lina2D
             return 10.0f;
         else
             return 5.0f;
+    }
+
+    void Internal::ConvexOutline(Array<Vertex>& srcVertices, int startIndex, int endIndex, const Vec2& convexCenter, OutlineOptions& options, bool skipEndClosing)
+    {
+        const int current   = DEF_VTX_BUF.m_size;
+        const int totalSize = endIndex - startIndex + 1;
+
+        for (size_t i = startIndex; i <= endIndex; i++)
+        {
+            // pushing a new one might invalidate the srcVertices[i] reference (due to growing and memcpy)
+            // so check and grow if necessary first.
+            DEF_VTX_BUF.checkGrow();
+            Vertex* v = DEF_VTX_BUF.push_back(srcVertices[i]);
+            v->m_col  = options.m_color;
+        }
+
+        // Iterate the latest added copy vertices.
+        // Exflate each vertex towards outer direction from center.
+        for (int i = 0; i < totalSize; i++)
+        {
+            Vertex&    v          = DEF_VTX_BUF[current + i];
+            const Vec2 dir        = Math::Normalized(Vec2(v.m_pos.x - convexCenter.x, v.m_pos.y - convexCenter.y));
+            Vec2       uniformDir = dir;
+
+            //  if (Math::Abs(dir.x) > Math::Abs(dir.y))
+            //  {
+            //      uniformDir.x = dir.x;
+            //      if (dir.y > 0.0)
+            //          uniformDir.y = Math::Abs(dir.x);
+            //      else
+            //          uniformDir.y = -Math::Abs(dir.x);
+            //  }
+            //  else
+            //  {
+            //      uniformDir.y = dir.y;
+            //      if (dir.x > 0.0)
+            //          uniformDir.x = Math::Abs(dir.y);
+            //      else
+            //          uniformDir.x = -Math::Abs(dir.y);
+            //  }
+
+            Vertex exf;
+            exf.m_pos = Vec2(v.m_pos.x + uniformDir.x * options.m_radius * Config.m_framebufferScale.x, v.m_pos.y + uniformDir.y * options.m_radius * Config.m_framebufferScale.y);
+            exf.m_col = options.m_color;
+            exf.m_uv  = v.m_uv;
+            DEF_VTX_BUF.push_back(exf);
+        }
+
+        // Now add the indices.
+        for (int i = current; i < current + totalSize; i++)
+        {
+            int next = i + 1;
+            if (next >= current + totalSize)
+                next = current;
+
+            if (i == current + totalSize - 1 && skipEndClosing)
+                return;
+
+            DEF_INDEX_BUF.push_back(i);
+            DEF_INDEX_BUF.push_back(i + totalSize);
+            DEF_INDEX_BUF.push_back(next);
+            DEF_INDEX_BUF.push_back(i + totalSize);
+            DEF_INDEX_BUF.push_back(next);
+            DEF_INDEX_BUF.push_back(next + totalSize);
+        }
+    }
+
+    Vec2 Internal::GetArcDirection(const Vec2& center, float radius, float startAngle, float endAngle)
+    {
+        const Vec2 centerAnglePoint = Math::GetPointOnCircle(center, radius, (startAngle + endAngle) / 2.0f);
+        return Vec2(centerAnglePoint.x - center.x, centerAnglePoint.y - center.y);
+    }
+
+    void Internal::CircleOutlineClosing(Vertex& c, StyleOptions& opts, int totalSize, float radius, float startAngle, float endAngle)
+    {
+        const float outline     = opts.m_outlineOptions.m_radius * Config.m_framebufferScale.x;
+        const float angleOffset = opts.m_outlineOptions.m_radius;
+
+        const Vec2 o1         = Math::GetPointOnCircle(c.m_pos, radius, startAngle - angleOffset);
+        const Vec2 o2         = Math::GetPointOnCircle(c.m_pos, radius, endAngle + angleOffset);
+        const Vec2 centerToO1 = Math::Normalized(Vec2(o1.x - c.m_pos.x, o1.y - c.m_pos.y));
+        const Vec2 centerToO2 = Math::Normalized(Vec2(o2.x - c.m_pos.x, o2.y - c.m_pos.y));
+        const Vec2 o1p        = Vec2(o1.x + centerToO1.x * outline, o1.y + centerToO1.y * outline);
+        const Vec2 o2p        = Vec2(o2.x + centerToO2.x * outline, o2.y + centerToO2.y * outline);
+        const Vec2 arcDir     = Math::Normalized(GetArcDirection(c.m_pos, radius, startAngle, endAngle));
+        const Vec2 cp         = Vec2(c.m_pos.x - arcDir.x * outline, c.m_pos.y - arcDir.y * outline);
+        //   DrawPoint(o1, Vec4(1, 0, 0, 1));
+        //   DrawPoint(o2, Vec4(1, 0, 0, 1));
+        // DrawPoint(o1p, Vec4(1, 1, 0, 1));
+        // DrawPoint(o2p, Vec4(1, 1, 0, 1));
+        // DrawPoint(cp, Vec4(1, 1, 1, 1));
+
+        const int firstVtxIndex  = DEF_VTX_BUF.m_size - totalSize;
+        const int lastVtxIndex   = DEF_VTX_BUF.m_size - 1;
+        Vertex&   firstBorderVtx = DEF_VTX_BUF[firstVtxIndex];
+        Vertex&   lastBorderVtx  = DEF_VTX_BUF[lastVtxIndex];
+        const int current        = DEF_VTX_BUF.m_size;
+
+        // Exflated center.
+        Vertex vcp;
+        vcp.m_pos = cp;
+        vcp.m_col = opts.m_outlineOptions.m_color;
+        DEF_VTX_BUF.push_back(vcp);
+
+        // Exflated first vertex.
+        Vertex vo1p;
+        vo1p.m_pos = o1p;
+        vo1p.m_col = opts.m_outlineOptions.m_color;
+        DEF_VTX_BUF.push_back(vo1p);
+
+        // Exflated last vertex.
+        Vertex vo2p;
+        vo2p.m_pos = o2p;
+        vo2p.m_col = opts.m_outlineOptions.m_color;
+        DEF_VTX_BUF.push_back(vo2p);
+
+        // Center copy vertex
+        Vertex vcc = c;
+        vcc.m_col  = opts.m_outlineOptions.m_color;
+        DEF_VTX_BUF.push_back(vcc);
+
+        // Exflated center to exflated first to center copy
+        DEF_INDEX_BUF.push_back(current);
+        DEF_INDEX_BUF.push_back(current + 1);
+        DEF_INDEX_BUF.push_back(firstVtxIndex);
+
+        // Exflated first to exflated center to center copy
+        DEF_INDEX_BUF.push_back(firstVtxIndex);
+        DEF_INDEX_BUF.push_back(current);
+        DEF_INDEX_BUF.push_back(current + 3);
+
+        // Vice-versa for the last vertex.
+        DEF_INDEX_BUF.push_back(current);
+        DEF_INDEX_BUF.push_back(current + 2);
+        DEF_INDEX_BUF.push_back(lastVtxIndex);
+        DEF_INDEX_BUF.push_back(lastVtxIndex);
+        DEF_INDEX_BUF.push_back(current);
+        DEF_INDEX_BUF.push_back(current + 3);
+        //
+
+        // const Vec2   toFirst        = Vec2(firstBorderVtx.m_pos.x - c.m_pos.x, firstBorderVtx.m_pos.y - c.m_pos.y);
+        // const Vec2   toLast         = Vec2(lastBorderVtx.m_pos.x - c.m_pos.x, lastBorderVtx.m_pos.y - c.m_pos.y);
+        // const Vec2   toFirstCW      = Math::Normalized(Math::Rotate90(toFirst, true));
+        // const Vec2   toFirstCCW     = Math::Normalized(Math::Rotate90(toFirst, false));
+        // const Vec2   toLastCW       = Math::Normalized(Math::Rotate90(toLast, true));
+        // const Vec2   toLastCCW      = Math::Normalized(Math::Rotate90(toLast, false));
+        // const Vec2   min1           = Vec2(firstBorderVtx.m_pos.x + toFirstCCW.x * outline, firstBorderVtx.m_pos.y + toFirstCCW.y * outline);
+        // const Vec2   min2           = Vec2(lastBorderVtx.m_pos.x + toLastCW.x * outline, lastBorderVtx.m_pos.y + toLastCW.y * outline);
+        // StyleOptions style;
+        // style.m_color = opts.m_outlineOptions.m_color;
+        // DrawRectFilled(min1, c.m_pos, style, rotateAngle);
+        // DrawRectFilled(min2, c.m_pos, style, rotateAngle);
+    }
+
+    void Internal::ExtrudeAndFillShapeBorders(Array<Vertex>& vertices, Array<Index>& indices, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing)
+    {
+        const int nextBorder = endIndex - startIndex + 1;
+
+        for (int i = startIndex; i < startIndex + nextBorder; i++)
+        {
+            Vertex v;
+            v.m_pos = Math::ScalePoint(vertices[i].m_pos, center, 1.1f);
+            v.m_uv  = vertices[i].m_uv;
+            v.m_col = vertices[i].m_col;
+            vertices.push_back(v);
+        }
+
+        for (int i = startIndex; i < startIndex + nextBorder; i++)
+        {
+            int next = i + 1;
+            if (next >= startIndex + nextBorder)
+                next = startIndex;
+
+            if (skipEndClosing && i == startIndex + nextBorder - 1)
+                return;
+
+            indices.push_back(i);
+            indices.push_back(next);
+            indices.push_back(i + nextBorder);
+            indices.push_back(next);
+            indices.push_back(next + nextBorder);
+            indices.push_back(i + nextBorder);
+        }
     }
 
 } // namespace Lina2D

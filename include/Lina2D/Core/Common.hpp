@@ -142,10 +142,15 @@ namespace Lina2D
             m_capacity = newCapacity;
         }
 
-        inline T* push_back(const T& v)
+        inline void checkGrow()
         {
             if (m_size == m_capacity)
                 reserve(growCapacity(m_size + 1));
+        }
+
+        inline T* push_back(const T& v)
+        {
+            checkGrow();
             std::memcpy(&m_data[m_size], &v, sizeof(v));
             m_size++;
             return last();
@@ -257,6 +262,14 @@ namespace Lina2D
 
     typedef float Thickness;
 
+    struct OutlineOptions
+    {
+        /// For both lines and shapes, defines the border radius.
+        float m_radius = 0.0f;
+
+        /// For both lines and shapes, defines the border color.
+        Vec4 m_color = Vec4(0, 0, 0, 1);
+    };
     /// <summary>
     /// Multicolors: If you want to use one color for each vertex, should point to an array of N colors, while drawing a convex shape.
     /// Passing a pointer to an array with wrong size is undefined behavior. Set to nullptr if you want to use a gradient instead. Construct your gradient with
@@ -268,7 +281,9 @@ namespace Lina2D
         /// Color for the shape, you can set this to 2 different colors & define a gradient type, or construct with a single color for flat shading.
         Vec4Grad m_color = Vec4Grad(Vec4(1, 1, 1, 1));
 
-        /// Works on lines, defines the thickness of the line either by fixed thickness or by gradient.
+        /// While drawing lines -> can make a straight line or a line with varying thickness based on start & end.
+        /// While drawing non-filled shapes -> only start thickness is used.
+        /// While drawing filled shapes, this has no effect.
         ThicknessGrad m_thickness = ThicknessGrad(1.0f);
 
         /// Rounding for shapes such as rectangles and triangles.
@@ -277,11 +292,8 @@ namespace Lina2D
         /// If rounding is to be applied, you can fill this array to only apply rounding to specific corners of the shape.
         Array<int> m_onlyRoundTheseCorners;
 
-        /// For both lines and shapes, defines the border radius.
-        float m_borderRadius = 0.0f;
-
-        /// For both lines and shapes, defines the border color.
-        Vec4 m_borderColor = Vec4(0, 0, 0, 1);
+        // Outline details.
+        OutlineOptions m_outlineOptions;
 
         /// For both lines and shapes, defines drop shadow angle & radius;
         Vec2 m_dropShadow = Vec2(0.0f, 0.0f);
@@ -297,6 +309,9 @@ namespace Lina2D
 
         /// Defines the texture offset.
         Vec2 m_textureUVOffset = Vec2(0.0f, 0.0f);
+
+        // Fills inside the shape if true, not used for lines.
+        bool m_isFilled = false;
     };
 
     struct Vertex
@@ -324,16 +339,16 @@ namespace Lina2D
 
     struct Configuration
     {
-        Vec2      m_displayPos         = Vec2(0, 0);
-        Vec2      m_displaySize        = Vec2(0, 0);
-        Vec2      m_framebufferScale   = Vec2(0, 0);
+        Vec2 m_displayPos       = Vec2(0, 0);
+        Vec2 m_displaySize      = Vec2(0, 0);
+        Vec2 m_framebufferScale = Vec2(0, 0);
 
         JointType m_lineJointType      = JointType::None;
         AAType    m_featheringType     = AAType::None;
         float     m_featheringDistance = 0.0f;
-        
+
         /// Every m_gcCollectInterval ticks, the system will call garbage collection on vertex & index buffers.
-        int       m_gcCollectInterval  = 180;
+        int m_gcCollectInterval = 180;
 
         /// For debugging purposes, sets to draw polygon/wireframe mode.
         bool m_wireframeEnabled = false;
