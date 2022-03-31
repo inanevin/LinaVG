@@ -68,36 +68,39 @@ namespace Lina2D
     /// <param name="top"> Top corner. </param>
     /// <param name="style"> Style options to apply.</param>
     /// <param name="rotateAngle"> Rotate angles around the center of the triangle. </param>
-    void DrawTriangleFilled(const Vec2& left, const Vec2& right, const Vec2& top, StyleOptions& style, float rotateAngle = 0.0f);
+    void DrawTriangle(const Vec2& left, const Vec2& right, const Vec2& top, StyleOptions& style, float rotateAngle = 0.0f);
 
     /// <summary>
     /// Draws a filled rectangle between min & max with the given style options & rotation angle.
     /// </summary>
-    void DrawRectFilled(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f);
+    void DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f);
 
     /// <summary>
     /// Draws a convex polygon with N corners. !Rounding options do not apply to NGons!
     /// </summary>
-    void DrawNGonFilled(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f);
+    void DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f);
 
-    void DrawConvexFilled(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f);
+    /// <summary>
+    /// Draws the given set of points. !Rounding options do not apply!
+    /// If you are not going to fill the convex shape (styling options -> m_isFilled), then prefer using DrawLines instead of this so that you can use proper line joints.
+    /// </summary>
+    void DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f);
 
     /// <summary>
     /// Draws a filled circle with the given radius & center.
-    /// You can change the start and end angles to create a filled semi-circle or a filled arc.
+    /// You can change the start and end angles to create a filled semi-circle or a filled arc. 
+    /// It's recommended to send angles always in the range of 0.0f - 360.0f. This method will try to auto-convert if not.
     /// Segments are clamped to 6 - 360 (360 being perfect circle, 8 being 6-gon)
     /// Higher the segment cause more weight on the performance. 18-54 is a good range for balance.
     /// Always recommended to use segments that leave no remainder when 360 is divided by it.
     /// !Rounding options have no effect.!
     /// </summary>
-    void DrawCircleFilled(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f);
+    void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f);
 
     /// <summary>
     /// Triangulates & fills the index array given a start and end vertex index.
     /// </summary>
     void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices, bool skipLastTriangle = false);
-
-    void GenerateLine(const Vec2& p1, const Vec2& p2, const Vec4Grad& col, ThicknessGrad thickness);
 
     /// <summary>
     /// Draws an arc always clock-wise from p1 to p2.
@@ -211,7 +214,7 @@ namespace Lina2D
         /// <param name="endIndex">Must be the last outer vertex of the shape.</param>
         /// <param name="convexCenter">Centroid of the convex shape.</param>
         /// <param name="options">Outline options</param>
-        void ConvexOutline(Array<Vertex>& srcVertices, int startIndex, int endIndex, const Vec2& convexCenter, OutlineOptions& options, bool skipEndClosing = false);
+        // void ConvexOutline(Array<Vertex>& srcVertices, int startIndex, int endIndex, const Vec2& convexCenter, OutlineOptions& options, bool skipEndClosing = false);
 
         /// <summary>
         /// Returns the direction vector going from the center of the arc towards it's middle angle.

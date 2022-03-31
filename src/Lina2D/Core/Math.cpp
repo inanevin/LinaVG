@@ -41,9 +41,12 @@ namespace Lina2D
         return Vec2(v.x / mag, v.y / mag);
     }
 
-    Vec2 Math::Rotate90(const Vec2& v, bool cw)
+    /// <summary>
+    /// Inverted Y axis.
+    /// </summary>
+    Vec2 Math::Rotate90(const Vec2& v, bool ccw)
     {
-        if (cw)
+        if (ccw)
             return Vec2(v.y, -v.x);
         else
             return Vec2(-v.y, v.x);
@@ -172,9 +175,19 @@ namespace Lina2D
 
     Vec2 Math::ScalePoint(const Vec2& p, const Vec2& center, float scale)
     {
+        const Vec2 dir = Math::Normalized(Vec2(p.x - center.x, p.y - center.y));
         const Vec2 aroundOrigin = Vec2(p.x - center.x, p.y - center.y);
         const Vec2 scaled       = Vec2(aroundOrigin.x * scale, aroundOrigin.y * scale);
         return Vec2(scaled.x + center.x, scaled.y + center.y);
+    }
+
+    Vec2 Math::GetVertexNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint)
+    {
+        const Vec2 toNext              = Math::Normalized(Vec2(nextPoint.x - point.x, nextPoint.y - point.y));
+        const Vec2 fromPrev            = Math::Normalized(Vec2(point.x - previousPoint.x, point.y - previousPoint.y));
+        const Vec2 toNextNormal        = Math::Rotate90(toNext, true);
+        const Vec2 fromPreviousNormal  = Math::Rotate90(fromPrev, true);
+        return Math::Normalized(Vec2(toNextNormal.x + fromPreviousNormal.x, toNextNormal.y + fromPreviousNormal.y));
     }
 
     float Math::Abs(float f)

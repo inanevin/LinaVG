@@ -69,9 +69,19 @@ namespace Lina2D
             m_data              = nullptr;
         }
 
+        Array(const Array&) = delete;
+        Array& operator=(const Array<T>& a) = delete;
+
         ~Array()
         {
             clear();
+        }
+
+        inline void from(const Array& t)
+        {
+            clear();
+            for (int i = 0; i < t.m_size; i++)
+                push_back(t.m_data[i]);
         }
 
         inline void clear()
@@ -262,14 +272,34 @@ namespace Lina2D
 
     typedef float Thickness;
 
+    enum class OutlineDrawDirection
+    {
+        Outwards,
+        Inwards,
+        Both
+    };
+
     struct OutlineOptions
     {
-        /// For both lines and shapes, defines the border radius.
-        float m_radius = 0.0f;
+        /// Outline thickness.
+        float m_thickness = 0.0f;
 
-        /// For both lines and shapes, defines the border color.
-        Vec4 m_color = Vec4(0, 0, 0, 1);
+        /// Where to draw the outline, have no effect on filled shapes.
+        OutlineDrawDirection m_drawDirection = OutlineDrawDirection::Outwards;
+
+        /// Outline color, you can set this to 2 different colors & define a gradient type, or construct with a single color for flat shading.
+        Vec4Grad m_color = Vec4Grad(Vec4(1, 1, 1, 1));
+
+        /// Set this to a texture handle you've created on your program to draw a texture on top of the shape/line. Set to 0 to clear.
+        BackendHandle m_textureHandle = 0;
+
+        /// Defines the texture repetition.
+        Vec2 m_textureUVTiling = Vec2(1.0f, 1.0f);
+
+        /// Defines the texture offset.
+        Vec2 m_textureUVOffset = Vec2(0.0f, 0.0f);
     };
+
     /// <summary>
     /// Multicolors: If you want to use one color for each vertex, should point to an array of N colors, while drawing a convex shape.
     /// Passing a pointer to an array with wrong size is undefined behavior. Set to nullptr if you want to use a gradient instead. Construct your gradient with
@@ -278,6 +308,22 @@ namespace Lina2D
     /// </summary>
     struct StyleOptions
     {
+
+        StyleOptions(){};
+
+        StyleOptions(const StyleOptions& opts, const OutlineOptions& o)
+        {
+            m_color           = o.m_color;
+            m_thickness       = o.m_thickness;
+            m_textureHandle   = o.m_textureHandle;
+            m_textureUVTiling = o.m_textureUVTiling;
+            m_textureUVOffset = o.m_textureUVOffset;
+            m_isFilled        = false;
+
+            m_onlyRoundTheseCorners.from(opts.m_onlyRoundTheseCorners);
+            m_rounding = opts.m_rounding;
+        };
+
         /// Color for the shape, you can set this to 2 different colors & define a gradient type, or construct with a single color for flat shading.
         Vec4Grad m_color = Vec4Grad(Vec4(1, 1, 1, 1));
 
@@ -310,7 +356,8 @@ namespace Lina2D
         /// Defines the texture offset.
         Vec2 m_textureUVOffset = Vec2(0.0f, 0.0f);
 
-        // Fills inside the shape if true, not used for lines.
+        // Fills inside the shape if true.
+        // This does nothing for lines and for any style option sent as "m_outlineOptions"
         bool m_isFilled = false;
     };
 
