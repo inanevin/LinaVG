@@ -68,7 +68,7 @@ namespace Lina2D
     /// <param name="top"> Top corner. </param>
     /// <param name="style"> Style options to apply.</param>
     /// <param name="rotateAngle"> Rotate angles around the center of the triangle. </param>
-    void DrawTriangle(const Vec2& left, const Vec2& right, const Vec2& top, StyleOptions& style, float rotateAngle = 0.0f);
+    void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f);
 
     /// <summary>
     /// Draws a filled rectangle between min & max with the given style options & rotation angle.
@@ -141,16 +141,16 @@ namespace Lina2D
         void FillRectData(Vertex* vertArray, bool hasCenter, const Vec2& min, const Vec2& max);
 
         // No rounding, vertical or horizontal gradient
-        void FillTri_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts);
+        void FillTri_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts);
 
         // No rounding, single color
-        void FillTri_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& color, StyleOptions& opts);
+        void FillTri_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& color, StyleOptions& opts);
 
         // No rounding, radial gradient
-        void FillTri_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts);
+        void FillTri_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts);
 
         // Rounding
-        void FillTri_Round(DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& col, float rounding, StyleOptions& opts);
+        void FillTri_Round(DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& col, float rounding, StyleOptions& opts);
 
         // Fill rect impl.
         void FillTriData(Vertex* vertArray, bool hasCenter, bool calculateUV, const Vec2& p1, const Vec2& p2, const Vec2& p3);
@@ -200,6 +200,9 @@ namespace Lina2D
 
         // fill min & max to the bounding box of the given convex points.
         void GetConvexBoundingBox(Vec2* points, int size, Vec2& outMin, Vec2& outMax);
+        void GetConvexBoundingBox(Vertex* points, int size, Vec2& outMin, Vec2& outMax);
+
+        void CalculateVertexUVs(DrawBuffer* buf, int startIndex, int endIndex);
 
         // Angle increment based on rounding value.
         float GetAngleIncrease(float rounding);
@@ -231,7 +234,7 @@ namespace Lina2D
         void ExtrudeAndFillShapeBorders(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing = false);
 
 
-        void DrawOutline(DrawBuffer* sourceBuffer, const Vec2& enter, int startIndex, int endIndex, OutlineOptions& opts, bool isFilled, bool skipEndClosing = false, bool swapPrevNext = false);
+        void DrawOutline(DrawBuffer* sourceBuffer, const Vec2& enter, int startIndex, int endIndex, OutlineOptions& opts, bool isFilled, bool skipEndClosing = false);
 
     }; // namespace Internal
 

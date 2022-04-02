@@ -182,12 +182,24 @@ namespace Lina2D
         return Vec2(scaled.x + center.x, scaled.y + center.y);
     }
 
-    Vec2 Math::GetVertexNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint)
+    Vec2 Math::GetVertexNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw)
     {
+        if (previousPoint.x == -1.0f && previousPoint.y == -1.0f)
+        {
+            const Vec2 toNext = Math::Normalized(Vec2(nextPoint.x - point.x, nextPoint.y - point.y));
+            return Math::Normalized(Math::Rotate90(toNext, ccw));
+        }
+
+        if (nextPoint.x == -1.0f && nextPoint.y == -1.0f)
+        {
+            const Vec2 fromPrev = Math::Normalized(Vec2(point.x - previousPoint.x, point.y - previousPoint.y));
+            return Math::Normalized(Math::Rotate90(fromPrev, ccw));
+        }
+
         const Vec2 toNext              = Math::Normalized(Vec2(nextPoint.x - point.x, nextPoint.y - point.y));
         const Vec2 fromPrev            = Math::Normalized(Vec2(point.x - previousPoint.x, point.y - previousPoint.y));
-        const Vec2 toNextNormal        = Math::Rotate90(toNext, true);
-        const Vec2 fromPreviousNormal  = Math::Rotate90(fromPrev, true);
+        const Vec2 toNextNormal        = Math::Rotate90(toNext, ccw);
+        const Vec2 fromPreviousNormal  = Math::Rotate90(fromPrev, ccw);
         return Math::Normalized(Vec2(toNextNormal.x + fromPreviousNormal.x, toNextNormal.y + fromPreviousNormal.y));
     }
 

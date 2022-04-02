@@ -62,7 +62,7 @@ namespace Lina2D
         static Vec2  Abs(const Vec2& v);
         static Vec2  Clamp(const Vec2& v, const Vec2& min, const Vec2& max);
         static Vec2  ScalePoint(const Vec2& p, const Vec2& center, float scale);
-        static Vec2  GetVertexNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint);
+        static Vec2  GetVertexNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw = true);
         static bool  Math::IsEqual(const Vec2& v1, const Vec2& v2);
         static bool  Math::IsEqual(const Vec4& v1, const Vec4& v2);
         static float Abs(float f);

@@ -289,6 +289,9 @@ namespace Lina2D
         /// Outline thickness.
         float m_thickness = 0.0f;
 
+        // If true, bypasses the gradient type property in the outline's color, and always uses vertex colors to colorize from inwards towards outwards.
+        bool m_useVertexColors = false;
+
         /// Where to draw the outline, have no effect on filled shapes.
         OutlineDrawDirection m_drawDirection = OutlineDrawDirection::Outwards;
 
@@ -428,22 +431,26 @@ namespace Lina2D
     {
         Array<Vertex> m_vertexBuffer;
         Array<Index>  m_indexBuffer;
+        Array<Vec2>   m_vertexNormals;
 
         inline void Clear()
         {
             m_vertexBuffer.clear();
             m_indexBuffer.clear();
+            m_vertexNormals.clear();
         }
 
         inline void ResizeZero()
         {
             m_vertexBuffer.resize(0);
             m_indexBuffer.resize(0);
+            m_vertexNormals.resize(0);
         }
 
-        inline void PushVertex(const Vertex& v)
+        inline void PushVertex(const Vertex& v, const Vec2& normal)
         {
             m_vertexBuffer.push_back(v);
+            m_vertexNormals.push_back(normal);
         }
 
         inline void PushIndex(Index i)
