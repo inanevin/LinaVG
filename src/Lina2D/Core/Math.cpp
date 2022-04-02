@@ -82,6 +82,7 @@ namespace Lina2D
         return (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z && v1.w == v2.w);
     }
 
+
     int Math::GetAreaIndex(const Vec2& diff)
     {
         if (diff.x >= 0 && diff.y >= 0)

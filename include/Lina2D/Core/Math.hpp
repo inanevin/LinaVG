@@ -44,7 +44,7 @@ Timestamp: 3/26/2022 10:42:37 AM
 
 namespace Lina2D
 {
-    class Math
+    class LINA2D_API Math
     {
     public:
         static float Mag(const Vec2& v);
@@ -52,8 +52,6 @@ namespace Lina2D
         static float GetAngleFromCenter(const Vec2& center, const Vec2& point);
         static float GetAngleBetween(const Vec2& p1, const Vec2& p2);
         static float GetAngleBetweenShort(const Vec2& p1, const Vec2& p2);
-        static bool  IsEqual(const Vec2& v1, const Vec2& v2);
-        static bool  IsEqual(const Vec4& v1, const Vec4& v2);
         static Vec2  Normalized(const Vec2& v);
         static Vec2  Rotate90(const Vec2& v, bool ccw = true);
         static Vec2  GetPointOnCircle(const Vec2& center, float radius, float angle); // Angle in degrees.
@@ -65,6 +63,8 @@ namespace Lina2D
         static Vec2  Clamp(const Vec2& v, const Vec2& min, const Vec2& max);
         static Vec2  ScalePoint(const Vec2& p, const Vec2& center, float scale);
         static Vec2  GetVertexNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint);
+        static bool  Math::IsEqual(const Vec2& v1, const Vec2& v2);
+        static bool  Math::IsEqual(const Vec4& v1, const Vec4& v2);
         static float Abs(float f);
         static float Clamp(float f, float min, float max);
         static int   Clamp(int i, int min, int max);

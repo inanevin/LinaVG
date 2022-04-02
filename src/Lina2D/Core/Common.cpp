@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: Lina Engine
 https://github.com/inanevin/LinaEngine
 
@@ -27,8 +27,43 @@ SOFTWARE.
 */
 
 #include "Lina2D/Core/Common.hpp"
+#include "Lina2D/Core/Math.hpp"
 
 namespace Lina2D
 {
-	
-}
+    GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad)
+    {
+        for (int i = 0; i < m_gradientBuffers.m_size; i++)
+        {
+            auto& buf = m_gradientBuffers[i];
+            if (Math::IsEqual(buf.m_color.m_start, grad.m_start) && Math::IsEqual(buf.m_color.m_end, grad.m_end) && buf.m_color.m_gradientType == grad.m_gradientType)
+            {
+                if (grad.m_gradientType == GradientType::Radial || grad.m_gradientType == GradientType::RadialCorner)
+                {
+                    if (buf.m_color.m_radialSize == grad.m_radialSize)
+                        return m_gradientBuffers[i];
+                }
+                else
+                    return m_gradientBuffers[i];
+            }
+        }
+
+        std::cout << "added" << std::endl;
+        m_gradientBuffers.push_back(GradientDrawBuffer(grad));
+        return m_gradientBuffers.last_ref();
+    }
+
+    TextureDrawBuffer& RendererData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset)
+    {
+        for (int i = 0; i < m_textureBuffers.m_size; i++)
+        {
+            auto& buf = m_textureBuffers[i];
+            if (buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset))
+                return m_textureBuffers[i];
+        }
+
+        m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset));
+        return m_textureBuffers.last_ref();
+    }
+
+} // namespace Lina2D

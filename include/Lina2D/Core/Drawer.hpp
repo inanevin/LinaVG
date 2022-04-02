@@ -88,7 +88,7 @@ namespace Lina2D
 
     /// <summary>
     /// Draws a filled circle with the given radius & center.
-    /// You can change the start and end angles to create a filled semi-circle or a filled arc. 
+    /// You can change the start and end angles to create a filled semi-circle or a filled arc.
     /// It's recommended to send angles always in the range of 0.0f - 360.0f. This method will try to auto-convert if not.
     /// Segments are clamped to 6 - 360 (360 being perfect circle, 8 being 6-gon)
     /// Higher the segment cause more weight on the performance. 18-54 is a good range for balance.
@@ -126,67 +126,67 @@ namespace Lina2D
     namespace Internal
     {
         // No rounding, vertical or horizontal gradient
-        void FillRect_NoRound_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts);
+        void FillRect_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts);
 
         // No rounding, single color
-        void FillRect_NoRound_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& color, StyleOptions& opts);
+        void FillRect_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& color, StyleOptions& opts);
 
         // No rounding, radial gradient
-        void FillRect_NoRound_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& startcolor, const Vec4& endColor, StyleOptions& opts);
+        void FillRect_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& startcolor, const Vec4& endColor, StyleOptions& opts);
 
         // Rounding
-        void FillRect_Round(Array<Vertex>& vertices, Array<Index>& indices, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& col, float rounding, StyleOptions& opts);
+        void FillRect_Round(DrawBuffer* buf, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& col, float rounding, StyleOptions& opts);
 
         // Fill rect impl.
         void FillRectData(Vertex* vertArray, bool hasCenter, const Vec2& min, const Vec2& max);
 
         // No rounding, vertical or horizontal gradient
-        void FillTri_NoRound_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts);
+        void FillTri_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts);
 
         // No rounding, single color
-        void FillTri_NoRound_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& color, StyleOptions& opts);
+        void FillTri_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& color, StyleOptions& opts);
 
         // No rounding, radial gradient
-        void FillTri_NoRound_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts);
+        void FillTri_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts);
 
         // Rounding
-        void FillTri_Round(Array<Vertex>& vertices, Array<Index>& indices, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& col, float rounding, StyleOptions& opts);
+        void FillTri_Round(DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4& col, float rounding, StyleOptions& opts);
 
         // Fill rect impl.
         void FillTriData(Vertex* vertArray, bool hasCenter, bool calculateUV, const Vec2& p1, const Vec2& p2, const Vec2& p3);
 
         // No rounding, single color
-        void FillNGon_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color, StyleOptions& opts);
+        void FillNGon_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color, StyleOptions& opts);
 
         // No rounding, horizontal or vertical gradient
-        void FillNGon_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts);
+        void FillNGon_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts);
 
         // No rounding, radial gradient
-        void FillNGon_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts);
+        void FillNGon_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts);
 
         // Fill NGon imp
         void FillNGonData(Array<Vertex>&, bool hasCenter, const Vec2& center, float radius, int n);
 
         // Single color
-        void FillCircle_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color, float startAngle, float endAngle, StyleOptions& opts);
+        void FillCircle_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color, float startAngle, float endAngle, StyleOptions& opts);
 
         // Vertical or horizontal gradinet.
-        void FillCircle_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle, StyleOptions& opts);
+        void FillCircle_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle, StyleOptions& opts);
 
         // Radial gradient
-        void FillCircle_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle, StyleOptions& opts);
+        void FillCircle_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle, StyleOptions& opts);
 
         // Fill circle impl
         void FillCircleData(Array<Vertex>& v, bool hasCenter, const Vec2& center, float radius, int segments, float startAngle, float endAngle);
 
         // Single color
-        void FillConvex_SC(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& color, StyleOptions& opts);
+        void FillConvex_SC(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& color, StyleOptions& opts);
 
         // Vertical horizontal gradient
-        void FillConvex_VerHorGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts);
+        void FillConvex_VerHorGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts);
 
         // Radial gradient.
-        void FillConvex_RadialGra(Array<Vertex>& vertices, Array<Index>& indices, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts);
+        void FillConvex_RadialGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts);
 
         /// <summary>
         /// Returns the centroid of a given polygon.
@@ -228,7 +228,10 @@ namespace Lina2D
         /// <param name="startIndex"> First vertex - start of the border.</param>
         /// <param name="endIndex"> Last vertex - end of the border.</param>
         /// </summary>
-        void ExtrudeAndFillShapeBorders(Array<Vertex>& vertices, Array<Index>& indices, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing = false);
+        void ExtrudeAndFillShapeBorders(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing = false);
+
+
+        void DrawOutline(DrawBuffer* sourceBuffer, const Vec2& enter, int startIndex, int endIndex, OutlineOptions& opts, bool isFilled, bool skipEndClosing = false);
 
     }; // namespace Internal
 

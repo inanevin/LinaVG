@@ -171,6 +171,11 @@ namespace Lina2D
             return &m_data[m_size - 1];
         }
 
+        inline T& last_ref()
+        {
+            return m_data[m_size - 1];
+        }
+
         inline T& operator[](int i)
         {
             _ASSERT(i >= 0 && i < m_size);
@@ -409,6 +414,9 @@ namespace Lina2D
         /// For debugging purposes, current count of the trianlges being drawn.
         int m_currentTriangleCount = 0;
 
+        /// For debugging purposes, current count of the vertices sent to backend buffers.
+        int m_currentVertexCount = 0;
+
         /// For debugging purposes, current draw calls.
         int m_currentDrawCalls = 0;
 
@@ -449,10 +457,35 @@ namespace Lina2D
         }
     };
 
+    struct GradientDrawBuffer : public DrawBuffer
+    {
+        GradientDrawBuffer(){};
+        GradientDrawBuffer(const Vec4Grad& g)
+            : m_color(g){};
+
+        Vec4Grad m_color = Vec4(1, 1, 1, 1);
+    };
+
+    struct TextureDrawBuffer : public DrawBuffer
+    {
+        TextureDrawBuffer(){};
+        TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset)
+            : m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset){};
+
+        BackendHandle m_textureHandle   = 0;
+        Vec2          m_textureUVTiling = Vec2(1.0f, 1.0f);
+        Vec2          m_textureUVOffset = Vec2(0.0f, 0.0f);
+    };
+
     struct RendererData
     {
-        int        m_gcFrameCounter;
-        DrawBuffer m_defaultBuffer;
+        int                       m_gcFrameCounter;
+        DrawBuffer                m_defaultBuffer;
+        Array<GradientDrawBuffer> m_gradientBuffers;
+        Array<TextureDrawBuffer>  m_textureBuffers;
+
+        GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad);
+        TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset);
     };
 
     struct BackendData

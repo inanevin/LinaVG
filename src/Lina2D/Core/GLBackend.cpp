@@ -171,8 +171,9 @@ namespace Lina2D::Backend
 
     void StartFrame()
     {
-        Config.m_currentDrawCalls = 0;
+        Config.m_currentDrawCalls     = 0;
         Config.m_currentTriangleCount = 0;
+        Config.m_currentVertexCount   = 0;
 
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
@@ -247,58 +248,61 @@ namespace Lina2D::Backend
         glBindVertexArray(Internal::g_backendData.m_vao);
     }
 
-    void DrawGradient(Array<Vertex>& vertices, Array<Index>& indices, const Vec4& startColor, const Vec4& endColor, GradientType type, float radialGradientSize)
+    void DrawGradient(GradientDrawBuffer* buf)
     {
         if (Internal::g_backendData.m_skipDraw)
             return;
 
         glUseProgram(Internal::g_backendData.m_gradientShaderHandle);
         glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
-        glUniform4f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["startColor"], (GLfloat)startColor.x, (GLfloat)startColor.y, (GLfloat)startColor.z, (GLfloat)startColor.w);
-        glUniform4f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["endColor"], (GLfloat)endColor.x, (GLfloat)endColor.y, (GLfloat)endColor.z, (GLfloat)endColor.w);
-        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["gradientType"], (GLint)((int)type));
-        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["radialSize"], (GLfloat)radialGradientSize);
+        glUniform4f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["startColor"], (GLfloat)buf->m_color.m_start.x, (GLfloat)buf->m_color.m_start.y, (GLfloat)buf->m_color.m_start.z, (GLfloat)buf->m_color.m_start.w);
+        glUniform4f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["endColor"], (GLfloat)buf->m_color.m_end.x, (GLfloat)buf->m_color.m_end.y, (GLfloat)buf->m_color.m_end.z, (GLfloat)buf->m_color.m_end.w);
+        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["gradientType"], (GLint)((int)buf->m_color.m_gradientType));
+        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["radialSize"], (GLfloat)buf->m_color.m_radialSize);
 
         glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertices.m_size * sizeof(Vertex), (const GLvoid*)vertices.begin(), GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.m_size * sizeof(Index), (const GLvoid*)indices.begin(), GL_STREAM_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glDrawElements(GL_TRIANGLES, (GLsizei)indices.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
         Config.m_currentDrawCalls++;
-        Config.m_currentTriangleCount += int((float)indices.m_size / 3.0f);
+        Config.m_currentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.m_currentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void DrawTextured(Array<Vertex>& vertices, Array<Index>& indices, BackendHandle texture, const Vec2& uvOffset, const Vec2& uvTiling)
+    void DrawTextured(TextureDrawBuffer* buf)
     {
         if (Internal::g_backendData.m_skipDraw)
             return;
-        const Vec2 uv = Config.m_flipTextureUVs ? Vec2(uvTiling.x, -uvTiling.y) : uvTiling;
+
+        const Vec2 uv = Config.m_flipTextureUVs ? Vec2(buf->m_textureUVTiling.x, -buf->m_textureUVTiling.y) : buf->m_textureUVTiling;
 
         glUseProgram(Internal::g_backendData.m_texturedShaderHandle);
         glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 
         glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["diffuse"], 0);
         glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["tiling"], (GLfloat)uv.x, (GLfloat)uv.y);
-        glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["offset"], (GLfloat)uvOffset.x, (GLfloat)uvOffset.y);
+        glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["offset"], (GLfloat)buf->m_textureUVOffset.x, (GLfloat)buf->m_textureUVOffset.y);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
 
         glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertices.m_size * sizeof(Vertex), (const GLvoid*)vertices.begin(), GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.m_size * sizeof(Index), (const GLvoid*)indices.begin(), GL_STREAM_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glDrawElements(GL_TRIANGLES, (GLsizei)indices.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
         Config.m_currentDrawCalls++;
-        Config.m_currentTriangleCount += int((float)indices.m_size / 3.0f);
+        Config.m_currentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.m_currentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void DrawDefault(Array<Vertex>& vertices, Array<Index>& indices)
+    void DrawDefault(DrawBuffer* buf)
     {
         if (Internal::g_backendData.m_skipDraw)
             return;
@@ -307,15 +311,16 @@ namespace Lina2D::Backend
         glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_defaultShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 
         glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertices.m_size * sizeof(Vertex), (const GLvoid*)vertices.begin(), GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.m_size * sizeof(Index), (const GLvoid*)indices.begin(), GL_STREAM_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glDrawElements(GL_TRIANGLES, (GLsizei)indices.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
         Config.m_currentDrawCalls++;
-        Config.m_currentTriangleCount += int((float)indices.m_size / 3.0f);
+        Config.m_currentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.m_currentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
     void EndFrame()

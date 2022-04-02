@@ -53,7 +53,13 @@ namespace Lina2D
 
     void Render()
     {
-        Backend::DrawDefault(Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer, Internal::g_rendererData.m_defaultBuffer.m_indexBuffer);
+        Backend::DrawDefault(&Internal::g_rendererData.m_defaultBuffer);
+
+        for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
+            Backend::DrawGradient(&(Internal::g_rendererData.m_gradientBuffers[i]));
+
+        for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
+            Backend::DrawTextured(&(Internal::g_rendererData.m_textureBuffers[i]));
     }
 
     void EndFrame()
@@ -62,16 +68,21 @@ namespace Lina2D
 
         Internal::g_rendererData.m_gcFrameCounter++;
 
+        for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
+            Internal::g_rendererData.m_gradientBuffers[i].Clear();
+
+        Internal::g_rendererData.m_gradientBuffers.clear();
+
+
+        for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
+            Internal::g_rendererData.m_textureBuffers[i].Clear();
+
+        Internal::g_rendererData.m_textureBuffers.clear();
+
         if (Internal::g_rendererData.m_gcFrameCounter > Config.m_gcCollectInterval)
         {
             Internal::g_rendererData.m_defaultBuffer.Clear();
 
-           // for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
-           // {
-           //     DrawBufferGradient& buf = Internal::g_rendererData.m_gradientBuffers[i];
-           //     buf.Clear();
-           // }
-           //
             Internal::g_rendererData.m_gcFrameCounter = 0;
         }
         else
@@ -79,12 +90,12 @@ namespace Lina2D
             Internal::g_rendererData.m_defaultBuffer.Clear();
             // m_defaultBuffer.ResizeZero();
 
-          // for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
-          // {
-          //     DrawBufferGradient& buf = Internal::g_rendererData.m_gradientBuffers[i];
-          //     buf.Clear();
-          //     // buf.ResizeZero();
-          // }
+            // for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
+            // {
+            //     DrawBufferGradient& buf = Internal::g_rendererData.m_gradientBuffers[i];
+            //     buf.Clear();
+            //     // buf.ResizeZero();
+            // }
         }
     }
 
