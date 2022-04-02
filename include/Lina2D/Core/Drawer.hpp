@@ -234,7 +234,9 @@ namespace Lina2D
         void ExtrudeAndFillShapeBorders(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing = false);
 
 
-        void DrawOutline(DrawBuffer* sourceBuffer, const Vec2& enter, int startIndex, int endIndex, OutlineOptions& opts, bool isFilled, bool skipEndClosing = false);
+        void DrawOutline(DrawBuffer* sourceBuffer, const Vec2& center, int startIndex, int endIndex, OutlineOptions& opts, bool isFilled, bool skipEndClosing = false);
+
+        void DrawAA(DrawBuffer* sourceBuffer, const Vec2& center, int startIndex, int endIndex, bool isFilled, bool skipEndClosing = false);
 
     }; // namespace Internal
 

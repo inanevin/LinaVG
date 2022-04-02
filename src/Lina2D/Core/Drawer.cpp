@@ -445,7 +445,7 @@ namespace Lina2D
                     if (style.m_textureHandle == 0)
                     {
                         GradientDrawBuffer& buf = Internal::g_rendererData.GetGradientBuffer(style.m_color);
-                        Internal::FillTri_NoRound_RadialGra(&buf, rotateAngle, top, right, left, style.m_color.m_start, style.m_color.m_end, style);
+                        Internal::FillTri_NoRound_RadialGra(&DEF_BUF, rotateAngle, top, right, left, style.m_color.m_start, style.m_color.m_end, style);
                     }
                     else
                     {
@@ -538,8 +538,8 @@ namespace Lina2D
                     // Radial, non rounded
                     if (style.m_textureHandle == 0)
                     {
-                        GradientDrawBuffer& buf = Internal::g_rendererData.GetGradientBuffer(style.m_color);
-                        Internal::FillRect_NoRound_RadialGra(&buf, rotateAngle, min, max, style.m_color.m_start, style.m_color.m_end, style);
+                      //  GradientDrawBuffer& buf = Internal::g_rendererData.GetGradientBuffer(style.m_color);
+                        Internal::FillRect_NoRound_RadialGra(&DEF_BUF, rotateAngle, min, max, style.m_color.m_start, style.m_color.m_end, style);
                     }
                     else
                     {
@@ -2071,6 +2071,93 @@ namespace Lina2D
             if (opts.m_drawDirection == OutlineDrawDirection::Inwards || opts.m_drawDirection == OutlineDrawDirection::Both)
                 copyAndFill(sourceBuffer, destBuf, opts, startIndex, 0, endIndex, totalSize, skipEndClosing, -thickness, recalcUvs);
         }
+    }
+
+    void Internal::DrawAA(DrawBuffer* sourceBuffer, const Vec2& center, int startIndex, int endIndex, bool isFilled, bool skipEndClosing)
+    {
+        const float thickness        = 2.0f * Config.m_framebufferScale.x;
+
+        // determine which buffer to use.
+        DrawBuffer* destBuf = &DEF_BUF;
+        const int totalSize   = endIndex - startIndex + 1;
+        const int startOffset = isFilled ? 0 : totalSize;
+
+        auto copyAndFill = [](DrawBuffer* sourceBuffer, DrawBuffer* destBuf, OutlineOptions& opts, int startIndex, int startOffset, int endIndex, int totalSize, bool skipEndClosing, float thickness, bool reCalcUVs) {
+            const int destBufStart = destBuf->m_vertexBuffer.m_size;
+
+            // First copy vertices.
+            for (int i = startIndex + startOffset; i < startIndex + startOffset + totalSize; i++)
+            {
+                Vertex v;
+                v.m_col = opts.m_color.m_start;
+                v.m_pos = sourceBuffer->m_vertexBuffer[i].m_pos;
+                v.m_uv  = sourceBuffer->m_vertexBuffer[i].m_uv;
+                destBuf->PushVertex(v);
+            }
+
+            // Now extrude & re-add extruded.
+            for (int i = startIndex + startOffset; i < startIndex + startOffset + totalSize; i++)
+            {
+                // take two edges, this vertex to next and previous to this in order to calculate vertex normals.
+                const int previous = i == startIndex + startOffset ? endIndex + startOffset : i - 1;
+                const int next     = i == endIndex + startOffset ? startIndex + startOffset : i + 1;
+                Vertex    v;
+                v.m_uv  = sourceBuffer->m_vertexBuffer[i].m_uv;
+                v.m_col = opts.m_color.m_end;
+
+                if (skipEndClosing && i == startIndex + startOffset)
+                {
+                    const Vec2 toNext  = Math::Normalized(Vec2(sourceBuffer->m_vertexBuffer[next].m_pos.x - sourceBuffer->m_vertexBuffer[i].m_pos.x, sourceBuffer->m_vertexBuffer[next].m_pos.y - sourceBuffer->m_vertexBuffer[i].m_pos.y));
+                    const Vec2 rotated = Math::Rotate90(toNext, true);
+                    v.m_pos            = Vec2(sourceBuffer->m_vertexBuffer[i].m_pos.x + rotated.x * thickness, sourceBuffer->m_vertexBuffer[i].m_pos.y + rotated.y * thickness);
+                }
+                else if (skipEndClosing && i == endIndex + startOffset)
+                {
+                    const Vec2 fromPrev = Math::Normalized(Vec2(sourceBuffer->m_vertexBuffer[i].m_pos.x - sourceBuffer->m_vertexBuffer[previous].m_pos.x, sourceBuffer->m_vertexBuffer[i].m_pos.y - sourceBuffer->m_vertexBuffer[previous].m_pos.y));
+                    const Vec2 rotated  = Math::Rotate90(fromPrev, true);
+                    v.m_pos             = Vec2(sourceBuffer->m_vertexBuffer[i].m_pos.x + rotated.x * thickness, sourceBuffer->m_vertexBuffer[i].m_pos.y + rotated.y * thickness);
+                }
+                else
+                {
+                    const Vec2 prevP               = sourceBuffer->m_vertexBuffer[previous].m_pos;
+                    const Vec2 nextP               = sourceBuffer->m_vertexBuffer[next].m_pos;
+                    const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].m_pos, prevP, nextP);
+                    v.m_pos                        = Vec2(sourceBuffer->m_vertexBuffer[i].m_pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].m_pos.y + vertexNormalAverage.y * thickness);
+                }
+
+                destBuf->PushVertex(v);
+            }
+
+
+            for (int i = destBufStart; i < destBufStart + totalSize; i++)
+            {
+                int next = i + 1;
+                if (next >= destBufStart + totalSize)
+                    next = destBufStart;
+
+                if (skipEndClosing && i == destBufStart + totalSize - 1)
+                    return;
+
+                destBuf->PushIndex(i);
+                destBuf->PushIndex(next);
+                destBuf->PushIndex(i + totalSize);
+                destBuf->PushIndex(next);
+                destBuf->PushIndex(next + totalSize);
+                destBuf->PushIndex(i + totalSize);
+            }
+        };
+
+//
+// if (isFilled)
+//     copyAndFill(sourceBuffer, destBuf, opts, startIndex, 0, endIndex, totalSize, skipEndClosing, thickness, recalcUvs);
+// else
+// {
+//     if (opts.m_drawDirection == OutlineDrawDirection::Outwards || opts.m_drawDirection == OutlineDrawDirection::Both)
+//         copyAndFill(sourceBuffer, destBuf, opts, startIndex, totalSize, endIndex, totalSize, skipEndClosing, thickness, recalcUvs);
+//
+//     if (opts.m_drawDirection == OutlineDrawDirection::Inwards || opts.m_drawDirection == OutlineDrawDirection::Both)
+//         copyAndFill(sourceBuffer, destBuf, opts, startIndex, 0, endIndex, totalSize, skipEndClosing, -thickness, recalcUvs);
+// }
     }
 
 } // namespace Lina2D

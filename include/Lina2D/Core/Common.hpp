@@ -425,32 +425,31 @@ namespace Lina2D
 
         /// Flips the Y coordinate of texture UVs.
         bool m_flipTextureUVs = false;
+
+        /// Enable-disable anti-aliasing.
+        bool m_enableAA = true;
     };
 
     struct DrawBuffer
     {
         Array<Vertex> m_vertexBuffer;
         Array<Index>  m_indexBuffer;
-        Array<Vec2>   m_vertexNormals;
 
         inline void Clear()
         {
             m_vertexBuffer.clear();
             m_indexBuffer.clear();
-            m_vertexNormals.clear();
         }
 
         inline void ResizeZero()
         {
             m_vertexBuffer.resize(0);
             m_indexBuffer.resize(0);
-            m_vertexNormals.resize(0);
         }
 
-        inline void PushVertex(const Vertex& v, const Vec2& normal)
+        inline void PushVertex(const Vertex& v)
         {
             m_vertexBuffer.push_back(v);
-            m_vertexNormals.push_back(normal);
         }
 
         inline void PushIndex(Index i)
