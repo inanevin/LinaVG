@@ -445,7 +445,7 @@ namespace Lina2D
                     if (style.m_textureHandle == 0)
                     {
                         GradientDrawBuffer& buf = Internal::g_rendererData.GetGradientBuffer(style.m_color);
-                        Internal::FillTri_NoRound_RadialGra(&DEF_BUF, rotateAngle, top, right, left, style.m_color.m_start, style.m_color.m_end, style);
+                        Internal::FillTri_NoRound_RadialGra(&buf, rotateAngle, top, right, left, style.m_color.m_start, style.m_color.m_end, style);
                     }
                     else
                     {
@@ -538,8 +538,8 @@ namespace Lina2D
                     // Radial, non rounded
                     if (style.m_textureHandle == 0)
                     {
-                      //  GradientDrawBuffer& buf = Internal::g_rendererData.GetGradientBuffer(style.m_color);
-                        Internal::FillRect_NoRound_RadialGra(&DEF_BUF, rotateAngle, min, max, style.m_color.m_start, style.m_color.m_end, style);
+                        GradientDrawBuffer& buf = Internal::g_rendererData.GetGradientBuffer(style.m_color);
+                        Internal::FillRect_NoRound_RadialGra(&buf, rotateAngle, min, max, style.m_color.m_start, style.m_color.m_end, style);
                     }
                     else
                     {
@@ -890,9 +890,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, current, current + 3, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, current, current + 3, opts.m_outlineOptions, opts.m_isFilled);
-        //   if (opts.m_outlineOptions.m_thickness != 0.0f)
-        //    DrawOutline(buf, center, current, current + 3, opts.m_outlineOptions, opts.m_isFilled);
+            buf = DrawOutline(buf, current, current + 3, opts.m_outlineOptions, opts.m_isFilled);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, false, current, current + 3, false);
+            else
+            {
+                buf = DrawAA(buf, opts, false, current + 4, current + 7, false);
+                buf = DrawAA(buf, opts, false, current, current + 3, true);
+            }
+        }
     }
 
     void Internal::FillRect_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& color, StyleOptions& opts)
@@ -925,7 +934,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, current, current + 3, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, current, current + 3, opts.m_outlineOptions, opts.m_isFilled);
+            buf = DrawOutline(buf, current, current + 3, opts.m_outlineOptions, opts.m_isFilled);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, false, current, current + 3, false);
+            else
+            {
+                buf = DrawAA(buf, opts, false, current + 4, current + 7, false);
+                buf = DrawAA(buf, opts, false, current, current + 3, true);
+            }
+        }
     }
 
     void Internal::FillRect_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts)
@@ -947,7 +967,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + 3, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + 4 : startIndex + 3, opts.m_outlineOptions, opts.m_isFilled);
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + 4 : startIndex + 3, opts.m_outlineOptions, opts.m_isFilled);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, true, startIndex + 1, startIndex + 4, false);
+            else
+            {
+                buf = DrawAA(buf, opts, true, startIndex + 4, startIndex + 7, false);
+                buf = DrawAA(buf, opts, true, startIndex, startIndex + 3, true);
+            }
+        }
     }
 
     void Internal::FillRect_Round(DrawBuffer* buf, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& col, float rounding, StyleOptions& opts)
@@ -1039,7 +1070,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + vertexCount - 1, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + vertexCount : startIndex + vertexCount - 1, opts.m_outlineOptions, opts.m_isFilled);
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + vertexCount : startIndex + vertexCount - 1, opts.m_outlineOptions, opts.m_isFilled);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, true, startIndex + 1, startIndex + vertexCount, false);
+            else
+            {
+                buf = DrawAA(buf, opts, true, startIndex + vertexCount, startIndex + vertexCount * 2 - 1, false);
+                buf = DrawAA(buf, opts, true, startIndex, startIndex + vertexCount - 1, true);
+            }
+        }
     }
 
     void Internal::FillRectData(Vertex* v, bool hasCenter, const Vec2& min, const Vec2& max)
@@ -1092,7 +1134,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, start, start + 2, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, start, start + 2, opts.m_outlineOptions, opts.m_isFilled, false);
+            buf = DrawOutline(buf, start, start + 2, opts.m_outlineOptions, opts.m_isFilled, false);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, false, start, start + 2, false);
+            else
+            {
+                buf = DrawAA(buf, opts, false, start + 3, start + 5, false);
+                buf = DrawAA(buf, opts, false, start, start + 2, true);
+            }
+        }
     }
 
     void Internal::FillTri_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& color, StyleOptions& opts)
@@ -1121,7 +1174,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, start, start + 2, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, start, start + 2, opts.m_outlineOptions, opts.m_isFilled, false);
+            buf = DrawOutline(buf, start, start + 2, opts.m_outlineOptions, opts.m_isFilled, false);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, false, start, start + 2, false);
+            else
+            {
+                buf = DrawAA(buf, opts, false, start + 3, start + 5, false);
+                buf = DrawAA(buf, opts, false, start, start + 2, true);
+            }
+        }
     }
 
     void Internal::FillTri_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& startcolor, const Vec4& endColor, StyleOptions& opts)
@@ -1144,7 +1208,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + 2, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + 3 : startIndex + 2, opts.m_outlineOptions, opts.m_isFilled, false);
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + 3 : startIndex + 2, opts.m_outlineOptions, opts.m_isFilled, false);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, true, startIndex + 1, startIndex + 3, false);
+            else
+            {
+                buf = DrawAA(buf, opts, true, startIndex + 3, startIndex + 5, false);
+                buf = DrawAA(buf, opts, true, startIndex, startIndex + 2, true);
+            }
+        }
     }
 
     void Internal::FillTri_Round(DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& col, float rounding, StyleOptions& opts)
@@ -1294,7 +1369,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + vertexCount - 1, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + vertexCount : startIndex + vertexCount - 1, opts.m_outlineOptions, opts.m_isFilled);
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + vertexCount : startIndex + vertexCount - 1, opts.m_outlineOptions, opts.m_isFilled);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, true, startIndex + 1, startIndex + vertexCount, false);
+            else
+            {
+                buf = DrawAA(buf, opts, true, startIndex + vertexCount, startIndex + vertexCount * 2 - 1, false);
+                buf = DrawAA(buf, opts, true, startIndex, startIndex + vertexCount - 1, true);
+            }
+        }
     }
 
     void Internal::FillTriData(Vertex* v, bool hasCenter, bool calculateUV, const Vec2& p3, const Vec2& p2, const Vec2& p1)
@@ -1346,7 +1432,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + n - 1, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + n : startIndex + n - 1, opts.m_outlineOptions, opts.m_isFilled);
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + n : startIndex + n - 1, opts.m_outlineOptions, opts.m_isFilled);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, false, startIndex + 1, startIndex + n, false);
+            else
+            {
+                buf = DrawAA(buf, opts, false, startIndex + n, startIndex + n * 2 - 1, false);
+                buf = DrawAA(buf, opts, false, startIndex, startIndex + n - 1, true);
+            }
+        }
     }
 
     void Internal::FillNGon_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts)
@@ -1370,7 +1467,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + n - 1, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + n : startIndex + n - 1, opts.m_outlineOptions, opts.m_isFilled);
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + n : startIndex + n - 1, opts.m_outlineOptions, opts.m_isFilled);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, false, startIndex + 1, startIndex + n, false);
+            else
+            {
+                buf = DrawAA(buf, opts, false, startIndex + n, startIndex + n * 2 - 1, false);
+                buf = DrawAA(buf, opts, false, startIndex, startIndex + n - 1, true);
+            }
+        }
     }
 
     void Internal::FillNGon_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts)
@@ -1393,7 +1501,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + n - 1, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + n : startIndex + n - 1, opts.m_outlineOptions, opts.m_isFilled);
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + n : startIndex + n - 1, opts.m_outlineOptions, opts.m_isFilled);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, true, startIndex + 1, startIndex + n, false);
+            else
+            {
+                buf = DrawAA(buf, opts, true, startIndex + n, startIndex + n * 2 - 1, false);
+                buf = DrawAA(buf, opts, true, startIndex, startIndex + n - 1, true);
+            }
+        }
     }
 
     void Internal::FillNGonData(Array<Vertex>& vertArray, bool hasCenter, const Vec2& center, float radius, int n)
@@ -1449,7 +1568,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + totalSize, opts.m_thickness.m_start, !isFullCircle);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, startIndex + totalSize, opts.m_outlineOptions, opts.m_isFilled, !isFullCircle);
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, startIndex + totalSize, opts.m_outlineOptions, opts.m_isFilled, !isFullCircle);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, false, startIndex + 1, startIndex + totalSize, false, !isFullCircle);
+            else
+            {
+                buf = DrawAA(buf, opts, false, startIndex + totalSize + 1, startIndex + totalSize * 2 + 1, false, !isFullCircle);
+                buf = DrawAA(buf, opts, false, startIndex, startIndex + totalSize, true, !isFullCircle);
+            }
+        }
     }
 
     void Internal::FillCircle_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle, StyleOptions& opts)
@@ -1476,7 +1606,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + totalSize, opts.m_thickness.m_start, !isFullCircle);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, startIndex + totalSize, opts.m_outlineOptions, opts.m_isFilled, !isFullCircle);
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, startIndex + totalSize, opts.m_outlineOptions, opts.m_isFilled, !isFullCircle);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, false, startIndex + 1, startIndex + totalSize, false, !isFullCircle);
+            else
+            {
+                buf = DrawAA(buf, opts, false, startIndex + totalSize + 1, startIndex + totalSize * 2 + 1, false, !isFullCircle);
+                buf = DrawAA(buf, opts, false, startIndex, startIndex + totalSize, true, !isFullCircle);
+            }
+        }
     }
 
     void Internal::FillCircle_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle, StyleOptions& opts)
@@ -1502,7 +1643,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + totalSize, opts.m_thickness.m_start, !isFullCircle);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, startIndex + totalSize, opts.m_outlineOptions, opts.m_isFilled, !isFullCircle);
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, startIndex + totalSize, opts.m_outlineOptions, opts.m_isFilled, !isFullCircle);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, true, startIndex + 1, startIndex + totalSize, false, !isFullCircle);
+            else
+            {
+                buf = DrawAA(buf, opts, true, startIndex + totalSize + 1, startIndex + totalSize * 2 + 1, false, !isFullCircle);
+                buf = DrawAA(buf, opts, true, startIndex, startIndex + totalSize, true, !isFullCircle);
+            }
+        }
     }
 
     void Internal::FillCircleData(Array<Vertex>& vertices, bool hasCenter, const Vec2& center, float radius, int segments, float startAngle, float endAngle)
@@ -1532,7 +1684,9 @@ namespace Lina2D
             vertices.push_back(c);
         }
 
-        const float end = Math::Abs(startAngle - endAngle) == 360.0f ? endAngle : endAngle + angleIncrease;
+        const float end       = Math::Abs(startAngle - endAngle) == 360.0f ? endAngle : endAngle + angleIncrease;
+        Vec2        nextPoint = Vec2(-1.0f, -1.0f);
+        Vec2        lastPoint = Vec2(-1.0f, -1.0f);
         for (float i = startAngle; i < end; i += angleIncrease)
         {
             Vertex v;
@@ -1578,8 +1732,19 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + size - 1, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + size : startIndex + size - 1, opts.m_outlineOptions, opts.m_isFilled);
-    }
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + size : startIndex + size - 1, opts.m_outlineOptions, opts.m_isFilled);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, false, startIndex + 1, startIndex + size, false);
+            else
+            {
+                buf = DrawAA(buf, opts, false, startIndex + size, startIndex + size * 2 - 1, false);
+                buf = DrawAA(buf, opts, false, startIndex, startIndex + size - 1, true);
+            }
+        }
+  }
 
     void Internal::FillConvex_VerHorGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts)
     {
@@ -1616,7 +1781,18 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + size - 1, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + size : startIndex + size - 1, opts.m_outlineOptions, opts.m_isFilled);
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + size : startIndex + size - 1, opts.m_outlineOptions, opts.m_isFilled);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, false, startIndex + 1, startIndex + size, false);
+            else
+            {
+                buf = DrawAA(buf, opts, false, startIndex + size, startIndex + size * 2 - 1, false);
+                buf = DrawAA(buf, opts, false, startIndex, startIndex + size - 1, true);
+            }
+        }
     }
 
     void Internal::FillConvex_RadialGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts)
@@ -1653,8 +1829,19 @@ namespace Lina2D
             ExtrudeAndFillShapeBorders(buf, center, startIndex, startIndex + size - 1, opts.m_thickness.m_start);
 
         if (opts.m_outlineOptions.m_thickness != 0.0f)
-            DrawOutline(buf, center, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + size : startIndex + size - 1, opts.m_outlineOptions, opts.m_isFilled);
-    }
+            buf = DrawOutline(buf, opts.m_isFilled ? startIndex + 1 : startIndex, opts.m_isFilled ? startIndex + size : startIndex + size - 1, opts.m_outlineOptions, opts.m_isFilled);
+        else
+        {
+            // Outline calls AA on its own.
+            if (opts.m_isFilled)
+                buf = DrawAA(buf, opts, true, startIndex + 1, startIndex + size, false);
+            else
+            {
+                buf = DrawAA(buf, opts, true, startIndex + size, startIndex + size * 2 - 1, false);
+                buf = DrawAA(buf, opts, true, startIndex, startIndex + size - 1, true);
+            }
+        }
+  }
 
     Vec2 Internal::GetPolygonCentroid(Vec2* vertices, int vertexCount)
     {
@@ -1738,6 +1925,24 @@ namespace Lina2D
                 outMin.y = points[i].m_pos.y;
             else if (points[i].m_pos.y > outMax.y)
                 outMax.y = points[i].m_pos.y;
+        }
+    }
+
+    void Internal::GetConvexBoundingBox(DrawBuffer* buf, int startIndex, int endIndex, Vec2& outMin, Vec2& outMax)
+    {
+        outMin = Vec2(99999, 99999);
+        outMax = Vec2(-99999, -99999);
+
+        for (int i = startIndex; i < endIndex + 1; i++)
+        {
+            if (buf->m_vertexBuffer[i].m_pos.x < outMin.x)
+                outMin.x = buf->m_vertexBuffer[i].m_pos.x;
+            else if (buf->m_vertexBuffer[i].m_pos.x > outMax.x)
+                outMax.x = buf->m_vertexBuffer[i].m_pos.x;
+            if (buf->m_vertexBuffer[i].m_pos.y < outMin.y)
+                outMin.y = buf->m_vertexBuffer[i].m_pos.y;
+            else if (buf->m_vertexBuffer[i].m_pos.y > outMax.y)
+                outMax.y = buf->m_vertexBuffer[i].m_pos.y;
         }
     }
 
@@ -1973,27 +2178,42 @@ namespace Lina2D
         }
     }
 
-    void Internal::DrawOutline(DrawBuffer* sourceBuffer, const Vec2& center, int startIndex, int endIndex, OutlineOptions& opts, bool isFilled, bool skipEndClosing)
+    DrawBuffer* Internal::DrawOutline(DrawBuffer* sourceBuffer, int startIndex, int endIndex, OutlineOptions& opts, bool isFilled, bool skipEndClosing)
     {
         const bool  useTextureBuffer = opts.m_textureHandle != 0;
         const bool  isGradient       = !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end) && !opts.m_useVertexColors;
         const bool  useGradBuffer    = !useTextureBuffer && isGradient;
         const float thickness        = opts.m_thickness * Config.m_framebufferScale.x;
 
-        // determine which buffer to use.
+        // Determine which buffer to use.
+        // Also correct the buffer pointer if getting a new buffer invalidated it.
         DrawBuffer* destBuf = nullptr;
 
         if (useTextureBuffer)
-            destBuf = &Internal::g_rendererData.GetTextureBuffer(opts.m_textureHandle, opts.m_textureUVTiling, opts.m_textureUVOffset);
+        {
+            const int sourceIndex = Internal::g_rendererData.GetBufferIndexInTextureArray(sourceBuffer);
+            destBuf               = &Internal::g_rendererData.GetTextureBuffer(opts.m_textureHandle, opts.m_textureUVTiling, opts.m_textureUVOffset);
+
+            if (sourceIndex != -1)
+                sourceBuffer = &Internal::g_rendererData.m_textureBuffers[sourceIndex];
+        }
         else if (useGradBuffer)
-            destBuf = &Internal::g_rendererData.GetGradientBuffer(opts.m_color);
+        {
+            const int sourceIndex = Internal::g_rendererData.GetBufferIndexInGradientArray(sourceBuffer);
+            destBuf               = &Internal::g_rendererData.GetGradientBuffer(opts.m_color);
+
+            if (sourceIndex != -1)
+                sourceBuffer = &Internal::g_rendererData.m_gradientBuffers[sourceIndex];
+        }
         else
             destBuf = &DEF_BUF;
 
         const int totalSize   = endIndex - startIndex + 1;
         const int startOffset = isFilled ? 0 : totalSize;
+        Vec2      bbMin, bbMax;
+        GetConvexBoundingBox(sourceBuffer, startIndex, endIndex, bbMin, bbMax);
 
-        auto copyAndFill = [](DrawBuffer* sourceBuffer, DrawBuffer* destBuf, OutlineOptions& opts, int startIndex, int startOffset, int endIndex, int totalSize, bool skipEndClosing, float thickness, bool reCalcUVs) {
+        auto copyAndFill = [&](DrawBuffer* sourceBuffer, DrawBuffer* destBuf, int startIndex, int startOffset, int endIndex, int totalSize, bool skipEndClosing, float thickness, bool reCalcUVs) {
             const int destBufStart = destBuf->m_vertexBuffer.m_size;
 
             // First copy vertices.
@@ -2062,36 +2282,64 @@ namespace Lina2D
 
         const bool recalcUvs = useTextureBuffer || useGradBuffer;
         if (isFilled)
-            copyAndFill(sourceBuffer, destBuf, opts, startIndex, 0, endIndex, totalSize, skipEndClosing, thickness, recalcUvs);
+            copyAndFill(sourceBuffer, destBuf, startIndex, 0, endIndex, totalSize, skipEndClosing, thickness, recalcUvs);
         else
         {
             if (opts.m_drawDirection == OutlineDrawDirection::Outwards || opts.m_drawDirection == OutlineDrawDirection::Both)
-                copyAndFill(sourceBuffer, destBuf, opts, startIndex, totalSize, endIndex, totalSize, skipEndClosing, thickness, recalcUvs);
+                copyAndFill(sourceBuffer, destBuf, startIndex, totalSize, endIndex, totalSize, skipEndClosing, thickness, recalcUvs);
 
             if (opts.m_drawDirection == OutlineDrawDirection::Inwards || opts.m_drawDirection == OutlineDrawDirection::Both)
-                copyAndFill(sourceBuffer, destBuf, opts, startIndex, 0, endIndex, totalSize, skipEndClosing, -thickness, recalcUvs);
+                copyAndFill(sourceBuffer, destBuf, startIndex, 0, endIndex, totalSize, skipEndClosing, -thickness, recalcUvs);
         }
+
+        return sourceBuffer;
     }
 
-    void Internal::DrawAA(DrawBuffer* sourceBuffer, const Vec2& center, int startIndex, int endIndex, bool isFilled, bool skipEndClosing)
+    /// Opts here is the shape we are drawing AA on to.
+    DrawBuffer* Internal::DrawAA(DrawBuffer* sourceBuffer, StyleOptions& opts, bool useGradientBuffer, int startIndex, int endIndex, bool drawInner, bool skipEndClosing)
     {
-        const float thickness        = 2.0f * Config.m_framebufferScale.x;
+        const bool  useTextureBuffer = opts.m_textureHandle != 0;
+        const float thickness        = 1.5f * Config.m_framebufferScale.x;
 
-        // determine which buffer to use.
-        DrawBuffer* destBuf = &DEF_BUF;
+        // Determine which buffer to use.
+        // Also correct the buffer pointer if getting a new buffer invalidated it.
+        DrawBuffer* destBuf = nullptr;
+
+        if (useTextureBuffer)
+        {
+            const int sourceIndex = Internal::g_rendererData.GetBufferIndexInTextureArray(sourceBuffer);
+            destBuf               = &Internal::g_rendererData.GetTextureBuffer(opts.m_textureHandle, opts.m_textureUVTiling, opts.m_textureUVOffset);
+
+            if (sourceIndex != -1)
+                sourceBuffer = &Internal::g_rendererData.m_textureBuffers[sourceIndex];
+        }
+        else if (useGradientBuffer)
+        {
+            const int sourceIndex = Internal::g_rendererData.GetBufferIndexInGradientArray(sourceBuffer);
+            destBuf               = &Internal::g_rendererData.GetGradientBuffer(opts.m_color, true);
+
+            if (sourceIndex != -1)
+                sourceBuffer = &Internal::g_rendererData.m_gradientBuffers[sourceIndex];
+        }
+        else
+            destBuf = &DEF_BUF;
+
         const int totalSize   = endIndex - startIndex + 1;
-        const int startOffset = isFilled ? 0 : totalSize;
+        const int startOffset = opts.m_isFilled ? 0 : totalSize;
+        Vec2      bbMin, bbMax;
+        GetConvexBoundingBox(sourceBuffer, startIndex, endIndex, bbMin, bbMax);
 
-        auto copyAndFill = [](DrawBuffer* sourceBuffer, DrawBuffer* destBuf, OutlineOptions& opts, int startIndex, int startOffset, int endIndex, int totalSize, bool skipEndClosing, float thickness, bool reCalcUVs) {
+        auto copyAndFill = [&](DrawBuffer* sourceBuffer, DrawBuffer* destBuf, int startIndex, int startOffset, int endIndex, int totalSize, bool skipEndClosing, float thickness) {
             const int destBufStart = destBuf->m_vertexBuffer.m_size;
 
             // First copy vertices.
             for (int i = startIndex + startOffset; i < startIndex + startOffset + totalSize; i++)
             {
                 Vertex v;
-                v.m_col = opts.m_color.m_start;
-                v.m_pos = sourceBuffer->m_vertexBuffer[i].m_pos;
-                v.m_uv  = sourceBuffer->m_vertexBuffer[i].m_uv;
+                v.m_col   = sourceBuffer->m_vertexBuffer[i].m_col;
+                v.m_pos   = sourceBuffer->m_vertexBuffer[i].m_pos;
+                v.m_uv    = sourceBuffer->m_vertexBuffer[i].m_uv;
+                v.m_col.w = 1.0f;
                 destBuf->PushVertex(v);
             }
 
@@ -2102,8 +2350,9 @@ namespace Lina2D
                 const int previous = i == startIndex + startOffset ? endIndex + startOffset : i - 1;
                 const int next     = i == endIndex + startOffset ? startIndex + startOffset : i + 1;
                 Vertex    v;
-                v.m_uv  = sourceBuffer->m_vertexBuffer[i].m_uv;
-                v.m_col = opts.m_color.m_end;
+                v.m_uv    = sourceBuffer->m_vertexBuffer[i].m_uv;
+                v.m_col   = sourceBuffer->m_vertexBuffer[i].m_col;
+                v.m_col.w = 0.0f;
 
                 if (skipEndClosing && i == startIndex + startOffset)
                 {
@@ -2128,6 +2377,7 @@ namespace Lina2D
                 destBuf->PushVertex(v);
             }
 
+            //  CalculateVertexUVs(destBuf, destBufStart, (destBufStart + totalSize * 2) - 1);
 
             for (int i = destBufStart; i < destBufStart + totalSize; i++)
             {
@@ -2147,17 +2397,50 @@ namespace Lina2D
             }
         };
 
-//
-// if (isFilled)
-//     copyAndFill(sourceBuffer, destBuf, opts, startIndex, 0, endIndex, totalSize, skipEndClosing, thickness, recalcUvs);
-// else
-// {
-//     if (opts.m_drawDirection == OutlineDrawDirection::Outwards || opts.m_drawDirection == OutlineDrawDirection::Both)
-//         copyAndFill(sourceBuffer, destBuf, opts, startIndex, totalSize, endIndex, totalSize, skipEndClosing, thickness, recalcUvs);
-//
-//     if (opts.m_drawDirection == OutlineDrawDirection::Inwards || opts.m_drawDirection == OutlineDrawDirection::Both)
-//         copyAndFill(sourceBuffer, destBuf, opts, startIndex, 0, endIndex, totalSize, skipEndClosing, -thickness, recalcUvs);
-// }
+        copyAndFill(sourceBuffer, destBuf, startIndex, 0, endIndex, totalSize, skipEndClosing, drawInner ? -thickness : thickness);
+       
+        // If we skipped and closing, fill the start & end borders with AA.
+        if (!opts.m_isFilled && skipEndClosing && drawInner && false)
+        {
+            const Vertex& startVtx = destBuf->m_vertexBuffer[startIndex];
+            const Vec2 p1 = startVtx.m_pos;
+            const Vec2 p2 = drawInner ? destBuf->m_vertexBuffer[endIndex + 1].m_pos : destBuf->m_vertexBuffer[startIndex - 1].m_pos;
+            const Vec2 nextPos = destBuf->m_vertexBuffer[startIndex + 1].m_pos;
+            const Vec2 extrudeDir = Math::Normalized(Vec2(p1.x - nextPos.x, p1.y - nextPos.y)); // inverted.
+            const float absThickness = Math::Abs(thickness);
+
+            Vertex vc;
+            vc.m_pos = Vec2((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f);
+            vc.m_uv  = startVtx.m_uv;
+            vc.m_col = startVtx.m_col;
+
+            Vertex vce;
+            vce.m_pos = Vec2((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f);
+            vce.m_pos.x += extrudeDir.x * absThickness;
+            vce.m_pos.y += extrudeDir.y * absThickness;
+            vce.m_uv = startVtx.m_uv;
+            vce.m_col = startVtx.m_col;
+            vce.m_col.w = 0.0f;
+
+            Vertex ve;
+            ve.m_pos = Vec2(p1.x + extrudeDir.x * absThickness, p1.y + extrudeDir.y * absThickness);
+            ve.m_uv    = startVtx.m_uv;
+            ve.m_col   = startVtx.m_col;
+            ve.m_col.w = 0.0f;
+
+           const int centerIndex = destBuf->m_vertexBuffer.m_size;
+           destBuf->PushVertex(vc);
+           destBuf->PushVertex(vce);
+           destBuf->PushVertex(ve);
+
+           destBuf->PushIndex(startIndex);
+           destBuf->PushIndex(centerIndex);
+           destBuf->PushIndex(centerIndex + 1);
+           //destBuf->PushIndex(centerIndex + 1);
+           //destBuf->PushIndex(centerIndex + 2);
+           //destBuf->PushIndex(startIndex);
+        }
+       return sourceBuffer;
     }
 
 } // namespace Lina2D

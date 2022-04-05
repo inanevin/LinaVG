@@ -31,7 +31,7 @@ SOFTWARE.
 
 namespace Lina2D
 {
-    GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad)
+    GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad, bool isAABuffer)
     {
         for (int i = 0; i < m_gradientBuffers.m_size; i++)
         {
@@ -40,30 +40,52 @@ namespace Lina2D
             {
                 if (grad.m_gradientType == GradientType::Radial || grad.m_gradientType == GradientType::RadialCorner)
                 {
-                    if (buf.m_color.m_radialSize == grad.m_radialSize)
+                    if (buf.m_color.m_radialSize == grad.m_radialSize && buf.m_isAABuffer == isAABuffer)
                         return m_gradientBuffers[i];
                 }
                 else
-                    return m_gradientBuffers[i];
+                {
+                    if (buf.m_isAABuffer == isAABuffer)
+                        return m_gradientBuffers[i];
+                }
             }
         }
 
-        std::cout << "added" << std::endl;
-        m_gradientBuffers.push_back(GradientDrawBuffer(grad));
+        m_gradientBuffers.push_back(GradientDrawBuffer(grad, isAABuffer));
         return m_gradientBuffers.last_ref();
     }
 
-    TextureDrawBuffer& RendererData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset)
+    TextureDrawBuffer& RendererData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, bool isAABuffer)
     {
         for (int i = 0; i < m_textureBuffers.m_size; i++)
         {
             auto& buf = m_textureBuffers[i];
-            if (buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset))
+            if (buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer)
                 return m_textureBuffers[i];
         }
 
-        m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset));
+        m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset, isAABuffer));
         return m_textureBuffers.last_ref();
+    }
+
+    int RendererData::GetBufferIndexInGradientArray(DrawBuffer* buf)
+    {
+        for (int i = 0; i < m_gradientBuffers.m_size; i++)
+        {
+            if (buf == &m_gradientBuffers[i])
+                return i;
+        }
+        return -1;
+    }
+
+    int RendererData::GetBufferIndexInTextureArray(DrawBuffer* buf)
+    {
+        for (int i = 0; i < m_textureBuffers.m_size; i++)
+        {
+            if (buf == &m_textureBuffers[i])
+                return i;
+        }
+        return -1;
     }
 
 } // namespace Lina2D

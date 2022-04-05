@@ -51,38 +51,35 @@ namespace Lina2D::Backend
                                                      "uniform mat4 proj; \n"
                                                      "out vec4 fCol;\n"
                                                      "out vec2 fUV;\n"
-                                                     "out float fYPos;\n"
                                                      "void main()\n"
                                                      "{\n"
                                                      "   fCol = col;\n"
                                                      "   fUV = uv;\n"
                                                      "   gl_Position = proj * vec4(pos.x, pos.y, 0.0f, 1.0);\n"
-                                                     "   fYPos = pos.y;\n"
                                                      "}\0";
 
         Internal::g_backendData.m_defaultFragShader = "#version 330 core\n"
                                                       "out vec4 fragColor;\n"
-                                                      "in vec2 fUV;\n"
                                                       "in vec4 fCol;\n"
-                                                      "in float fYPos;\n"
                                                       "void main()\n"
                                                       "{\n"
                                                       "   fragColor = fCol;\n"
-                                                      "}\n\0";
+                                                      "}\0";
 
         Internal::g_backendData.m_texturedFragShader = "#version 330 core\n"
                                                        "out vec4 fragColor;\n"
                                                        "in vec2 fUV;\n"
                                                        "in vec4 fCol;\n"
-                                                       "in float fYPos;\n"
                                                        "uniform sampler2D diffuse;\n"
                                                        "uniform vec2 tiling;\n"
                                                        "uniform vec2 offset;\n"
+                                                       "uniform int isAABuffer;\n"
                                                        "void main()\n"
                                                        "{\n"
                                                        "   vec2 tiled = vec2(fUV.x * tiling.x, fUV.y * tiling.y);\n"
-                                                       "   fragColor = texture(diffuse, fUV * tiling + offset);\n"
-                                                       "}\n\0";
+                                                       "   vec4 col = texture(diffuse, fUV * tiling + offset);\n"
+                                                       "   fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
+                                                       "}\0";
 
         Internal::g_backendData.m_roundedGradientVtxShader = "#version 330 core\n"
                                                              "layout (location = 0) in vec2 pos;\n"
@@ -91,40 +88,44 @@ namespace Lina2D::Backend
                                                              "uniform mat4 proj; \n"
                                                              "out vec4 fCol;\n"
                                                              "out vec2 fUV;\n"
-                                                             "out float fYPos;\n"
                                                              "void main()\n"
                                                              "{\n"
                                                              "   fCol = col;\n"
                                                              "   fUV = uv;\n"
                                                              "   gl_Position = proj * vec4(pos.x, pos.y, 0.0f, 1.0);\n"
-                                                             "   fYPos = pos.y;\n"
                                                              "}\0";
 
         Internal::g_backendData.m_roundedGradientFragShader = "#version 330 core\n"
                                                               "out vec4 fragColor;\n"
                                                               "in vec2 fUV;\n"
                                                               "in vec4 fCol;\n"
-                                                              "in float fYPos;\n"
                                                               "uniform vec4 startColor;\n"
                                                               "uniform vec4 endColor;\n"
                                                               "uniform int  gradientType;\n"
                                                               "uniform float radialSize;\n"
+                                                              "uniform int isAABuffer;\n"
                                                               "void main()\n"
                                                               "{\n"
-                                                              "   if(gradientType == 0)\n"
-                                                              "     fragColor = mix(startColor, endColor, fUV.x);\n"
-                                                              "   else if(gradientType == 1)\n"
-                                                              "     fragColor = mix(startColor, endColor, fUV.y);\n"
+                                                              "   if(gradientType == 0) {\n"
+                                                              "     vec4 col = mix(startColor, endColor, fUV.x);\n"
+                                                              "     fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
+                                                              "}\n"
+                                                              "   else if(gradientType == 1){\n"
+                                                              "     vec4 col = mix(startColor, endColor, fUV.y);\n"
+                                                              "     fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
+                                                              "}\n"
                                                               "   else if(gradientType == 2) \n"
                                                               "   {\n"
-                                                              "       vec2 uv = fUV - vec2(0.5, 0.5);"
+                                                              "       vec2 uv = fUV - vec2(0.5, 0.5);\n"
                                                               "       float dist = length(uv * radialSize);\n"
-                                                              "       fragColor = mix(startColor, endColor, dist);\n"
+                                                              "       vec4 col = mix(startColor, endColor, dist);\n"
+                                                              "       fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
                                                               "    }\n"
                                                               "   else if(gradientType == 3) \n"
                                                               "   {\n"
                                                               "       float dist = length(fUV * radialSize);\n"
-                                                              "       fragColor = mix(startColor, endColor, dist);\n"
+                                                              "       vec4 col = mix(startColor, endColor, dist);\n"
+                                                              "       fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
                                                               "    }\n"
                                                               "}\n\0";
 
@@ -212,8 +213,8 @@ namespace Lina2D::Backend
         static Vec2 keyVal = Vec2(0, 0);
         zoom += Config.m_mouseScrollCallback() * 0.1f;
 
-        keyVal.x += key.x * 6;
-        keyVal.y -= key.y * 6;
+        keyVal.x += key.x * 0.8f;
+        keyVal.y -= key.y * 0.8f;
 
         L *= -zoom;
         R *= -zoom;
@@ -259,6 +260,7 @@ namespace Lina2D::Backend
         glUniform4f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["endColor"], (GLfloat)buf->m_color.m_end.x, (GLfloat)buf->m_color.m_end.y, (GLfloat)buf->m_color.m_end.z, (GLfloat)buf->m_color.m_end.w);
         glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["gradientType"], (GLint)((int)buf->m_color.m_gradientType));
         glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["radialSize"], (GLfloat)buf->m_color.m_radialSize);
+        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
 
         glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
         glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
@@ -286,6 +288,7 @@ namespace Lina2D::Backend
         glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["diffuse"], 0);
         glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["tiling"], (GLfloat)uv.x, (GLfloat)uv.y);
         glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["offset"], (GLfloat)buf->m_textureUVOffset.x, (GLfloat)buf->m_textureUVOffset.y);
+        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
 

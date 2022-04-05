@@ -318,6 +318,21 @@ namespace Lina2D
     {
 
         StyleOptions(){};
+        StyleOptions(const StyleOptions& opts)
+        {
+            m_color     = opts.m_color;
+            m_thickness = opts.m_thickness;
+            m_rounding  = opts.m_rounding;
+            ;
+            m_onlyRoundTheseCorners.from(opts.m_onlyRoundTheseCorners);
+            m_outlineOptions  = opts.m_outlineOptions;
+            m_dropShadow      = opts.m_dropShadow;
+            m_dropShadowColor = opts.m_dropShadowColor;
+            m_textureHandle   = opts.m_textureHandle;
+            m_textureUVTiling = opts.m_textureUVTiling;
+            m_textureUVOffset = opts.m_textureUVOffset;
+            m_isFilled        = false;
+        }
 
         StyleOptions(const StyleOptions& opts, const OutlineOptions& o)
         {
@@ -432,6 +447,8 @@ namespace Lina2D
 
     struct DrawBuffer
     {
+        DrawBuffer(){};
+
         Array<Vertex> m_vertexBuffer;
         Array<Index>  m_indexBuffer;
 
@@ -466,18 +483,20 @@ namespace Lina2D
     struct GradientDrawBuffer : public DrawBuffer
     {
         GradientDrawBuffer(){};
-        GradientDrawBuffer(const Vec4Grad& g)
-            : m_color(g){};
+        GradientDrawBuffer(const Vec4Grad& g, bool isAABuffer)
+            : m_isAABuffer(isAABuffer), m_color(g){};
 
-        Vec4Grad m_color = Vec4(1, 1, 1, 1);
+        bool     m_isAABuffer = false;
+        Vec4Grad m_color      = Vec4(1, 1, 1, 1);
     };
 
     struct TextureDrawBuffer : public DrawBuffer
     {
         TextureDrawBuffer(){};
-        TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset)
-            : m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset){};
+        TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, bool isAABuffer)
+            : m_isAABuffer(isAABuffer), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset){};
 
+        bool          m_isAABuffer      = false;
         BackendHandle m_textureHandle   = 0;
         Vec2          m_textureUVTiling = Vec2(1.0f, 1.0f);
         Vec2          m_textureUVOffset = Vec2(0.0f, 0.0f);
@@ -490,8 +509,10 @@ namespace Lina2D
         Array<GradientDrawBuffer> m_gradientBuffers;
         Array<TextureDrawBuffer>  m_textureBuffers;
 
-        GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad);
-        TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset);
+        int GetBufferIndexInGradientArray(DrawBuffer* buf);
+        int GetBufferIndexInTextureArray(DrawBuffer* buf);
+        GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad, bool isAABuffer = false);
+        TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, bool isAABuffer = false);
     };
 
     struct BackendData

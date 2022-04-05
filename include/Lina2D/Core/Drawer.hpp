@@ -201,6 +201,7 @@ namespace Lina2D
         // fill min & max to the bounding box of the given convex points.
         void GetConvexBoundingBox(Vec2* points, int size, Vec2& outMin, Vec2& outMax);
         void GetConvexBoundingBox(Vertex* points, int size, Vec2& outMin, Vec2& outMax);
+        void GetConvexBoundingBox(DrawBuffer* buf, int startIndex, int endIndex, Vec2& outMin, Vec2& outMax);
 
         void CalculateVertexUVs(DrawBuffer* buf, int startIndex, int endIndex);
 
@@ -233,10 +234,21 @@ namespace Lina2D
         /// </summary>
         void ExtrudeAndFillShapeBorders(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing = false);
 
+        /// <summary>
+        /// Draws outline around vertices defined by start & end index, given outline settings.
+        /// This method might add new gradient or texture buffer to the buffer arrays, invalidating previous pointers.
+        /// Thus returns the corrected sourceBuffer pointer if it was invalidated.
+        /// </summary>
+        /// <returns>Re-validated source buffer pointer.</returns>
+        DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, int startIndex, int endIndex, OutlineOptions& opts, bool isFilled, bool skipEndClosing = false);
 
-        void DrawOutline(DrawBuffer* sourceBuffer, const Vec2& center, int startIndex, int endIndex, OutlineOptions& opts, bool isFilled, bool skipEndClosing = false);
-
-        void DrawAA(DrawBuffer* sourceBuffer, const Vec2& center, int startIndex, int endIndex, bool isFilled, bool skipEndClosing = false);
+        /// <summary>
+        /// Draws AA outline around vertices defined by start & end index, given outline settings.
+        /// This method might add new gradient or texture buffer to the buffer arrays, invalidating previous pointers.
+        /// Thus returns the corrected sourceBuffer pointer if it was invalidated.
+        /// </summary>
+        /// <returns>Re-validated source buffer pointer.</returns>
+        DrawBuffer* DrawAA(DrawBuffer* sourceBuffer, StyleOptions& opts, bool useGradientBuffer, int startIndex, int endIndex, bool drawInner, bool skipEndClosing = false);
 
     }; // namespace Internal
 
