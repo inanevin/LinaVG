@@ -88,4 +88,15 @@ namespace Lina2D
         return -1;
     }
 
+    OutlineOptions OutlineOptions::FromStyle(const StyleOptions& opts, OutlineDrawDirection drawDir)
+    {
+        OutlineOptions o;
+        o.m_color = opts.m_color;
+        o.m_textureHandle = opts.m_textureHandle;
+        o.m_textureUVOffset = opts.m_textureUVOffset;
+        o.m_textureUVTiling = opts.m_textureUVTiling;
+        o.m_drawDirection = drawDir;
+        return o;
+    }
+
 } // namespace Lina2D

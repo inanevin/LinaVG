@@ -101,6 +101,13 @@ namespace Lina2D
     /// Triangulates & fills the index array given a start and end vertex index.
     /// </summary>
     void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices, bool skipLastTriangle = false);
+    
+    /// <summary>
+    /// Fills convex shapes without the assumption of a center vertex. Used for filling outer areas of non-filled shapes.
+    /// <param name="startIndex"> First vertex - start of the border.</param>
+    /// <param name="endIndex"> Last vertex - end of the border.</param>
+    /// </summary>
+    void ConvexExtrudeVertices(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing = false);
 
     /// <summary>
     /// Draws an arc always clock-wise from p1 to p2.
@@ -227,20 +234,16 @@ namespace Lina2D
 
         void CircleOutlineClosing(Vertex& c, StyleOptions& opts, int totalSize, float radius, float startAngle, float endAngle);
 
-        /// <summary>
-        /// Fills convex shapes without the assumption of a center vertex. Used for filling outer areas of non-filled shapes.
-        /// <param name="startIndex"> First vertex - start of the border.</param>
-        /// <param name="endIndex"> Last vertex - end of the border.</param>
-        /// </summary>
-        void ExtrudeAndFillShapeBorders(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing = false);
+        DrawBuffer* DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw = false, bool isAAOutline = false);
 
         /// <summary>
-        /// Draws outline around vertices defined by start & end index, given outline settings.
-        /// This method might add new gradient or texture buffer to the buffer arrays, invalidating previous pointers.
-        /// Thus returns the corrected sourceBuffer pointer if it was invalidated.
+        /// Needs vertex count without the convex centers!
         /// </summary>
-        /// <returns>Re-validated source buffer pointer.</returns>
-        DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, int startIndex, int endIndex, OutlineOptions& opts, bool isFilled, bool skipEndClosing = false);
+        /// <param name="sourceBuffer"></param>
+        /// <param name="vertexCount"></param>
+        /// <param name="opts"></param>
+        /// <returns></returns>
+        DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, bool isAAOutline = false, bool reverseDrawDir = false);
 
         /// <summary>
         /// Draws AA outline around vertices defined by start & end index, given outline settings.

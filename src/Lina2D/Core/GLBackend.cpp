@@ -81,19 +81,6 @@ namespace Lina2D::Backend
                                                        "   fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
                                                        "}\0";
 
-        Internal::g_backendData.m_roundedGradientVtxShader = "#version 330 core\n"
-                                                             "layout (location = 0) in vec2 pos;\n"
-                                                             "layout (location = 1) in vec2 uv;\n"
-                                                             "layout (location = 2) in vec4 col;\n"
-                                                             "uniform mat4 proj; \n"
-                                                             "out vec4 fCol;\n"
-                                                             "out vec2 fUV;\n"
-                                                             "void main()\n"
-                                                             "{\n"
-                                                             "   fCol = col;\n"
-                                                             "   fUV = uv;\n"
-                                                             "   gl_Position = proj * vec4(pos.x, pos.y, 0.0f, 1.0);\n"
-                                                             "}\0";
 
         Internal::g_backendData.m_roundedGradientFragShader = "#version 330 core\n"
                                                               "out vec4 fragColor;\n"
@@ -130,7 +117,7 @@ namespace Lina2D::Backend
                                                               "}\n\0";
 
         Internal::g_backendData.m_defaultShaderHandle  = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_defaultFragShader);
-        Internal::g_backendData.m_gradientShaderHandle = CreateShader(Internal::g_backendData.m_roundedGradientVtxShader, Internal::g_backendData.m_roundedGradientFragShader);
+        Internal::g_backendData.m_gradientShaderHandle = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_roundedGradientFragShader);
         Internal::g_backendData.m_texturedShaderHandle = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_texturedFragShader);
 
         glGenVertexArrays(1, &Internal::g_backendData.m_vao);
@@ -213,8 +200,8 @@ namespace Lina2D::Backend
         static Vec2 keyVal = Vec2(0, 0);
         zoom += Config.m_mouseScrollCallback() * 0.1f;
 
-        keyVal.x += key.x * 0.8f;
-        keyVal.y -= key.y * 0.8f;
+        keyVal.x += key.x * 2.8f;
+        keyVal.y -= key.y * 2.8f;
 
         L *= -zoom;
         R *= -zoom;

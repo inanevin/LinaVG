@@ -284,8 +284,12 @@ namespace Lina2D
         Both
     };
 
+    struct StyleOptions;
+
     struct OutlineOptions
     {
+        static OutlineOptions FromStyle(const StyleOptions& opts, OutlineDrawDirection drawDir);
+
         /// Outline thickness.
         float m_thickness = 0.0f;
 
@@ -323,7 +327,7 @@ namespace Lina2D
             m_color     = opts.m_color;
             m_thickness = opts.m_thickness;
             m_rounding  = opts.m_rounding;
-            ;
+           
             m_onlyRoundTheseCorners.from(opts.m_onlyRoundTheseCorners);
             m_outlineOptions  = opts.m_outlineOptions;
             m_dropShadow      = opts.m_dropShadow;
@@ -331,21 +335,8 @@ namespace Lina2D
             m_textureHandle   = opts.m_textureHandle;
             m_textureUVTiling = opts.m_textureUVTiling;
             m_textureUVOffset = opts.m_textureUVOffset;
-            m_isFilled        = false;
+            m_isFilled        = opts.m_isFilled;
         }
-
-        StyleOptions(const StyleOptions& opts, const OutlineOptions& o)
-        {
-            m_color           = o.m_color;
-            m_thickness       = o.m_thickness;
-            m_textureHandle   = o.m_textureHandle;
-            m_textureUVTiling = o.m_textureUVTiling;
-            m_textureUVOffset = o.m_textureUVOffset;
-            m_isFilled        = false;
-
-            m_onlyRoundTheseCorners.from(opts.m_onlyRoundTheseCorners);
-            m_rounding = opts.m_rounding;
-        };
 
         /// Color for the shape, you can set this to 2 different colors & define a gradient type, or construct with a single color for flat shading.
         Vec4Grad m_color = Vec4Grad(Vec4(1, 1, 1, 1));
@@ -526,7 +517,6 @@ namespace Lina2D
         std::unordered_map<BackendHandle, std::unordered_map<std::string, BackendHandle>> m_shaderUniformMap;
         float                                                                             m_proj[4][4]                = {0};
         char*                                                                             m_defaultVtxShader          = nullptr;
-        char*                                                                             m_roundedGradientVtxShader  = nullptr;
         char*                                                                             m_defaultFragShader         = nullptr;
         char*                                                                             m_roundedGradientFragShader = nullptr;
         char*                                                                             m_texturedFragShader        = nullptr;
