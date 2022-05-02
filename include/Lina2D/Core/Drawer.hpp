@@ -59,6 +59,8 @@ namespace Lina2D
     /// </summary>
     void DrawPoint(const Vec2& p1, const Vec4& col);
 
+    void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, float rotateAngle = 0.0f);
+
     /// <summary>
     /// Your points for the triangle must follow the given parameter order -- left, right and top edges.
     /// If you are drawing odd triangles, e.g. maxAngle > 90, rounding of the triangle might perform poorly on sharp edges.
@@ -202,56 +204,45 @@ namespace Lina2D
         /// <returns></returns>
         Vec2 GetPolygonCentroid(Vec2* points, int size);
 
-        // Triangle bounding box.
+        /// Triangle bounding box.
         void GetTriangleBoundingBox(const Vec2& p1, const Vec2& p2, const Vec2& p3, Vec2& outMin, Vec2& outMax);
 
-        // fill min & max to the bounding box of the given convex points.
+        /// <summary>
+        /// Fills bounding box information for given points/vertices.
+        /// </summary>
         void GetConvexBoundingBox(Vec2* points, int size, Vec2& outMin, Vec2& outMax);
         void GetConvexBoundingBox(Vertex* points, int size, Vec2& outMin, Vec2& outMax);
         void GetConvexBoundingBox(DrawBuffer* buf, int startIndex, int endIndex, Vec2& outMin, Vec2& outMax);
 
+        /// <summary>
+        /// Auto-calculate UVs for the vertices defined by start & end indices using 2D bounding-box.
+        /// </summary>
         void CalculateVertexUVs(DrawBuffer* buf, int startIndex, int endIndex);
 
         // Angle increment based on rounding value.
         float GetAngleIncrease(float rounding);
 
         /// <summary>
-        /// Extrudes the outer vertices of a convex shape & draws vertex color outline around it. !Copies the given vertices into a seperate buffer.!
-        /// </summary>
-        /// <param name="srcVertices">Original buffer to copy from.</param>
-        /// <param name="destVertices">Destination draw buffer.</param>
-        /// <param name="destIndices">Destination draw buffer.</param>
-        /// <param name="startIndex">Must be the first outer vertex of the shape. !Should not be the center if exists! </param>
-        /// <param name="endIndex">Must be the last outer vertex of the shape.</param>
-        /// <param name="convexCenter">Centroid of the convex shape.</param>
-        /// <param name="options">Outline options</param>
-        // void ConvexOutline(Array<Vertex>& srcVertices, int startIndex, int endIndex, const Vec2& convexCenter, OutlineOptions& options, bool skipEndClosing = false);
-
-        /// <summary>
         /// Returns the direction vector going from the center of the arc towards it's middle angle.
         /// </summary>
         Vec2 GetArcDirection(const Vec2& center, float radius, float startAngle, float endAngle);
 
-        void CircleOutlineClosing(Vertex& c, StyleOptions& opts, int totalSize, float radius, float startAngle, float endAngle);
-
+        /// <summary>
+        /// Draws an outline (or AA) around the vertices given, following the specific draw order via index array.
+        /// Used for semi-circles, arcs, lines and alike.
+        /// </summary>
+        /// <returns></returns>
         DrawBuffer* DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw = false, bool isAAOutline = false);
 
         /// <summary>
-        /// Needs vertex count without the convex centers!
+        /// Draws an outline (or AA) around a convex shape.
+        /// Vertex count need to be without including the center vertex.
         /// </summary>
         /// <param name="sourceBuffer"></param>
         /// <param name="vertexCount"></param>
         /// <param name="opts"></param>
         /// <returns></returns>
         DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, bool isAAOutline = false, bool reverseDrawDir = false);
-
-        /// <summary>
-        /// Draws AA outline around vertices defined by start & end index, given outline settings.
-        /// This method might add new gradient or texture buffer to the buffer arrays, invalidating previous pointers.
-        /// Thus returns the corrected sourceBuffer pointer if it was invalidated.
-        /// </summary>
-        /// <returns>Re-validated source buffer pointer.</returns>
-        DrawBuffer* DrawAA(DrawBuffer* sourceBuffer, StyleOptions& opts, bool useGradientBuffer, int startIndex, int endIndex, bool drawInner, bool skipEndClosing = false);
 
     }; // namespace Internal
 
