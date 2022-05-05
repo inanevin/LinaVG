@@ -327,7 +327,7 @@ namespace Lina2D
             m_color     = opts.m_color;
             m_thickness = opts.m_thickness;
             m_rounding  = opts.m_rounding;
-           
+
             m_onlyRoundTheseCorners.from(opts.m_onlyRoundTheseCorners);
             m_outlineOptions  = opts.m_outlineOptions;
             m_dropShadow      = opts.m_dropShadow;
@@ -439,9 +439,12 @@ namespace Lina2D
     struct DrawBuffer
     {
         DrawBuffer(){};
+        DrawBuffer(int drawOrder)
+            : m_drawOrder(drawOrder){};
 
         Array<Vertex> m_vertexBuffer;
         Array<Index>  m_indexBuffer;
+        int           m_drawOrder = -1;
 
         inline void Clear()
         {
@@ -474,8 +477,8 @@ namespace Lina2D
     struct GradientDrawBuffer : public DrawBuffer
     {
         GradientDrawBuffer(){};
-        GradientDrawBuffer(const Vec4Grad& g, bool isAABuffer)
-            : m_isAABuffer(isAABuffer), m_color(g){};
+        GradientDrawBuffer(const Vec4Grad& g, int drawOrder, bool isAABuffer)
+            : m_isAABuffer(isAABuffer), m_color(g), DrawBuffer(drawOrder){};
 
         bool     m_isAABuffer = false;
         Vec4Grad m_color      = Vec4(1, 1, 1, 1);
@@ -484,8 +487,9 @@ namespace Lina2D
     struct TextureDrawBuffer : public DrawBuffer
     {
         TextureDrawBuffer(){};
-        TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, bool isAABuffer)
-            : m_isAABuffer(isAABuffer), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset){};
+        TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, int drawOrder, bool isAABuffer)
+            : m_isAABuffer(isAABuffer), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset),
+              DrawBuffer(drawOrder){};
 
         bool          m_isAABuffer      = false;
         BackendHandle m_textureHandle   = 0;
@@ -495,15 +499,20 @@ namespace Lina2D
 
     struct RendererData
     {
-        int                       m_gcFrameCounter;
-        DrawBuffer                m_defaultBuffer;
+        Array<DrawBuffer>         m_defaultBuffers;
         Array<GradientDrawBuffer> m_gradientBuffers;
         Array<TextureDrawBuffer>  m_textureBuffers;
+        int                       m_gcFrameCounter;
+        int                       m_minDrawOrder = -1;
+        int                       m_maxDrawOrder = -1;
 
-        int GetBufferIndexInGradientArray(DrawBuffer* buf);
-        int GetBufferIndexInTextureArray(DrawBuffer* buf);
-        GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad, bool isAABuffer = false);
-        TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, bool isAABuffer = false);
+        void                SetDrawOrderLimits(int drawOrder);
+        int                 GetBufferIndexInGradientArray(DrawBuffer* buf);
+        int                 GetBufferIndexInTextureArray(DrawBuffer* buf);
+        int                 GetBufferIndexInDefaultArray(DrawBuffer* buf);
+        DrawBuffer&         GetDefaultBuffer(int drawOrder);
+        GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad, int drawOrder, bool isAABuffer = false);
+        TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, bool isAABuffer = false);
     };
 
     struct BackendData

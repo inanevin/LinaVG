@@ -65,6 +65,20 @@ namespace Lina2D
         static Vec2  GetVertexAverage(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint);
         static Vec2  GetVertexNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw = true);
         static Vec2  GetVertexNormalFlatCheck(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw = true);
+
+        /// <summary>
+        /// Returns the centroid of a given polygon.
+        /// https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon
+        /// </summary>
+        /// <returns></returns>
+        static Vec2 GetPolygonCentroid(Vec2* points, int size);
+
+        /// <summary>
+        /// Returns the center of the given points via simple average.
+        /// </summary>
+        /// <returns></returns>
+        static Vec2         GetPolygonCentroidFast(Vec2* points, int size);
+
         static bool  Math::IsEqual(const Vec2& v1, const Vec2& v2);
         static bool  Math::IsEqualMarg(const Vec2& v1, const Vec2& v2, float err = 0.001f);
         static bool  Math::IsEqual(const Vec4& v1, const Vec4& v2);

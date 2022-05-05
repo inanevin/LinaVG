@@ -46,20 +46,45 @@ namespace Lina2D
 {
     struct Line
     {
-        Vertex m_vertices[4]; // 0 - start up, 1 - end up, 2 - end down, 3 - start down - cw order
-        Vec2   m_center;
+        Vec2 m_points[4]; // Clock-wise, starting from top-left
     };
 
-    void DrawArc(const Vec2& p1, const Vec2& p2, const Vec4Grad& color, float radius = 0.0f, ThicknessGrad thickness = ThicknessGrad(), int segments = 36, bool flip = false);
+    struct RectOverrideData
+    {
+        bool overrideRectPositions = false;
+        Vec2 m_p1                  = Vec2(0,0);
+        Vec2 m_p2                  = Vec2(0,0);
+        Vec2 m_p3                  = Vec2(0,0);
+        Vec2 m_p4                  = Vec2(0,0);
+    };
+
+    enum class LineJointType
+    {
+        None,
+        Miter,
+        Bevel
+    };
+
+    enum class LineCapDirection
+    {
+        None,
+        Left,
+        Right,
+        Both
+    };
+
+    extern RectOverrideData g_rectOverrideData;
+
     void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4Grad& color, ThicknessGrad thickness = ThicknessGrad(), int segments = 50);
-    void DrawLine(const Vec2& p1, const Vec2& p2, const Vec4Grad& col, ThicknessGrad thickness = ThicknessGrad());
 
     /// <summary>
     /// Draws a single point with the given color & position.
     /// </summary>
     void DrawPoint(const Vec2& p1, const Vec4& col);
 
-    void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, float rotateAngle = 0.0f);
+    void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, float rotateAngle = 0.0f, int drawOrder = 0);
+
+    void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::None, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Your points for the triangle must follow the given parameter order -- left, right and top edges.
@@ -70,23 +95,23 @@ namespace Lina2D
     /// <param name="top"> Top corner. </param>
     /// <param name="style"> Style options to apply.</param>
     /// <param name="rotateAngle"> Rotate angles around the center of the triangle. </param>
-    void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f);
+    void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws a filled rectangle between min & max with the given style options & rotation angle.
     /// </summary>
-    void DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f);
+    void DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws a convex polygon with N corners. !Rounding options do not apply to NGons!
     /// </summary>
-    void DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f);
+    void DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws the given set of points. !Rounding options do not apply!
     /// If you are not going to fill the convex shape (styling options -> m_isFilled), then prefer using DrawLines instead of this so that you can use proper line joints.
     /// </summary>
-    void DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f);
+    void DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws a filled circle with the given radius & center.
@@ -97,7 +122,7 @@ namespace Lina2D
     /// Always recommended to use segments that leave no remainder when 360 is divided by it.
     /// !Rounding options have no effect.!
     /// </summary>
-    void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f);
+    void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 
     /// <summary>
     /// Triangulates & fills the index array given a start and end vertex index.
@@ -131,79 +156,74 @@ namespace Lina2D
     /// <param name="endIndex"> Last vertex to rotate. </param>
     /// <param name="angle"> Rotation angle. </param>
     void RotateVertices(Array<Vertex>& vertices, const Vec2& center, int startIndex, int endIndex, float angle);
+    void RotatePoints(Vec2* points, int size, const Vec2& center, float angle);
 
     namespace Internal
     {
         // No rounding, vertical or horizontal gradient
-        void FillRect_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts);
+        void FillRect_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts, int drawOrder);
 
         // No rounding, single color
-        void FillRect_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& color, StyleOptions& opts);
+        void FillRect_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& color, StyleOptions& opts, int drawOrder);
 
         // No rounding, radial gradient
-        void FillRect_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& startcolor, const Vec4& endColor, StyleOptions& opts);
+        void FillRect_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& startcolor, const Vec4& endColor, StyleOptions& opts, int drawOrder);
 
         // Rounding
-        void FillRect_Round(DrawBuffer* buf, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& col, float rounding, StyleOptions& opts);
+        void FillRect_Round(DrawBuffer* buf, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& col, float rounding, StyleOptions& opts, int drawOrder);
 
         // Fill rect impl.
         void FillRectData(Vertex* vertArray, bool hasCenter, const Vec2& min, const Vec2& max);
 
         // No rounding, vertical or horizontal gradient
-        void FillTri_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts);
+        void FillTri_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts, int drawOrder);
 
         // No rounding, single color
-        void FillTri_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& color, StyleOptions& opts);
+        void FillTri_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& color, StyleOptions& opts, int drawOrder);
 
         // No rounding, radial gradient
-        void FillTri_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts);
+        void FillTri_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts, int drawOrder);
 
         // Rounding
-        void FillTri_Round(DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& col, float rounding, StyleOptions& opts);
+        void FillTri_Round(DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& col, float rounding, StyleOptions& opts, int drawOrder);
 
         // Fill rect impl.
         void FillTriData(Vertex* vertArray, bool hasCenter, bool calculateUV, const Vec2& p1, const Vec2& p2, const Vec2& p3);
 
         // No rounding, single color
-        void FillNGon_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color, StyleOptions& opts);
+        void FillNGon_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color, StyleOptions& opts, int drawOrder);
 
         // No rounding, horizontal or vertical gradient
-        void FillNGon_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts);
+        void FillNGon_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts, int drawOrder);
 
         // No rounding, radial gradient
-        void FillNGon_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts);
+        void FillNGon_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts, int drawOrder);
 
         // Fill NGon imp
         void FillNGonData(Array<Vertex>&, bool hasCenter, const Vec2& center, float radius, int n);
 
         // Single color
-        void FillCircle_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color, float startAngle, float endAngle, StyleOptions& opts);
+        void FillCircle_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
 
         // Vertical or horizontal gradinet.
-        void FillCircle_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle, StyleOptions& opts);
+        void FillCircle_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
 
         // Radial gradient
-        void FillCircle_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle, StyleOptions& opts);
+        void FillCircle_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
 
         // Fill circle impl
         void FillCircleData(Array<Vertex>& v, bool hasCenter, const Vec2& center, float radius, int segments, float startAngle, float endAngle);
 
         // Single color
-        void FillConvex_SC(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& color, StyleOptions& opts);
+        void FillConvex_SC(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& color, StyleOptions& opts, int drawOrder);
 
         // Vertical horizontal gradient
-        void FillConvex_VerHorGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts);
+        void FillConvex_VerHorGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts, int drawOrder);
 
         // Radial gradient.
-        void FillConvex_RadialGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts);
+        void FillConvex_RadialGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts, int drawOrder);
 
-        /// <summary>
-        /// Returns the centroid of a given polygon.
-        /// https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon
-        /// </summary>
-        /// <returns></returns>
-        Vec2 GetPolygonCentroid(Vec2* points, int size);
-
+      
         /// Triangle bounding box.
         void GetTriangleBoundingBox(const Vec2& p1, const Vec2& p2, const Vec2& p3, Vec2& outMin, Vec2& outMax);
 
@@ -227,12 +247,14 @@ namespace Lina2D
         /// </summary>
         Vec2 GetArcDirection(const Vec2& center, float radius, float startAngle, float endAngle);
 
+        Line CalculateLine(const Vec2& p1, const Vec2& p2, StyleOptions& style);
+
         /// <summary>
         /// Draws an outline (or AA) around the vertices given, following the specific draw order via index array.
         /// Used for semi-circles, arcs, lines and alike.
         /// </summary>
         /// <returns></returns>
-        DrawBuffer* DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw = false, bool isAAOutline = false);
+        DrawBuffer* DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw = false, int drawOrder = 0, bool isAAOutline = false);
 
         /// <summary>
         /// Draws an outline (or AA) around a convex shape.
@@ -242,7 +264,7 @@ namespace Lina2D
         /// <param name="vertexCount"></param>
         /// <param name="opts"></param>
         /// <returns></returns>
-        DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, bool isAAOutline = false, bool reverseDrawDir = false);
+        DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, int drawOrder = 0, bool isAAOutline = false, bool reverseDrawDir = false);
 
     }; // namespace Internal
 

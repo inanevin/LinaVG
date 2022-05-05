@@ -149,8 +149,8 @@ namespace Lina2D::Backend
         // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
         glBindVertexArray(0);
 
-        Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer.reserve(8000);
-        Internal::g_rendererData.m_defaultBuffer.m_indexBuffer.reserve(24000);
+        // Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer.reserve(8000);
+        // Internal::g_rendererData.m_defaultBuffer.m_indexBuffer.reserve(24000);
     }
 
     void Terminate()

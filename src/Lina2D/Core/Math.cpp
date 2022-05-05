@@ -233,7 +233,63 @@ namespace Lina2D
 
     }
 
+    
+    Vec2 Math::GetPolygonCentroid(Vec2* vertices, int vertexCount)
+    {
+        Vec2  centroid   = {0, 0};
+        float signedArea = 0.0f;
+        float x0         = 0.0f; // Current vertex X
+        float y0         = 0.0f; // Current vertex Y
+        float x1         = 0.0f; // Next vertex X
+        float y1         = 0.0f; // Next vertex Y
+        float a          = 0.0f; // Partial signed area
 
+        // For all vertices except last
+        int i = 0;
+        for (i = 0; i < vertexCount - 1; ++i)
+        {
+            x0 = vertices[i].x;
+            y0 = vertices[i].y;
+            x1 = vertices[i + 1].x;
+            y1 = vertices[i + 1].y;
+            a  = x0 * y1 - x1 * y0;
+            signedArea += a;
+            centroid.x += (x0 + x1) * a;
+            centroid.y += (y0 + y1) * a;
+        }
+
+        // Do last vertex separately to avoid performing an expensive
+        // modulus operation in each iteration.
+        x0 = vertices[i].x;
+        y0 = vertices[i].y;
+        x1 = vertices[0].x;
+        y1 = vertices[0].y;
+        a  = x0 * y1 - x1 * y0;
+        signedArea += a;
+        centroid.x += (x0 + x1) * a;
+        centroid.y += (y0 + y1) * a;
+
+        signedArea *= 0.5f;
+        centroid.x /= (6.0f * signedArea);
+        centroid.y /= (6.0f * signedArea);
+
+        return centroid;
+    }
+
+    Vec2 Math::GetPolygonCentroidFast(Vec2* points, int size)
+    {
+        Vec2 total = Vec2(0, 0);
+
+        for (int i = 0; i < size; i++)
+        {
+            total.x += points[i].x;
+            total.y += points[i].y;
+        }
+
+        total.x /= (float)size;
+        total.y /= (float)size;
+        return total;
+    }
 
     float Math::Abs(float f)
     {
