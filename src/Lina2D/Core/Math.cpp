@@ -62,6 +62,11 @@ namespace Lina2D
         return L2D_RAD2DEG * (std::atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
     }
 
+    float Math::GetAngleBetweenDirs(const Vec2& dir1, const Vec2& dir2)
+    {
+        return L2D_RAD2DEG * std::atan2f(dir1.x * dir2.y - dir1.y * dir2.x, dir1.x * dir2.x + dir1.y * dir2.y);
+    }
+
     float Math::GetAngleBetweenShort(const Vec2& p1, const Vec2& p2)
     {
         float ang = L2D_RAD2DEG * (std::atan2(p2.y, p2.x) - atan2(p1.y, p1.x));

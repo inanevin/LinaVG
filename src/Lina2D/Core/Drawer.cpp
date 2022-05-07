@@ -135,18 +135,88 @@ namespace Lina2D
             s.m_rounding = 2.0f;
         }
 
-        const Vec2 up                            = Math::Normalized(Math::Rotate90(Vec2(p2.x - p1.x, p2.y - p1.y), true));
-        g_rectOverrideData.m_p1                  = Vec2(p1.x + up.x * style.m_thickness.m_start / 2.0f, p1.y + up.y * style.m_thickness.m_start / 2.0f);
-        g_rectOverrideData.m_p4                  = Vec2(p1.x - up.x * style.m_thickness.m_start / 2.0f, p1.y - up.y * style.m_thickness.m_start / 2.0f);
-        g_rectOverrideData.m_p2                  = Vec2(p2.x + up.x * style.m_thickness.m_end / 2.0f, p2.y + up.y * style.m_thickness.m_end / 2.0f);
-        g_rectOverrideData.m_p3                  = Vec2(p2.x - up.x * style.m_thickness.m_end / 2.0f, p2.y - up.y * style.m_thickness.m_end / 2.0f);
-        g_rectOverrideData.overrideRectPositions = true;
-        DrawRect(g_rectOverrideData.m_p1, g_rectOverrideData.m_p3, s, rotateAngle);
-        g_rectOverrideData.overrideRectPositions = false;
+        Internal::DrawLine(l, s, rotateAngle);
     }
 
-    void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap, LineJointType jointType, float rotateAngle, int drawOrder)
+    void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap, LineJointType jointType, int drawOrder)
     {
+        Config.m_enableAA = false;
+        StyleOptions s    = StyleOptions(style);
+        s.m_isFilled      = true;
+
+        if (count < 2)
+        {
+            Config.m_errorCallback("LinaVG: Can't draw lines as the point array count is smaller than 2!", 0);
+            return;
+        }
+
+        Line previousLine = Internal::CalculateLine(points[0], points[1], style);
+
+        Array<Vec2> upperVertices;
+        Array<Vec2> lowerVertices;
+
+        upperVertices.push_back(previousLine.m_points[0]);
+        upperVertices.push_back(previousLine.m_points[1]);
+        lowerVertices.push_back(previousLine.m_points[2]);
+        lowerVertices.push_back(previousLine.m_points[3]);
+
+        for (int i = 1; i < count - 1; i++)
+        {
+            Line currentLine = Internal::CalculateLine(points[i], points[i + 1], s);
+
+            const Vec2 prevDir = Math::Normalized(Vec2(previousLine.m_points[2].x - previousLine.m_points[3].x, previousLine.m_points[2].y - previousLine.m_points[3].y));
+            const Vec2 currDir = Math::Normalized(Vec2(currentLine.m_points[2].x - currentLine.m_points[3].x, currentLine.m_points[2].y - currentLine.m_points[3].y));
+
+            // Find which side is joining, which side is churning
+            // Churning side always meets at intersection
+            // Joining side miter: meet at intersection, bevel: draw line between, round: draw arc between
+            // fall back from miter to bevel if angle is below 60
+
+            // positive angle if going below previous line.
+            const float angle = Math::GetAngleBetweenDirs(prevDir, currDir);
+
+            // Joint type fallbacks.
+            if (jointType == LineJointType::Miter && Math::Abs(angle) > Config.m_miterLimit)
+                jointType = LineJointType::BevelRound;
+
+            if (jointType == LineJointType::BevelRound && style.m_rounding == 0.0f)
+                jointType = LineJointType::Bevel;
+
+            const Vec2 lowerIntersect = Math::LineIntersection(previousLine.m_points[3], previousLine.m_points[2], currentLine.m_points[3], currentLine.m_points[2]);
+            const Vec2 upperIntersect = Math::LineIntersection(previousLine.m_points[0], previousLine.m_points[1], currentLine.m_points[0], currentLine.m_points[1]);
+            DrawPoint(lowerIntersect, Vec4(0, 1, 0, 1));
+            DrawPoint(upperIntersect, Vec4(0, 1, 0, 1));
+
+            // Merge lower, use joints on upper.
+            if (angle > 0.0f)
+            {
+                previousLine.m_points[2] = lowerIntersect;
+                currentLine.m_points[3]  = lowerIntersect;
+
+                if (jointType == LineJointType::Miter)
+                {
+                    previousLine.m_points[1] = upperIntersect;
+                    currentLine.m_points[0]  = upperIntersect;
+                }
+            }
+            else
+            {
+                // Merge upper, use joints on lower.
+                previousLine.m_points[1] = upperIntersect;
+                currentLine.m_points[0]  = upperIntersect;
+
+                if (jointType == LineJointType::Miter)
+                {
+                    previousLine.m_points[2] = lowerIntersect;
+                    currentLine.m_points[3]  = lowerIntersect;
+                }
+            }
+
+            Internal::DrawLine(previousLine, s, 0.0f);
+            Internal::DrawLine(currentLine, s, 0.0f);
+
+            previousLine = currentLine;
+        }
     }
 
     void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle, int drawOrder)
@@ -393,7 +463,7 @@ namespace Lina2D
     {
         if (size < 3)
         {
-            Config.m_errorCallback("Can draw a convex shape that has less than 3 corners!", 0);
+            Config.m_errorCallback("LinaVG: Can draw a convex shape that has less than 3 corners!", 0);
             return;
         }
 
@@ -1480,7 +1550,7 @@ namespace Lina2D
                 buf = DrawOutlineAroundShape(buf, opts2, &indices[0], halfSize * 2, opts2.m_outlineOptions.m_thickness, false, drawOrder, true);
             }
             else
-                buf = DrawOutline(buf, opts2, opts2.m_isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, true);
+                buf = DrawOutline(buf, opts2, opts2.m_isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, true);
         }
     }
 
@@ -1902,18 +1972,25 @@ namespace Lina2D
 
     Line Internal::CalculateLine(const Vec2& p1, const Vec2& p2, StyleOptions& style)
     {
-        const Vec2 dir = Vec2(p2.x - p1.x, p2.y - p1.y);
-        const Vec2 up  = Math::Normalized(Math::Rotate90(dir, true));
-
-        Line line;
-        line.m_points[0] = Vec2(p1.x + up.x * style.m_thickness.m_start, p1.y + up.y * style.m_thickness.m_start);
-        line.m_points[3] = Vec2(p1.x - up.x * style.m_thickness.m_start, p1.y - up.y * style.m_thickness.m_start);
-
-        line.m_points[1] = Vec2(p2.x + up.x * style.m_thickness.m_start, p2.y + up.y * style.m_thickness.m_start);
-        line.m_points[2] = Vec2(p2.x - up.x * style.m_thickness.m_start, p2.y - up.y * style.m_thickness.m_start);
+        Line       line;
+        const Vec2 up    = Math::Normalized(Math::Rotate90(Vec2(p2.x - p1.x, p2.y - p1.y), true));
+        line.m_points[0] = Vec2(p1.x + up.x * style.m_thickness.m_start / 2.0f, p1.y + up.y * style.m_thickness.m_start / 2.0f);
+        line.m_points[3] = Vec2(p1.x - up.x * style.m_thickness.m_start / 2.0f, p1.y - up.y * style.m_thickness.m_start / 2.0f);
+        line.m_points[1] = Vec2(p2.x + up.x * style.m_thickness.m_end / 2.0f, p2.y + up.y * style.m_thickness.m_end / 2.0f);
+        line.m_points[2] = Vec2(p2.x - up.x * style.m_thickness.m_end / 2.0f, p2.y - up.y * style.m_thickness.m_end / 2.0f);
         return line;
     }
 
+    void Internal::DrawLine(Line& line, StyleOptions& opts, float rotateAngle)
+    {
+        g_rectOverrideData.m_p1                  = line.m_points[0];
+        g_rectOverrideData.m_p4                  = line.m_points[3];
+        g_rectOverrideData.m_p2                  = line.m_points[1];
+        g_rectOverrideData.m_p3                  = line.m_points[2];
+        g_rectOverrideData.overrideRectPositions = true;
+        DrawRect(g_rectOverrideData.m_p1, g_rectOverrideData.m_p3, opts, rotateAngle);
+        g_rectOverrideData.overrideRectPositions = false;
+    }
     DrawBuffer* Internal::DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw, int drawOrder, bool isAAOutline)
     {
         const bool useTextureBuffer = opts.m_outlineOptions.m_textureHandle != 0;
@@ -1944,7 +2021,7 @@ namespace Lina2D
         else
         {
             const int sourceIndex = Internal::g_rendererData.GetBufferIndexInDefaultArray(sourceBuffer);
-            destBuf = &Internal::g_rendererData.GetDefaultBuffer(drawOrder);
+            destBuf               = &Internal::g_rendererData.GetDefaultBuffer(drawOrder);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_defaultBuffers[sourceIndex];
@@ -2015,7 +2092,7 @@ namespace Lina2D
         if (Config.m_enableAA && !isAAOutline)
         {
             StyleOptions opts2 = StyleOptions(opts);
-            DrawOutlineAroundShape(destBuf, opts2, &extrudedVerticesOrder[0], extrudedVerticesOrder.m_size, defThickness, ccw, true);
+            DrawOutlineAroundShape(destBuf, opts2, &extrudedVerticesOrder[0], extrudedVerticesOrder.m_size, defThickness, ccw, drawOrder, true);
         }
 
         return sourceBuffer;
@@ -2171,7 +2248,7 @@ namespace Lina2D
             {
                 StyleOptions opts2                     = StyleOptions(opts);
                 opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                DrawOutline(destBuf, opts2, vertexCount, skipEnds, true);
+                DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
             }
         }
         else
@@ -2184,12 +2261,12 @@ namespace Lina2D
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
 
                     // AA outline to the shape we are drawing
                     StyleOptions opts3     = StyleOptions(opts);
                     opts3.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Inwards);
-                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, true);
+                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, true);
                 }
             }
             else if (opts.m_outlineOptions.m_drawDirection == OutlineDrawDirection::Inwards)
@@ -2201,12 +2278,12 @@ namespace Lina2D
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, true, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true, true);
 
                     // AA outline to the shape we are drawing
                     StyleOptions opts3     = StyleOptions(opts);
                     opts3.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Outwards);
-                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, true);
+                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, true);
                 }
             }
             else
@@ -2219,12 +2296,12 @@ namespace Lina2D
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, true, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true, true);
 
                     // AA outline to the shape we are drawing
                     StyleOptions opts3     = StyleOptions(opts);
                     opts3.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Inwards);
-                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, true);
+                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, true);
                 }
 
                 copyAndFill(sourceBuffer, destBuf, startIndex + vertexCount / 2, endIndex, thickness, recalcUvs);
@@ -2234,12 +2311,12 @@ namespace Lina2D
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
 
                     // AA outline to the shape we are drawing
                     StyleOptions opts3     = StyleOptions(opts);
                     opts3.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Outwards);
-                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, true);
+                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, true);
                 }
             }
         }

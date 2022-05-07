@@ -404,10 +404,6 @@ namespace Lina2D
         Vec2 m_displaySize      = Vec2(0, 0);
         Vec2 m_framebufferScale = Vec2(0, 0);
 
-        JointType m_lineJointType      = JointType::None;
-        AAType    m_featheringType     = AAType::None;
-        float     m_featheringDistance = 0.0f;
-
         /// Every m_gcCollectInterval ticks, the system will call garbage collection on vertex & index buffers.
         int m_gcCollectInterval = 180;
 
@@ -434,6 +430,10 @@ namespace Lina2D
 
         /// Enable-disable anti-aliasing.
         bool m_enableAA = true;
+
+        /// If the angle between two lines exceed this limit fall-back to bevel joints from miter joints.
+        /// This is because miter joins the line points on intersection, ang with a very small angle (closer to 180) intersections get close to infinity.
+        float m_miterLimit = 150;
     };
 
     struct DrawBuffer

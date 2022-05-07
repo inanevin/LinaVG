@@ -51,6 +51,7 @@ namespace Lina2D
         static int   GetAreaIndex(const Vec2& diff);
         static float GetAngleFromCenter(const Vec2& center, const Vec2& point);
         static float GetAngleBetween(const Vec2& p1, const Vec2& p2);
+        static float GetAngleBetweenDirs(const Vec2& dir1, const Vec2& dir2);
         static float GetAngleBetweenShort(const Vec2& p1, const Vec2& p2);
         static Vec2  Normalized(const Vec2& v);
         static Vec2  Rotate90(const Vec2& v, bool ccw = true);

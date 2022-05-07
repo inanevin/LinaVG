@@ -60,9 +60,9 @@ namespace Lina2D
 
     enum class LineJointType
     {
-        None,
         Miter,
-        Bevel
+        Bevel,
+        BevelRound,
     };
 
     enum class LineCapDirection
@@ -84,7 +84,7 @@ namespace Lina2D
 
     void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, float rotateAngle = 0.0f, int drawOrder = 0);
 
-    void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::None, float rotateAngle = 0.0f, int drawOrder = 0);
+    void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0);
 
     /// <summary>
     /// Your points for the triangle must follow the given parameter order -- left, right and top edges.
@@ -248,6 +248,7 @@ namespace Lina2D
         Vec2 GetArcDirection(const Vec2& center, float radius, float startAngle, float endAngle);
 
         Line CalculateLine(const Vec2& p1, const Vec2& p2, StyleOptions& style);
+        void DrawLine(Line& line, StyleOptions& style, float rotateAngle);
 
         /// <summary>
         /// Draws an outline (or AA) around the vertices given, following the specific draw order via index array.
