@@ -48,6 +48,11 @@ namespace Lina2D
     {
         Vec2 m_points[4]; // Clock-wise, starting from top-left
     };
+    
+    struct LineTriangle
+    {
+        int m_indices[3];
+    };
 
     struct RectOverrideData
     {
@@ -84,7 +89,7 @@ namespace Lina2D
 
     void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, float rotateAngle = 0.0f, int drawOrder = 0);
 
-    void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0);
+    void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true);
 
     /// <summary>
     /// Your points for the triangle must follow the given parameter order -- left, right and top edges.

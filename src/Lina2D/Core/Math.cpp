@@ -84,6 +84,10 @@ namespace Lina2D
         return x && y;
     }
 
+    bool Math::IsEqualMarg(float f1, float f2, float epsilon)
+    {
+        return ((f1 - f2) < epsilon) && ((f2 - f1) < epsilon);
+    }
     bool Math::IsEqual(const Vec2& v1, const Vec2& v2)
     {
         return (v1.x == v2.x && v1.y == v2.y);
@@ -230,15 +234,25 @@ namespace Lina2D
         {
             const Vec2 fromPreviousNormal = Math::Rotate90(fromPrev, ccw);
             return Math::Normalized(Vec2(toNext.x + fromPreviousNormal.x, toNext.y + fromPreviousNormal.y));
-
         }
         const Vec2 toNextNormal       = Math::Rotate90(toNext, ccw);
         const Vec2 fromPreviousNormal = Math::Rotate90(fromPrev, ccw);
         return Math::Normalized(Vec2(toNextNormal.x + fromPreviousNormal.x, toNextNormal.y + fromPreviousNormal.y));
-
     }
 
-    
+    float Math::InverseLerp(float a, float b, float v)
+    {
+        if (a == b)
+            return 0;
+        else if (b < a)
+        {
+            float temp = b;
+            b = a;
+            a = temp;
+        }
+        return (v - a) / (b - a);
+    }
+
     Vec2 Math::GetPolygonCentroid(Vec2* vertices, int vertexCount)
     {
         Vec2  centroid   = {0, 0};

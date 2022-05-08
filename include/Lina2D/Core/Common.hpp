@@ -382,15 +382,6 @@ namespace Lina2D
         Vec4 m_col;
     };
 
-    enum class JointType
-    {
-        None,
-        Miter,
-        Bevel,
-        MiterBevelAuto,
-        Round,
-    };
-
     enum class AAType
     {
         None,

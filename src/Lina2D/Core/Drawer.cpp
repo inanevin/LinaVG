@@ -138,11 +138,27 @@ namespace Lina2D
         Internal::DrawLine(l, s, rotateAngle);
     }
 
-    void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap, LineJointType jointType, int drawOrder)
+    void DrawLines(Vec2* points, int count, StyleOptions& opts, LineCapDirection cap, LineJointType jointType, int drawOrder, bool uniformUVs)
     {
-        Config.m_enableAA = false;
-        StyleOptions s    = StyleOptions(style);
-        s.m_isFilled      = true;
+        StyleOptions style = StyleOptions(opts);
+        style.m_isFilled   = true;
+
+        const bool useTextureBuffer = style.m_textureHandle != 0;
+        const bool isGradient       = !Math::IsEqual(style.m_color.m_start, style.m_color.m_end);
+        const bool useGradBuffer    = !useTextureBuffer && isGradient;
+
+        // Determine which buffer to use.
+        // Also correct the buffer pointer if getting a new buffer invalidated it.
+        DrawBuffer* destBuf = nullptr;
+
+        if (useTextureBuffer)
+            destBuf = &Internal::g_rendererData.GetTextureBuffer(style.m_textureHandle, style.m_textureUVTiling, style.m_textureUVOffset, drawOrder, false);
+        else if (useGradBuffer)
+            destBuf = &Internal::g_rendererData.GetGradientBuffer(style.m_color, drawOrder, false);
+        else
+            destBuf = &Internal::g_rendererData.GetDefaultBuffer(drawOrder);
+
+        const int destBufStart = destBuf->m_vertexBuffer.m_size;
 
         if (count < 2)
         {
@@ -152,25 +168,17 @@ namespace Lina2D
 
         Line previousLine = Internal::CalculateLine(points[0], points[1], style);
 
-        Array<Vec2> upperVertices;
-        Array<Vec2> lowerVertices;
+        Array<int> upperVertices;
+        Array<int> lowerVertices;
 
-        upperVertices.push_back(previousLine.m_points[0]);
-        upperVertices.push_back(previousLine.m_points[1]);
-        lowerVertices.push_back(previousLine.m_points[2]);
-        lowerVertices.push_back(previousLine.m_points[3]);
+        Array<LineTriangle> tris;
 
         for (int i = 1; i < count - 1; i++)
         {
-            Line currentLine = Internal::CalculateLine(points[i], points[i + 1], s);
+            Line currentLine = Internal::CalculateLine(points[i], points[i + 1], style);
 
             const Vec2 prevDir = Math::Normalized(Vec2(previousLine.m_points[2].x - previousLine.m_points[3].x, previousLine.m_points[2].y - previousLine.m_points[3].y));
             const Vec2 currDir = Math::Normalized(Vec2(currentLine.m_points[2].x - currentLine.m_points[3].x, currentLine.m_points[2].y - currentLine.m_points[3].y));
-
-            // Find which side is joining, which side is churning
-            // Churning side always meets at intersection
-            // Joining side miter: meet at intersection, bevel: draw line between, round: draw arc between
-            // fall back from miter to bevel if angle is below 60
 
             // positive angle if going below previous line.
             const float angle = Math::GetAngleBetweenDirs(prevDir, currDir);
@@ -184,38 +192,364 @@ namespace Lina2D
 
             const Vec2 lowerIntersect = Math::LineIntersection(previousLine.m_points[3], previousLine.m_points[2], currentLine.m_points[3], currentLine.m_points[2]);
             const Vec2 upperIntersect = Math::LineIntersection(previousLine.m_points[0], previousLine.m_points[1], currentLine.m_points[0], currentLine.m_points[1]);
-            DrawPoint(lowerIntersect, Vec4(0, 1, 0, 1));
-            DrawPoint(upperIntersect, Vec4(0, 1, 0, 1));
+            int        mergeIndexPrev, mergeIndexCurr = 0;
+            int        jointIndexPrev, jointIndexCurr = 0;
+            Vec2       mergeIntersect = Vec2(0.0f, 0.0f);
+            Vec2       jointIntersect = Vec2(0.0f, 0.0f);
 
-            // Merge lower, use joints on upper.
+            // Angle is positive, going below
             if (angle > 0.0f)
             {
-                previousLine.m_points[2] = lowerIntersect;
-                currentLine.m_points[3]  = lowerIntersect;
-
-                if (jointType == LineJointType::Miter)
-                {
-                    previousLine.m_points[1] = upperIntersect;
-                    currentLine.m_points[0]  = upperIntersect;
-                }
+                mergeIndexPrev = 2;
+                mergeIndexCurr = 3;
+                jointIndexPrev = 1;
+                jointIndexCurr = 0;
+                mergeIntersect = lowerIntersect;
+                jointIntersect = upperIntersect;
             }
             else
             {
-                // Merge upper, use joints on lower.
-                previousLine.m_points[1] = upperIntersect;
-                currentLine.m_points[0]  = upperIntersect;
+                mergeIndexPrev = 1;
+                mergeIndexCurr = 0;
+                jointIndexPrev = 2;
+                jointIndexCurr = 3;
+                mergeIntersect = upperIntersect;
+                jointIntersect = lowerIntersect;
+            }
 
-                if (jointType == LineJointType::Miter)
+            previousLine.m_points[mergeIndexPrev] = mergeIntersect;
+            currentLine.m_points[mergeIndexCurr]  = mergeIntersect;
+
+            Array<int> indicesToAddToLower;
+            Array<int> indicesToAddToUpper;
+
+            if (jointType == LineJointType::Miter)
+            {
+                previousLine.m_points[jointIndexPrev] = jointIntersect;
+                currentLine.m_points[jointIndexCurr]  = jointIntersect;
+            }
+            else if (jointType == LineJointType::Bevel)
+            {
+                const int destBufCurrent = destBuf->m_vertexBuffer.m_size;
+
+                Vertex v1, v2, v3;
+                v1.m_pos = mergeIntersect;
+                v2.m_pos = previousLine.m_points[jointIndexPrev];
+                v3.m_pos = currentLine.m_points[jointIndexCurr];
+                v1.m_col = v2.m_col = v3.m_col = style.m_color.m_start;
+
+                if (!uniformUVs)
                 {
-                    previousLine.m_points[2] = lowerIntersect;
-                    currentLine.m_points[3]  = lowerIntersect;
+                    v1.m_uv = Vec2(0.5f, 1.0f);
+                    v2.m_uv = Vec2(0.0f, 0.0f);
+                    v3.m_uv = Vec2(1.0f, 0.0f);
+                }
+
+                destBuf->PushVertex(v1);
+                destBuf->PushVertex(v2);
+                destBuf->PushVertex(v3);
+
+                if (angle > 0.0f)
+                    indicesToAddToUpper.push_back(destBufCurrent + 2);
+                else
+                    indicesToAddToLower.push_back(destBufCurrent + 2);
+
+                LineTriangle tri{};
+                tri.m_indices[0] = destBufCurrent;
+                tri.m_indices[1] = destBufCurrent + 1;
+                tri.m_indices[2] = destBufCurrent + 2;
+                tris.push_back(tri);
+            }
+            else if (jointType == LineJointType::BevelRound)
+            {
+                const int destBufCurrent = destBuf->m_vertexBuffer.m_size;
+
+                Vertex v;
+                v.m_pos = previousLine.m_points[mergeIndexPrev];
+                v.m_col = style.m_color.m_start;
+
+                destBuf->PushVertex(v);
+
+                if (!uniformUVs)
+                    v.m_uv = Vec2(0.5f, 1.0f);
+
+                const Vec2  middle = Vec2((previousLine.m_points[jointIndexPrev].x + currentLine.m_points[jointIndexCurr].x) / 2.0f, (previousLine.m_points[jointIndexPrev].y + currentLine.m_points[jointIndexCurr].y) / 2.0f);
+                const float radius = 0.7f * Math ::Mag(Vec2(currentLine.m_points[jointIndexCurr].x - previousLine.m_points[jointIndexPrev].x, currentLine.m_points[jointIndexCurr].y - previousLine.m_points[jointIndexPrev].y)) / 2.0f;
+                const Vec2  dir    = Math::Normalized(Vec2(middle.x - previousLine.m_points[mergeIndexPrev].x, middle.y - previousLine.m_points[mergeIndexPrev].y));
+
+                const int   parabolaStart  = destBuf->m_vertexBuffer.m_size;
+                int         parabolaPoints = 0;
+                const float increase       = Math::Remap(style.m_rounding, 0.0f, 1.0f, 0.4f, 0.1f);
+                for (float k = 0.0f; k < 1.1f; k += increase)
+                {
+                    const Vec2 p = Math::SampleParabola(previousLine.m_points[jointIndexPrev], currentLine.m_points[jointIndexCurr], dir, radius, k);
+                    Vertex     v;
+                    v.m_col = style.m_color.m_start;
+                    v.m_pos = p;
+
+                    if (!uniformUVs)
+                    {
+                        const Vec2 topPoint = Vec2(middle.x + dir.x * radius, middle.y + dir.y * radius);
+                        v.m_uv.x            = Math::Remap(v.m_pos.x, previousLine.m_points[jointIndexPrev].x, currentLine.m_points[jointIndexCurr].x, 1.0f, 0.0f);
+                        v.m_uv.y            = Math::Remap(v.m_pos.y, topPoint.y, previousLine.m_points[mergeIndexCurr].y, 1.0f, 0.0f);
+                    }
+
+                    destBuf->PushVertex(v);
+
+                    if (angle > 0.0f)
+                        indicesToAddToUpper.push_back(destBuf->m_vertexBuffer.m_size - 1);
+                    else
+                        indicesToAddToLower.push_back(destBuf->m_vertexBuffer.m_size - 1);
+
+                    parabolaPoints++;
+                }
+
+                for (int k = 0; k < parabolaPoints - 1; k++)
+                {
+                    LineTriangle tri;
+                    tri.m_indices[0] = destBufCurrent;
+                    tri.m_indices[1] = parabolaStart + k;
+                    tri.m_indices[2] = parabolaStart + k + 1;
+                    tris.push_back(tri);
                 }
             }
 
-            Internal::DrawLine(previousLine, s, 0.0f);
-            Internal::DrawLine(currentLine, s, 0.0f);
+            // Previous line vertices.
+            const int prevTriStart = destBuf->m_vertexBuffer.m_size;
+            for (int k = 0; k < 4; k++)
+            {
+                Vertex v;
+                v.m_col = style.m_color.m_start;
+                v.m_pos = previousLine.m_points[k];
+
+                if (!uniformUVs)
+                {
+                    if (k == 0)
+                        v.m_uv = Vec2(0, 0);
+                    else if (k == 1)
+                        v.m_uv = Vec2(1, 0);
+                    else if (k == 2)
+                        v.m_uv = Vec2(1, 1);
+                    else if (k == 3)
+                        v.m_uv = Vec2(0, 1);
+                }
+
+                destBuf->PushVertex(v);
+            }
+
+            const bool willDrawLeftCap  = i == 1 && (cap == LineCapDirection::Left || cap == LineCapDirection::Both);
+            const bool willDrawRightCap = i == count - 2 && (cap == LineCapDirection::Right || cap == LineCapDirection::Both);
+
+            // Previous line indices.
+            LineTriangle prevTri1;
+            LineTriangle prevTri2;
+            prevTri1.m_indices[0] = prevTriStart;
+            prevTri1.m_indices[1] = prevTriStart + 1;
+            prevTri1.m_indices[2] = prevTriStart + 2;
+            prevTri2.m_indices[0] = prevTriStart + 2;
+            prevTri2.m_indices[1] = prevTriStart + 3;
+            prevTri2.m_indices[2] = prevTriStart;
+            tris.push_back(prevTri1);
+            tris.push_back(prevTri2);
+
+            auto addPrevLineVertices = [&](bool addFirst) {
+                
+                if (addFirst)
+                {
+                    upperVertices.push_back(prevTriStart);
+                    lowerVertices.push_back(prevTriStart + 3);
+                }
+
+                if (angle > 0.0f || jointType != LineJointType::BevelRound)
+                    lowerVertices.push_back(prevTriStart + 2);
+
+                if (angle < 0.0f || jointType != LineJointType::BevelRound)
+                    upperVertices.push_back(prevTriStart + 1);
+
+                for (int k = 0; k < indicesToAddToLower.m_size; k++)
+                    lowerVertices.push_back(indicesToAddToLower[k]);
+
+                for (int k = 0; k < indicesToAddToUpper.m_size; k++)
+                    upperVertices.push_back(indicesToAddToUpper[k]);
+            };
+
+            if (!willDrawLeftCap)
+            {
+                addPrevLineVertices(i == 1);
+            }
+
+            auto drawCap = [&](bool isLeft) {
+                const Vec2 upperPoint = isLeft ? previousLine.m_points[0] : currentLine.m_points[1];
+                const Vec2 lowerPoint = isLeft ? previousLine.m_points[3] : currentLine.m_points[2];
+
+                const int   destBufCurrent = destBuf->m_vertexBuffer.m_size;
+                const Vec2  up             = Vec2(upperPoint.x - lowerPoint.x, upperPoint.y - lowerPoint.y);
+                const Vec2  dir            = Math::Rotate90(Math::Normalized(up), isLeft);
+                const Vec2  middle         = Vec2((upperPoint.x + lowerPoint.x) / 2.0f, (upperPoint.y + lowerPoint.y) / 2.0f);
+                const float rad            = (Math::Mag(up) / 2.0f) * 0.7f;
+
+                Vertex v;
+                v.m_pos = middle;
+                v.m_col = style.m_color.m_start;
+
+                destBuf->PushVertex(v);
+
+                if (!uniformUVs)
+                    v.m_uv = Vec2(isLeft ? 0.0f : 1.0f, 0.5f);
+
+                const float increase       = Math::Remap(style.m_rounding, 0.0f, 1.0f, 0.4f, 0.1f);
+                int         parabolaPoints = 0;
+                const int   parabolaStart  = destBuf->m_vertexBuffer.m_size;
+
+                Array<int> capVerticesUpper;
+                Array<int> capVerticesLower;
+                for (float k = 0.0f; k < 1.1f; k += increase)
+                {
+                    const Vec2 p = Math::SampleParabola(upperPoint, lowerPoint, dir, rad, k);
+
+                    Vertex v;
+                    v.m_col = style.m_color.m_start;
+                    v.m_pos = p;
+
+                    if (!uniformUVs)
+                    {
+                        v.m_uv.x = isLeft ? 0.0f : 1.0f;
+                        v.m_uv.y = k;
+                    }
+
+                    destBuf->PushVertex(v);
+
+                    if (k < 0.5f)
+                        capVerticesUpper.push_back(destBuf->m_vertexBuffer.m_size - 1);
+                    else
+                        capVerticesLower.push_back(destBuf->m_vertexBuffer.m_size - 1);
+
+                    parabolaPoints++;
+                }
+
+                if (isLeft)
+                {
+                    for (int k = capVerticesUpper.m_size - 1; k > -1; k--)
+                        upperVertices.push_back(capVerticesUpper[k]);
+
+                    for(int k = 0; k < capVerticesLower.m_size; k++)
+                        lowerVertices.push_back(capVerticesLower[k]);   
+                }
+                else
+                {
+                    for (int k = capVerticesLower.m_size - 1; k > -1; k--)
+                        lowerVertices.push_back(capVerticesLower[k]);
+
+                    for (int k = 0; k < capVerticesUpper.m_size; k++)
+                        upperVertices.push_back(capVerticesUpper[k]);   
+                }
+
+                for (int k = 0; k < parabolaPoints - 1; k++)
+                {
+                    LineTriangle tri;
+                    tri.m_indices[0] = destBufCurrent;
+                    tri.m_indices[1] = parabolaStart + k;
+                    tri.m_indices[2] = parabolaStart + k + 1;
+                    tris.push_back(tri);
+                }
+            };
+
+            if (willDrawLeftCap)
+            {
+                drawCap(true);
+                addPrevLineVertices(false);
+            }
+
+            // Only push this line if it's the last line, else it'll be pushed by the next line.
+            if (i == count - 2)
+            {
+                // Current line vertices.
+                const int currTriStart = destBuf->m_vertexBuffer.m_size;
+                for (int k = 0; k < 4; k++)
+                {
+                    Vertex v;
+                    v.m_col = style.m_color.m_start;
+                    v.m_pos = currentLine.m_points[k];
+
+                    if (!uniformUVs)
+                    {
+                        if (k == 0)
+                            v.m_uv = Vec2(0, 0);
+                        else if (k == 1)
+                            v.m_uv = Vec2(1, 0);
+                        else if (k == 2)
+                            v.m_uv = Vec2(1, 1);
+                        else if (k == 3)
+                            v.m_uv = Vec2(0, 1);
+                    }
+
+                    destBuf->PushVertex(v);
+                }
+
+                // Current line indices.
+                LineTriangle currTri1;
+                LineTriangle currTri2;
+                currTri1.m_indices[0] = currTriStart;
+                currTri1.m_indices[1] = currTriStart + 1;
+                currTri1.m_indices[2] = currTriStart + 2;
+                currTri2.m_indices[0] = currTriStart + 2;
+                currTri2.m_indices[1] = currTriStart + 3;
+                currTri2.m_indices[2] = currTriStart;
+
+                tris.push_back(currTri1);
+                tris.push_back(currTri2);
+
+                if (!willDrawRightCap)
+                {
+                    lowerVertices.push_back(currTriStart + 2);
+                    upperVertices.push_back(currTriStart + 1);
+                }
+      
+            }
+
+            if (willDrawRightCap)
+                drawCap(false);
 
             previousLine = currentLine;
+        }
+
+        if (uniformUVs)
+            Internal::CalculateVertexUVs(destBuf, destBufStart, destBuf->m_vertexBuffer.m_size - destBufStart - 1);
+
+        for (int i = 0; i < tris.m_size; i++)
+        {
+            destBuf->PushIndex(tris[i].m_indices[0]);
+            destBuf->PushIndex(tris[i].m_indices[1]);
+            destBuf->PushIndex(tris[i].m_indices[2]);
+        }
+
+        if (style.m_outlineOptions.m_thickness != 0.0f)
+        {
+            Array<int> indicesOrder;
+            for (int i = 0; i < lowerVertices.m_size; i++)
+            {
+                indicesOrder.push_back(lowerVertices[i]);
+                DrawPoint(destBuf->m_vertexBuffer[lowerVertices[i]].m_pos, Vec4(1,0,0,1));
+            }
+
+            for (int i = upperVertices.m_size - 1; i > -1; i--)
+                indicesOrder.push_back(upperVertices[i]);
+
+          Internal::DrawOutlineAroundShape(destBuf, style, &indicesOrder[0], indicesOrder.m_size, style.m_outlineOptions.m_thickness, false, drawOrder, false);
+        }
+        else if (Config.m_enableAA)
+        {
+            StyleOptions opts2     = StyleOptions(style);
+            opts2.m_outlineOptions = OutlineOptions::FromStyle(style, OutlineDrawDirection::Both);
+
+            Array<int> indicesOrder;
+            for (int i = 0; i < lowerVertices.m_size; i++)
+                indicesOrder.push_back(lowerVertices[i]);
+
+            for (int i = upperVertices.m_size - 1; i > -1; i--)
+                indicesOrder.push_back(upperVertices[i]);
+
+            Internal::DrawOutlineAroundShape(destBuf, opts2, &indicesOrder[0], indicesOrder.m_size, opts2.m_outlineOptions.m_thickness, false, drawOrder, true);
         }
     }
 
@@ -2323,4 +2657,5 @@ namespace Lina2D
 
         return sourceBuffer;
     }
+
 } // namespace Lina2D
