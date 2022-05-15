@@ -218,7 +218,7 @@ namespace Lina2D
 
             return -1;
         }
-        
+
         inline T* findAddr(const T& v)
         {
             T*       data     = m_data;
@@ -463,16 +463,26 @@ namespace Lina2D
         Textured
     };
 
+    enum class DrawBufferShapeType
+    {
+        Shape,
+        Outline,
+        AA
+    };
+
     struct DrawBuffer
     {
         DrawBuffer(){};
-        DrawBuffer(int drawOrder, DrawBufferType type)
-            : m_drawOrder(drawOrder), m_drawBufferType(type){};
+        DrawBuffer(int drawOrder, DrawBufferType type, DrawBufferShapeType shapeType)
+            : m_drawOrder(drawOrder), m_drawBufferType(type), m_shapeType(shapeType){};
 
-        Array<Vertex> m_vertexBuffer;
-        Array<Index>  m_indexBuffer;
-        int           m_drawOrder = -1;
-        DrawBufferType m_drawBufferType = DrawBufferType::Default;
+        Array<Vertex>       m_vertexBuffer;
+        Array<Index>        m_indexBuffer;
+        int                 m_drawOrder      = -1;
+        DrawBufferType      m_drawBufferType = DrawBufferType::Default;
+        DrawBufferShapeType m_shapeType      = DrawBufferShapeType::Shape;
+
+        virtual void Draw();
 
         inline void Clear()
         {
@@ -505,8 +515,10 @@ namespace Lina2D
     struct GradientDrawBuffer : public DrawBuffer
     {
         GradientDrawBuffer(){};
-        GradientDrawBuffer(const Vec4Grad& g, int drawOrder, bool isAABuffer)
-            : m_isAABuffer(isAABuffer), m_color(g), DrawBuffer(drawOrder, DrawBufferType::Gradient){};
+        GradientDrawBuffer(const Vec4Grad& g, int drawOrder, DrawBufferShapeType shapeType)
+            : m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_color(g), DrawBuffer(drawOrder, DrawBufferType::Gradient, shapeType){};
+
+        virtual void Draw() override;
 
         bool     m_isAABuffer = false;
         Vec4Grad m_color      = Vec4(1, 1, 1, 1);
@@ -515,10 +527,11 @@ namespace Lina2D
     struct TextureDrawBuffer : public DrawBuffer
     {
         TextureDrawBuffer(){};
-        TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, int drawOrder, bool isAABuffer)
-            : m_isAABuffer(isAABuffer), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset),
-              DrawBuffer(drawOrder, DrawBufferType::Textured){};
+        TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, int drawOrder, DrawBufferShapeType shapeType)
+            : m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset),
+              DrawBuffer(drawOrder, DrawBufferType::Textured, shapeType){};
 
+        virtual void  Draw() override;
         bool          m_isAABuffer      = false;
         BackendHandle m_textureHandle   = 0;
         Vec2          m_textureUVTiling = Vec2(1.0f, 1.0f);
@@ -530,6 +543,7 @@ namespace Lina2D
         Array<DrawBuffer>         m_defaultBuffers;
         Array<GradientDrawBuffer> m_gradientBuffers;
         Array<TextureDrawBuffer>  m_textureBuffers;
+        Array<DrawBuffer*>        m_buffers;
         int                       m_gcFrameCounter;
         int                       m_minDrawOrder = -1;
         int                       m_maxDrawOrder = -1;
@@ -538,9 +552,9 @@ namespace Lina2D
         int                 GetBufferIndexInGradientArray(DrawBuffer* buf);
         int                 GetBufferIndexInTextureArray(DrawBuffer* buf);
         int                 GetBufferIndexInDefaultArray(DrawBuffer* buf);
-        DrawBuffer&         GetDefaultBuffer(int drawOrder);
-        GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad, int drawOrder, bool isAABuffer = false);
-        TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, bool isAABuffer = false);
+        DrawBuffer&         GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType);
+        GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
+        TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType);
     };
 
     struct BackendData

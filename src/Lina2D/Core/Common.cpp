@@ -28,11 +28,14 @@ SOFTWARE.
 
 #include "Lina2D/Core/Common.hpp"
 #include "Lina2D/Core/Math.hpp"
+#include "Lina2D/Core/GLBackend.hpp"
 
 namespace Lina2D
 {
-    GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad, int drawOrder, bool isAABuffer)
+    GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)
     {
+        const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
+
         for (int i = 0; i < m_gradientBuffers.m_size; i++)
         {
             auto& buf = m_gradientBuffers[i];
@@ -53,11 +56,11 @@ namespace Lina2D
 
         SetDrawOrderLimits(drawOrder);
 
-        m_gradientBuffers.push_back(GradientDrawBuffer(grad, drawOrder, isAABuffer));
+        m_gradientBuffers.push_back(GradientDrawBuffer(grad, drawOrder, shapeType));
         return m_gradientBuffers.last_ref();
     }
 
-    DrawBuffer& RendererData::GetDefaultBuffer(int drawOrder)
+    DrawBuffer& RendererData::GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType)
     {
         for (int i = 0; i < m_defaultBuffers.m_size; i++)
         {
@@ -68,12 +71,13 @@ namespace Lina2D
 
         SetDrawOrderLimits(drawOrder);
 
-        m_defaultBuffers.push_back(DrawBuffer(drawOrder, DrawBufferType::Default));
+        m_defaultBuffers.push_back(DrawBuffer(drawOrder, DrawBufferType::Default, shapeType));
         return m_defaultBuffers.last_ref();
     }
 
-    TextureDrawBuffer& RendererData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, bool isAABuffer)
+    TextureDrawBuffer& RendererData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType)
     {
+        const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
         for (int i = 0; i < m_textureBuffers.m_size; i++)
         {
             auto& buf = m_textureBuffers[i];
@@ -83,7 +87,7 @@ namespace Lina2D
 
         SetDrawOrderLimits(drawOrder);
 
-        m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset, drawOrder, isAABuffer));
+        m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset, drawOrder, shapeType));
         return m_textureBuffers.last_ref();
     }
 
@@ -135,6 +139,21 @@ namespace Lina2D
         o.m_textureUVTiling = opts.m_textureUVTiling;
         o.m_drawDirection   = drawDir;
         return o;
+    }
+
+    void DrawBuffer::Draw()
+    {
+        Backend::DrawDefault(this);
+    }
+
+    void GradientDrawBuffer::Draw()
+    {
+        Backend::DrawGradient(this);
+    }
+
+    void TextureDrawBuffer::Draw()
+    {
+        Backend::DrawTextured(this);
     }
 
 } // namespace Lina2D

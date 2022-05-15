@@ -56,35 +56,41 @@ namespace Lina2D
         const int  diff  = Internal::g_rendererData.m_maxDrawOrder - Internal::g_rendererData.m_minDrawOrder;
         const bool valid = !(diff == 0 || diff < 0);
 
-        const int start = valid ? Internal::g_rendererData.m_maxDrawOrder  : 0;
+        const int start = valid ? Internal::g_rendererData.m_maxDrawOrder : 0;
         const int end   = valid ? Internal::g_rendererData.m_minDrawOrder - 1 : -1;
 
-        for (int k = start; k > end; k--)
-        {
-            for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
+        auto drawBuffers = [valid, start, end](DrawBufferShapeType shapeType) {
+            for (int k = start; k > end; k--)
             {
-                DrawBuffer& buf = Internal::g_rendererData.m_defaultBuffers[i];
+                for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
+                {
+                    DrawBuffer& buf = Internal::g_rendererData.m_defaultBuffers[i];
 
-                if (buf.m_drawOrder == k)
-                    Backend::DrawDefault(&(buf));
+                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
+                        Backend::DrawDefault(&(buf));
+                }
+
+                for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
+                {
+                    GradientDrawBuffer& buf = Internal::g_rendererData.m_gradientBuffers[i];
+
+                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
+                        Backend::DrawGradient(&buf);
+                }
+
+                for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
+                {
+                    TextureDrawBuffer& buf = Internal::g_rendererData.m_textureBuffers[i];
+
+                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
+                        Backend::DrawTextured(&buf);
+                }
             }
+        };
 
-            for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
-            {
-                GradientDrawBuffer& buf = Internal::g_rendererData.m_gradientBuffers[i];
-
-                if (buf.m_drawOrder == k)
-                    Backend::DrawGradient(&buf);
-            }
-
-            for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
-            {
-                TextureDrawBuffer& buf = Internal::g_rendererData.m_textureBuffers[i];
-
-                if (buf.m_drawOrder == k)
-                    Backend::DrawTextured(&buf);
-            }
-        }
+        drawBuffers(DrawBufferShapeType::Shape);
+        drawBuffers(DrawBufferShapeType::Outline);
+        drawBuffers(DrawBufferShapeType::AA);
     }
 
     void EndFrame()
