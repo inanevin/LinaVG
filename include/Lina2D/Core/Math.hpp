@@ -59,6 +59,7 @@ namespace Lina2D
         static Vec2  SampleParabola(const Vec2& p1, const Vec2& p2, const Vec2& direction, float height, float t);
         static Vec2  SampleBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, float t);
         static Vec2  LineIntersection(const Vec2& p00, const Vec2& p01, const Vec2& p10, const Vec2& p11);
+        static bool  AreLinesParallel(const Vec2& p00, const Vec2& p01, const Vec2& p10, const Vec2& p11);
         static Vec2  RotateAround(const Vec2& point, const Vec2& center, float angle);
         static Vec2  Abs(const Vec2& v);
         static Vec2  Clamp(const Vec2& v, const Vec2& min, const Vec2& max);

@@ -68,7 +68,7 @@ namespace Lina2D
 
         SetDrawOrderLimits(drawOrder);
 
-        m_defaultBuffers.push_back(DrawBuffer(drawOrder));
+        m_defaultBuffers.push_back(DrawBuffer(drawOrder, DrawBufferType::Default));
         return m_defaultBuffers.last_ref();
     }
 

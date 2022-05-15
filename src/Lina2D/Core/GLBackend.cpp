@@ -200,8 +200,8 @@ namespace Lina2D::Backend
         static Vec2 keyVal = Vec2(0, 0);
         zoom += Config.m_mouseScrollCallback() * 0.05f;
 
-        keyVal.x += key.x * 2.8f;
-        keyVal.y -= key.y * 2.8f;
+        keyVal.x += key.x * 1.8f;
+        keyVal.y -= key.y * 1.8f;
 
         L *= -zoom;
         R *= -zoom;

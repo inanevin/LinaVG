@@ -44,30 +44,62 @@ Timestamp: 3/24/2022 10:57:37 PM
 
 namespace Lina2D
 {
-    struct Line
-    {
-        Vec2 m_points[4]; // Clock-wise, starting from top-left
-    };
-    
+
     struct LineTriangle
     {
         int m_indices[3];
     };
 
+    struct Line
+    {
+        Array<Vertex> m_vertices;
+        Array<int> m_upperIndices;
+        Array<int> m_lowerIndices;
+        Array<LineTriangle> m_tris;
+        bool                m_hasMidpoints = false;
+
+        Line& operator=(const Line& t)
+        {
+            m_vertices.m_data = nullptr;
+            m_vertices.m_size = m_vertices.m_capacity = m_vertices.m_lastSize = 0;
+            m_tris.m_data                                                     = nullptr;
+            m_tris.m_size = m_tris.m_capacity = m_tris.m_lastSize = 0;
+            m_lowerIndices.m_data = nullptr;
+            m_lowerIndices.m_size = m_lowerIndices.m_capacity = m_lowerIndices.m_lastSize = 0;
+            m_upperIndices.m_data                                                         = nullptr;
+            m_upperIndices.m_size = m_upperIndices.m_capacity = m_upperIndices.m_lastSize = 0;
+            m_vertices.from(t.m_vertices);
+            m_tris.from(t.m_tris);
+            m_lowerIndices.from(t.m_lowerIndices);
+            m_upperIndices.from(t.m_upperIndices);
+            m_hasMidpoints = t.m_hasMidpoints;
+            return *this;
+        }
+
+        Line() = default;
+    };
+
+    struct SimpleLine
+    {
+        Vec2 m_points[4];
+    };
+
     struct RectOverrideData
     {
         bool overrideRectPositions = false;
-        Vec2 m_p1                  = Vec2(0,0);
-        Vec2 m_p2                  = Vec2(0,0);
-        Vec2 m_p3                  = Vec2(0,0);
-        Vec2 m_p4                  = Vec2(0,0);
+        Vec2 m_p1                  = Vec2(0, 0);
+        Vec2 m_p2                  = Vec2(0, 0);
+        Vec2 m_p3                  = Vec2(0, 0);
+        Vec2 m_p4                  = Vec2(0, 0);
     };
 
     enum class LineJointType
     {
+        None,
         Miter,
         Bevel,
         BevelRound,
+        VtxAverage,
     };
 
     enum class LineCapDirection
@@ -80,7 +112,20 @@ namespace Lina2D
 
     extern RectOverrideData g_rectOverrideData;
 
-    void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, const Vec4Grad& color, ThicknessGrad thickness = ThicknessGrad(), int segments = 50);
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="p0"></param>
+    /// <param name="p1"></param>
+    /// <param name="p2"></param>
+    /// <param name="p3"></param>
+    /// <param name="style"></param>
+    /// <param name="cap"></param>
+    /// <param name="jointType"></param>
+    /// <param name="drawOrder"></param>
+    /// <param name="uniformUVs"></param>
+    /// <param name="segments"> 0-100 range, 100 smoothest. </param>
+    void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true, int segments = 50);
 
     /// <summary>
     /// Draws a single point with the given color & position.
@@ -133,7 +178,7 @@ namespace Lina2D
     /// Triangulates & fills the index array given a start and end vertex index.
     /// </summary>
     void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices, bool skipLastTriangle = false);
-    
+
     /// <summary>
     /// Fills convex shapes without the assumption of a center vertex. Used for filling outer areas of non-filled shapes.
     /// <param name="startIndex"> First vertex - start of the border.</param>
@@ -228,7 +273,6 @@ namespace Lina2D
         // Radial gradient.
         void FillConvex_RadialGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts, int drawOrder);
 
-      
         /// Triangle bounding box.
         void GetTriangleBoundingBox(const Vec2& p1, const Vec2& p2, const Vec2& p3, Vec2& outMin, Vec2& outMax);
 
@@ -252,8 +296,14 @@ namespace Lina2D
         /// </summary>
         Vec2 GetArcDirection(const Vec2& center, float radius, float startAngle, float endAngle);
 
-        Line CalculateLine(const Vec2& p1, const Vec2& p2, StyleOptions& style);
-        void DrawLine(Line& line, StyleOptions& style, float rotateAngle);
+        void       CalculateLine(Line& line, const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection lineCapToAdd);
+        SimpleLine CalculateSimpleLine(const Vec2& p1, const Vec2& p2, StyleOptions& style);
+        void       JoinLines(Line& line1, Line& line2, StyleOptions& opts, LineJointType joinType, bool mergeUpperVertices);
+
+        void DrawSimpleLine(SimpleLine& line, StyleOptions& style, float rotateAngle);
+        void CalculateLineUVs(Line& line);
+
+        void CheckAAOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int shapeStartIndex, int shapeEndIndex, bool skipEnds = false, int drawOrder = 0);
 
         /// <summary>
         /// Draws an outline (or AA) around the vertices given, following the specific draw order via index array.

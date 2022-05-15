@@ -162,12 +162,33 @@ namespace Lina2D
         float det = a1 * b2 - a2 * b1;
 
         // Parallel
+        if (det == 0.0f)
+            return p10;
+
         _ASSERT(det != 0.0f);
 
         float x = (b2 * c1 - b1 * c2) / det;
         float y = (a1 * c2 - a2 * c1) / det;
 
         return Vec2(x, y);
+    }
+
+    bool Math::AreLinesParallel(const Vec2& p00, const Vec2& p01, const Vec2& p10, const Vec2& p11)
+    {
+        // Line 1
+        float a1 = p01.y - p00.y;
+        float b1 = p00.x - p01.x;
+        float c1 = a1 * (p00.x) + b1 * (p00.y);
+
+        // Line 2
+        float a2 = p11.y - p10.y;
+        float b2 = p10.x - p11.x;
+        float c2 = a2 * (p10.x) + b2 * (p10.y);
+
+        float det = a1 * b2 - a2 * b1;
+
+        // Parallel
+        return det == 0.0f;
     }
 
     Vec2 Math::RotateAround(const Vec2& point, const Vec2& center, float angle)
@@ -247,8 +268,8 @@ namespace Lina2D
         else if (b < a)
         {
             float temp = b;
-            b = a;
-            a = temp;
+            b          = a;
+            a          = temp;
         }
         return (v - a) / (b - a);
     }

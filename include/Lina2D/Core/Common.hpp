@@ -61,12 +61,12 @@ namespace Lina2D
         T*  m_data     = nullptr;
         int m_size     = 0;
         int m_lastSize = 0;
-        int m_capacity;
+        int m_capacity = 0;
 
         Array()
         {
-            m_size = m_capacity = 0;
-            m_data              = nullptr;
+            m_size = m_capacity = m_lastSize = 0;
+            m_data                           = nullptr;
         }
 
         Array(const Array&) = delete;
@@ -88,7 +88,7 @@ namespace Lina2D
         {
             if (m_data)
             {
-                m_size = m_capacity = 0;
+                m_size = m_capacity = m_lastSize = 0;
                 std::free(m_data);
                 m_data = nullptr;
             }
@@ -145,7 +145,8 @@ namespace Lina2D
 
             if (m_data)
             {
-                std::memcpy(newData, m_data, (size_t)m_size * sizeof(T));
+                if (newData != 0)
+                    std::memcpy(newData, m_data, (size_t)m_size * sizeof(T));
                 std::free(m_data);
             }
             m_data     = newData;
@@ -161,9 +162,28 @@ namespace Lina2D
         inline T* push_back(const T& v)
         {
             checkGrow();
-            std::memcpy(&m_data[m_size], &v, sizeof(v));
+            auto s = sizeof(v);
+            std::memcpy(&m_data[m_size], &v, s);
             m_size++;
             return last();
+        }
+
+        inline T* push_back_copy(const T& v)
+        {
+            checkGrow();
+            auto s         = sizeof(v);
+            m_data[m_size] = v;
+            m_size++;
+            return last();
+        }
+
+        inline T* erase(const T* it)
+        {
+            _ASSERT(it >= m_data && it < m_data + m_size);
+            const ptrdiff_t off = it - m_data;
+            std::memmove(m_data + off, m_data + off + 1, ((size_t)m_size - (size_t)off - 1) * sizeof(T));
+            m_size--;
+            return m_data + off;
         }
 
         inline T* last()
@@ -188,7 +208,7 @@ namespace Lina2D
             return m_data[i];
         }
 
-        inline int find(const T& t) const
+        inline int findIndex(const T& t) const
         {
             for (int i = 0; i < m_size; i++)
             {
@@ -197,6 +217,18 @@ namespace Lina2D
             }
 
             return -1;
+        }
+        
+        inline T* findAddr(const T& v)
+        {
+            T*       data     = m_data;
+            const T* data_end = m_data + m_size;
+            while (data < data_end)
+                if (*data == v)
+                    break;
+                else
+                    ++data;
+            return data;
         }
     };
     struct Vec4
@@ -292,9 +324,6 @@ namespace Lina2D
 
         /// Outline thickness.
         float m_thickness = 0.0f;
-
-        // If true, bypasses the gradient type property in the outline's color, and always uses vertex colors to colorize from inwards towards outwards.
-        bool m_useVertexColors = false;
 
         /// Where to draw the outline, have no effect on filled shapes.
         OutlineDrawDirection m_drawDirection = OutlineDrawDirection::Outwards;
@@ -427,15 +456,23 @@ namespace Lina2D
         float m_miterLimit = 150;
     };
 
+    enum class DrawBufferType
+    {
+        Default,
+        Gradient,
+        Textured
+    };
+
     struct DrawBuffer
     {
         DrawBuffer(){};
-        DrawBuffer(int drawOrder)
-            : m_drawOrder(drawOrder){};
+        DrawBuffer(int drawOrder, DrawBufferType type)
+            : m_drawOrder(drawOrder), m_drawBufferType(type){};
 
         Array<Vertex> m_vertexBuffer;
         Array<Index>  m_indexBuffer;
         int           m_drawOrder = -1;
+        DrawBufferType m_drawBufferType = DrawBufferType::Default;
 
         inline void Clear()
         {
@@ -469,7 +506,7 @@ namespace Lina2D
     {
         GradientDrawBuffer(){};
         GradientDrawBuffer(const Vec4Grad& g, int drawOrder, bool isAABuffer)
-            : m_isAABuffer(isAABuffer), m_color(g), DrawBuffer(drawOrder){};
+            : m_isAABuffer(isAABuffer), m_color(g), DrawBuffer(drawOrder, DrawBufferType::Gradient){};
 
         bool     m_isAABuffer = false;
         Vec4Grad m_color      = Vec4(1, 1, 1, 1);
@@ -480,7 +517,7 @@ namespace Lina2D
         TextureDrawBuffer(){};
         TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, int drawOrder, bool isAABuffer)
             : m_isAABuffer(isAABuffer), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset),
-              DrawBuffer(drawOrder){};
+              DrawBuffer(drawOrder, DrawBufferType::Textured){};
 
         bool          m_isAABuffer      = false;
         BackendHandle m_textureHandle   = 0;
