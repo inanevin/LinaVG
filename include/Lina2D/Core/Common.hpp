@@ -482,8 +482,6 @@ namespace Lina2D
         DrawBufferType      m_drawBufferType = DrawBufferType::Default;
         DrawBufferShapeType m_shapeType      = DrawBufferShapeType::Shape;
 
-        virtual void Draw();
-
         inline void Clear()
         {
             m_vertexBuffer.clear();
@@ -518,8 +516,6 @@ namespace Lina2D
         GradientDrawBuffer(const Vec4Grad& g, int drawOrder, DrawBufferShapeType shapeType)
             : m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_color(g), DrawBuffer(drawOrder, DrawBufferType::Gradient, shapeType){};
 
-        virtual void Draw() override;
-
         bool     m_isAABuffer = false;
         Vec4Grad m_color      = Vec4(1, 1, 1, 1);
     };
@@ -531,7 +527,6 @@ namespace Lina2D
             : m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset),
               DrawBuffer(drawOrder, DrawBufferType::Textured, shapeType){};
 
-        virtual void  Draw() override;
         bool          m_isAABuffer      = false;
         BackendHandle m_textureHandle   = 0;
         Vec2          m_textureUVTiling = Vec2(1.0f, 1.0f);

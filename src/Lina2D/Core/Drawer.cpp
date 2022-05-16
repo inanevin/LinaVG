@@ -2680,21 +2680,24 @@ namespace Lina2D
         };
 
         const bool recalcUvs = useTextureBuffer || useGradBuffer;
+        const bool useAA     = Config.m_enableAA && !isAAOutline;
 
         if (opts.m_isFilled)
         {
             copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, thickness, recalcUvs);
 
-            if (Config.m_enableAA && !isAAOutline)
+            if (useAA)
             {
                 StyleOptions opts2                     = StyleOptions(opts);
                 opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
                 DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
+
+                opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
+                DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, true, true);
             }
         }
         else
         {
-            const bool useAA = Config.m_enableAA && !isAAOutline;
 
             if (opts.m_outlineOptions.m_drawDirection == OutlineDrawDirection::Outwards)
             {
@@ -2713,6 +2716,9 @@ namespace Lina2D
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
+
+                    opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
                 }
             }
@@ -2734,19 +2740,13 @@ namespace Lina2D
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true, true);
+
+                    opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true, true);
                 }
             }
             else
             {
-
-                if (useAA)
-                {
-                    // AA outline to the shape we are drawing
-                    StyleOptions opts3     = StyleOptions(opts);
-                    opts3.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Inwards);
-                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, true);
-                }
-
                 copyAndFill(sourceBuffer, destBuf, startIndex, startIndex + vertexCount / 2 - 1, -thickness, recalcUvs);
 
                 if (useAA)
@@ -2755,14 +2755,9 @@ namespace Lina2D
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true, true);
-                }
 
-                if (useAA)
-                {
-                    // // AA outline to the shape we are drawing
-                    StyleOptions opts3     = StyleOptions(opts);
-                    opts3.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Outwards);
-                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, true);
+                    opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true, true);
                 }
 
                 copyAndFill(sourceBuffer, destBuf, startIndex + vertexCount / 2, endIndex, thickness, recalcUvs);
@@ -2772,6 +2767,9 @@ namespace Lina2D
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
+
+                    opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
                 }
             }

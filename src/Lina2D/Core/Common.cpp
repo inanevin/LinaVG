@@ -141,19 +141,5 @@ namespace Lina2D
         return o;
     }
 
-    void DrawBuffer::Draw()
-    {
-        Backend::DrawDefault(this);
-    }
-
-    void GradientDrawBuffer::Draw()
-    {
-        Backend::DrawGradient(this);
-    }
-
-    void TextureDrawBuffer::Draw()
-    {
-        Backend::DrawTextured(this);
-    }
 
 } // namespace Lina2D
