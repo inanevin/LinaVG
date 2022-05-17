@@ -1,11 +1,11 @@
 /*
-This file is a part of: Lina Engine
-https://github.com/inanevin/LinaEngine
+This file is a part of: LinaVG
+https://github.com/inanevin/LinaVG
 
 Author: Inan Evin
 http://www.inanevin.com
 
-Copyright (c) [2018-] [Inan Evin]
+Copyright (c) [2022-] [Inan Evin]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,10 +26,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "Lina2D/Core/Drawer.hpp"
-#include "Lina2D/Core/Math.hpp"
-#include "Lina2D/Core/Renderer.hpp"
-#include "Lina2D/Core/Backend.hpp"
+#include "Core/Drawer.hpp"
+#include "Core/Math.hpp"
+#include "Core/Renderer.hpp"
+#include "Core/Backend.hpp"
 #include <iostream>
 #include <stdio.h>
 

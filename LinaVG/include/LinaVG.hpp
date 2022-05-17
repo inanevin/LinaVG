@@ -1,11 +1,11 @@
-/* 
-This file is a part of: Lina Engine
-https://github.com/inanevin/LinaEngine
+/*
+This file is a part of: LinaVG
+https://github.com/inanevin/LinaVG
 
 Author: Inan Evin
 http://www.inanevin.com
 
-Copyright (c) [2018-2020] [Inan Evin]
+Copyright (c) [2022-] [Inan Evin]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "Lina2D/Core/Backend.hpp"
+/*
+Class: LinaVG
 
-namespace LinaVG::Internal
-{
-    BackendData g_backendData;
-}
+
+Timestamp: 3/28/2022 2:38:21 PM
+*/
+
+#pragma once
+
+#ifndef LinaVG_HPP
+#define LinaVG_HPP
+#include "Core/Renderer.hpp"
+#include "Core/Drawer.hpp"
+#endif

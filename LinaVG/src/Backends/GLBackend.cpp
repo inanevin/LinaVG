@@ -27,9 +27,9 @@ SOFTWARE.
 */
 
 #include <glad/glad.h>
-#include "Lina2D/Core/Backend.hpp"
-#include "Lina2D/Core/Renderer.hpp"
-#include "Lina2D/Core/Drawer.hpp"
+#include "Core/Backend.hpp"
+#include "Core/Renderer.hpp"
+#include "Core/Drawer.hpp"
 #include <iostream>
 #include <stdio.h>
 

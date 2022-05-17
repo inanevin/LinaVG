@@ -1,11 +1,11 @@
 /*
-This file is a part of: Lina Engine
-https://github.com/inanevin/LinaEngine
+This file is a part of: LinaVG
+https://github.com/inanevin/LinaVG
 
 Author: Inan Evin
 http://www.inanevin.com
 
-Copyright (c) [2018-] [Inan Evin]
+Copyright (c) [2022-] [Inan Evin]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ Timestamp: 3/28/2022 2:55:16 PM
 #include "Common.hpp"
 
 #ifdef LINAVG_BACKEND_GL
-#include "Lina2D/Backends/GLBackend.hpp"
+#include "Backends/GLBackend.hpp"
 #endif
 
 namespace LinaVG::Internal

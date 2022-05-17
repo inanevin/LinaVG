@@ -1,11 +1,11 @@
 /*
-This file is a part of: Lina Engine
-https://github.com/inanevin/LinaEngine
+This file is a part of: LinaVG
+https://github.com/inanevin/LinaVG
 
 Author: Inan Evin
 http://www.inanevin.com
 
-Copyright (c) [2018-2020] [Inan Evin]
+Copyright (c) [2022-] [Inan Evin]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,21 +26,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "Lina2D/Core/Common.hpp"
-#include "Lina2D/Core/Math.hpp"
+#include "Core/Backend.hpp"
 
-namespace LinaVG
+namespace LinaVG::Internal
 {
-    OutlineOptions OutlineOptions::FromStyle(const StyleOptions& opts, OutlineDrawDirection drawDir)
-    {
-        OutlineOptions o;
-        o.m_color           = opts.m_color;
-        o.m_textureHandle   = opts.m_textureHandle;
-        o.m_textureUVOffset = opts.m_textureUVOffset;
-        o.m_textureUVTiling = opts.m_textureUVTiling;
-        o.m_drawDirection   = drawDir;
-        return o;
-    }
-
-
-} // namespace LinaVG
+    BackendData g_backendData;
+}
