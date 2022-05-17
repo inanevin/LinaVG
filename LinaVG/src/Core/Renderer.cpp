@@ -43,12 +43,21 @@ namespace LinaVG
 
     void Initialize()
     {
+        Internal::g_rendererData.m_defaultBuffers.reserve(Config.m_defaultBufferReserve);
+        Internal::g_rendererData.m_gradientBuffers.reserve(Config.m_gradientBufferReserve);
+        Internal::g_rendererData.m_textureBuffers.reserve(Config.m_textureBufferReserve);
         Backend::Initialize();
+
+        // TODO - error check
+        Config.m_logCallback("LinaVG: Renderer and Backend initialized successfuly.");
     }
 
     void Terminate()
     {
         Backend::Terminate();
+
+        // TODO - error check
+        Config.m_logCallback("LinaVG: Renderer and Backend terminated successfuly.");
     }
 
     void StartFrame()

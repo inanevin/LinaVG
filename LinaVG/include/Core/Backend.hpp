@@ -27,7 +27,7 @@ SOFTWARE.
 */
 
 /*
-Class: Internal
+Class: Backend
 
 
 
@@ -36,8 +36,8 @@ Timestamp: 3/28/2022 2:55:16 PM
 
 #pragma once
 
-#ifndef Backend_HPP
-#define Backend_HPP
+#ifndef LinaVGBackend_HPP
+#define LinaVGBackend_HPP
 
 // Headers here.
 #include "Common.hpp"

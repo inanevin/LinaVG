@@ -54,7 +54,7 @@ namespace LinaVG
     typedef unsigned int Index;
     typedef unsigned int BackendHandle;
 
-    struct Vec4
+    LINAVG_API struct Vec4
     {
         Vec4(){};
         Vec4(float x, float y, float z, float w)
@@ -73,7 +73,7 @@ namespace LinaVG
         float w = 0.0f;
     };
 
-    enum class GradientType
+    LINAVG_API enum class GradientType
     {
         Horizontal   = 0,
         Vertical     = 1,
@@ -81,7 +81,7 @@ namespace LinaVG
         RadialCorner = 3
     };
 
-    struct Vec4Grad
+    LINAVG_API struct Vec4Grad
     {
         Vec4Grad(){};
         Vec4Grad(const Vec4& c1)
@@ -96,7 +96,7 @@ namespace LinaVG
         float        m_radialSize   = 1.0f;
     };
 
-    struct Vec2
+    LINAVG_API struct Vec2
     {
         Vec2(){};
         Vec2(float x, float y)
@@ -118,7 +118,7 @@ namespace LinaVG
         }
     };
 
-    struct ThicknessGrad
+    LINAVG_API struct ThicknessGrad
     {
         ThicknessGrad(){};
         ThicknessGrad(float start)
@@ -132,7 +132,6 @@ namespace LinaVG
 
     typedef float Thickness;
 
-    
     /// <summary>
     /// Custom array for fast-handling vertex & index buffers for vector drawing operations.
     /// Inspired by Dear ImGui's ImVector
@@ -316,7 +315,7 @@ namespace LinaVG
         }
     };
 
-    enum class OutlineDrawDirection
+    LINAVG_API enum class OutlineDrawDirection
     {
         Outwards,
         Inwards,
@@ -325,7 +324,7 @@ namespace LinaVG
 
     struct StyleOptions;
 
-    struct OutlineOptions
+    LINAVG_API struct OutlineOptions
     {
         static OutlineOptions FromStyle(const StyleOptions& opts, OutlineDrawDirection drawDir);
 
@@ -363,7 +362,7 @@ namespace LinaVG
     /// <summary>
     /// Style options used to draw various effects around the target shape.
     /// </summary>
-    struct StyleOptions
+    LINAVG_API struct StyleOptions
     {
 
         StyleOptions(){};
@@ -439,14 +438,7 @@ namespace LinaVG
         Vec4 m_col;
     };
 
-    enum class AAType
-    {
-        None,
-        VertexAA,
-        GPU
-    };
-
-    struct Configuration
+    LINAVG_API struct Configuration
     {
         /// <summary>
         /// Set this to your application's display pos (viewport pos).
@@ -479,7 +471,7 @@ namespace LinaVG
         /// </summary>
         float m_miterLimit = 150;
 
-                /// <summary>
+        /// <summary>
         /// Flips the Y coordinate of texture UVs.
         /// </summary>
         bool m_flipTextureUVs = false;
@@ -492,9 +484,29 @@ namespace LinaVG
         int m_gcCollectInterval = 600;
 
         /// <summary>
-        /// Set this to your own function to receive log/error callbacks from LinaVG.
+        /// This amount of default buffers are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
+        /// </summary>
+        int m_defaultBufferReserve = 10;
+
+        /// <summary>
+        /// This amount of gradient buffers are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
+        /// </summary>
+        int m_gradientBufferReserve = 5;
+
+        /// <summary>
+        /// This amount of texture buffers are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
+        /// </summary>
+        int m_textureBufferReserve = 5;
+
+        /// <summary>
+        /// Set this to your own function to receive error callbacks from LinaVG.
         /// </summary>
         std::function<void(const std::string&)> m_errorCallback;
+
+        /// <summary>
+        /// Set this to your own function to receive log callbacks from LinaVG.
+        /// </summary>
+        std::function<void(const std::string&)> m_logCallback;
 
         /// <summary>
         /// For debugging purposes, sets to draw polygon/wireframe mode.
@@ -603,7 +615,6 @@ namespace LinaVG
         Vec2          m_textureUVTiling = Vec2(1.0f, 1.0f);
         Vec2          m_textureUVOffset = Vec2(0.0f, 0.0f);
     };
-
 
 } // namespace LinaVG
 

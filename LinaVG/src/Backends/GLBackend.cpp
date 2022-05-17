@@ -33,14 +33,10 @@ SOFTWARE.
 #include <iostream>
 #include <stdio.h>
 
-#if (__cplusplus >= 201100) || (defined(_MSVC_LANG) && _MSVC_LANG >= 201100)
-#define OFFSETOF(_TYPE, _MEMBER) offsetof(_TYPE, _MEMBER) // Offset of _MEMBER within _TYPE. Standardized as offsetof() in C++11
-#else
-#define OFFSETOF(_TYPE, _MEMBER) ((size_t) & (((_TYPE*)0)->_MEMBER)) // Offset of _MEMBER within _TYPE. Old style macro.
-#endif
-
 namespace LinaVG::Backend
 {
+    GLState g_glState;
+
     void Initialize()
     {
         Internal::g_backendData.m_defaultVtxShader = "#version 330 core\n"
@@ -140,19 +136,9 @@ namespace LinaVG::Backend
         // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
-        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
         // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
         // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
         glBindVertexArray(0);
-
-        // Internal::g_rendererData.m_defaultBuffer.m_vertexBuffer.reserve(8000);
-        // Internal::g_rendererData.m_defaultBuffer.m_indexBuffer.reserve(24000);
-    }
-
-    void Terminate()
-    {
     }
 
     void StartFrame()
@@ -161,22 +147,55 @@ namespace LinaVG::Backend
         Config.m_debugCurrentTriangleCount = 0;
         Config.m_debugCurrentVertexCount   = 0;
 
+        // Save GL state
+        GLboolean blendEnabled;
+        GLboolean cullFaceEnabled;
+        GLboolean stencilTestEnabled;
+        GLboolean depthTestEnabled;
+        GLboolean scissorTestEnabled;
+        GLint     blendEq;
+        GLint     blendSrcAlpha;
+        GLint     blendSrcRGB;
+        GLint     blendDestAlpha;
+        GLint     blendDestRGB;
+        glGetBooleanv(GL_BLEND, &blendEnabled);
+        glGetBooleanv(GL_CULL_FACE, &cullFaceEnabled);
+        glGetBooleanv(GL_DEPTH_TEST, &depthTestEnabled);
+        glGetBooleanv(GL_STENCIL_TEST, &stencilTestEnabled);
+        glGetBooleanv(GL_SCISSOR_TEST, &scissorTestEnabled);
+        glGetIntegerv(GL_BLEND_EQUATION, &blendEq);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+        g_glState.m_blendDestAlpha     = static_cast<int>(blendDestAlpha);
+        g_glState.m_blendDestRGB       = static_cast<int>(blendDestRGB);
+        g_glState.m_blendEq            = static_cast<int>(blendEq);
+        g_glState.m_blendSrcAlpha      = static_cast<int>(blendSrcAlpha);
+        g_glState.m_blendSrcRGB        = static_cast<int>(blendSrcRGB);
+        g_glState.m_blendEnabled       = static_cast<bool>(blendEnabled);
+        g_glState.m_cullFaceEnabled    = static_cast<bool>(cullFaceEnabled);
+        g_glState.m_depthTestEnabled   = static_cast<bool>(depthTestEnabled);
+        g_glState.m_scissorTestEnabled = static_cast<bool>(scissorTestEnabled);
+        g_glState.m_stencilTestEnabled = static_cast<bool>(stencilTestEnabled);
+
+        // Apply GL state
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
+        glDisable(GL_SCISSOR_TEST);
 
         if (Config.m_debugWireframeEnabled)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        // glEnable(GL_SCISSOR_TEST);
-
         glViewport(0, 0, (GLsizei)Config.m_displaySize.x, (GLsizei)Config.m_displaySize.y);
 
+        // Ortho projection matrix.
         int fb_width  = (int)(Config.m_displaySize.x * Config.m_framebufferScale.x);
         int fb_height = (int)(Config.m_displaySize.y * Config.m_framebufferScale.y);
         if (fb_width <= 0 || fb_height <= 0)
@@ -186,12 +205,11 @@ namespace LinaVG::Backend
         }
 
         Internal::g_backendData.m_skipDraw = false;
-        // glViewport(0, 0, (GLsizei)fb_width, (GLsizei)fb_height);
 
-        float L    = Config.m_displayPos.x;
-        float R    = Config.m_displayPos.x + Config.m_displaySize.x;
-        float T    = Config.m_displayPos.y;
-        float B    = Config.m_displayPos.y + Config.m_displaySize.y;
+        float       L    = Config.m_displayPos.x;
+        float       R    = Config.m_displayPos.x + Config.m_displaySize.x;
+        float       T    = Config.m_displayPos.y;
+        float       B    = Config.m_displayPos.y + Config.m_displaySize.y;
         const float zoom = Config.m_debugOrthoProjectionZoom;
 
         L *= zoom;
@@ -307,8 +325,43 @@ namespace LinaVG::Backend
     void EndFrame()
     {
         // Restore state.
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        // Reset GL state
+        if (g_glState.m_blendEnabled)
+            glEnable(GL_BLEND);
+        else
+            glDisable(GL_BLEND);
+
+        if (g_glState.m_depthTestEnabled)
+            glEnable(GL_DEPTH_TEST);
+        else
+            glDisable(GL_DEPTH_TEST);
+
+        if (g_glState.m_cullFaceEnabled)
+            glEnable(GL_CULL_FACE);
+        else
+            glDisable(GL_CULL_FACE);
+
+        if (g_glState.m_stencilTestEnabled)
+            glEnable(GL_STENCIL_TEST);
+        else
+            glDisable(GL_STENCIL_TEST);
+
+        if (g_glState.m_scissorTestEnabled)
+            glEnable(GL_SCISSOR_TEST);
+        else
+            glDisable(GL_SCISSOR_TEST);
+
+        glBlendEquation(static_cast<GLenum>(g_glState.m_blendEq));
+        glBlendFuncSeparate(static_cast<GLenum>(g_glState.m_blendSrcRGB), static_cast<GLenum>(g_glState.m_blendDestRGB), static_cast<GLenum>(g_glState.m_blendSrcAlpha), static_cast<GLenum>(g_glState.m_blendDestAlpha));
+    }
+
+    void Terminate()
+    {
     }
 
     BackendHandle CreateShader(const char* vert, const char* frag)
@@ -397,4 +450,4 @@ namespace LinaVG::Backend
         }
     }
 
-} // namespace Lina2D::Backend
+} // namespace LinaVG::Backend

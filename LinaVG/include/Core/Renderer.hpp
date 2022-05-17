@@ -27,17 +27,14 @@ SOFTWARE.
 */
 
 /*
-Class: Application
-
-Central application class, responsible for managing all the engines like input, physics, rendering etc.
-as well as defining the game loop.
+Class: Renderer
 
 Timestamp: 12/29/2018 10:43:46 PM
 */
 
 #pragma once
-#ifndef LinaGUI_HPP
-#define LinaGUI_HPP
+#ifndef LinaVGRenderer_HPP
+#define LinaVGRenderer_HPP
 
 #include "Common.hpp"
 #include <functional>
@@ -52,7 +49,6 @@ namespace LinaVG
         Array<DrawBuffer>         m_defaultBuffers;
         Array<GradientDrawBuffer> m_gradientBuffers;
         Array<TextureDrawBuffer>  m_textureBuffers;
-        Array<DrawBuffer*>        m_buffers;
         int                       m_gcFrameCounter;
         int                       m_minDrawOrder = -1;
         int                       m_maxDrawOrder = -1;

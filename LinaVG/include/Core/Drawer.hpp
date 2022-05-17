@@ -100,7 +100,7 @@ namespace LinaVG
         Vec2 m_uvBR     = Vec2(1, 1);
     };
 
-    enum class LineJointType
+    LINAVG_API enum class LineJointType
     {
         None,
         Miter,
@@ -109,7 +109,7 @@ namespace LinaVG
         VtxAverage,
     };
 
-    enum class LineCapDirection
+    LINAVG_API enum class LineCapDirection
     {
         None,
         Left,
@@ -133,12 +133,12 @@ namespace LinaVG
     /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
     /// <param name="uniformUVs">Either treats whole bezier curve as a single shape to calculate UVs, or individually calculates the UVs of each line within.</param>
     /// <param name="segments"> Determines the smoothness of the curve. 0-100 range, 100 smoothest. </param>
-    void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true, int segments = 50);
+    LINAVG_API void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true, int segments = 50);
 
     /// <summary>
     /// Draws a single point.
     /// </summary>
-    void DrawPoint(const Vec2& p1, const Vec4& col);
+    LINAVG_API void DrawPoint(const Vec2& p1, const Vec4& col);
 
     /// <summary>
     /// Draws a line between two points.
@@ -149,7 +149,7 @@ namespace LinaVG
     /// <param name="cap">Puts a line cap to either first, last or both ends.</param>
     /// <param name="rotateAngle">Rotates the whole line by the given angle (degrees).</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
-    void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, float rotateAngle = 0.0f, int drawOrder = 0);
+    LINAVG_API void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws multiple lines defined by the given path.
@@ -161,7 +161,7 @@ namespace LinaVG
     /// <param name="jointType">Determines how to join the lines.</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
     /// <param name="uniformUVs">Either treats whole bezier curve as a single shape to calculate UVs, or individually calculates the UVs of each line within.</param>
-    void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true);
+    LINAVG_API void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true);
 
     /// <summary>
     /// Draws a texture in the given pos.
@@ -175,7 +175,7 @@ namespace LinaVG
     /// <param name="uvOffset">Texture UV offset.</param>
     /// <param name="uvTL">Top-left UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
     /// <param name="uvBR">Bottom-right UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
-    void DrawImage(BackendHandle textureHandle, const Vec2& pos, const Vec2& size, float rotateAngle = 0.0f, int drawOrder = 0, Vec2 uvTiling = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
+    LINAVG_API void DrawImage(BackendHandle textureHandle, const Vec2& pos, const Vec2& size, float rotateAngle = 0.0f, int drawOrder = 0, Vec2 uvTiling = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
 
     /// <summary>
     /// Your points for the triangle must follow the given parameter order -- left, right and top edges.
@@ -186,7 +186,7 @@ namespace LinaVG
     /// <param name="top"> Top corner. </param>
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-    void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
+    LINAVG_API void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws a filled rectangle between min & max with the given style options & rotation angle.
@@ -196,7 +196,7 @@ namespace LinaVG
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
-    void DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
+    LINAVG_API void DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws a convex polygon with N corners. !Rounding options do not apply to NGons!
@@ -207,7 +207,7 @@ namespace LinaVG
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
-    void DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
+    LINAVG_API void DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws the given set of points. !Rounding options do not apply!
@@ -222,7 +222,7 @@ namespace LinaVG
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
-    void DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
+    LINAVG_API void DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws a filled circle with the given radius & center.
@@ -240,7 +240,7 @@ namespace LinaVG
     /// <param name="startAngle">Use start & end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
     /// <param name="startAngle">Use start & end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
-    void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
+    LINAVG_API void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 
     namespace Internal
     {

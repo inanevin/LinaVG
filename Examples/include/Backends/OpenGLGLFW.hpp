@@ -25,49 +25,43 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-/*
-Class: GLBackend
-
-
-
-Timestamp: 3/24/2022 11:33:52 PM
-*/
 
 #pragma once
+#ifndef LinaVGExampleBackendGL_HPP
+#define LinaVGExampleBackendGL_HPP
 
-#ifndef LinaVGGLBackend_HPP
-#define LinaVGGLBackend_HPP
+class GLFWwindow;
 
-// Headers here.
-#include "Core/Common.hpp"
-
-namespace LinaVG::Backend
+namespace LinaVG
 {
-    struct GLState
+    namespace Examples
     {
-        bool m_blendEnabled       = false;
-        bool m_cullFaceEnabled    = false;
-        bool m_stencilTestEnabled = false;
-        bool m_depthTestEnabled   = false;
-        bool m_scissorTestEnabled = false;
-        int  m_blendEq            = 0;
-        int  m_blendSrcAlpha      = 0;
-        int  m_blendSrcRGB        = 0;
-        int  m_blendDestAlpha     = 0;
-        int  m_blendDestRGB       = 0;
-    };
+        class ExampleBackend
+        {
+        public:
+            ExampleBackend()  = default;
+            ~ExampleBackend() = default;
 
-    void          Initialize();
-    void          Terminate();
-    void          StartFrame();
-    void          DrawGradient(GradientDrawBuffer* buf);
-    void          DrawTextured(TextureDrawBuffer* buf);
-    void          DrawDefault(DrawBuffer* buf);
-    void          EndFrame();
-    void          AddShaderUniforms(BackendHandle shader);
-    BackendHandle CreateShader(const char* vert, const char* frag);
+            bool InitWindow(int width, int height);
+            void Poll();
+            void Render();
+            void SwapBuffers();
+            void Terminate();
 
-    extern LINAVG_API GLState g_glState;
-} // namespace LinaVG::Backend
+            inline float GetFramebufferScale()
+            {
+                return m_frameBufferScaleX;
+            }
+
+            bool m_shouldClose = false;
+
+        private:
+            static ExampleBackend* s_exampleBackend;
+            GLFWwindow*            m_window            = nullptr;
+            float                  m_frameBufferScaleX = 0.0f;
+            float                  m_frameBufferScaleY = 0.0f;
+        };
+    } // namespace Examples
+} // namespace LinaVG
 
 #endif

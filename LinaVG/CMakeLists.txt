@@ -15,11 +15,6 @@
 cmake_minimum_required (VERSION 3.6)
 project(LinaVG)
 
-option(LINAVG_BACKEND_GL "Enables OpenGL Backend." ON)
-
-if(LINAVG_BACKEND_GL)
-	add_compile_definitions(LINAVG_BACKEND_GL)
-endif()
 
 #--------------------------------------------------------------------
 # Set sources
@@ -67,7 +62,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/vendor/gla
 #--------------------------------------------------------------------
 
 target_link_libraries(${PROJECT_NAME} 
-	PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glad/lib/${TARGET_ARCHITECTURE}/$<CONFIGURATION>/glad.lib
+	PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glad/lib/${TARGETARCHITECTURE}/$<CONFIGURATION>/glad.lib
 )
 	
 

@@ -22,18 +22,19 @@ project(Examples)
 set(EXAMPLES_SOURCES 
 
 src/Main.cpp
+src/Backends/OpenGLGLFW.cpp
 )
 
 set(EXAMPLES_HEADERS
 
 include/Main.hpp
+include/Backends/OpenGLGLFW.hpp
 )
 
 #--------------------------------------------------------------------
 # Create executable project
 #--------------------------------------------------------------------
 add_executable(${PROJECT_NAME} ${EXAMPLES_SOURCES} ${EXAMPLES_HEADERS})
-add_executable(Examples ALIAS ${PROJECT_NAME}) 
 
 #--------------------------------------------------------------------
 # Options & Definitions
@@ -42,13 +43,20 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/LinaVG/include)
 
+if(LINAVG_BACKEND_GL)
+	target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glfw/include)
+endif()
 
 #--------------------------------------------------------------------
 # Links
 #--------------------------------------------------------------------
 target_link_libraries(${PROJECT_NAME} 
-PUBLIC LinaVG
+PUBLIC Lina::VG
 )
+
+if(LINAVG_BACKEND_GL)
+	target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glfw/lib/${TARGETARCHITECTURE}/$<CONFIGURATION>/glfw3.lib)
+endif()
 
 
 #--------------------------------------------------------------------
