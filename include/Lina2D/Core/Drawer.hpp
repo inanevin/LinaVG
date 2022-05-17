@@ -27,7 +27,7 @@ SOFTWARE.
 */
 
 /*
-Class: Draw
+Class: Drawer
 
 
 
@@ -36,13 +36,13 @@ Timestamp: 3/24/2022 10:57:37 PM
 
 #pragma once
 
-#ifndef Lina2DDrawer_HPP
-#define Lina2DDrawer_HPP
+#ifndef LinaVGDrawer_HPP
+#define LinaVGDrawer_HPP
 
 // Headers here.
 #include "Common.hpp"
 
-namespace Lina2D
+namespace LinaVG
 {
 
     struct LineTriangle
@@ -52,9 +52,9 @@ namespace Lina2D
 
     struct Line
     {
-        Array<Vertex> m_vertices;
-        Array<int> m_upperIndices;
-        Array<int> m_lowerIndices;
+        Array<Vertex>       m_vertices;
+        Array<int>          m_upperIndices;
+        Array<int>          m_lowerIndices;
         Array<LineTriangle> m_tris;
         bool                m_hasMidpoints = false;
 
@@ -64,7 +64,7 @@ namespace Lina2D
             m_vertices.m_size = m_vertices.m_capacity = m_vertices.m_lastSize = 0;
             m_tris.m_data                                                     = nullptr;
             m_tris.m_size = m_tris.m_capacity = m_tris.m_lastSize = 0;
-            m_lowerIndices.m_data = nullptr;
+            m_lowerIndices.m_data                                 = nullptr;
             m_lowerIndices.m_size = m_lowerIndices.m_capacity = m_lowerIndices.m_lastSize = 0;
             m_upperIndices.m_data                                                         = nullptr;
             m_upperIndices.m_size = m_upperIndices.m_capacity = m_upperIndices.m_lastSize = 0;
@@ -93,6 +93,13 @@ namespace Lina2D
         Vec2 m_p4                  = Vec2(0, 0);
     };
 
+    struct UVOverrideData
+    {
+        bool m_override = false;
+        Vec2 m_uvTL     = Vec2(0, 0);
+        Vec2 m_uvBR     = Vec2(1, 1);
+    };
+
     enum class LineJointType
     {
         None,
@@ -111,30 +118,64 @@ namespace Lina2D
     };
 
     extern RectOverrideData g_rectOverrideData;
+    extern UVOverrideData   g_uvOverride;
 
     /// <summary>
-    ///
+    /// Draws a bezier curve defined by the start, end and control points.
     /// </summary>
-    /// <param name="p0"></param>
-    /// <param name="p1"></param>
-    /// <param name="p2"></param>
-    /// <param name="p3"></param>
-    /// <param name="style"></param>
-    /// <param name="cap"></param>
-    /// <param name="jointType"></param>
-    /// <param name="drawOrder"></param>
-    /// <param name="uniformUVs"></param>
-    /// <param name="segments"> 0-100 range, 100 smoothest. </param>
+    /// <param name="p0">Start point.</param>
+    /// <param name="p1">Control point 1.</param>
+    /// <param name="p2">Control point 2.</param>
+    /// <param name="p3">End point.</param>
+    /// <param name="style">Style options.</param>
+    /// <param name="cap">Puts a line cap to either first, last or both ends.</param>
+    /// <param name="jointType">Determines how to join the lines.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="uniformUVs">Either treats whole bezier curve as a single shape to calculate UVs, or individually calculates the UVs of each line within.</param>
+    /// <param name="segments"> Determines the smoothness of the curve. 0-100 range, 100 smoothest. </param>
     void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true, int segments = 50);
 
     /// <summary>
-    /// Draws a single point with the given color & position.
+    /// Draws a single point.
     /// </summary>
     void DrawPoint(const Vec2& p1, const Vec4& col);
 
+    /// <summary>
+    /// Draws a line between two points.
+    /// </summary>
+    /// <param name="p1">Start point.</param>
+    /// <param name="p2">End point.</param>
+    /// <param name="style">Style options.</param>
+    /// <param name="cap">Puts a line cap to either first, last or both ends.</param>
+    /// <param name="rotateAngle">Rotates the whole line by the given angle (degrees).</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
     void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, float rotateAngle = 0.0f, int drawOrder = 0);
 
+    /// <summary>
+    /// Draws multiple lines defined by the given path.
+    /// </summary>
+    /// <param name="points">Line path, needs to be at least 3 points.</param>
+    /// <param name="count">Total number of points in the given path.</param>
+    /// <param name="style">Style options.</param>
+    /// <param name="cap">Puts a line cap to either first, last or both ends.</param>
+    /// <param name="jointType">Determines how to join the lines.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="uniformUVs">Either treats whole bezier curve as a single shape to calculate UVs, or individually calculates the UVs of each line within.</param>
     void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true);
+
+    /// <summary>
+    /// Draws a texture in the given pos.
+    /// </summary>
+    /// <param name="textureHandle">Texture handle, should be a valid texture loaded into the target backend device.</param>
+    /// <param name="pos">Center position of the draw rect.</param>
+    /// <param name="size">Size of the draw rect, should be same aspect ratio to prevent stretching.</param>
+    /// <param name="rotateAngle">Rotates the whole image by the given angle (degrees).</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="uvTiling">Texture tiling.</param>
+    /// <param name="uvOffset">Texture UV offset.</param>
+    /// <param name="uvTL">Top-left UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
+    /// <param name="uvBR">Bottom-right UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
+    void DrawImage(BackendHandle textureHandle, const Vec2& pos, const Vec2& size, float rotateAngle = 0.0f, int drawOrder = 0, Vec2 uvTiling = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
 
     /// <summary>
     /// Your points for the triangle must follow the given parameter order -- left, right and top edges.
@@ -143,24 +184,44 @@ namespace Lina2D
     /// <param name="left"> Bottom left corner. </param>
     /// <param name="right"> Bottom right corner. </param>
     /// <param name="top"> Top corner. </param>
-    /// <param name="style"> Style options to apply.</param>
-    /// <param name="rotateAngle"> Rotate angles around the center of the triangle. </param>
+    /// <param name="style">Style options.</param>
+    /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
     void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws a filled rectangle between min & max with the given style options & rotation angle.
     /// </summary>
+    /// <param name="min">Top left corner of the rectangle.</param>
+    /// <param name="max">Bottom right corner of the rectangle.</param>
+    /// <param name="style">Style options.</param>
+    /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
     void DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws a convex polygon with N corners. !Rounding options do not apply to NGons!
     /// </summary>
+    /// <param name="center">Shape center.</param>
+    /// <param name="radius">Shape radius.</param>
+    /// <param name="n">Segment count.</param>
+    /// <param name="style">Style options.</param>
+    /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
     void DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws the given set of points. !Rounding options do not apply!
     /// If you are not going to fill the convex shape (styling options -> m_isFilled), then prefer using DrawLines instead of this so that you can use proper line joints.
     /// </summary>
+    
+    /// <summary>
+    /// Draws a convex shape defined by the set of points. All points must be unique.
+    /// </summary>
+    /// <param name="points">Path to follow while drawing the shape. It's users' responsibility to ensure this is a convex shape.</param>
+    /// <param name="size">Total number of given points.</param>
+    /// <param name="style">Style options.</param>
+    /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
     void DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
@@ -170,43 +231,16 @@ namespace Lina2D
     /// Segments are clamped to 6 - 360 (360 being perfect circle, 8 being 6-gon)
     /// Higher the segment cause more weight on the performance. 18-54 is a good range for balance.
     /// Always recommended to use segments that leave no remainder when 360 is divided by it.
-    /// !Rounding options have no effect.!
-    /// </summary>
+    /// !Rounding options have no effect.!    /// </summary>
+    /// <param name="center">Center of the shape.</param>
+    /// <param name="radius">Radius of the shape.</param>
+    /// <param name="style">Style options.</param>
+    /// <param name="segments">Defines the smoothness of the circle, default 36.</param>
+    /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+    /// <param name="startAngle">Use start & end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
+    /// <param name="startAngle">Use start & end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
     void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
-
-    /// <summary>
-    /// Triangulates & fills the index array given a start and end vertex index.
-    /// </summary>
-    void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices, bool skipLastTriangle = false);
-
-    /// <summary>
-    /// Fills convex shapes without the assumption of a center vertex. Used for filling outer areas of non-filled shapes.
-    /// <param name="startIndex"> First vertex - start of the border.</param>
-    /// <param name="endIndex"> Last vertex - end of the border.</param>
-    /// </summary>
-    void ConvexExtrudeVertices(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing = false);
-
-    /// <summary>
-    /// Draws an arc always clock-wise from p1 to p2.
-    /// </summary>
-    /// <param name="points"></param>
-    /// <param name="p1"></param>
-    /// <param name="p2"></param>
-    /// <param name="radius"></param>
-    /// <param name="segments"></param>
-    /// <param name="flip"></param>
-    void GetArcPoints(Array<Vec2>& points, const Vec2& p1, const Vec2& p2, Vec2 directionHintPoint = Vec2(-1.0f, -1.0f), float radius = 0.0f, float segments = 36, bool flip = false, float angleOffset = 0.0f);
-
-    /// <summary>
-    /// Rotates all the vertices in the given range.
-    /// </summary>
-    /// <param name="vertices"> Vertex array. </param>
-    /// <param name="center"> Center of rotation. </param>
-    /// <param name="startIndex"> First vertex to rotate. </param>
-    /// <param name="endIndex"> Last vertex to rotate. </param>
-    /// <param name="angle"> Rotation angle. </param>
-    void RotateVertices(Array<Vertex>& vertices, const Vec2& center, int startIndex, int endIndex, float angle);
-    void RotatePoints(Vec2* points, int size, const Vec2& center, float angle);
 
     namespace Internal
     {
@@ -276,6 +310,21 @@ namespace Lina2D
         /// Triangle bounding box.
         void GetTriangleBoundingBox(const Vec2& p1, const Vec2& p2, const Vec2& p3, Vec2& outMin, Vec2& outMax);
 
+         /// Triangulates & fills the index array given a start and end vertex index.
+        void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices, bool skipLastTriangle = false);
+
+        /// Fills convex shapes without the assumption of a center vertex. Used for filling outer areas of non-filled shapes.
+        void ConvexExtrudeVertices(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing = false);
+
+        /// Fill the point array with points to draw an arc with a direction hint.
+        void GetArcPoints(Array<Vec2>& points, const Vec2& p1, const Vec2& p2, Vec2 directionHintPoint = Vec2(-1.0f, -1.0f), float radius = 0.0f, float segments = 36, bool flip = false, float angleOffset = 0.0f);
+
+        /// Rotates all the vertices in the given range via their vertex average center.
+        void RotateVertices(Array<Vertex>& vertices, const Vec2& center, int startIndex, int endIndex, float angle);
+
+        /// Rotates all points by a center.
+        void RotatePoints(Vec2* points, int size, const Vec2& center, float angle);
+
         /// <summary>
         /// Fills bounding box information for given points/vertices.
         /// </summary>
@@ -296,14 +345,12 @@ namespace Lina2D
         /// </summary>
         Vec2 GetArcDirection(const Vec2& center, float radius, float startAngle, float endAngle);
 
+        /// Line calculation methods.
         void       CalculateLine(Line& line, const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection lineCapToAdd);
-        SimpleLine CalculateSimpleLine(const Vec2& p1, const Vec2& p2, StyleOptions& style);
         void       JoinLines(Line& line1, Line& line2, StyleOptions& opts, LineJointType joinType, bool mergeUpperVertices);
-
-        void DrawSimpleLine(SimpleLine& line, StyleOptions& style, float rotateAngle);
-        void CalculateLineUVs(Line& line);
-
-        void CheckAAOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int shapeStartIndex, int shapeEndIndex, bool skipEnds = false, int drawOrder = 0);
+        void       DrawSimpleLine(SimpleLine& line, StyleOptions& style, float rotateAngle);
+        void       CalculateLineUVs(Line& line);
+        SimpleLine CalculateSimpleLine(const Vec2& p1, const Vec2& p2, StyleOptions& style);
 
         /// <summary>
         /// Draws an outline (or AA) around the vertices given, following the specific draw order via index array.
@@ -324,6 +371,6 @@ namespace Lina2D
 
     }; // namespace Internal
 
-} // namespace Lina2D
+} // namespace LinaVG
 
 #endif

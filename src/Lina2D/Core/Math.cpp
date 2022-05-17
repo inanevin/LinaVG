@@ -28,7 +28,7 @@ SOFTWARE.
 
 #include "Lina2D/Core/Math.hpp"
 
-namespace Lina2D
+namespace LinaVG
 {
     float Math::Mag(const Vec2& v)
     {
@@ -54,22 +54,22 @@ namespace Lina2D
 
     float Math::GetAngleFromCenter(const Vec2& center, const Vec2& point)
     {
-        return L2D_RAD2DEG * (std::atan2(point.y - center.y, point.x - center.x));
+        return LVG_RAD2DEG * (std::atan2(point.y - center.y, point.x - center.x));
     }
 
     float Math::GetAngleBetween(const Vec2& p1, const Vec2& p2)
     {
-        return L2D_RAD2DEG * (std::atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
+        return LVG_RAD2DEG * (std::atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
     }
 
     float Math::GetAngleBetweenDirs(const Vec2& dir1, const Vec2& dir2)
     {
-        return L2D_RAD2DEG * std::atan2f(dir1.x * dir2.y - dir1.y * dir2.x, dir1.x * dir2.x + dir1.y * dir2.y);
+        return LVG_RAD2DEG * std::atan2f(dir1.x * dir2.y - dir1.y * dir2.x, dir1.x * dir2.x + dir1.y * dir2.y);
     }
 
     float Math::GetAngleBetweenShort(const Vec2& p1, const Vec2& p2)
     {
-        float ang = L2D_RAD2DEG * (std::atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
+        float ang = LVG_RAD2DEG * (std::atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
 
         if (ang > 180.0f)
             ang = 360.0f - ang;
@@ -113,8 +113,8 @@ namespace Lina2D
 
     Vec2 Math::GetPointOnCircle(const Vec2& center, float radius, float angle)
     {
-        const float x = radius * std::cos(L2D_DEG2RAD * angle) + center.x;
-        const float y = radius * std::sin(L2D_DEG2RAD * angle) + center.y;
+        const float x = radius * std::cos(LVG_DEG2RAD * angle) + center.x;
+        const float y = radius * std::sin(LVG_DEG2RAD * angle) + center.y;
         return Vec2(x, y);
     }
 
@@ -193,7 +193,7 @@ namespace Lina2D
 
     Vec2 Math::RotateAround(const Vec2& point, const Vec2& center, float angle)
     {
-        const float angleRads = L2D_DEG2RAD * angle;
+        const float angleRads = LVG_DEG2RAD * angle;
         float       x         = std::cos(angleRads) * (point.x - center.x) - std::sin(angleRads) * (point.y - center.y) + center.x;
         float       y         = std::sin(angleRads) * (point.x - center.x) + std::cos(angleRads) * (point.y - center.y) + center.y;
         return Vec2(x, y);
@@ -379,4 +379,4 @@ namespace Lina2D
         Vec2  c2 = Vec2(val2.x * amt, val2.y * amt);
         return Vec2(c1.x + c2.x, c1.y + c2.y);
     }
-} // namespace Lina2D
+} // namespace LinaVG

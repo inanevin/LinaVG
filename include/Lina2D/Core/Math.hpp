@@ -27,7 +27,7 @@ SOFTWARE.
 */
 
 /*
-Class: Lina2DMath
+Class: Math
 
 
 
@@ -36,15 +36,15 @@ Timestamp: 3/26/2022 10:42:37 AM
 
 #pragma once
 
-#ifndef Lina2DMath_HPP
-#define Lina2DMath_HPP
+#ifndef LinaVGMath_HPP
+#define LinaVGMath_HPP
 
 // Headers here.
 #include "Common.hpp"
 
-namespace Lina2D
+namespace LinaVG
 {
-    class LINA2D_API Math
+    class LINAVG_API Math
     {
     public:
         static float Mag(const Vec2& v);
@@ -107,6 +107,6 @@ namespace Lina2D
         }
     };
 
-} // namespace Lina2D
+} // namespace LinaVG
 
 #endif

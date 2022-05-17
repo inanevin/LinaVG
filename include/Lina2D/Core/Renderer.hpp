@@ -42,14 +42,42 @@ Timestamp: 12/29/2018 10:43:46 PM
 #include "Common.hpp"
 #include <functional>
 
-namespace Lina2D
+namespace LinaVG
 {
-    LINA2D_API void          Initialize();
-    LINA2D_API void          Terminate();
-    LINA2D_API void          StartFrame();
-    LINA2D_API void          Render();
-    LINA2D_API void          EndFrame();
-    extern LINA2D_API Configuration Config;
-}; // namespace Lina2D
+    /// <summary>
+    /// Management for draw buffers.
+    /// </summary>
+    struct RendererData
+    {
+        Array<DrawBuffer>         m_defaultBuffers;
+        Array<GradientDrawBuffer> m_gradientBuffers;
+        Array<TextureDrawBuffer>  m_textureBuffers;
+        Array<DrawBuffer*>        m_buffers;
+        int                       m_gcFrameCounter;
+        int                       m_minDrawOrder = -1;
+        int                       m_maxDrawOrder = -1;
+
+        void                SetDrawOrderLimits(int drawOrder);
+        int                 GetBufferIndexInGradientArray(DrawBuffer* buf);
+        int                 GetBufferIndexInTextureArray(DrawBuffer* buf);
+        int                 GetBufferIndexInDefaultArray(DrawBuffer* buf);
+        DrawBuffer&         GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType);
+        GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
+        TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType);
+    };
+
+    namespace Internal
+    {
+        extern LINAVG_API RendererData g_rendererData;
+    }
+
+    LINAVG_API void                 Initialize();
+    LINAVG_API void                 Terminate();
+    LINAVG_API void                 StartFrame();
+    LINAVG_API void                 Render();
+    LINAVG_API void                 EndFrame();
+    extern LINAVG_API Configuration Config;
+
+}; // namespace LinaVG
 
 #endif

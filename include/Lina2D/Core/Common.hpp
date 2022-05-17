@@ -27,7 +27,7 @@ SOFTWARE.
 */
 
 /*
-Class: Lina2DCommon
+Class: Common
 
 
 
@@ -36,8 +36,8 @@ Timestamp: 3/26/2022 10:36:46 AM
 
 #pragma once
 
-#ifndef Lina2DCommon_HPP
-#define Lina2DCommon_HPP
+#ifndef LinaVGCommon_HPP
+#define LinaVGCommon_HPP
 
 // Headers here.
 #include <iostream>
@@ -45,15 +45,99 @@ Timestamp: 3/26/2022 10:36:46 AM
 #include <functional>
 #include <unordered_map>
 
-namespace Lina2D
+namespace LinaVG
 {
-#define L2D_RAD2DEG 57.2957f
-#define L2D_DEG2RAD 0.0174533f
-#define LINA2D_API  // TODO
+#define LVG_RAD2DEG 57.2957f
+#define LVG_DEG2RAD 0.0174533f
+#define LINAVG_API  // TODO
 
     typedef unsigned int Index;
     typedef unsigned int BackendHandle;
 
+    struct Vec4
+    {
+        Vec4(){};
+        Vec4(float x, float y, float z, float w)
+            : x(x), y(y), z(z), w(w){};
+        Vec4(const Vec4& v)
+        {
+            this->x = v.x;
+            this->y = v.y;
+            this->z = v.z;
+            this->w = v.w;
+        }
+
+        float x = 0.0f;
+        float y = 0.0f;
+        float z = 0.0f;
+        float w = 0.0f;
+    };
+
+    enum class GradientType
+    {
+        Horizontal   = 0,
+        Vertical     = 1,
+        Radial       = 2,
+        RadialCorner = 3
+    };
+
+    struct Vec4Grad
+    {
+        Vec4Grad(){};
+        Vec4Grad(const Vec4& c1)
+            : m_start(c1), m_end(c1){};
+
+        Vec4Grad(const Vec4& c1, const Vec4& c2)
+            : m_start(c1), m_end(c2){};
+
+        Vec4         m_start        = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
+        Vec4         m_end          = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        GradientType m_gradientType = GradientType::Horizontal;
+        float        m_radialSize   = 1.0f;
+    };
+
+    struct Vec2
+    {
+        Vec2(){};
+        Vec2(float x, float y)
+            : x(x), y(y){};
+        Vec2(const Vec2& v)
+        {
+            x = v.x;
+            y = v.y;
+        }
+
+        float x = 0.0f;
+        float y = 0.0f;
+
+        std::string ToString() const
+        {
+            std::stringstream ss;
+            ss << "X:" << x << "   Y:" << y;
+            return ss.str();
+        }
+    };
+
+    struct ThicknessGrad
+    {
+        ThicknessGrad(){};
+        ThicknessGrad(float start)
+            : m_start(start), m_end(start){};
+        ThicknessGrad(float start, float end)
+            : m_start(start), m_end(end){};
+
+        float m_start = 1.0f;
+        float m_end   = 1.0f;
+    };
+
+    typedef float Thickness;
+
+    
+    /// <summary>
+    /// Custom array for fast-handling vertex & index buffers for vector drawing operations.
+    /// Inspired by Dear ImGui's ImVector
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     template <typename T>
     class Array
     {
@@ -231,83 +315,6 @@ namespace Lina2D
             return data;
         }
     };
-    struct Vec4
-    {
-        Vec4(){};
-        Vec4(float x, float y, float z, float w)
-            : x(x), y(y), z(z), w(w){};
-        Vec4(const Vec4& v)
-        {
-            this->x = v.x;
-            this->y = v.y;
-            this->z = v.z;
-            this->w = v.w;
-        }
-
-        float x = 0.0f;
-        float y = 0.0f;
-        float z = 0.0f;
-        float w = 0.0f;
-    };
-
-    enum class GradientType
-    {
-        Horizontal   = 0,
-        Vertical     = 1,
-        Radial       = 2,
-        RadialCorner = 3
-    };
-
-    struct Vec4Grad
-    {
-        Vec4Grad(){};
-        Vec4Grad(const Vec4& c1)
-            : m_start(c1), m_end(c1){};
-
-        Vec4Grad(const Vec4& c1, const Vec4& c2)
-            : m_start(c1), m_end(c2){};
-
-        Vec4         m_start        = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
-        Vec4         m_end          = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
-        GradientType m_gradientType = GradientType::Horizontal;
-        float        m_radialSize   = 1.0f;
-    };
-
-    struct Vec2
-    {
-        Vec2(){};
-        Vec2(float x, float y)
-            : x(x), y(y){};
-        Vec2(const Vec2& v)
-        {
-            x = v.x;
-            y = v.y;
-        }
-
-        float x = 0.0f;
-        float y = 0.0f;
-
-        std::string ToString() const
-        {
-            std::stringstream ss;
-            ss << "X:" << x << "   Y:" << y;
-            return ss.str();
-        }
-    };
-
-    struct ThicknessGrad
-    {
-        ThicknessGrad(){};
-        ThicknessGrad(float start)
-            : m_start(start), m_end(start){};
-        ThicknessGrad(float start, float end)
-            : m_start(start), m_end(end){};
-
-        float m_start = 1.0f;
-        float m_end   = 1.0f;
-    };
-
-    typedef float Thickness;
 
     enum class OutlineDrawDirection
     {
@@ -322,30 +329,39 @@ namespace Lina2D
     {
         static OutlineOptions FromStyle(const StyleOptions& opts, OutlineDrawDirection drawDir);
 
+        /// <summary>
         /// Outline thickness.
+        /// </summary>
         float m_thickness = 0.0f;
 
-        /// Where to draw the outline, have no effect on filled shapes.
+        /// <summary>
+        /// Determines where to draw the outline, has no effect on filled shapes and lines.
+        /// </summary>
         OutlineDrawDirection m_drawDirection = OutlineDrawDirection::Outwards;
 
+        /// <summary>
         /// Outline color, you can set this to 2 different colors & define a gradient type, or construct with a single color for flat shading.
+        /// </summary>
         Vec4Grad m_color = Vec4Grad(Vec4(1, 1, 1, 1));
 
-        /// Set this to a texture handle you've created on your program to draw a texture on top of the shape/line. Set to 0 to clear.
+        /// <summary>
+        /// Set this to a texture handle you've created on your program to draw a texture on the outline. Set to 0 to clear.
+        /// </summary>
         BackendHandle m_textureHandle = 0;
 
+        /// <summary>
         /// Defines the texture repetition.
+        /// </summary>
         Vec2 m_textureUVTiling = Vec2(1.0f, 1.0f);
 
+        /// <summary>
         /// Defines the texture offset.
+        /// </summary>
         Vec2 m_textureUVOffset = Vec2(0.0f, 0.0f);
     };
 
     /// <summary>
-    /// Multicolors: If you want to use one color for each vertex, should point to an array of N colors, while drawing a convex shape.
-    /// Passing a pointer to an array with wrong size is undefined behavior. Set to nullptr if you want to use a gradient instead. Construct your gradient with
-    /// a single color if you want to use a single color instead.
-    /// Rounding: between 0.0f - 1.0f
+    /// Style options used to draw various effects around the target shape.
     /// </summary>
     struct StyleOptions
     {
@@ -359,48 +375,60 @@ namespace Lina2D
 
             m_onlyRoundTheseCorners.from(opts.m_onlyRoundTheseCorners);
             m_outlineOptions  = opts.m_outlineOptions;
-            m_dropShadow      = opts.m_dropShadow;
-            m_dropShadowColor = opts.m_dropShadowColor;
             m_textureHandle   = opts.m_textureHandle;
             m_textureUVTiling = opts.m_textureUVTiling;
             m_textureUVOffset = opts.m_textureUVOffset;
             m_isFilled        = opts.m_isFilled;
         }
 
+        /// <summary>
         /// Color for the shape, you can set this to 2 different colors & define a gradient type, or construct with a single color for flat shading.
+        /// </summary>
         Vec4Grad m_color = Vec4Grad(Vec4(1, 1, 1, 1));
 
-        /// While drawing lines -> can make a straight line or a line with varying thickness based on start & end.
+        /// <summary>
+        /// While drawing lines -> can make a straight line or a line with varying thickness based on start & end (only for single line API, e.g. DrawLine()).
         /// While drawing non-filled shapes -> only start thickness is used.
         /// While drawing filled shapes, this has no effect.
+        /// </summary>
         ThicknessGrad m_thickness = ThicknessGrad(1.0f);
 
-        /// Rounding for shapes such as rectangles and triangles.
+        /// <summary>
+        /// Used for:
+        /// - Rounding the corners of the shapes, e.g. rect, triangle
+        /// - Line caps rounding
+        /// - Line joints rounding
+        /// </summary>
         float m_rounding = 0.0f;
 
-        /// If rounding is to be applied, you can fill this array to only apply rounding to specific corners of the shape.
+        /// <summary>
+        /// If rounding is to be applied, you can fill this array to only apply rounding to specific corners of the shape (only for shapes, not lines).
+        /// </summary>
         Array<int> m_onlyRoundTheseCorners;
 
-        // Outline details.
+        /// <summary>
+        /// Outline details.
+        /// </summary>
         OutlineOptions m_outlineOptions;
 
-        /// For both lines and shapes, defines drop shadow angle & radius;
-        Vec2 m_dropShadow = Vec2(0.0f, 0.0f);
-
-        /// For both lines and shapes, defines the drop shadow color.
-        Vec4 m_dropShadowColor = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-        /// Set this to a texture handle you've created on your program to draw a texture on top of the shape/line. Set to 0 to clear.
+        /// <summary>
+        /// Set this to a texture handle you've created on your program to draw a texture on the shape/line. Set to 0 to clear.
+        /// </summary>
         BackendHandle m_textureHandle = 0;
 
+        /// <summary>
         /// Defines the texture repetition.
+        /// </summary>
         Vec2 m_textureUVTiling = Vec2(1.0f, 1.0f);
 
+        /// <summary>
         /// Defines the texture offset.
+        /// </summary>
         Vec2 m_textureUVOffset = Vec2(0.0f, 0.0f);
 
-        // Fills inside the shape if true.
-        // This does nothing for lines and for any style option sent as "m_outlineOptions"
+        /// <summary>
+        /// Fills inside the target shape, e.g. rect, tris, convex, circles, ngons, has no effect on lines.
+        /// </summary>
         bool m_isFilled = false;
     };
 
@@ -420,40 +448,83 @@ namespace Lina2D
 
     struct Configuration
     {
-        Vec2 m_displayPos       = Vec2(0, 0);
-        Vec2 m_displaySize      = Vec2(0, 0);
+        /// <summary>
+        /// Set this to your application's display pos (viewport pos).
+        /// </summary>
+        Vec2 m_displayPos = Vec2(0, 0);
+
+        /// <summary>
+        /// Set this to your application's display size.
+        /// </summary>
+        Vec2 m_displaySize = Vec2(0, 0);
+
+        /// <summary>
+        /// Set this to your application's framebuffer scale, e.g. OS scaling factor for high-dpi screens.
+        /// </summary>
         Vec2 m_framebufferScale = Vec2(0, 0);
 
-        /// Every m_gcCollectInterval ticks, the system will call garbage collection on vertex & index buffers.
-        int m_gcCollectInterval = 180;
-
-        /// For debugging purposes, sets to draw polygon/wireframe mode.
-        bool m_wireframeEnabled = false;
-
-        std::function<float()> m_mouseScrollCallback;
-        std::function<Vec2()>  m_keyAxisCallback;
-
-        /// Set this to your own function to receive error callbacks from Lina2D.
-        std::function<void(const std::string&, int)> m_errorCallback;
-
-        /// For debugging purposes, current count of the trianlges being drawn.
-        int m_currentTriangleCount = 0;
-
-        /// For debugging purposes, current count of the vertices sent to backend buffers.
-        int m_currentVertexCount = 0;
-
-        /// For debugging purposes, current draw calls.
-        int m_currentDrawCalls = 0;
-
-        /// Flips the Y coordinate of texture UVs.
-        bool m_flipTextureUVs = false;
-
+        /// <summary>
         /// Enable-disable anti-aliasing.
+        /// </summary>
         bool m_enableAA = true;
 
+        /// <summary>
+        /// Size multiplier for AA vertices.
+        /// </summary>
+        float m_aaMultiplier = 1.0f;
+
+        /// <summary>
         /// If the angle between two lines exceed this limit fall-back to bevel joints from miter joints.
         /// This is because miter joins the line points on intersection, ang with a very small angle (closer to 180) intersections get close to infinity.
+        /// </summary>
         float m_miterLimit = 150;
+
+                /// <summary>
+        /// Flips the Y coordinate of texture UVs.
+        /// </summary>
+        bool m_flipTextureUVs = false;
+
+        /// <summary>
+        /// Every interval ticks system will garbage collect all vertex & index buffers, meaning that will clear all the arrays.
+        /// On other ticks, arrays are simply resized to 0, avoiding re-allocations on the next frame.
+        /// Set to 0 for instant flush on buffers at the end of every frame.
+        /// </summary>
+        int m_gcCollectInterval = 600;
+
+        /// <summary>
+        /// Set this to your own function to receive log/error callbacks from LinaVG.
+        /// </summary>
+        std::function<void(const std::string&)> m_errorCallback;
+
+        /// <summary>
+        /// For debugging purposes, sets to draw polygon/wireframe mode.
+        /// </summary>
+        bool m_debugWireframeEnabled = false;
+
+        /// <summary>
+        /// For debugging purposes, current count of the trianlges being drawn.
+        /// </summary>
+        int m_debugCurrentTriangleCount = 0;
+
+        /// <summary>
+        /// For debugging purposes, current count of the vertices sent to backend buffers.
+        /// </summary>
+        int m_debugCurrentVertexCount = 0;
+
+        /// <summary>
+        /// For debugging purposes, current draw calls.
+        /// </summary>
+        int m_debugCurrentDrawCalls = 0;
+
+        /// <summary>
+        /// For debugging purposes, zooms the rendering ortho projection.
+        /// </summary>
+        float m_debugOrthoProjectionZoom = 1.0f;
+
+        /// <summary>
+        /// For debugging purposes, offsets the rendering ortho projection.
+        /// </summary>
+        Vec2 m_debugOrthoOffset = Vec2(0.0f, 0.0f);
     };
 
     enum class DrawBufferType
@@ -533,42 +604,7 @@ namespace Lina2D
         Vec2          m_textureUVOffset = Vec2(0.0f, 0.0f);
     };
 
-    struct RendererData
-    {
-        Array<DrawBuffer>         m_defaultBuffers;
-        Array<GradientDrawBuffer> m_gradientBuffers;
-        Array<TextureDrawBuffer>  m_textureBuffers;
-        Array<DrawBuffer*>        m_buffers;
-        int                       m_gcFrameCounter;
-        int                       m_minDrawOrder = -1;
-        int                       m_maxDrawOrder = -1;
 
-        void                SetDrawOrderLimits(int drawOrder);
-        int                 GetBufferIndexInGradientArray(DrawBuffer* buf);
-        int                 GetBufferIndexInTextureArray(DrawBuffer* buf);
-        int                 GetBufferIndexInDefaultArray(DrawBuffer* buf);
-        DrawBuffer&         GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType);
-        GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
-        TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType);
-    };
-
-    struct BackendData
-    {
-        BackendHandle                                                                     m_vbo                  = 0;
-        BackendHandle                                                                     m_vao                  = 0;
-        BackendHandle                                                                     m_ebo                  = 0;
-        BackendHandle                                                                     m_defaultShaderHandle  = 0;
-        BackendHandle                                                                     m_gradientShaderHandle = 0;
-        BackendHandle                                                                     m_texturedShaderHandle = 0;
-        std::unordered_map<BackendHandle, std::unordered_map<std::string, BackendHandle>> m_shaderUniformMap;
-        float                                                                             m_proj[4][4]                = {0};
-        char*                                                                             m_defaultVtxShader          = nullptr;
-        char*                                                                             m_defaultFragShader         = nullptr;
-        char*                                                                             m_roundedGradientFragShader = nullptr;
-        char*                                                                             m_texturedFragShader        = nullptr;
-        bool                                                                              m_skipDraw                  = false;
-    };
-
-} // namespace Lina2D
+} // namespace LinaVG
 
 #endif

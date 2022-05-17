@@ -27,7 +27,7 @@ SOFTWARE.
 */
 
 /*
-Class: Lina2D
+Class: LinaVG
 
 
 
@@ -36,8 +36,8 @@ Timestamp: 3/28/2022 2:38:21 PM
 
 #pragma once
 
-#ifndef Lina2D_HPP
-#define Lina2D_HPP
+#ifndef LinaVG_HPP
+#define LinaVG_HPP
 #include "Core/Renderer.hpp"
 #include "Core/Drawer.hpp"
 #endif

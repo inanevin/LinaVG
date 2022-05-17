@@ -15,6 +15,12 @@
 cmake_minimum_required (VERSION 3.6)
 project(Lina2D)
 
+option(LINAVG_BACKEND_GL "Enables OpenGL Backend." ON)
+
+if(LINAVG_BACKEND_GL)
+	add_compile_definitions(LINAVG_BACKEND_GL)
+endif()
+
 #--------------------------------------------------------------------
 # Set sources
 #--------------------------------------------------------------------
@@ -24,11 +30,11 @@ set(Lina2D_SOURCES
 # Core
 include/Lina2D/Lina2D.hpp
 include/Lina2D/Core/Renderer.hpp
-include/Lina2D/Core/Internal.hpp
 include/Lina2D/Core/Drawer.hpp
-include/Lina2D/Core/GLBackend.hpp
+include/Lina2D/Core/Backend.hpp
 include/Lina2D/Core/Common.hpp
 include/Lina2D/Core/Math.hpp
+include/Lina2D/Backends/GLBackend.hpp
 )
 
 
@@ -36,11 +42,11 @@ set(Lina2D_HEADERS
 
 # Core
 src/Lina2D/Core/Renderer.cpp
-src/Lina2D/Core/Internal.cpp
+src/Lina2D/Core/Backend.cpp
 src/Lina2D/Core/Drawer.cpp
-src/Lina2D/Core/GLBackend.cpp
 src/Lina2D/Core/Common.cpp
 src/Lina2D/Core/Math.cpp
+src/Lina2D/Backends/GLBackend.cpp
 )
 
 #--------------------------------------------------------------------

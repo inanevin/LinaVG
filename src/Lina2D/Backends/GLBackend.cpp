@@ -27,10 +27,9 @@ SOFTWARE.
 */
 
 #include <glad/glad.h>
-#include "Lina2D/Core/GLBackend.hpp"
+#include "Lina2D/Core/Backend.hpp"
 #include "Lina2D/Core/Renderer.hpp"
 #include "Lina2D/Core/Drawer.hpp"
-#include "Lina2D/Core/Internal.hpp"
 #include <iostream>
 #include <stdio.h>
 
@@ -40,7 +39,7 @@ SOFTWARE.
 #define OFFSETOF(_TYPE, _MEMBER) ((size_t) & (((_TYPE*)0)->_MEMBER)) // Offset of _MEMBER within _TYPE. Old style macro.
 #endif
 
-namespace Lina2D::Backend
+namespace LinaVG::Backend
 {
     void Initialize()
     {
@@ -80,7 +79,6 @@ namespace Lina2D::Backend
                                                        "   vec4 col = texture(diffuse, fUV * tiling + offset);\n"
                                                        "   fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
                                                        "}\0";
-
 
         Internal::g_backendData.m_roundedGradientFragShader = "#version 330 core\n"
                                                               "out vec4 fragColor;\n"
@@ -159,9 +157,9 @@ namespace Lina2D::Backend
 
     void StartFrame()
     {
-        Config.m_currentDrawCalls     = 0;
-        Config.m_currentTriangleCount = 0;
-        Config.m_currentVertexCount   = 0;
+        Config.m_debugCurrentDrawCalls     = 0;
+        Config.m_debugCurrentTriangleCount = 0;
+        Config.m_debugCurrentVertexCount   = 0;
 
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
@@ -170,7 +168,7 @@ namespace Lina2D::Backend
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
 
-        if (Config.m_wireframeEnabled)
+        if (Config.m_debugWireframeEnabled)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -190,28 +188,21 @@ namespace Lina2D::Backend
         Internal::g_backendData.m_skipDraw = false;
         // glViewport(0, 0, (GLsizei)fb_width, (GLsizei)fb_height);
 
-        float        L    = Config.m_displayPos.x;
-        float        R    = Config.m_displayPos.x + Config.m_displaySize.x;
-        float        T    = Config.m_displayPos.y;
-        float        B    = Config.m_displayPos.y + Config.m_displaySize.y;
-        static float zoom = -1.0f;
+        float L    = Config.m_displayPos.x;
+        float R    = Config.m_displayPos.x + Config.m_displaySize.x;
+        float T    = Config.m_displayPos.y;
+        float B    = Config.m_displayPos.y + Config.m_displaySize.y;
+        const float zoom = Config.m_debugOrthoProjectionZoom;
 
-        Vec2        key    = Config.m_keyAxisCallback();
-        static Vec2 keyVal = Vec2(0, 0);
-        zoom += Config.m_mouseScrollCallback() * 0.05f;
+        L *= zoom;
+        R *= zoom;
+        T *= zoom;
+        B *= zoom;
 
-        keyVal.x += key.x * 1.8f;
-        keyVal.y -= key.y * 1.8f;
-
-        L *= -zoom;
-        R *= -zoom;
-        T *= -zoom;
-        B *= -zoom;
-
-        L += keyVal.x;
-        R += keyVal.x;
-        T += keyVal.y;
-        B += keyVal.y;
+        L += Config.m_debugOrthoOffset.x;
+        R += Config.m_debugOrthoOffset.x;
+        T += Config.m_debugOrthoOffset.y;
+        B += Config.m_debugOrthoOffset.y;
 
         Internal::g_backendData.m_proj[0][0] = 2.0f / (R - L);
         Internal::g_backendData.m_proj[0][1] = 0.0f;
@@ -257,9 +248,9 @@ namespace Lina2D::Backend
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-        Config.m_currentDrawCalls++;
-        Config.m_currentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-        Config.m_currentVertexCount += buf->m_vertexBuffer.m_size;
+        Config.m_debugCurrentDrawCalls++;
+        Config.m_debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.m_debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
     void DrawTextured(TextureDrawBuffer* buf)
@@ -287,9 +278,9 @@ namespace Lina2D::Backend
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-        Config.m_currentDrawCalls++;
-        Config.m_currentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-        Config.m_currentVertexCount += buf->m_vertexBuffer.m_size;
+        Config.m_debugCurrentDrawCalls++;
+        Config.m_debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.m_debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
     void DrawDefault(DrawBuffer* buf)
@@ -308,9 +299,9 @@ namespace Lina2D::Backend
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-        Config.m_currentDrawCalls++;
-        Config.m_currentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-        Config.m_currentVertexCount += buf->m_vertexBuffer.m_size;
+        Config.m_debugCurrentDrawCalls++;
+        Config.m_debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.m_debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
     void EndFrame()

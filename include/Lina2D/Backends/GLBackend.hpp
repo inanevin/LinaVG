@@ -27,25 +27,33 @@ SOFTWARE.
 */
 
 /*
-Class: Internal
+Class: LinaGUIGLBackend
 
 
 
-Timestamp: 3/28/2022 2:55:16 PM
+Timestamp: 3/24/2022 11:33:52 PM
 */
 
 #pragma once
 
-#ifndef Internal_HPP
-#define Internal_HPP
+#ifndef Lina2DGLBackend_HPP
+#define Lina2DGLBackend_HPP
 
 // Headers here.
-#include "Common.hpp"
+#include "Lina2D/Core/Common.hpp"
 
-namespace Lina2D::Internal
+namespace LinaVG::Backend
 {
-    extern LINA2D_API BackendData g_backendData;
-    extern LINA2D_API RendererData g_rendererData;
-} // namespace Lina2D::Internal
+    void          Initialize();
+    void          Terminate();
+    void          StartFrame();
+    void          DrawGradient(GradientDrawBuffer* buf);
+    void          DrawTextured(TextureDrawBuffer* buf);
+    void          DrawDefault(DrawBuffer* buf);
+    void          EndFrame();
+    void          AddShaderUniforms(BackendHandle shader);
+    BackendHandle CreateShader(const char* vert, const char* frag);
+
+} // namespace Lina2D::Backend
 
 #endif

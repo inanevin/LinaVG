@@ -28,108 +28,9 @@ SOFTWARE.
 
 #include "Lina2D/Core/Common.hpp"
 #include "Lina2D/Core/Math.hpp"
-#include "Lina2D/Core/GLBackend.hpp"
 
-namespace Lina2D
+namespace LinaVG
 {
-    GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)
-    {
-        const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
-
-        for (int i = 0; i < m_gradientBuffers.m_size; i++)
-        {
-            auto& buf = m_gradientBuffers[i];
-            if (buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.m_start, grad.m_start) && Math::IsEqual(buf.m_color.m_end, grad.m_end) && buf.m_color.m_gradientType == grad.m_gradientType)
-            {
-                if (grad.m_gradientType == GradientType::Radial || grad.m_gradientType == GradientType::RadialCorner)
-                {
-                    if (buf.m_color.m_radialSize == grad.m_radialSize && buf.m_isAABuffer == isAABuffer)
-                        return m_gradientBuffers[i];
-                }
-                else
-                {
-                    if (buf.m_isAABuffer == isAABuffer)
-                        return m_gradientBuffers[i];
-                }
-            }
-        }
-
-        SetDrawOrderLimits(drawOrder);
-
-        m_gradientBuffers.push_back(GradientDrawBuffer(grad, drawOrder, shapeType));
-        return m_gradientBuffers.last_ref();
-    }
-
-    DrawBuffer& RendererData::GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType)
-    {
-        for (int i = 0; i < m_defaultBuffers.m_size; i++)
-        {
-            auto& buf = m_defaultBuffers[i];
-            if (m_defaultBuffers[i].m_drawOrder == drawOrder)
-                return m_defaultBuffers[i];
-        }
-
-        SetDrawOrderLimits(drawOrder);
-
-        m_defaultBuffers.push_back(DrawBuffer(drawOrder, DrawBufferType::Default, shapeType));
-        return m_defaultBuffers.last_ref();
-    }
-
-    TextureDrawBuffer& RendererData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType)
-    {
-        const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
-        for (int i = 0; i < m_textureBuffers.m_size; i++)
-        {
-            auto& buf = m_textureBuffers[i];
-            if (buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer)
-                return m_textureBuffers[i];
-        }
-
-        SetDrawOrderLimits(drawOrder);
-
-        m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset, drawOrder, shapeType));
-        return m_textureBuffers.last_ref();
-    }
-
-    int RendererData::GetBufferIndexInDefaultArray(DrawBuffer* buf)
-    {
-        for (int i = 0; i < m_defaultBuffers.m_size; i++)
-        {
-            if (buf == &m_defaultBuffers[i])
-                return i;
-        }
-        return -1;
-    }
-
-    int RendererData::GetBufferIndexInGradientArray(DrawBuffer* buf)
-    {
-        for (int i = 0; i < m_gradientBuffers.m_size; i++)
-        {
-            if (buf == &m_gradientBuffers[i])
-                return i;
-        }
-        return -1;
-    }
-
-    int RendererData::GetBufferIndexInTextureArray(DrawBuffer* buf)
-    {
-        for (int i = 0; i < m_textureBuffers.m_size; i++)
-        {
-            if (buf == &m_textureBuffers[i])
-                return i;
-        }
-        return -1;
-    }
-
-    void RendererData::SetDrawOrderLimits(int drawOrder)
-    {
-        if (m_minDrawOrder == -1 || drawOrder < m_minDrawOrder)
-            m_minDrawOrder = drawOrder;
-
-        if (m_maxDrawOrder == -1 || drawOrder > m_maxDrawOrder)
-            m_maxDrawOrder = drawOrder;
-    }
-
     OutlineOptions OutlineOptions::FromStyle(const StyleOptions& opts, OutlineDrawDirection drawDir)
     {
         OutlineOptions o;
@@ -142,4 +43,4 @@ namespace Lina2D
     }
 
 
-} // namespace Lina2D
+} // namespace LinaVG

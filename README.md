@@ -1,6 +1,6 @@
 ![Lina](Docs/Images/linalogofull_medium.png)
 
-## Lina 2D
+## Lina VG
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c0c10a437a214dbf963210ed3edf3c4f)](https://www.codacy.com/gh/inanevin/LinaEngine/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=inanevin/LinaEngine&amp;utm_campaign=Badge_Grade)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/inanevin/LinaGUI/issues) 
 ![GitHub issues](https://img.shields.io/github/issues/inanevin/LinaEngine.svg)
@@ -8,9 +8,9 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) 
 Check out the [Licence](LICENSE) file.
 
-Lina2D is a 2D graphics & an immediate-mode GUI library mainly developed for [Lina Engine](https://www.github.com/inanevin/LinaEngine), however it's decoupled from any of the Lina Engine functionality. You can use Lina2D in your own projects to facilitate the low-level drawing functionality for rendering basic anti-aliased shapes or use the high-level widgets to draw immediate-mode user interfaces.
+LinaVG is a 2D graphics & an immediate-mode GUI library mainly developed for [Lina Engine](https://www.github.com/inanevin/LinaEngine), however it's decoupled from any of the Lina Engine functionality. You can use Lina2D in your own projects to facilitate the low-level drawing functionality for rendering basic anti-aliased shapes or use the high-level widgets to draw immediate-mode user interfaces.
 
-Lina2D currently only supports OpenGL backend, but feel free to contribute by implementing low-level drawing functionalities on other backends!
+LinaVG currently only supports OpenGL backend, but feel free to contribute by implementing low-level drawing functionalities on other backends!
 
 ## Installation
 

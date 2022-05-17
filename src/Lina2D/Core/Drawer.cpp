@@ -29,14 +29,14 @@ SOFTWARE.
 #include "Lina2D/Core/Drawer.hpp"
 #include "Lina2D/Core/Math.hpp"
 #include "Lina2D/Core/Renderer.hpp"
-#include "Lina2D/Core/Internal.hpp"
-#include "Lina2D/Core/GLBackend.hpp"
+#include "Lina2D/Core/Backend.hpp"
 #include <iostream>
 #include <stdio.h>
 
-namespace Lina2D
+namespace LinaVG
 {
     RectOverrideData g_rectOverrideData;
+    UVOverrideData   g_uvOverride;
 
     void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap, LineJointType jointType, int drawOrder, bool uniformUVs, int segments)
     {
@@ -108,14 +108,14 @@ namespace Lina2D
         {
             s.m_onlyRoundTheseCorners.push_back(0);
             s.m_onlyRoundTheseCorners.push_back(3);
-            s.m_rounding = 2.0f;
+            s.m_rounding = 1.0f;
         }
 
         if (cap == LineCapDirection::Right || cap == LineCapDirection::Both)
         {
             s.m_onlyRoundTheseCorners.push_back(1);
             s.m_onlyRoundTheseCorners.push_back(2);
-            s.m_rounding = 2.0f;
+            s.m_rounding = 1.0f;
         }
 
         Internal::DrawSimpleLine(l, s, rotateAngle);
@@ -146,7 +146,7 @@ namespace Lina2D
 
         if (count < 3)
         {
-            Config.m_errorCallback("LinaVG: Can't draw lines as the point array count is smaller than 3!", 0);
+            Config.m_errorCallback("LinaVG: Can't draw lines as the point array count is smaller than 3!");
             return;
         }
 
@@ -312,6 +312,28 @@ namespace Lina2D
 
             Internal::DrawOutlineAroundShape(destBuf, opts2, &indicesOrder[0], indicesOrder.m_size, opts2.m_outlineOptions.m_thickness, false, drawOrder, true);
         }
+    }
+
+    void DrawImage(BackendHandle textureHandle, const Vec2& pos, const Vec2& size, float rotateAngle, int drawOrder, Vec2 uvTiling, Vec2 uvOffset, Vec2 uvTL, Vec2 uvBR)
+    {
+        StyleOptions style;
+        style.m_isFilled        = true;
+        style.m_textureHandle   = textureHandle;
+        style.m_textureUVOffset = uvOffset;
+        style.m_textureUVTiling = uvTiling;
+        const Vec2 min          = Vec2(pos.x - size.x / 2.0f, pos.y - size.y / 2.0f);
+        const Vec2 max          = Vec2(pos.x + size.x / 2.0f, pos.y + size.y / 2.0f);
+
+        g_uvOverride.m_override = true;
+        g_uvOverride.m_uvTL     = uvTL;
+        g_uvOverride.m_uvBR     = uvBR;
+        const bool currAA       = Config.m_enableAA;
+        Config.m_enableAA       = false;
+        DrawRect(min, max, style, rotateAngle, drawOrder);
+        Config.m_enableAA       = currAA;
+        g_uvOverride.m_override = false;
+        g_uvOverride.m_uvTL     = Vec2(0, 0);
+        g_uvOverride.m_uvBR     = Vec2(1, 1);
     }
 
     void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle, int drawOrder)
@@ -558,7 +580,7 @@ namespace Lina2D
     {
         if (size < 3)
         {
-            Config.m_errorCallback("LinaVG: Can draw a convex shape that has less than 3 corners!", 0);
+            Config.m_errorCallback("LinaVG: Can draw a convex shape that has less than 3 corners!");
             return;
         }
 
@@ -669,175 +691,6 @@ namespace Lina2D
                     Internal::FillCircle_RadialGra(&buf, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, startAngle, endAngle, style, drawOrder);
                 }
             }
-        }
-    }
-
-    void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices, bool skipLastTriangle)
-    {
-        // i = 0 is center.
-        for (int i = startIndex + 1; i < endIndex; i++)
-        {
-            indices.push_back(startIndex);
-            indices.push_back(i);
-            indices.push_back(i + 1);
-        }
-
-        // Last fill.
-        if (!skipLastTriangle)
-        {
-            indices.push_back(startIndex);
-            indices.push_back(startIndex + 1);
-            indices.push_back(endIndex);
-        }
-    }
-
-    void ConvexExtrudeVertices(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing)
-    {
-        const int totalSize = endIndex - startIndex + 1;
-        thickness *= Config.m_framebufferScale.x;
-
-        // Extrude vertices.
-        for (int i = startIndex; i < startIndex + totalSize; i++)
-        {
-            // take two edges, this vertex to next and previous to this in order to calculate vertex normals.
-            const int previous = i == startIndex ? endIndex : i - 1;
-            const int next     = i == endIndex ? startIndex : i + 1;
-            Vertex    v;
-            v.m_col = buf->m_vertexBuffer[i].m_col;
-            if (skipEndClosing && i == startIndex)
-            {
-                const Vec2 toNext  = Math::Normalized(Vec2(buf->m_vertexBuffer[next].m_pos.x - buf->m_vertexBuffer[i].m_pos.x, buf->m_vertexBuffer[next].m_pos.y - buf->m_vertexBuffer[i].m_pos.y));
-                const Vec2 rotated = Math::Rotate90(toNext, true);
-                v.m_pos            = Vec2(buf->m_vertexBuffer[i].m_pos.x + rotated.x * thickness, buf->m_vertexBuffer[i].m_pos.y + rotated.y * thickness);
-            }
-            else if (skipEndClosing && i == endIndex)
-            {
-                const Vec2 fromPrev = Math::Normalized(Vec2(buf->m_vertexBuffer[i].m_pos.x - buf->m_vertexBuffer[previous].m_pos.x, buf->m_vertexBuffer[i].m_pos.y - buf->m_vertexBuffer[previous].m_pos.y));
-                const Vec2 rotated  = Math::Rotate90(fromPrev, true);
-                v.m_pos             = Vec2(buf->m_vertexBuffer[i].m_pos.x + rotated.x * thickness, buf->m_vertexBuffer[i].m_pos.y + rotated.y * thickness);
-            }
-            else
-            {
-                const Vec2 vertexNormalAverage = Math::GetVertexNormal(buf->m_vertexBuffer[i].m_pos, buf->m_vertexBuffer[previous].m_pos, buf->m_vertexBuffer[next].m_pos);
-                v.m_pos                        = Vec2(buf->m_vertexBuffer[i].m_pos.x + vertexNormalAverage.x * thickness, buf->m_vertexBuffer[i].m_pos.y + vertexNormalAverage.y * thickness);
-            }
-
-            buf->PushVertex(v);
-        }
-
-        Internal::CalculateVertexUVs(buf, startIndex, endIndex + totalSize);
-
-        for (int i = startIndex; i < startIndex + totalSize; i++)
-        {
-            int next = i + 1;
-            if (next >= startIndex + totalSize)
-                next = startIndex;
-
-            if (skipEndClosing && i == startIndex + totalSize - 1)
-                return;
-
-            buf->PushIndex(i);
-            buf->PushIndex(next);
-            buf->PushIndex(i + totalSize);
-            buf->PushIndex(next);
-            buf->PushIndex(next + totalSize);
-            buf->PushIndex(i + totalSize);
-        }
-    }
-
-    void RotateVertices(Array<Vertex>& vertices, const Vec2& center, int startIndex, int endIndex, float angle)
-    {
-        for (int i = startIndex; i < endIndex + 1; i++)
-        {
-            vertices[i].m_pos = Math::RotateAround(vertices[i].m_pos, center, angle);
-        }
-    }
-
-    void RotatePoints(Vec2* points, int size, const Vec2& center, float angle)
-    {
-        for (int i = 0; i < size; i++)
-        {
-            points[i] = Math::RotateAround(points[i], center, angle);
-        }
-    }
-
-    void GetArcPoints(Array<Vec2>& points, const Vec2& p1, const Vec2& p2, Vec2 directionHintPoint, float radius, float segments, bool flip, float angleOffset)
-    {
-        const float halfMag = Math::Mag(Vec2(p2.x - p1.x, p2.y - p1.y)) / 2.0f;
-        const Vec2  center  = Vec2((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f);
-        const Vec2  dir     = Vec2(p2.x - p1.x, p2.y - p1.y);
-
-        // Determine flip if we have a hint point.
-        if (!Math::IsEqual(directionHintPoint, Vec2(-1.0f, -1.0f)))
-        {
-            if (p1.x - p2.x == 0.0f)
-            {
-                // Flipped Y axis, if p1 is above.
-                if (p1.y < p2.y)
-                {
-                    if (directionHintPoint.x < p1.x)
-                        flip = true;
-                }
-                else
-                {
-                    // if p2 is above.
-                    if (directionHintPoint.x > p1.x)
-                        flip = true;
-                }
-            }
-            else
-            {
-                const Vec2 centerToDirHint = Vec2(directionHintPoint.x - center.x, directionHintPoint.y - center.y);
-                // p2 is on the right, p1 on the left
-                if (p2.x > p1.x)
-                {
-                    if (centerToDirHint.y > 0.0f)
-                        flip = true;
-                    else if (centerToDirHint.y == 0.0f)
-                    {
-                        if (centerToDirHint.x < 0.0f)
-                            flip = true;
-                    }
-                }
-                else
-                {
-                    // p2 is on the left, p1 is on the right.
-                    if (centerToDirHint.y < 0.0f)
-                        flip = true;
-                    else if (centerToDirHint.y == 0.0f)
-                    {
-                        if (centerToDirHint.x > 0.0f)
-                            flip = true;
-                    }
-                }
-            }
-        }
-
-        float angle1 = Math::GetAngleFromCenter(center, flip ? p2 : p1);
-        float angle2 = Math::GetAngleFromCenter(center, flip ? p1 : p2);
-
-        if (angleOffset == 0.0f)
-            points.push_back(flip ? p2 : p1);
-
-        if (angle2 < angle1)
-            angle2 += 360.0f;
-
-        const float midAngle      = (angle2 + angle1) / 2.0f;
-        const float angleIncrease = (segments >= 180.0f || segments < 0.0f) ? 1.0f : 180.0f / (float)segments;
-
-        for (float i = angle1 + angleIncrease + angleOffset; i < angle2 - angleOffset; i += angleIncrease)
-        {
-            Vec2 p = Vec2(0, 0);
-
-            if (radius == 0.0f)
-                p = Math::GetPointOnCircle(center, halfMag, i);
-            else
-            {
-                const Vec2 out = Math::Normalized(Math::Rotate90(dir, !flip));
-                p              = Math::SampleParabola(p1, p2, out, radius, Math::Remap(i, angle1, angle2, 0.0f, 1.0f));
-            }
-
-            points.push_back(p);
         }
     }
 
@@ -1057,7 +910,7 @@ namespace Lina2D
         if (hasCenter)
         {
             v[0].m_pos = center;
-            v[0].m_uv  = Vec2(0.5f, 0.5f);
+            v[0].m_uv  = Vec2((g_uvOverride.m_uvTL.x + g_uvOverride.m_uvBR.x) / 2.0f, (g_uvOverride.m_uvTL.y + g_uvOverride.m_uvBR.y) / 2.0f);
         }
 
         if (!g_rectOverrideData.overrideRectPositions)
@@ -1078,10 +931,10 @@ namespace Lina2D
             v[i + 3].m_pos = g_rectOverrideData.m_p4;
         }
 
-        v[i].m_uv     = Vec2(0.0f, 0.0f);
-        v[i + 1].m_uv = Vec2(1.0f, 0.0f);
-        v[i + 2].m_uv = Vec2(1.0f, 1.0f);
-        v[i + 3].m_uv = Vec2(0.0f, 1.0f);
+        v[i].m_uv     = g_uvOverride.m_uvTL;
+        v[i + 1].m_uv = Vec2(g_uvOverride.m_uvBR.x, g_uvOverride.m_uvTL.y);
+        v[i + 2].m_uv = g_uvOverride.m_uvBR;
+        v[i + 3].m_uv = Vec2(g_uvOverride.m_uvTL.x, g_uvOverride.m_uvBR.y);
     }
 
     void Internal::FillTri_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts, int drawOrder)
@@ -1907,6 +1760,175 @@ namespace Lina2D
             buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? size : size * 2, false, drawOrder, true);
         }
     }
+    
+    void Internal::ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices, bool skipLastTriangle)
+    {
+        // i = 0 is center.
+        for (int i = startIndex + 1; i < endIndex; i++)
+        {
+            indices.push_back(startIndex);
+            indices.push_back(i);
+            indices.push_back(i + 1);
+        }
+
+        // Last fill.
+        if (!skipLastTriangle)
+        {
+            indices.push_back(startIndex);
+            indices.push_back(startIndex + 1);
+            indices.push_back(endIndex);
+        }
+    }
+
+    void Internal::ConvexExtrudeVertices(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing)
+    {
+        const int totalSize = endIndex - startIndex + 1;
+        thickness *= Config.m_framebufferScale.x;
+
+        // Extrude vertices.
+        for (int i = startIndex; i < startIndex + totalSize; i++)
+        {
+            // take two edges, this vertex to next and previous to this in order to calculate vertex normals.
+            const int previous = i == startIndex ? endIndex : i - 1;
+            const int next     = i == endIndex ? startIndex : i + 1;
+            Vertex    v;
+            v.m_col = buf->m_vertexBuffer[i].m_col;
+            if (skipEndClosing && i == startIndex)
+            {
+                const Vec2 toNext  = Math::Normalized(Vec2(buf->m_vertexBuffer[next].m_pos.x - buf->m_vertexBuffer[i].m_pos.x, buf->m_vertexBuffer[next].m_pos.y - buf->m_vertexBuffer[i].m_pos.y));
+                const Vec2 rotated = Math::Rotate90(toNext, true);
+                v.m_pos            = Vec2(buf->m_vertexBuffer[i].m_pos.x + rotated.x * thickness, buf->m_vertexBuffer[i].m_pos.y + rotated.y * thickness);
+            }
+            else if (skipEndClosing && i == endIndex)
+            {
+                const Vec2 fromPrev = Math::Normalized(Vec2(buf->m_vertexBuffer[i].m_pos.x - buf->m_vertexBuffer[previous].m_pos.x, buf->m_vertexBuffer[i].m_pos.y - buf->m_vertexBuffer[previous].m_pos.y));
+                const Vec2 rotated  = Math::Rotate90(fromPrev, true);
+                v.m_pos             = Vec2(buf->m_vertexBuffer[i].m_pos.x + rotated.x * thickness, buf->m_vertexBuffer[i].m_pos.y + rotated.y * thickness);
+            }
+            else
+            {
+                const Vec2 vertexNormalAverage = Math::GetVertexNormal(buf->m_vertexBuffer[i].m_pos, buf->m_vertexBuffer[previous].m_pos, buf->m_vertexBuffer[next].m_pos);
+                v.m_pos                        = Vec2(buf->m_vertexBuffer[i].m_pos.x + vertexNormalAverage.x * thickness, buf->m_vertexBuffer[i].m_pos.y + vertexNormalAverage.y * thickness);
+            }
+
+            buf->PushVertex(v);
+        }
+
+        Internal::CalculateVertexUVs(buf, startIndex, endIndex + totalSize);
+
+        for (int i = startIndex; i < startIndex + totalSize; i++)
+        {
+            int next = i + 1;
+            if (next >= startIndex + totalSize)
+                next = startIndex;
+
+            if (skipEndClosing && i == startIndex + totalSize - 1)
+                return;
+
+            buf->PushIndex(i);
+            buf->PushIndex(next);
+            buf->PushIndex(i + totalSize);
+            buf->PushIndex(next);
+            buf->PushIndex(next + totalSize);
+            buf->PushIndex(i + totalSize);
+        }
+    }
+
+    void Internal::RotateVertices(Array<Vertex>& vertices, const Vec2& center, int startIndex, int endIndex, float angle)
+    {
+        for (int i = startIndex; i < endIndex + 1; i++)
+        {
+            vertices[i].m_pos = Math::RotateAround(vertices[i].m_pos, center, angle);
+        }
+    }
+
+    void Internal::RotatePoints(Vec2* points, int size, const Vec2& center, float angle)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            points[i] = Math::RotateAround(points[i], center, angle);
+        }
+    }
+
+    void Internal::GetArcPoints(Array<Vec2>& points, const Vec2& p1, const Vec2& p2, Vec2 directionHintPoint, float radius, float segments, bool flip, float angleOffset)
+    {
+        const float halfMag = Math::Mag(Vec2(p2.x - p1.x, p2.y - p1.y)) / 2.0f;
+        const Vec2  center  = Vec2((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f);
+        const Vec2  dir     = Vec2(p2.x - p1.x, p2.y - p1.y);
+
+        // Determine flip if we have a hint point.
+        if (!Math::IsEqual(directionHintPoint, Vec2(-1.0f, -1.0f)))
+        {
+            if (p1.x - p2.x == 0.0f)
+            {
+                // Flipped Y axis, if p1 is above.
+                if (p1.y < p2.y)
+                {
+                    if (directionHintPoint.x < p1.x)
+                        flip = true;
+                }
+                else
+                {
+                    // if p2 is above.
+                    if (directionHintPoint.x > p1.x)
+                        flip = true;
+                }
+            }
+            else
+            {
+                const Vec2 centerToDirHint = Vec2(directionHintPoint.x - center.x, directionHintPoint.y - center.y);
+                // p2 is on the right, p1 on the left
+                if (p2.x > p1.x)
+                {
+                    if (centerToDirHint.y > 0.0f)
+                        flip = true;
+                    else if (centerToDirHint.y == 0.0f)
+                    {
+                        if (centerToDirHint.x < 0.0f)
+                            flip = true;
+                    }
+                }
+                else
+                {
+                    // p2 is on the left, p1 is on the right.
+                    if (centerToDirHint.y < 0.0f)
+                        flip = true;
+                    else if (centerToDirHint.y == 0.0f)
+                    {
+                        if (centerToDirHint.x > 0.0f)
+                            flip = true;
+                    }
+                }
+            }
+        }
+
+        float angle1 = Math::GetAngleFromCenter(center, flip ? p2 : p1);
+        float angle2 = Math::GetAngleFromCenter(center, flip ? p1 : p2);
+
+        if (angleOffset == 0.0f)
+            points.push_back(flip ? p2 : p1);
+
+        if (angle2 < angle1)
+            angle2 += 360.0f;
+
+        const float midAngle      = (angle2 + angle1) / 2.0f;
+        const float angleIncrease = (segments >= 180.0f || segments < 0.0f) ? 1.0f : 180.0f / (float)segments;
+
+        for (float i = angle1 + angleIncrease + angleOffset; i < angle2 - angleOffset; i += angleIncrease)
+        {
+            Vec2 p = Vec2(0, 0);
+
+            if (radius == 0.0f)
+                p = Math::GetPointOnCircle(center, halfMag, i);
+            else
+            {
+                const Vec2 out = Math::Normalized(Math::Rotate90(dir, !flip));
+                p              = Math::SampleParabola(p1, p2, out, radius, Math::Remap(i, angle1, angle2, 0.0f, 1.0f));
+            }
+
+            points.push_back(p);
+        }
+    }
 
     void Internal::GetTriangleBoundingBox(const Vec2& p1, const Vec2& p2, const Vec2& p3, Vec2& outMin, Vec2& outMax)
     {
@@ -1993,71 +2015,6 @@ namespace Lina2D
         else
             return 5.0f;
     }
-
-    /*void Internal::ConvexOutline(Array<Vertex>& srcVertices, int startIndex, int endIndex, const Vec2& convexCenter, OutlineOptions& options, bool skipEndClosing)
-    {
-        const int current   = DEF_VTX_BUF.m_size;
-        const int totalSize = endIndex - startIndex + 1;
-
-        for (size_t i = startIndex; i <= endIndex; i++)
-        {
-            // pushing a new one might invalidate the srcVertices[i] reference (due to growing and memcpy)
-            // so check and grow if necessary first.
-            DEF_VTX_BUF.checkGrow();
-            Vertex* v = DEF_VTX_BUF.push_back(srcVertices[i]);
-            v->m_col  = options.m_color;
-        }
-
-        // Iterate the latest added copy vertices.
-        // Exflate each vertex towards outer direction from center.
-        for (int i = 0; i < totalSize; i++)
-        {
-            Vertex&    v          = DEF_VTX_BUF[current + i];
-            const Vec2 dir        = Math::Normalized(Vec2(v.m_pos.x - convexCenter.x, v.m_pos.y - convexCenter.y));
-            Vec2       uniformDir = dir;
-
-            //  if (Math::Abs(dir.x) > Math::Abs(dir.y))
-            //  {
-            //      uniformDir.x = dir.x;
-            //      if (dir.y > 0.0)
-            //          uniformDir.y = Math::Abs(dir.x);
-            //      else
-            //          uniformDir.y = -Math::Abs(dir.x);
-            //  }
-            //  else
-            //  {
-            //      uniformDir.y = dir.y;
-            //      if (dir.x > 0.0)
-            //          uniformDir.x = Math::Abs(dir.y);
-            //      else
-            //          uniformDir.x = -Math::Abs(dir.y);
-            //  }
-
-            Vertex exf;
-            exf.m_pos = Vec2(v.m_pos.x + uniformDir.x * options.m_radius * Config.m_framebufferScale.x, v.m_pos.y + uniformDir.y * options.m_radius * Config.m_framebufferScale.y);
-            exf.m_col = options.m_color;
-            exf.m_uv  = v.m_uv;
-            DEF_VTX_BUF.push_back(exf);
-        }
-
-        // Now add the indices.
-        for (int i = current; i < current + totalSize; i++)
-        {
-            int next = i + 1;
-            if (next >= current + totalSize)
-                next = current;
-
-            if (i == current + totalSize - 1 && skipEndClosing)
-                return;
-
-            DEF_INDEX_BUF.push_back(i);
-            DEF_INDEX_BUF.push_back(i + totalSize);
-            DEF_INDEX_BUF.push_back(next);
-            DEF_INDEX_BUF.push_back(i + totalSize);
-            DEF_INDEX_BUF.push_back(next);
-            DEF_INDEX_BUF.push_back(next + totalSize);
-        }
-    }*/
 
     Vec2 Internal::GetArcDirection(const Vec2& center, float radius, float startAngle, float endAngle)
     {
@@ -2291,7 +2248,7 @@ namespace Lina2D
             vLow.m_pos = line2.m_vertices[intersection3].m_pos;
             line1.m_vertices.push_back(vLow);
 
-            LineTriangle tri1, tri2;
+            LineTriangle tri1;
             tri1.m_indices[0] = intersection1;
             tri1.m_indices[1] = intersection2;
             tri1.m_indices[2] = vLowIndex;
@@ -2428,16 +2385,13 @@ namespace Lina2D
         }
     }
 
-    void Internal::CheckAAOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int shapeStartIndex, int shapeEndIndex, bool skipEnds, int drawOrder)
-    {
-    }
 
     DrawBuffer* Internal::DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw, int drawOrder, bool isAAOutline)
     {
         const bool useTextureBuffer = opts.m_outlineOptions.m_textureHandle != 0;
         const bool isGradient       = !Math::IsEqual(opts.m_outlineOptions.m_color.m_start, opts.m_outlineOptions.m_color.m_end) && (!isAAOutline || (isAAOutline && sourceBuffer->m_drawBufferType == DrawBufferType::Gradient));
         const bool useGradBuffer    = !useTextureBuffer && isGradient;
-        float      thickness        = isAAOutline ? Config.m_framebufferScale.x : (defThickness * Config.m_framebufferScale.x);
+        float      thickness        = isAAOutline ? Config.m_framebufferScale.x * Config.m_aaMultiplier : (defThickness * Config.m_framebufferScale.x);
 
         // Determine which buffer to use.
         // Also correct the buffer pointer if getting a new buffer invalidated it.
@@ -2544,7 +2498,7 @@ namespace Lina2D
         const bool useTextureBuffer = opts.m_outlineOptions.m_textureHandle != 0;
         const bool isGradient       = !Math::IsEqual(opts.m_outlineOptions.m_color.m_start, opts.m_outlineOptions.m_color.m_end) && (!isAAOutline || (isAAOutline && sourceBuffer->m_drawBufferType == DrawBufferType::Gradient));
         const bool useGradBuffer    = !useTextureBuffer && isGradient;
-        float      thickness        = isAAOutline ? Config.m_framebufferScale.x : (opts.m_outlineOptions.m_thickness * Config.m_framebufferScale.x);
+        float      thickness        = isAAOutline ? Config.m_framebufferScale.x * Config.m_aaMultiplier : (opts.m_outlineOptions.m_thickness * Config.m_framebufferScale.x);
 
         if (reverseDrawDir)
             thickness = -thickness;
@@ -2778,4 +2732,4 @@ namespace Lina2D
         return sourceBuffer;
     }
 
-} // namespace Lina2D
+} // namespace LinaVG

@@ -26,10 +26,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "Lina2D/Core/Internal.hpp"
+#include "Lina2D/Core/Backend.hpp"
 
-namespace Lina2D::Internal
+namespace LinaVG::Internal
 {
-    RendererData g_rendererData;
     BackendData g_backendData;
 }
