@@ -56,13 +56,15 @@ add_library(Lina::VG ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glad/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/vendor/FreeType/include)
 
 #--------------------------------------------------------------------
 # Subdirectories & linking
 #--------------------------------------------------------------------
 
 target_link_libraries(${PROJECT_NAME} 
-	PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glad/lib/${TARGETARCHITECTURE}/$<CONFIGURATION>/glad.lib
+	PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glad/lib/${ARCHITECTURE}/$<CONFIGURATION>/glad.lib
+	PUBLIC ${CMAKE_SOURCE_DIR}/vendor/FreeType/lib/${ARCHITECTURE}/$<CONFIGURATION>/freetype.lib
 )
 	
 

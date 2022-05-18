@@ -57,7 +57,7 @@ namespace LinaVG::Backend
         int  m_blendDestRGB       = 0;
     };
 
-    void          Initialize();
+    bool          Initialize();
     void          Terminate();
     void          StartFrame();
     void          DrawGradient(GradientDrawBuffer* buf);

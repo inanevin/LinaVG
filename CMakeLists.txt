@@ -18,7 +18,7 @@ project (LinaVGPROJ)
 set(CMAKE_CXX_STANDARD 17)
 
 option(BUILD_EXAMPLES "Builds example backend projects." ON)
-set(TARGETARCHITECTURE "x64" CACHE STRING "Set this to your target architecture, Win32, x64 etc.")
+set(ARCHITECTURE "x64" CACHE STRING "Set this to your target architecture, Win32, x64 etc.")
 
 option(LINAVG_BACKEND_GL "Enables OpenGL Backend." ON)
 
@@ -42,6 +42,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 #--------------------------------------------------------------------
 # Sub directories
 #--------------------------------------------------------------------
+
 
 add_subdirectory(LinaVG)
 

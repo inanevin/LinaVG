@@ -30,7 +30,7 @@ SOFTWARE.
 #ifndef LinaVGExampleBackendGL_HPP
 #define LinaVGExampleBackendGL_HPP
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace LinaVG
 {
@@ -47,16 +47,14 @@ namespace LinaVG
             void Render();
             void SwapBuffers();
             void Terminate();
+            float GetTime();
 
             inline float GetFramebufferScale()
             {
                 return m_frameBufferScaleX;
             }
 
-            bool m_shouldClose = false;
-
         private:
-            static ExampleBackend* s_exampleBackend;
             GLFWwindow*            m_window            = nullptr;
             float                  m_frameBufferScaleX = 0.0f;
             float                  m_frameBufferScaleY = 0.0f;

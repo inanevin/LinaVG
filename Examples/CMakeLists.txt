@@ -55,8 +55,18 @@ PUBLIC Lina::VG
 )
 
 if(LINAVG_BACKEND_GL)
-	target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glfw/lib/${TARGETARCHITECTURE}/$<CONFIGURATION>/glfw3.lib)
+	target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glfw/lib/${ARCHITECTURE}/$<CONFIGURATION>/glfw3.lib)
 endif()
+
+add_custom_command(
+TARGET ${PROJECT_NAME}
+POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/_Resources" "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/")
+
+add_custom_command(
+TARGET ${PROJECT_NAME}
+POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/_Resources" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/")
 
 
 #--------------------------------------------------------------------

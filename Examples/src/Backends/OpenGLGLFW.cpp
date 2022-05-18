@@ -27,6 +27,7 @@ SOFTWARE.
 */
 
 #include "Backends/OpenGLGLFW.hpp"
+#include "Main.hpp"
 #include <iostream>
 
 #include "glad/glad.h"
@@ -38,8 +39,6 @@ namespace LinaVG
 {
     namespace Examples
     {
-        ExampleBackend* ExampleBackend::s_exampleBackend = nullptr;
-
         static void GLFWErrorCallback(int error, const char* desc)
         {
             std::cerr << "LinaVG: GLFW Error: " << error << " Description: " << desc << std::endl;
@@ -47,7 +46,6 @@ namespace LinaVG
 
         bool ExampleBackend::InitWindow(int width, int height)
         {
-            s_exampleBackend = this;
             int init = glfwInit();
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -96,15 +94,34 @@ namespace LinaVG
             glfwSetWindowUserPointer(m_window, this);
 
             auto windowResizeFunc = [](GLFWwindow* w, int wi, int he) {
-                
+                ExampleApp::Get()->OnWindowResizeCallback(wi, he);
             };
 
             auto windowCloseFunc = [](GLFWwindow* w) {
-                s_exampleBackend->m_shouldClose = true;
+                ExampleApp::Get()->OnWindowCloseCallback();
             };
 
             auto windowKeyFunc = [](GLFWwindow* w, int key, int scancode, int action, int modes) {
+                if (action == GLFW_PRESS)
+                {
+                    if (key == GLFW_KEY_F)
+                        ExampleApp::Get()->OnFCallback();
+                    else if (key == GLFW_KEY_SPACE)
+                        ExampleApp::Get()->OnSpaceCallback();
 
+                    else if (key == GLFW_KEY_0)
+                        ExampleApp::Get()->OnNumKeyCallback(0);
+                    else if (key == GLFW_KEY_1)
+                        ExampleApp::Get()->OnNumKeyCallback(1);
+                    else if (key == GLFW_KEY_2)
+                        ExampleApp::Get()->OnNumKeyCallback(2);
+                    else if (key == GLFW_KEY_3)
+                        ExampleApp::Get()->OnNumKeyCallback(3);
+                    else if (key == GLFW_KEY_4)
+                        ExampleApp::Get()->OnNumKeyCallback(4);
+                    else if (key == GLFW_KEY_5)
+                        ExampleApp::Get()->OnNumKeyCallback(5);
+                }
             };
 
             auto windowButtonFunc = [](GLFWwindow* w, int button, int action, int modes) {
@@ -112,7 +129,7 @@ namespace LinaVG
             };
 
             auto windowMouseScrollFunc = [](GLFWwindow* w, double xOff, double yOff) {
-
+                ExampleApp::Get()->OnMouseScrollCallback(static_cast<float>(yOff));
             };
 
             auto windowCursorPosFunc = [](GLFWwindow* w, double xPos, double yPos) {
@@ -139,6 +156,15 @@ namespace LinaVG
         void ExampleBackend::Poll()
         {
             glfwPollEvents();
+
+            if (glfwGetKey(m_window, GLFW_KEY_W))
+                ExampleApp::Get()->OnVerticalKeyCallback(1.0f);
+            else if (glfwGetKey(m_window, GLFW_KEY_S))
+                ExampleApp::Get()->OnVerticalKeyCallback(-1.0f);
+            else if (glfwGetKey(m_window, GLFW_KEY_D))
+                ExampleApp::Get()->OnHorizontalKeyCallback(1.0f);
+            else if (glfwGetKey(m_window, GLFW_KEY_A))
+                ExampleApp::Get()->OnHorizontalKeyCallback(-1.0f);
         }
 
         void ExampleBackend::Render()
@@ -157,6 +183,11 @@ namespace LinaVG
         {
             glfwTerminate();
             std::cout << "LinaVG: Example backend terminated successfully." << std::endl;
+        }
+
+        float ExampleBackend::GetTime()
+        {
+            return static_cast<float>(glfwGetTime());
         }
 
     } // namespace Examples

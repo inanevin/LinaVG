@@ -41,15 +41,27 @@ namespace LinaVG
 
     Configuration Config;
 
-    void Initialize()
+    bool Initialize()
     {
-        // Internal::g_rendererData.m_defaultBuffers.reserve(Config.m_defaultBufferReserve);
-        // Internal::g_rendererData.m_gradientBuffers.reserve(Config.m_gradientBufferReserve);
-        // Internal::g_rendererData.m_textureBuffers.reserve(Config.m_textureBufferReserve);
-        Backend::Initialize();
+        Internal::g_rendererData.m_defaultBuffers.reserve(Config.m_defaultBufferReserve);
+        Internal::g_rendererData.m_gradientBuffers.reserve(Config.m_gradientBufferReserve);
+        Internal::g_rendererData.m_textureBuffers.reserve(Config.m_textureBufferReserve);
+
+        if(!Backend::Initialize())
+        {
+            Config.m_logCallback("LinaVG: Could not initialize! Error initializing backend.");
+            return false;
+        }
+
+        if (FT_Init_FreeType(&Internal::g_rendererData.m_ftlib))
+        {
+            Config.m_logCallback("LinaVG: Could not initialize! Error initializing FreeType Library");
+            return false;
+        }
 
         // TODO - error check
         Config.m_logCallback("LinaVG: Renderer and Backend initialized successfuly.");
+        return true;
     }
 
     void Terminate()
@@ -150,6 +162,17 @@ namespace LinaVG
 
             Internal::g_rendererData.m_defaultBuffers.resize(0);
         }
+    }
+
+    LINAVG_API bool LoadFont(const std::string& file)
+    {
+    return true;
+        // FT_Face face;
+        // if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
+        // {
+        //     std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        //     return -1;
+        // }
     }
 
     GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)

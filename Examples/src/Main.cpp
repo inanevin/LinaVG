@@ -28,6 +28,7 @@ SOFTWARE.
 
 #include "Main.hpp"
 #include "LinaVG.hpp"
+#include <chrono>
 
 #ifdef LINAVG_BACKEND_GL
 #include "Backends/OpenGLGLFW.hpp"
@@ -35,7 +36,7 @@ SOFTWARE.
 
 int main(int argc, char* argv[])
 {
-    LinaVG::Examples::Application app;
+    LinaVG::Examples::ExampleApp app;
     app.Run();
     return 0;
 }
@@ -44,22 +45,25 @@ namespace LinaVG
 {
     namespace Examples
     {
-        void Application::Run()
+        ExampleApp* ExampleApp::s_exampleApp = nullptr;
+
+        void ExampleApp::Run()
         {
-            ExampleBackend backend;
+            s_exampleApp = this;
+            ExampleBackend exampleBackend;
 
             const float sizeX = 1920.0f;
             const float sizeY = 1080.0f;
 
-            // Initialize example backend.
-            backend.InitWindow(sizeX, sizeY);
+            // Initialize example exampleBackend.
+            exampleBackend.InitWindow(static_cast<int>(sizeX), static_cast<int>(sizeY));
 
             // Setup Lina VG config.
             LinaVG::Config.m_displayPos.x       = 0.0f;
             LinaVG::Config.m_displayPos.y       = 0.0f;
             LinaVG::Config.m_displaySize.x      = sizeX;
             LinaVG::Config.m_displaySize.y      = sizeY;
-            LinaVG::Config.m_framebufferScale.x = LinaVG::Config.m_framebufferScale.y = backend.GetFramebufferScale();
+            LinaVG::Config.m_framebufferScale.x = LinaVG::Config.m_framebufferScale.y = exampleBackend.GetFramebufferScale();
             Config.m_flipTextureUVs                                                   = true;
             LinaVG::Config.m_errorCallback                                            = [](const std::string& err) {
                 std::cerr << err.c_str() << std::endl;
@@ -72,40 +76,85 @@ namespace LinaVG
             // Init LinaVG
             LinaVG::Initialize();
 
+            float prev = exampleBackend.GetTime();
+
             // Application loop.
-            while (!backend.m_shouldClose)
+            while (!m_shouldClose)
             {
-                // Example backend input & rendering.
-                backend.Poll();
-                backend.Render();
+                float now   = exampleBackend.GetTime();
+                m_deltaTime = now - prev;
+                prev        = now;
+
+                // Example exampleBackend input & rendering.
+                exampleBackend.Poll();
+                exampleBackend.Render();
 
                 // Lina VG start frame.
                 LinaVG::StartFrame();
 
-                // Define style options & render rect.
+                //  Define style options & render rect.
                 LinaVG::StyleOptions opts;
-                opts.m_isFilled = true;
-                opts.m_color = LinaVG::Vec4(1,0,0,1);
-                opts.m_thickness                             = 5.0f;
-                opts.m_rounding                              = 0.0f;
-                opts.m_textureUVTiling                       = Vec2(1.0f, 1.0f);
-                opts.m_textureUVOffset                       = Vec2(0.0f, 0.0f);
-                opts.m_outlineOptions.m_color                = Vec4(1, 0, 0, 1);
-                opts.m_color                                 = Vec4(1, 1, 1, 1);
-                opts.m_outlineOptions.m_thickness = 2.0f;
-                LinaVG::DrawRect(LinaVG::Vec2(100, 200), LinaVG::Vec2(300, 500), opts, 0.0f, 0.0f);
+                opts.m_isFilled                   = true;
+                opts.m_color                      = LinaVG::Vec4(1, 0, 0, 1);
+                opts.m_thickness                  = 5.0f;
+                opts.m_rounding                   = 0.0f;
+                opts.m_textureUVTiling            = Vec2(1.0f, 1.0f);
+                opts.m_textureUVOffset            = Vec2(0.0f, 0.0f);
+                opts.m_outlineOptions.m_color     = Vec4(1, 1, 1, 1);
+                opts.m_outlineOptions.m_thickness = 5;
+                opts.m_color.m_end                = Vec4(1, 0, 1, 1);
+                //   opts.m_outlineOptions.m_thickness = 2.0f;
+                LinaVG::DrawRect(LinaVG::Vec2(100, 200), LinaVG::Vec2(300, 500), opts, 0.0f, 0);
 
                 // Lina VG Render & end frame.
                 LinaVG::Render();
                 LinaVG::EndFrame();
 
                 // Backend window swap buffers.
-                backend.SwapBuffers();
+                exampleBackend.SwapBuffers();
             }
 
-            // Terminate Lina VG & example backend.
+            // Terminate Lina VG & example exampleBackend.
             LinaVG::Terminate();
-            backend.Terminate();
+            exampleBackend.Terminate();
+        }
+
+        void ExampleApp::OnHorizontalKeyCallback(float input)
+        {
+            LinaVG::Config.m_debugOrthoOffset.x += input * m_deltaTime * 1000;
+        }
+
+        void ExampleApp::OnVerticalKeyCallback(float input)
+        {
+            LinaVG::Config.m_debugOrthoOffset.y -= input * m_deltaTime * 1000;
+        }
+
+        void ExampleApp::OnSpaceCallback()
+        {
+        }
+
+        void ExampleApp::OnNumKeyCallback(int key)
+        {
+        }
+
+        void ExampleApp::OnFCallback()
+        {
+            LinaVG::Config.m_debugWireframeEnabled = !LinaVG::Config.m_debugWireframeEnabled;
+        }
+
+        void ExampleApp::OnMouseScrollCallback(float val)
+        {
+            LinaVG::Config.m_debugOrthoProjectionZoom -= val * m_deltaTime * 10;
+        }
+
+        void ExampleApp::OnWindowResizeCallback(int width, int height)
+        {
+            LinaVG::Config.m_displaySize.x = static_cast<float>(width);
+            LinaVG::Config.m_displaySize.y = static_cast<float>(height);
+        }
+        void ExampleApp::OnWindowCloseCallback()
+        {
+            m_shouldClose = true;
         }
     } // namespace Examples
 } // namespace LinaVG

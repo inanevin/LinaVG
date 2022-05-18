@@ -30,12 +30,29 @@ namespace LinaVG
 {
     namespace Examples
     {
-        class Application
+        class ExampleApp
         {
         public:
             void Run();
+
+            static inline ExampleApp* Get()
+            {
+                return s_exampleApp;
+            }
+
+            void OnHorizontalKeyCallback(float input);
+            void OnVerticalKeyCallback(float input);
+            void OnSpaceCallback();
+            void OnNumKeyCallback(int key);
+            void OnFCallback();
+            void OnMouseScrollCallback(float val);
+            void OnWindowResizeCallback(int width, int height);
+            void OnWindowCloseCallback();
+
         private:
-        
+            float              m_deltaTime   = 0.0f;
+            bool               m_shouldClose = false;
+            static ExampleApp* s_exampleApp;
         };
     } // namespace Examples
 } // namespace LinaVG

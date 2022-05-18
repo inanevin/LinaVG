@@ -1760,7 +1760,7 @@ namespace LinaVG
             buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? size : size * 2, false, drawOrder, true);
         }
     }
-    
+
     void Internal::ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices, bool skipLastTriangle)
     {
         // i = 0 is center.
@@ -2385,7 +2385,6 @@ namespace LinaVG
         }
     }
 
-
     DrawBuffer* Internal::DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw, int drawOrder, bool isAAOutline)
     {
         const bool useTextureBuffer = opts.m_outlineOptions.m_textureHandle != 0;
@@ -2566,12 +2565,16 @@ namespace LinaVG
             for (int i = startIndex; i < endIndex + 1; i++)
             {
                 Vertex v;
-                v.m_col = sourceBuffer->m_vertexBuffer[i].m_col;
                 v.m_pos = sourceBuffer->m_vertexBuffer[i].m_pos;
                 v.m_uv  = sourceBuffer->m_vertexBuffer[i].m_uv;
 
                 if (isAAOutline)
+                {
+                    v.m_col   = sourceBuffer->m_vertexBuffer[i].m_col;
                     v.m_col.w = 1.0f;
+                }
+                else
+                    v.m_col = opts.m_outlineOptions.m_color.m_start;
 
                 destBuf->PushVertex(v);
             }
@@ -2583,11 +2586,15 @@ namespace LinaVG
                 const int previous = i == startIndex ? endIndex : i - 1;
                 const int next     = i == endIndex ? startIndex : i + 1;
                 Vertex    v;
-                v.m_uv  = sourceBuffer->m_vertexBuffer[i].m_uv;
-                v.m_col = sourceBuffer->m_vertexBuffer[i].m_col;
+                v.m_uv = sourceBuffer->m_vertexBuffer[i].m_uv;
 
                 if (isAAOutline)
+                {
+                    v.m_col   = sourceBuffer->m_vertexBuffer[i].m_col;
                     v.m_col.w = 0.0f;
+                }
+                else
+                    v.m_col = opts.m_outlineOptions.m_color.m_end;
 
                 if (skipEnds && i == startIndex)
                 {

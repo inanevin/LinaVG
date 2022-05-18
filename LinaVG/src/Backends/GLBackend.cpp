@@ -37,7 +37,7 @@ namespace LinaVG::Backend
 {
     GLState g_glState;
 
-    void Initialize()
+    bool Initialize()
     {
         Internal::g_backendData.m_defaultVtxShader = "#version 330 core\n"
                                                      "layout (location = 0) in vec2 pos;\n"
@@ -110,9 +110,18 @@ namespace LinaVG::Backend
                                                               "    }\n"
                                                               "}\n\0";
 
-        Internal::g_backendData.m_defaultShaderHandle  = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_defaultFragShader);
-        Internal::g_backendData.m_gradientShaderHandle = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_roundedGradientFragShader);
-        Internal::g_backendData.m_texturedShaderHandle = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_texturedFragShader);
+        try
+        {
+            Internal::g_backendData.m_defaultShaderHandle  = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_defaultFragShader);
+            Internal::g_backendData.m_gradientShaderHandle = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_roundedGradientFragShader);
+            Internal::g_backendData.m_texturedShaderHandle = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_texturedFragShader);
+        }
+        catch (const std::runtime_error& err)
+        {
+            Config.m_errorCallback("LinaVG: Backend shader creation failed!");
+            return false;
+        }
+     
 
         glGenVertexArrays(1, &Internal::g_backendData.m_vao);
         glGenBuffers(1, &Internal::g_backendData.m_vbo);
@@ -139,6 +148,8 @@ namespace LinaVG::Backend
         // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
         // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
         glBindVertexArray(0);
+
+        return true;
     }
 
     void StartFrame()
@@ -371,7 +382,7 @@ namespace LinaVG::Backend
         char         infoLog[512];
 
         // VTX
-        vertex = glCreateShader(GL_VERTEX_SHADER);
+        vertex = 123;
         glShaderSource(vertex, 1, &vert, NULL);
         glCompileShader(vertex);
         glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
@@ -379,8 +390,9 @@ namespace LinaVG::Backend
         if (!success)
         {
             glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-            std::cout << "Lina GUI ERROR -> Shader vertex compilation failed!\n"
-                      << infoLog << std::endl;
+            Config.m_errorCallback("LinaVG: Backend Error -> Shader vertex compilation failed!");
+            Config.m_errorCallback(infoLog);
+            throw std::runtime_error("");
         }
 
         // FRAG
@@ -392,8 +404,9 @@ namespace LinaVG::Backend
         if (!success)
         {
             glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-            std::cout << "Lina GUI ERROR -> Shader fragment compilation failed!\n"
-                      << infoLog << std::endl;
+            Config.m_errorCallback("LinaVG: Backend Error -> Shader fragment compilation failed!");
+            Config.m_errorCallback(infoLog);
+            throw std::runtime_error("");
         }
 
         GLuint handle = glCreateProgram();
@@ -405,8 +418,9 @@ namespace LinaVG::Backend
         if (!success)
         {
             glGetProgramInfoLog(handle, 512, NULL, infoLog);
-            std::cout << "Lina GUI ERROR -> Could not link shader program!\n"
-                      << infoLog << std::endl;
+            Config.m_errorCallback("LinaVG: Backend Error -> Could not link shader program!");
+            Config.m_errorCallback(infoLog);
+            throw std::runtime_error("");
         }
 
         glDeleteShader(vertex);
