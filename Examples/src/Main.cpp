@@ -76,6 +76,8 @@ namespace LinaVG
             // Init LinaVG
             LinaVG::Initialize();
 
+            LinaVG::LoadFont("Resources/Fonts/OpenSans-Regular.ttf");
+
             float prev = exampleBackend.GetTime();
 
             // Application loop.

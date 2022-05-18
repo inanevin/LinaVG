@@ -119,9 +119,9 @@ namespace LinaVG::Backend
         catch (const std::runtime_error& err)
         {
             Config.m_errorCallback("LinaVG: Backend shader creation failed!");
+            Config.m_errorCallback(err.what());
             return false;
         }
-     
 
         glGenVertexArrays(1, &Internal::g_backendData.m_vao);
         glGenBuffers(1, &Internal::g_backendData.m_vbo);
@@ -169,21 +169,24 @@ namespace LinaVG::Backend
         GLint     blendSrcRGB;
         GLint     blendDestAlpha;
         GLint     blendDestRGB;
-        glGetBooleanv(GL_BLEND, &blendEnabled);
-        glGetBooleanv(GL_CULL_FACE, &cullFaceEnabled);
-        glGetBooleanv(GL_DEPTH_TEST, &depthTestEnabled);
-        glGetBooleanv(GL_STENCIL_TEST, &stencilTestEnabled);
-        glGetBooleanv(GL_SCISSOR_TEST, &scissorTestEnabled);
+        GLint     unpackAlignment;
         glGetIntegerv(GL_BLEND_EQUATION, &blendEq);
         glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
         glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
         glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
         glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+        glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpackAlignment);
+        glGetBooleanv(GL_BLEND, &blendEnabled);
+        glGetBooleanv(GL_CULL_FACE, &cullFaceEnabled);
+        glGetBooleanv(GL_DEPTH_TEST, &depthTestEnabled);
+        glGetBooleanv(GL_STENCIL_TEST, &stencilTestEnabled);
+        glGetBooleanv(GL_SCISSOR_TEST, &scissorTestEnabled);
         g_glState.m_blendDestAlpha     = static_cast<int>(blendDestAlpha);
         g_glState.m_blendDestRGB       = static_cast<int>(blendDestRGB);
         g_glState.m_blendEq            = static_cast<int>(blendEq);
         g_glState.m_blendSrcAlpha      = static_cast<int>(blendSrcAlpha);
         g_glState.m_blendSrcRGB        = static_cast<int>(blendSrcRGB);
+        g_glState.m_unpackAlignment    = static_cast<int>(unpackAlignment);
         g_glState.m_blendEnabled       = static_cast<bool>(blendEnabled);
         g_glState.m_cullFaceEnabled    = static_cast<bool>(cullFaceEnabled);
         g_glState.m_depthTestEnabled   = static_cast<bool>(depthTestEnabled);
@@ -198,6 +201,7 @@ namespace LinaVG::Backend
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_SCISSOR_TEST);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         if (Config.m_debugWireframeEnabled)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -369,6 +373,7 @@ namespace LinaVG::Backend
 
         glBlendEquation(static_cast<GLenum>(g_glState.m_blendEq));
         glBlendFuncSeparate(static_cast<GLenum>(g_glState.m_blendSrcRGB), static_cast<GLenum>(g_glState.m_blendDestRGB), static_cast<GLenum>(g_glState.m_blendSrcAlpha), static_cast<GLenum>(g_glState.m_blendDestAlpha));
+        glPixelStorei(GL_UNPACK_ALIGNMENT, g_glState.m_unpackAlignment);
     }
 
     void Terminate()
@@ -382,7 +387,7 @@ namespace LinaVG::Backend
         char         infoLog[512];
 
         // VTX
-        vertex = 123;
+        vertex = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertex, 1, &vert, NULL);
         glCompileShader(vertex);
         glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
@@ -462,6 +467,22 @@ namespace LinaVG::Backend
                 Internal::g_backendData.m_shaderUniformMap[shader][&uniformName[0]] = loc;
             }
         }
+    }
+
+    BackendHandle GenerateFontTexture(int width, int height, void* data)
+    {
+        // Generate texture
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, static_cast<GLvoid*>(data));
+
+        // Options
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        return static_cast<BackendHandle>(texture);
     }
 
 } // namespace LinaVG::Backend

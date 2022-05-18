@@ -38,8 +38,6 @@ Timestamp: 12/29/2018 10:43:46 PM
 
 #include "Common.hpp"
 #include <functional>
-#include <ft2build.h>
-#include FT_FREETYPE_H
 
 namespace LinaVG
 {
@@ -54,6 +52,7 @@ namespace LinaVG
         int                       m_gcFrameCounter;
         int                       m_minDrawOrder = -1;
         int                       m_maxDrawOrder = -1;
+        bool                      m_frameStarted = false;
 
         void                SetDrawOrderLimits(int drawOrder);
         int                 GetBufferIndexInGradientArray(DrawBuffer* buf);
@@ -62,8 +61,6 @@ namespace LinaVG
         DrawBuffer&         GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType);
         GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
         TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType);
-
-        FT_Library m_ftlib;
     };
 
     namespace Internal
@@ -71,13 +68,35 @@ namespace LinaVG
         extern LINAVG_API RendererData g_rendererData;
     }
 
-    LINAVG_API bool                 Initialize();
-    LINAVG_API void                 Terminate();
-    LINAVG_API void                 StartFrame();
-    LINAVG_API void                 Render();
-    LINAVG_API void                 EndFrame();
-    LINAVG_API bool                 LoadFont(const std::string& file);
-    extern LINAVG_API Configuration Config;
+    /// <summary>
+    /// Initializes LinaVG renderer. Must be called before any other calls to LinaVG API!
+    /// </summary>
+    /// <returns></returns>
+    LINAVG_API bool Initialize();
+
+    /// <summary>
+    /// Terminates LinaVG. Call once your main application loop is complete.
+    /// </summary>
+    /// <returns></returns>
+    LINAVG_API void Terminate();
+
+    /// <summary>
+    /// Any Draw commands via LinaVG must take place between StartFrame & EndFrame.
+    /// </summary>
+    /// <returns></returns>
+    LINAVG_API void StartFrame();
+
+    /// <summary>
+    /// Call after you submit your draw requests to LinaVG, before EndFrame;
+    /// </summary>
+    /// <returns></returns>
+    LINAVG_API void Render();
+
+    /// <summary>
+    /// Any Draw commands via LinaVG must take place between StartFrame & EndFrame.
+    /// </summary>
+    /// <returns></returns>
+    LINAVG_API void EndFrame();
 
 }; // namespace LinaVG
 

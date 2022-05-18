@@ -25,6 +25,7 @@ set(LinaVG_SOURCES
 # Core
 include/LinaVG.hpp
 include/Core/Renderer.hpp
+include/Core/Text.hpp
 include/Core/Drawer.hpp
 include/Core/Backend.hpp
 include/Core/Common.hpp
@@ -37,6 +38,7 @@ set(LinaVG_HEADERS
 
 # Core
 src/Core/Renderer.cpp
+src/Core/Text.cpp
 src/Core/Backend.cpp
 src/Core/Drawer.cpp
 src/Core/Common.cpp

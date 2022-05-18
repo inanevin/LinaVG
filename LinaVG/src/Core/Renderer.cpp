@@ -30,6 +30,7 @@ SOFTWARE.
 #include "Core/Backend.hpp"
 #include "Core/Drawer.hpp"
 #include "Core/Math.hpp"
+#include "Core/Text.hpp"
 #include <math.h>
 
 namespace LinaVG
@@ -39,7 +40,6 @@ namespace LinaVG
         RendererData g_rendererData;
     }
 
-    Configuration Config;
 
     bool Initialize()
     {
@@ -47,15 +47,15 @@ namespace LinaVG
         Internal::g_rendererData.m_gradientBuffers.reserve(Config.m_gradientBufferReserve);
         Internal::g_rendererData.m_textureBuffers.reserve(Config.m_textureBufferReserve);
 
-        if(!Backend::Initialize())
+        if (!Backend::Initialize())
         {
             Config.m_logCallback("LinaVG: Could not initialize! Error initializing backend.");
             return false;
         }
 
-        if (FT_Init_FreeType(&Internal::g_rendererData.m_ftlib))
+        if (!Text::Initialize())
         {
-            Config.m_logCallback("LinaVG: Could not initialize! Error initializing FreeType Library");
+            Config.m_logCallback("LinaVG: Could not initialize! Error initializing text API.");
             return false;
         }
 
@@ -67,6 +67,7 @@ namespace LinaVG
     void Terminate()
     {
         Backend::Terminate();
+        Text::Terminate();
 
         // TODO - error check
         Config.m_logCallback("LinaVG: Renderer and Backend terminated successfuly.");
@@ -74,7 +75,14 @@ namespace LinaVG
 
     void StartFrame()
     {
+        if (Internal::g_rendererData.m_frameStarted)
+        {
+            Config.m_errorCallback("LinaVG: StartFrame was called, but EndFrame was skipped! Make sure you always call EndFrame() after calling StartFrame() for the second time!");
+            _ASSERT(false);
+        }
+
         Backend::StartFrame();
+        Internal::g_rendererData.m_frameStarted = true;
     }
 
     void Render()
@@ -121,6 +129,8 @@ namespace LinaVG
 
     void EndFrame()
     {
+        Internal::g_rendererData.m_frameStarted = false;
+
         Backend::EndFrame();
 
         Internal::g_rendererData.m_gcFrameCounter++;
@@ -162,17 +172,6 @@ namespace LinaVG
 
             Internal::g_rendererData.m_defaultBuffers.resize(0);
         }
-    }
-
-    LINAVG_API bool LoadFont(const std::string& file)
-    {
-    return true;
-        // FT_Face face;
-        // if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
-        // {
-        //     std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-        //     return -1;
-        // }
     }
 
     GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)

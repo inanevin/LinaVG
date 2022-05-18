@@ -55,6 +55,7 @@ namespace LinaVG::Backend
         int  m_blendSrcRGB        = 0;
         int  m_blendDestAlpha     = 0;
         int  m_blendDestRGB       = 0;
+        int  m_unpackAlignment    = 0;
     };
 
     bool          Initialize();
@@ -65,6 +66,7 @@ namespace LinaVG::Backend
     void          DrawDefault(DrawBuffer* buf);
     void          EndFrame();
     void          AddShaderUniforms(BackendHandle shader);
+    BackendHandle GenerateFontTexture(int width, int height, void* data);
     BackendHandle CreateShader(const char* vert, const char* frag);
 
     extern LINAVG_API GLState g_glState;

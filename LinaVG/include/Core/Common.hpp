@@ -480,6 +480,12 @@ namespace LinaVG
         bool m_flipTextureUVs = false;
 
         /// <summary>
+        /// Text backend loads this amount of character glyphs when loading a font.
+        /// 128 covers all ASCII character set, load more if you are using fonts that require more characters.
+        /// </summary>
+        int m_maxGlyphCharSize = 128;
+
+        /// <summary>
         /// Every interval ticks system will garbage collect all vertex & index buffers, meaning that will clear all the arrays.
         /// On other ticks, arrays are simply resized to 0, avoiding re-allocations on the next frame.
         /// Set to 0 for instant flush on buffers at the end of every frame.
@@ -541,6 +547,11 @@ namespace LinaVG
         /// </summary>
         Vec2 m_debugOrthoOffset = Vec2(0.0f, 0.0f);
     };
+
+    /// <summary>
+    /// Main configurations for LinaVG API, contains settings for debug options, line joint angles and AA.
+    /// </summary>
+    extern LINAVG_API Configuration Config;
 
     enum class DrawBufferType
     {
