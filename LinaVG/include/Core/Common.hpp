@@ -54,6 +54,9 @@ namespace LinaVG
     typedef unsigned int Index;
     typedef unsigned int BackendHandle;
 
+    /// <summary>
+    /// Color vector, range 0.0f - 1.0f
+    /// </summary>
     LINAVG_API struct Vec4
     {
         Vec4(){};

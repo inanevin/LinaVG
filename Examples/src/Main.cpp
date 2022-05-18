@@ -85,6 +85,14 @@ namespace LinaVG
                 // Define style options & render rect.
                 LinaVG::StyleOptions opts;
                 opts.m_isFilled = true;
+                opts.m_color = LinaVG::Vec4(1,0,0,1);
+                opts.m_thickness                             = 5.0f;
+                opts.m_rounding                              = 0.0f;
+                opts.m_textureUVTiling                       = Vec2(1.0f, 1.0f);
+                opts.m_textureUVOffset                       = Vec2(0.0f, 0.0f);
+                opts.m_outlineOptions.m_color                = Vec4(1, 0, 0, 1);
+                opts.m_color                                 = Vec4(1, 1, 1, 1);
+                opts.m_outlineOptions.m_thickness = 2.0f;
                 LinaVG::DrawRect(LinaVG::Vec2(100, 200), LinaVG::Vec2(300, 500), opts, 0.0f, 0.0f);
 
                 // Lina VG Render & end frame.
