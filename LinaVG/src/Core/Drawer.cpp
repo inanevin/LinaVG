@@ -30,6 +30,7 @@ SOFTWARE.
 #include "Core/Math.hpp"
 #include "Core/Renderer.hpp"
 #include "Core/Backend.hpp"
+#include "Core/Text.hpp"
 #include <iostream>
 #include <stdio.h>
 
@@ -691,6 +692,98 @@ namespace LinaVG
                     Internal::FillCircle_RadialGra(&buf, rotateAngle, center, radius, segments, style.m_color.m_start, style.m_color.m_end, startAngle, endAngle, style, drawOrder);
                 }
             }
+        }
+    }
+
+    void DrawText(const std::string& text, const Vec2& position, float scale, StyleOptions& style, int drawOrder)
+    {
+        std::string::const_iterator c;
+        Vec2                        pos  = position;
+        auto*                       font = Internal::g_textData.m_loadedFonts[Internal::g_textData.m_activeFont];
+
+        for (c = text.begin(); c != text.end(); c++)
+        {
+            auto&         ch         = font->m_characterGlyphs[*c];
+            BackendHandle txt        = font->m_texture;
+            DrawBuffer&   buf        = Internal::g_rendererData.GetCharBuffer(txt, drawOrder);
+            const int     startIndex = buf.m_vertexBuffer.m_size;
+
+            float x2 = pos.x + ch.m_bearing.x * scale;
+            float y2 = -pos.y - ch.m_bearing.y * scale;
+            float w  = ch.m_size.x * scale;
+            float h  = ch.m_size.y * scale;
+
+            pos.x += ch.m_advance.x * scale;
+            pos.y += ch.m_advance.y * scale;
+
+            if (w == 0.0f || h == 0.0f)
+                continue;
+
+            Vertex v0, v1, v2, v3;
+            v0.m_col = Vec4(1, 1, 1, 1);
+            v1.m_col = Vec4(1, 1, 1, 1);
+            v2.m_col = Vec4(1, 1, 1, 1);
+            v3.m_col = Vec4(1, 1, 1, 1);
+
+            v0.m_pos = Vec2(x2, -y2);
+            v1.m_pos = Vec2(x2 + w, -y2);
+            v2.m_pos = Vec2(x2 + w, -y2 - h);
+            v3.m_pos = Vec2(x2, -y2 - h);
+
+            v0.m_uv = Vec2(0.0f, 0.0f);
+            v1.m_uv = Vec2(1.0f, 0.0f);
+            v2.m_uv = Vec2(1.0f, 1.0f);
+            v3.m_uv = Vec2(0.0f, 1.0f);
+
+            buf.PushVertex(v0);
+            buf.PushVertex(v1);
+            buf.PushVertex(v2);
+            buf.PushVertex(v3);
+
+            buf.PushIndex(startIndex);
+            buf.PushIndex(startIndex + 1);
+            buf.PushIndex(startIndex + 3);
+            buf.PushIndex(startIndex + 1);
+            buf.PushIndex(startIndex + 2);
+            buf.PushIndex(startIndex + 3);
+
+            // const float xpos = pos.x + ch.m_bearing.x * scale;
+            // const float ypos = pos.y - (ch.m_size.y - ch.m_bearing.y) * scale;
+            //
+            // const float w = ch.m_size.x * scale;
+            // const float h = ch.m_size.y * scale;
+            //
+            // Vertex v0, v1, v2, v3;
+            // v0.m_col = Vec4(1, 1, 1, 1);
+            // v1.m_col = Vec4(1, 1, 1, 1);
+            // v2.m_col = Vec4(1, 1, 1, 1);
+            // v3.m_col = Vec4(1, 1, 1, 1);
+            // // v0.m_pos = Vec2(xpos, ypos + h);
+            // // v1.m_pos = Vec2(xpos, ypos);
+            // // v2.m_pos = Vec2(xpos + w, ypos);
+            // // v3.m_pos = Vec2(xpos + w, ypos + h);
+            // v0.m_pos = Vec2(xpos, ypos);
+            // v1.m_pos = Vec2(xpos + w, ypos);
+            // v2.m_pos = Vec2(xpos + w, ypos + h);
+            // v3.m_pos = Vec2(xpos, ypos + h);
+            // v0.m_uv  = Vec2(0.0f, 0.0f);
+            // v1.m_uv  = Vec2(1.0f, 0.0f);
+            // v2.m_uv  = Vec2(1.0f, 1.0f);
+            // v3.m_uv  = Vec2(0.0f, 1.0f);
+            //
+            // buf.PushVertex(v0);
+            // buf.PushVertex(v1);
+            // buf.PushVertex(v2);
+            // buf.PushVertex(v3);
+            //
+            // buf.PushIndex(startIndex);
+            // buf.PushIndex(startIndex + 1);
+            // buf.PushIndex(startIndex + 3);
+            // buf.PushIndex(startIndex + 1);
+            // buf.PushIndex(startIndex + 2);
+            // buf.PushIndex(startIndex + 3);
+            //
+            // pos.x += (ch.m_advance >> 6) * scale;
         }
     }
 
@@ -2650,11 +2743,12 @@ namespace LinaVG
             if (useAA)
             {
                 StyleOptions opts2                     = StyleOptions(opts);
+                opts2.m_isFilled = false;
                 opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
+                DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, true);
 
                 opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
-                DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, true, true);
+                DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, true);
             }
         }
         else

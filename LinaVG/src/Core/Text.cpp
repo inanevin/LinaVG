@@ -29,13 +29,17 @@ SOFTWARE.
 #include "Core/Text.hpp"
 #include "Core/Renderer.hpp"
 #include "Core/Backend.hpp"
+#include "Core/Math.hpp"
 
 namespace LinaVG
 {
     namespace Internal
     {
         TextData g_textData;
-    }
+        int      g_fontCounter = 0;
+    } // namespace Internal
+
+#define MAX_WIDTH 1024
 
     namespace Text
     {
@@ -53,21 +57,40 @@ namespace LinaVG
         void Terminate()
         {
             FT_Done_FreeType(Internal::g_textData.m_ftlib);
+
+            for (int i = 0; i < Internal::g_textData.m_loadedFonts.m_size; i++)
+                delete Internal::g_textData.m_loadedFonts[i];
+
+            Internal::g_textData.m_loadedFonts.clear();
         }
     } // namespace Text
 
-    bool LoadFont(const std::string& file, int height)
+    int LoadFont(const std::string& file, int size)
     {
         FT_Face face;
         if (FT_New_Face(Internal::g_textData.m_ftlib, file.c_str(), 0, &face))
         {
             Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
-            return false;
+            return -1;
         }
 
-        FT_Set_Pixel_Sizes(face, 0, height);
+        FT_Set_Pixel_Sizes(face, 0, size);
 
-        auto& characterMap = Internal::g_textData.m_loadedFonts[file];
+        // Texture alignment changes might be necessary on some APIs such as OpenGL
+        Backend::SaveAPIState();
+
+        LinaVGFont* font = new LinaVGFont();
+        font->m_size     = size;
+
+        auto& characterMap = font->m_characterGlyphs;
+        int   maxHeight    = 0;
+
+        unsigned int roww = 0;
+        unsigned int rowh = 0;
+
+        unsigned int w = 0;
+        unsigned int h = 0;
+
         for (unsigned char c = 0; c < Config.m_maxGlyphCharSize; c++)
         {
             if (FT_Load_Char(face, c, FT_LOAD_RENDER))
@@ -75,18 +98,75 @@ namespace LinaVG
                 Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load character!");
                 continue;
             }
+            const unsigned int glyphWidth = face->glyph->bitmap.width;
+            const unsigned int glyphRows  = face->glyph->bitmap.rows;
 
-            BackendHandle generatedTexture = Backend::GenerateFontTexture(face->glyph->bitmap.width, face->glyph->bitmap.rows, static_cast<void*>(face->glyph->bitmap.buffer));
+            if (roww + glyphWidth + 1 >= MAX_WIDTH)
+            {
+                w = Math::Max(w, roww);
+                h += rowh;
+                roww = 0;
+                rowh = 0;
+            }
+
+            roww += glyphWidth + 1;
+            rowh = Math::Max(rowh, glyphRows);
+        }
+
+        w = Math::Max(w, roww);
+        h += rowh;
+
+        BackendHandle tex   = Backend::CreateFontTexture(w, h);
+        font->m_textureSize = Vec2(w, h);
+        font->m_texture     = tex;
+        int offsetX         = 0;
+        int offsetY         = 0;
+        rowh                = 0;
+
+        for (unsigned char c = 0; c < Config.m_maxGlyphCharSize; c++)
+        {
+            if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+            {
+                Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load character!");
+                continue;
+            }
+            const unsigned int glyphWidth = face->glyph->bitmap.width;
+            const unsigned int glyphRows  = face->glyph->bitmap.rows;
+
+            if (offsetX + glyphWidth + 1 >= MAX_WIDTH)
+            {
+
+                offsetY += rowh;
+                rowh    = 0;
+                offsetX = 0;
+            }
+
+            Backend::BufferFontTextureAtlas(glyphWidth, glyphRows, offsetX, offsetY, static_cast<void*>(face->glyph->bitmap.buffer));
 
             characterMap[c] = {
-                generatedTexture,
-                Vec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-                Vec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-                face->glyph->advance.x};
+                Vec2(static_cast<float>(offsetX / (float)w), static_cast<float>(offsetY / (float)h)),
+                Vec2(static_cast<float>(glyphWidth), static_cast<float>(glyphRows)),
+                Vec2(static_cast<float>(face->glyph->bitmap_left), static_cast<float>(face->glyph->bitmap_top)),
+                Vec2(static_cast<float>(face->glyph->advance.x >> 6), static_cast<float>(face->glyph->advance.y >> 6))};
+
+            rowh = Math::Max(rowh, glyphRows);
+            offsetX += glyphWidth + 1;
         }
 
         FT_Done_Face(face);
+        Backend::RestoreAPIState();
+
         Config.m_logCallback("LinaVG: Successfuly loaded font!");
+        const int currentCounter          = Internal::g_fontCounter;
+        Internal::g_textData.m_activeFont = Internal::g_fontCounter;
+        Internal::g_textData.m_loadedFonts.push_back(font);
+        return currentCounter;
+    }
+
+    LINAVG_API void SetActiveFont(int activeFont)
+    {
+        _ASSERT(activeFont < Internal::g_textData.m_loadedFonts.m_size && activeFont > -1);
+        Internal::g_textData.m_activeFont = activeFont;
     }
 
 } // namespace LinaVG

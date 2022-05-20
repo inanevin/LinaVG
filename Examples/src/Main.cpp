@@ -59,10 +59,11 @@ namespace LinaVG
             exampleBackend.InitWindow(static_cast<int>(sizeX), static_cast<int>(sizeY));
 
             // Setup Lina VG config.
-            LinaVG::Config.m_displayPos.x       = 0.0f;
-            LinaVG::Config.m_displayPos.y       = 0.0f;
-            LinaVG::Config.m_displaySize.x      = sizeX;
-            LinaVG::Config.m_displaySize.y      = sizeY;
+            LinaVG::Config.m_displayPos.x  = 0.0f;
+            LinaVG::Config.m_displayPos.y  = 0.0f;
+            LinaVG::Config.m_displaySize.x = sizeX;
+            LinaVG::Config.m_displaySize.y = sizeY;
+            // LinaVG::Config.m_aaMultiplier = 3;
             LinaVG::Config.m_framebufferScale.x = LinaVG::Config.m_framebufferScale.y = exampleBackend.GetFramebufferScale();
             Config.m_flipTextureUVs                                                   = true;
             LinaVG::Config.m_errorCallback                                            = [](const std::string& err) {
@@ -96,18 +97,20 @@ namespace LinaVG
 
                 //  Define style options & render rect.
                 LinaVG::StyleOptions opts;
-                opts.m_isFilled                   = true;
-                opts.m_color                      = LinaVG::Vec4(1, 0, 0, 1);
-                opts.m_thickness                  = 5.0f;
-                opts.m_rounding                   = 0.0f;
-                opts.m_textureUVTiling            = Vec2(1.0f, 1.0f);
-                opts.m_textureUVOffset            = Vec2(0.0f, 0.0f);
-                opts.m_outlineOptions.m_color     = Vec4(1, 1, 1, 1);
-                opts.m_outlineOptions.m_thickness = 5;
-                opts.m_color.m_end                = Vec4(1, 0, 1, 1);
+                opts.m_isFilled        = true;
+                opts.m_color           = LinaVG::Vec4(1,1,1,1);
+                opts.m_thickness       = 5.0f;
+                opts.m_rounding        = 0.0f;
+                opts.m_textureUVTiling = Vec2(1.0f, 1.0f);
+                opts.m_textureUVOffset = Vec2(0.0f, 0.0f);
+                // opts.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
+                opts.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Both;
+                opts.m_outlineOptions.m_color         = LinaVG::Vec4Grad(LinaVG::Vec4(1, 0, 0, 1), LinaVG::Vec4(0, 0, 1, 1));
+                opts.m_outlineOptions.m_thickness     = 7;
                 //   opts.m_outlineOptions.m_thickness = 2.0f;
-                LinaVG::DrawRect(LinaVG::Vec2(100, 200), LinaVG::Vec2(300, 500), opts, 0.0f, 0);
+                LinaVG::DrawRect(LinaVG::Vec2(100, 200), LinaVG::Vec2(300, 500), opts, 40.0f, 0);
 
+                //  LinaVG::DrawText("Tabi amina koyim ya!", LinaVG::Vec2(300, 500), 1, opts, 0);
                 // Lina VG Render & end frame.
                 LinaVG::Render();
                 LinaVG::EndFrame();

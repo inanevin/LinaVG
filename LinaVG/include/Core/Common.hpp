@@ -508,6 +508,11 @@ namespace LinaVG
         int m_textureBufferReserve = 5;
 
         /// <summary>
+        /// This amount of character buffers for text rendering are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
+        /// </summary>
+        int m_charBufferReserve = 100;
+
+        /// <summary>
         /// Set this to your own function to receive error callbacks from LinaVG.
         /// </summary>
         std::function<void(const std::string&)> m_errorCallback;
@@ -628,6 +633,16 @@ namespace LinaVG
         BackendHandle m_textureHandle   = 0;
         Vec2          m_textureUVTiling = Vec2(1.0f, 1.0f);
         Vec2          m_textureUVOffset = Vec2(0.0f, 0.0f);
+    };
+
+    struct CharDrawBuffer : public DrawBuffer
+    {
+        CharDrawBuffer(){};
+        CharDrawBuffer(BackendHandle glyphHandle, int drawOrder)
+            : m_glyphHandle(glyphHandle),
+              DrawBuffer(drawOrder, DrawBufferType::Textured, DrawBufferShapeType::Shape){};
+
+        BackendHandle m_glyphHandle = 0;
     };
 
 } // namespace LinaVG

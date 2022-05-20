@@ -44,12 +44,22 @@ Timestamp: 12/29/2018 10:43:46 PM
 
 namespace LinaVG
 {
+
     struct TextCharacter
     {
-        BackendHandle m_texture = 0;
-        Vec2          m_size    = Vec2(0.0f, 0.0f);
-        Vec2          m_bearing = Vec2(0.0f, 0.0f);
-        signed int    m_advance = 0;
+        Vec2 m_uv      = Vec2(0.0f, 0.0f);
+        Vec2 m_size    = Vec2(0.0f, 0.0f);
+        Vec2 m_bearing = Vec2(0.0f, 0.0f);
+        Vec2 m_advance = Vec2(0.0f, 0.0f);
+    };
+
+    class LinaVGFont
+    {
+    public:
+        BackendHandle                           m_texture     = 0;
+        int                                     m_size        = 0;
+        Vec2                                    m_textureSize = Vec2(0.0f, 0.0f);
+        std::unordered_map<char, TextCharacter> m_characterGlyphs;
     };
 
     /// <summary>
@@ -57,22 +67,30 @@ namespace LinaVG
     /// </summary>
     struct TextData
     {
-        FT_Library                                                               m_ftlib = nullptr;
-        std::unordered_map<std::string, std::unordered_map<char, TextCharacter>> m_loadedFonts;
+        FT_Library         m_ftlib = nullptr;
+        Array<LinaVGFont*> m_loadedFonts;
+        int                m_activeFont = 0;
     };
 
     namespace Internal
     {
         extern LINAVG_API TextData g_textData;
-    }
+
+        /// <summary>
+        /// !Internal! Do not modify.
+        /// </summary>
+        extern LINAVG_API int g_fontCounter;
+    } // namespace Internal
 
     namespace Text
     {
         LINAVG_API bool Initialize();
         LINAVG_API void Terminate();
     } // namespace Text
-    LINAVG_API bool LoadFont(const std::string& file, int height = 48);
 
+    LINAVG_API int LoadFont(const std::string& file, int size = 48);
+
+    LINAVG_API void SetActiveFont(int activeFont);
 }; // namespace LinaVG
 
 #endif

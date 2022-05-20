@@ -40,12 +40,12 @@ namespace LinaVG
         RendererData g_rendererData;
     }
 
-
     bool Initialize()
     {
         Internal::g_rendererData.m_defaultBuffers.reserve(Config.m_defaultBufferReserve);
         Internal::g_rendererData.m_gradientBuffers.reserve(Config.m_gradientBufferReserve);
         Internal::g_rendererData.m_textureBuffers.reserve(Config.m_textureBufferReserve);
+        Internal::g_rendererData.m_charBuffers.reserve(Config.m_charBufferReserve);
 
         if (!Backend::Initialize())
         {
@@ -119,6 +119,14 @@ namespace LinaVG
                     if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
                         Backend::DrawTextured(&buf);
                 }
+
+                for (int i = 0; i < Internal::g_rendererData.m_charBuffers.m_size; i++)
+                {
+                    CharDrawBuffer& buf = Internal::g_rendererData.m_charBuffers[i];
+
+                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
+                        Backend::DrawText(&buf);
+                }
             }
         };
 
@@ -154,6 +162,11 @@ namespace LinaVG
                 Internal::g_rendererData.m_defaultBuffers[i].Clear();
 
             Internal::g_rendererData.m_defaultBuffers.clear();
+
+            for (int i = 0; i < Internal::g_rendererData.m_charBuffers.m_size; i++)
+                Internal::g_rendererData.m_charBuffers[i].Clear();
+
+            Internal::g_rendererData.m_charBuffers.clear();
         }
         else
         {
@@ -171,6 +184,11 @@ namespace LinaVG
                 Internal::g_rendererData.m_defaultBuffers[i].ResizeZero();
 
             Internal::g_rendererData.m_defaultBuffers.resize(0);
+
+            for (int i = 0; i < Internal::g_rendererData.m_charBuffers.m_size; i++)
+                Internal::g_rendererData.m_charBuffers[i].ResizeZero();
+
+            Internal::g_rendererData.m_charBuffers.resize(0);
         }
     }
 
@@ -233,11 +251,36 @@ namespace LinaVG
         return m_textureBuffers.last_ref();
     }
 
+    CharDrawBuffer& RendererData::GetCharBuffer(BackendHandle glyphHandle, int drawOrder)
+    {
+        for (int i = 0; i < m_charBuffers.m_size; i++)
+        {
+            auto& buf = m_charBuffers[i];
+            if (buf.m_drawOrder == drawOrder && buf.m_glyphHandle == glyphHandle)
+                return m_charBuffers[i];
+        }
+
+        SetDrawOrderLimits(drawOrder);
+
+        m_charBuffers.push_back(CharDrawBuffer(glyphHandle, drawOrder));
+        return m_charBuffers.last_ref();
+    }
+
     int RendererData::GetBufferIndexInDefaultArray(DrawBuffer* buf)
     {
         for (int i = 0; i < m_defaultBuffers.m_size; i++)
         {
             if (buf == &m_defaultBuffers[i])
+                return i;
+        }
+        return -1;
+    }
+
+    int RendererData::GetBufferIndexInCharArray(DrawBuffer* buf)
+    {
+        for (int i = 0; i < m_charBuffers.m_size; i++)
+        {
+            if (buf == &m_charBuffers[i])
                 return i;
         }
         return -1;

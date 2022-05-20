@@ -76,6 +76,17 @@ namespace LinaVG::Backend
                                                        "   fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
                                                        "}\0";
 
+        Internal::g_backendData.m_textFragShader = "#version 330 core\n"
+                                                   "out vec4 fragColor;\n"
+                                                   "in vec2 fUV;\n"
+                                                   "in vec4 fCol;\n"
+                                                   "uniform sampler2D diffuse;\n"
+                                                   "void main()\n"
+                                                   "{\n"
+                                                   "   vec4 sampled = vec4(1,1,1,texture(diffuse, fUV).r); \n"
+                                                   "   fragColor = vec4(fCol.rgb, 1.0f) * sampled; \n"
+                                                   "}\0";
+
         Internal::g_backendData.m_roundedGradientFragShader = "#version 330 core\n"
                                                               "out vec4 fragColor;\n"
                                                               "in vec2 fUV;\n"
@@ -115,6 +126,7 @@ namespace LinaVG::Backend
             Internal::g_backendData.m_defaultShaderHandle  = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_defaultFragShader);
             Internal::g_backendData.m_gradientShaderHandle = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_roundedGradientFragShader);
             Internal::g_backendData.m_texturedShaderHandle = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_texturedFragShader);
+            Internal::g_backendData.m_textShaderHandle     = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_textFragShader);
         }
         catch (const std::runtime_error& err)
         {
@@ -142,6 +154,24 @@ namespace LinaVG::Backend
         glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(4 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
+        glGenVertexArrays(1, &Internal::g_backendData.m_textVAO);
+        glGenBuffers(1, &Internal::g_backendData.m_textVBO);
+        glGenBuffers(1, &Internal::g_backendData.m_textEBO);
+
+        glBindVertexArray(Internal::g_backendData.m_textVAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_textVBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_textEBO);
+
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(2 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(4 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+
         // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -159,39 +189,7 @@ namespace LinaVG::Backend
         Config.m_debugCurrentVertexCount   = 0;
 
         // Save GL state
-        GLboolean blendEnabled;
-        GLboolean cullFaceEnabled;
-        GLboolean stencilTestEnabled;
-        GLboolean depthTestEnabled;
-        GLboolean scissorTestEnabled;
-        GLint     blendEq;
-        GLint     blendSrcAlpha;
-        GLint     blendSrcRGB;
-        GLint     blendDestAlpha;
-        GLint     blendDestRGB;
-        GLint     unpackAlignment;
-        glGetIntegerv(GL_BLEND_EQUATION, &blendEq);
-        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
-        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
-        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
-        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
-        glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpackAlignment);
-        glGetBooleanv(GL_BLEND, &blendEnabled);
-        glGetBooleanv(GL_CULL_FACE, &cullFaceEnabled);
-        glGetBooleanv(GL_DEPTH_TEST, &depthTestEnabled);
-        glGetBooleanv(GL_STENCIL_TEST, &stencilTestEnabled);
-        glGetBooleanv(GL_SCISSOR_TEST, &scissorTestEnabled);
-        g_glState.m_blendDestAlpha     = static_cast<int>(blendDestAlpha);
-        g_glState.m_blendDestRGB       = static_cast<int>(blendDestRGB);
-        g_glState.m_blendEq            = static_cast<int>(blendEq);
-        g_glState.m_blendSrcAlpha      = static_cast<int>(blendSrcAlpha);
-        g_glState.m_blendSrcRGB        = static_cast<int>(blendSrcRGB);
-        g_glState.m_unpackAlignment    = static_cast<int>(unpackAlignment);
-        g_glState.m_blendEnabled       = static_cast<bool>(blendEnabled);
-        g_glState.m_cullFaceEnabled    = static_cast<bool>(cullFaceEnabled);
-        g_glState.m_depthTestEnabled   = static_cast<bool>(depthTestEnabled);
-        g_glState.m_scissorTestEnabled = static_cast<bool>(scissorTestEnabled);
-        g_glState.m_stencilTestEnabled = static_cast<bool>(stencilTestEnabled);
+        SaveAPIState();
 
         // Apply GL state
         glEnable(GL_BLEND);
@@ -256,14 +254,14 @@ namespace LinaVG::Backend
         Internal::g_backendData.m_proj[3][1] = (T + B) / (B - T);
         Internal::g_backendData.m_proj[3][2] = 0.0f;
         Internal::g_backendData.m_proj[3][3] = 1.0f;
-
-        glBindVertexArray(Internal::g_backendData.m_vao);
     }
 
     void DrawGradient(GradientDrawBuffer* buf)
     {
         if (Internal::g_backendData.m_skipDraw)
             return;
+
+        BindVAO(Internal::g_backendData.m_vao);
 
         glUseProgram(Internal::g_backendData.m_gradientShaderHandle);
         glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
@@ -290,6 +288,8 @@ namespace LinaVG::Backend
     {
         if (Internal::g_backendData.m_skipDraw)
             return;
+
+        BindVAO(Internal::g_backendData.m_vao);
 
         const Vec2 uv = Config.m_flipTextureUVs ? Vec2(buf->m_textureUVTiling.x, -buf->m_textureUVTiling.y) : buf->m_textureUVTiling;
 
@@ -321,6 +321,8 @@ namespace LinaVG::Backend
         if (Internal::g_backendData.m_skipDraw)
             return;
 
+        BindVAO(Internal::g_backendData.m_vao);
+
         glUseProgram(Internal::g_backendData.m_defaultShaderHandle);
         glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_defaultShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 
@@ -337,15 +339,72 @@ namespace LinaVG::Backend
         Config.m_debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void EndFrame()
+    void DrawText(CharDrawBuffer* buf)
     {
-        // Restore state.
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        if (Internal::g_backendData.m_skipDraw)
+            return;
 
-        // Reset GL state
+        BindVAO(Internal::g_backendData.m_textVAO);
+
+        glUseProgram(Internal::g_backendData.m_textShaderHandle);
+        glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_defaultShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+
+        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_defaultShaderHandle]["diffuse"], 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, buf->m_glyphHandle);
+
+        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_textVBO);
+        glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_textEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
+        Config.m_debugCurrentDrawCalls++;
+        Config.m_debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.m_debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
+    }
+
+    void SaveAPIState()
+    {
+        GLboolean blendEnabled;
+        GLboolean cullFaceEnabled;
+        GLboolean stencilTestEnabled;
+        GLboolean depthTestEnabled;
+        GLboolean scissorTestEnabled;
+        GLint     blendEq;
+        GLint     blendSrcAlpha;
+        GLint     blendSrcRGB;
+        GLint     blendDestAlpha;
+        GLint     blendDestRGB;
+        GLint     unpackAlignment;
+        glGetIntegerv(GL_BLEND_EQUATION, &blendEq);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+        glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpackAlignment);
+        glGetBooleanv(GL_BLEND, &blendEnabled);
+        glGetBooleanv(GL_CULL_FACE, &cullFaceEnabled);
+        glGetBooleanv(GL_DEPTH_TEST, &depthTestEnabled);
+        glGetBooleanv(GL_STENCIL_TEST, &stencilTestEnabled);
+        glGetBooleanv(GL_SCISSOR_TEST, &scissorTestEnabled);
+        g_glState.m_blendDestAlpha     = static_cast<int>(blendDestAlpha);
+        g_glState.m_blendDestRGB       = static_cast<int>(blendDestRGB);
+        g_glState.m_blendEq            = static_cast<int>(blendEq);
+        g_glState.m_blendSrcAlpha      = static_cast<int>(blendSrcAlpha);
+        g_glState.m_blendSrcRGB        = static_cast<int>(blendSrcRGB);
+        g_glState.m_unpackAlignment    = static_cast<int>(unpackAlignment);
+        g_glState.m_blendEnabled       = static_cast<bool>(blendEnabled);
+        g_glState.m_cullFaceEnabled    = static_cast<bool>(cullFaceEnabled);
+        g_glState.m_depthTestEnabled   = static_cast<bool>(depthTestEnabled);
+        g_glState.m_scissorTestEnabled = static_cast<bool>(scissorTestEnabled);
+        g_glState.m_stencilTestEnabled = static_cast<bool>(stencilTestEnabled);
+    }
+
+    void RestoreAPIState()
+    {
         if (g_glState.m_blendEnabled)
             glEnable(GL_BLEND);
         else
@@ -374,6 +433,27 @@ namespace LinaVG::Backend
         glBlendEquation(static_cast<GLenum>(g_glState.m_blendEq));
         glBlendFuncSeparate(static_cast<GLenum>(g_glState.m_blendSrcRGB), static_cast<GLenum>(g_glState.m_blendDestRGB), static_cast<GLenum>(g_glState.m_blendSrcAlpha), static_cast<GLenum>(g_glState.m_blendDestAlpha));
         glPixelStorei(GL_UNPACK_ALIGNMENT, g_glState.m_unpackAlignment);
+    }
+
+    void BindVAO(BackendHandle vao)
+    {
+        if (Internal::g_backendData.m_boundVAO != vao)
+        {
+            glBindVertexArray(vao);
+            Internal::g_backendData.m_boundVAO = vao;
+        }
+    }
+
+    void EndFrame()
+    {
+        // Restore state.
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        // Reset GL state
+        RestoreAPIState();
     }
 
     void Terminate()
@@ -469,20 +549,49 @@ namespace LinaVG::Backend
         }
     }
 
-    BackendHandle GenerateFontTexture(int width, int height, void* data)
+    BackendHandle CreateFontTexture(int width, int height)
     {
-        // Generate texture
-        unsigned int texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, static_cast<GLvoid*>(data));
 
-        // Options
+        GLuint tex;
+        glActiveTexture(GL_TEXTURE0);
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        return static_cast<BackendHandle>(texture);
+
+        return tex;
     }
+
+    void BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, void* data)
+    {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, GL_RED, GL_UNSIGNED_BYTE, data);
+    }
+
+    //  BackendHandle GenerateFontTexture(int width, int height, void* data)
+    //  {
+    //      if (data == nullptr)
+    //          return 0;
+    //
+    //      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    //
+    //      // Generate texture
+    //      unsigned int texture;
+    //      glGenTextures(1, &texture);
+    //      glBindTexture(GL_TEXTURE_2D, texture);
+    //      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, static_cast<GLvoid*>(data));
+    //
+    //      // Options
+    //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //      return static_cast<BackendHandle>(texture);
+    //  }
 
 } // namespace LinaVG::Backend

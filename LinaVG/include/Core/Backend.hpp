@@ -56,15 +56,21 @@ namespace LinaVG::Internal
         BackendHandle                                                                     m_vbo                  = 0;
         BackendHandle                                                                     m_vao                  = 0;
         BackendHandle                                                                     m_ebo                  = 0;
+        BackendHandle                                                                     m_textVBO              = 0;
+        BackendHandle                                                                     m_textVAO              = 0;
+        BackendHandle                                                                     m_textEBO              = 0;
+        BackendHandle                                                                     m_boundVAO             = 0;
         BackendHandle                                                                     m_defaultShaderHandle  = 0;
         BackendHandle                                                                     m_gradientShaderHandle = 0;
         BackendHandle                                                                     m_texturedShaderHandle = 0;
+        BackendHandle                                                                     m_textShaderHandle     = 0;
         std::unordered_map<BackendHandle, std::unordered_map<std::string, BackendHandle>> m_shaderUniformMap;
         float                                                                             m_proj[4][4]                = {0};
         char*                                                                             m_defaultVtxShader          = nullptr;
         char*                                                                             m_defaultFragShader         = nullptr;
         char*                                                                             m_roundedGradientFragShader = nullptr;
         char*                                                                             m_texturedFragShader        = nullptr;
+        char*                                                                             m_textFragShader            = nullptr;
         bool                                                                              m_skipDraw                  = false;
     };
 

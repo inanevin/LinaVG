@@ -58,15 +58,22 @@ namespace LinaVG::Backend
         int  m_unpackAlignment    = 0;
     };
 
-    bool          Initialize();
-    void          Terminate();
-    void          StartFrame();
-    void          DrawGradient(GradientDrawBuffer* buf);
-    void          DrawTextured(TextureDrawBuffer* buf);
-    void          DrawDefault(DrawBuffer* buf);
-    void          EndFrame();
+    bool Initialize();
+    void Terminate();
+    void StartFrame();
+    void DrawGradient(GradientDrawBuffer* buf);
+    void DrawTextured(TextureDrawBuffer* buf);
+    void DrawDefault(DrawBuffer* buf);
+    void DrawText(CharDrawBuffer* buf);
+
+    void EndFrame();
+
+    void          SaveAPIState();
+    void          RestoreAPIState();
+    void          BindVAO(BackendHandle vao);
     void          AddShaderUniforms(BackendHandle shader);
-    BackendHandle GenerateFontTexture(int width, int height, void* data);
+    BackendHandle CreateFontTexture(int width, int height);
+    void          BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, void* data);
     BackendHandle CreateShader(const char* vert, const char* frag);
 
     extern LINAVG_API GLState g_glState;
