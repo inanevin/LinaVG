@@ -79,9 +79,11 @@ namespace LinaVG
 
             // Init LinaVG
             LinaVG::Initialize();
-            demoScreens.Initialize(this);
+            demoScreens.Initialize();
 
             float prevTime = exampleBackend.GetTime();
+            float lastFPSTime = exampleBackend.GetTime();
+            int frameCount = 0;
 
             // Application loop.
             while (!m_shouldClose)
@@ -89,6 +91,14 @@ namespace LinaVG
                 float now   = exampleBackend.GetTime();
                 m_deltaTime = now - prevTime;
                 prevTime    = now;
+
+                if (now > lastFPSTime + 1.0f)
+                {
+                    m_fps = frameCount;
+                    frameCount = 0;
+                    lastFPSTime = now;
+                    m_deltaTimeRead = m_deltaTime;
+                }
 
                 // Example exampleBackend input & rendering.
                 exampleBackend.Poll();
@@ -112,10 +122,13 @@ namespace LinaVG
                     demoScreens.ShowDemoScreen5_Texts();
 
                 LinaVG::Render();
+
+                demoScreens.PreEndFrame();
                 LinaVG::EndFrame();
 
                 // Backend window swap buffers.
                 exampleBackend.SwapBuffers();
+                frameCount++;
             }
 
             // Terminate Lina VG & example exampleBackend.

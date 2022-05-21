@@ -131,7 +131,7 @@ namespace LinaVG
     /// <param name="style">Style options.</param>
     /// <param name="cap">Puts a line cap to either first, last or both ends.</param>
     /// <param name="jointType">Determines how to join the lines.</param>
-    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     /// <param name="uniformUVs">Either treats whole bezier curve as a single shape to calculate UVs, or individually calculates the UVs of each line within.</param>
     /// <param name="segments"> Determines the smoothness of the curve. 0-100 range, 100 smoothest. </param>
     LINAVG_API void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true, int segments = 50);
@@ -149,7 +149,7 @@ namespace LinaVG
     /// <param name="style">Style options.</param>
     /// <param name="cap">Puts a line cap to either first, last or both ends.</param>
     /// <param name="rotateAngle">Rotates the whole line by the given angle (degrees).</param>
-    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     LINAVG_API void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
@@ -160,7 +160,7 @@ namespace LinaVG
     /// <param name="style">Style options.</param>
     /// <param name="cap">Puts a line cap to either first, last or both ends.</param>
     /// <param name="jointType">Determines how to join the lines.</param>
-    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     /// <param name="uniformUVs">Either treats whole bezier curve as a single shape to calculate UVs, or individually calculates the UVs of each line within.</param>
     LINAVG_API void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true);
 
@@ -171,7 +171,7 @@ namespace LinaVG
     /// <param name="pos">Center position of the draw rect.</param>
     /// <param name="size">Size of the draw rect, should be same aspect ratio to prevent stretching.</param>
     /// <param name="rotateAngle">Rotates the whole image by the given angle (degrees).</param>
-    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     /// <param name="uvTiling">Texture tiling.</param>
     /// <param name="uvOffset">Texture UV offset.</param>
     /// <param name="uvTL">Top-left UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
@@ -196,7 +196,7 @@ namespace LinaVG
     /// <param name="max">Bottom right corner of the rectangle.</param>
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     LINAVG_API void DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
@@ -207,7 +207,7 @@ namespace LinaVG
     /// <param name="n">Segment count.</param>
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     LINAVG_API void DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
@@ -222,7 +222,7 @@ namespace LinaVG
     /// <param name="size">Total number of given points.</param>
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     LINAVG_API void DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
@@ -240,7 +240,7 @@ namespace LinaVG
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
     /// <param name="startAngle">Use start & end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
     /// <param name="startAngle">Use start & end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
-    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     LINAVG_API void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 
     /// <summary>
@@ -250,7 +250,7 @@ namespace LinaVG
     /// <param name="position">Screen-space position.</param>
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     /// <returns></returns>
     LINAVG_API void DrawTextNormal(const std::string& text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0);
 
@@ -263,7 +263,7 @@ namespace LinaVG
     /// <param name="position">Screen-space position.</param>
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     /// <returns></returns>
     LINAVG_API void DrawTextSDF(const std::string& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0);
 

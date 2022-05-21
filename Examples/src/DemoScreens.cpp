@@ -34,9 +34,13 @@ namespace LinaVG
 {
     namespace Examples
     {
-        void DemoScreens::Initialize(ExampleApp* app)
+
+        FontHandle defaultFont;
+        int        drawCount, triangleCount, vertexCount = 0;
+
+        void DemoScreens::Initialize()
         {
-            m_app = app;
+            defaultFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 32);
         }
 
         /// <summary>
@@ -55,12 +59,34 @@ namespace LinaVG
             LinaVG::DrawRect(Vec2(0.0f, 0.0f), screenSize, style, 0.0f, 0);
 
             // Draw stats window.
-            // style.m_color = Vec4(0, 0, 0, 0.5f);
-            // style.m_rounding = 0.5f;
-            // style.m_onlyRoundTheseCorners.push_back(0);
-            // style.m_onlyRoundTheseCorners.push_back(3);
-            // LinaVG::DrawRect(Vec2(screenSize.x - screenSize.x * 0.15f, screenSize.y * 0.1f), Vec2(screenSize.x, screenSize.y * 0.3f), style, 0.0f, 0);
-            // style.m_onlyRoundTheseCorners.clear();
+            const float statsWindowX = screenSize.x - screenSize.x * 0.18f;
+            const float statsWindowY = screenSize.y * 0.05f;
+            style.m_color            = Vec4(0, 0, 0, 0.5f);
+            style.m_rounding         = 0.2f;
+            style.m_onlyRoundTheseCorners.push_back(0);
+            style.m_onlyRoundTheseCorners.push_back(3);
+            LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.2f), style, 0.0f, 1);
+            style.m_onlyRoundTheseCorners.clear();
+
+            // Draw stats texts.
+            const std::string drawCountStr     = std::to_string(drawCount);
+            const std::string triangleCountStr = std::to_string(triangleCount);
+            const std::string vertexCountStr   = std::to_string(vertexCount);
+            const std::string wireframeStr     = Config.m_debugWireframeEnabled ? "Enabled" : "Disabled";
+            const std::string fpsStr           = std::to_string(ExampleApp::Get()->GetFPS());
+            const std::string frameTimeStr     = std::to_string(ExampleApp::Get()->GetFrameTimeRead()) + " ms";
+            Vec2              textPosition     = Vec2(statsWindowX + 10, statsWindowY + 25);
+            TextOptions       textStyle;
+            textStyle.m_textScale = 0.6f;
+            LinaVG::DrawTextNormal("Draw Count: " + drawCountStr, textPosition, textStyle, 0.0f, 2);
+            textPosition.y += 25;
+            LinaVG::DrawTextNormal("Vertex Count: " + vertexCountStr, textPosition, textStyle, 0.0f, 2);
+            textPosition.y += 25;
+            LinaVG::DrawTextNormal("Triangle Count: " + triangleCountStr, textPosition, textStyle, 0.0f, 2);
+            textPosition.y += 25;
+            LinaVG::DrawTextNormal("Wireframe: " + wireframeStr, textPosition, textStyle, 0.0f, 2);
+            textPosition.y += 25;
+            LinaVG::DrawTextNormal("FPS: " + fpsStr + " Frame Time: " + frameTimeStr, textPosition, textStyle, 0.0f, 2);
 
             // Draw semi-transparent black rectangle on the bottom of the screen.
             style.m_color    = Vec4(0, 0, 0, 0.5f);
@@ -82,6 +108,12 @@ namespace LinaVG
         }
         void DemoScreens::ShowDemoScreen5_Texts()
         {
+        }
+        void DemoScreens::PreEndFrame()
+        {
+            drawCount     = Config.m_debugCurrentDrawCalls;
+            triangleCount = Config.m_debugCurrentTriangleCount;
+            vertexCount   = Config.m_debugCurrentVertexCount;
         }
     } // namespace Examples
 } // namespace LinaVG

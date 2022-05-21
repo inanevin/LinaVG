@@ -30,12 +30,10 @@ namespace LinaVG
 {
     namespace Examples
     {
-        class ExampleApp;
-
         class DemoScreens
         {
         public:
-            void Initialize(ExampleApp* app);
+            void Initialize();
 
             void ShowBackground();
             void ShowDemoScreen1_Shapes();
@@ -43,9 +41,8 @@ namespace LinaVG
             void ShowDemoScreen3_Colors();
             void ShowDemoScreen4_Lines();
             void ShowDemoScreen5_Texts();
+            void PreEndFrame();
 
-        private:
-            ExampleApp* m_app = nullptr;
         };
     } // namespace Examples
 } // namespace LinaVG

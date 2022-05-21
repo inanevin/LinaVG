@@ -321,9 +321,9 @@ namespace LinaVG
         inline void swap(int start, int end)
         {
             _ASSERT(start > -1 && start < m_size && end > -1 && end < m_size);
-            T temp = m_data[start];
+            T temp        = m_data[start];
             m_data[start] = end;
-            m_data[end] = temp;
+            m_data[end]   = temp;
         }
     };
 
@@ -408,7 +408,7 @@ namespace LinaVG
         /// <summary>
         /// Drop shadow color, lol.
         /// </summary>
-        Vec4 m_dropShadowColor  = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        Vec4 m_dropShadowColor = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
         /// <summary>
         /// Defines how far the drop shadow is rendered, in screen-units.
@@ -437,7 +437,7 @@ namespace LinaVG
         }
 
         /// <summary>
-        /// 0.0f - 1.0f range, defines how strongly the text is extruded. 
+        /// 0.0f - 1.0f range, defines how strongly the text is extruded.
         /// !NOTE! 0.0f might make the text invisible
         /// </summary>
         float m_sdfThickness = 1.0f;
@@ -448,14 +448,14 @@ namespace LinaVG
         float m_sdfSoftness = 0.02f;
 
         /// <summary>
-        /// 0.0f - 1.0f range, defines how strongly the outline is extruded. 
+        /// 0.0f - 1.0f range, defines how strongly the outline is extruded.
         /// </summary>
         float m_sdfOutlineThickness = 1.0f;
 
         /// <summary>
         /// Well, outline color.
         /// </summary>
-        Vec4  m_sdfOutlineColor = Vec4(1, 1, 1, 1);
+        Vec4 m_sdfOutlineColor = Vec4(1, 1, 1, 1);
 
         /// <summary>
         /// 0.0f - 1.0f range, defines how strongly the drop shadow is extruded.
@@ -465,14 +465,13 @@ namespace LinaVG
         /// <summary>
         /// Defines drop shadow blurring/smoothing. 0.0f - 1.0f range
         /// </summary>
-        float m_sdfDropShadowSoftness  = 0.02f;
+        float m_sdfDropShadowSoftness = 0.02f;
 
         /// <summary>
         /// Flips the alpha mask in-out, can be used to create create cut-out font rendering, e.g. letter is transparent, surrounding
         /// quad is colored.
         /// </summary>
-        bool  m_flipAlpha           = false;
-      
+        bool m_flipAlpha = false;
     };
     /// <summary>
     /// Style options used to draw various effects around the target shape.

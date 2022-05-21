@@ -49,12 +49,28 @@ namespace LinaVG
             void OnWindowResizeCallback(int width, int height);
             void OnWindowCloseCallback();
 
+            inline int GetFPS()
+            {
+                return m_fps;
+            }
+
+            inline float GetFrameTime()
+            {
+                return m_deltaTime;
+            }
+
+            inline float GetFrameTimeRead()
+            {
+                return m_deltaTimeRead;
+            }
+
         private:
             int                m_currentDemoScreen = 0;
-            float              m_deltaTime   = 0.0f;
-            bool               m_shouldClose = false;
+            float              m_deltaTime         = 0.0f;
+            float              m_deltaTimeRead     = 0.0f;
+            int                m_fps               = 0;
+            bool               m_shouldClose       = false;
             static ExampleApp* s_exampleApp;
-
         };
     } // namespace Examples
 } // namespace LinaVG

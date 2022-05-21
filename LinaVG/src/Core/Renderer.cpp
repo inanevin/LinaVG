@@ -94,7 +94,7 @@ namespace LinaVG
 
         auto& arr = Internal::g_rendererData.m_drawOrders;
         auto drawBuffers = [&](DrawBufferShapeType shapeType) {
-            for (int i = arr.m_size - 1; i > -1; i--)
+            for (int i = 0; i < arr.m_size; i++)
             {
                 const int drawOrder = arr[i];
                 for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
