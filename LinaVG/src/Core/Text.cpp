@@ -91,14 +91,17 @@ namespace LinaVG
      
        unsigned int w = 0;
        unsigned int h = 0;
-     
+       FT_GlyphSlot slot = face->glyph; // <-- This is new
+
        for (unsigned char c = 32; c < Config.m_maxGlyphCharSize; c++)
        {
-           if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+           if (FT_Load_Char(face, c, FT_LOAD_DEFAULT))
            {
                Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load character!");
                continue;
            }
+           FT_Render_Glyph(slot, FT_RENDER_MODE_SDF); // <-- And this is new
+
            const unsigned int glyphWidth = face->glyph->bitmap.width;
            const unsigned int glyphRows  = face->glyph->bitmap.rows;
      
@@ -123,7 +126,6 @@ namespace LinaVG
         int offsetX         = 0;
         int offsetY         = 0;
         rowh                = 0;
-        FT_GlyphSlot slot   = face->glyph; // <-- This is new
 
         for (unsigned char c = 32; c < Config.m_maxGlyphCharSize; c++)
         {
@@ -146,11 +148,10 @@ namespace LinaVG
             }
 
 
-            // Backend::BufferFontTextureAtlas(glyphWidth, glyphRows, offsetX, offsetY, static_cast<void*>(face->glyph->bitmap.buffer));
-            BackendHandle txt = Backend::GenerateFontTexture(glyphWidth, glyphRows, static_cast<void*>(face->glyph->bitmap.buffer));
+            Backend::BufferFontTextureAtlas(glyphWidth, glyphRows, offsetX, offsetY, static_cast<void*>(face->glyph->bitmap.buffer));
+            //BackendHandle txt = Backend::GenerateFontTexture(glyphWidth, glyphRows, static_cast<void*>(face->glyph->bitmap.buffer));
             characterMap[c]   = {
-                txt,
-                Vec2(static_cast<float>(offsetX ), static_cast<float>(offsetY )),
+                Vec2(static_cast<float>(offsetX / (float)w), static_cast<float>(offsetY / (float)h)),
                 Vec2(static_cast<float>(glyphWidth), static_cast<float>(glyphRows)),
                 Vec2(static_cast<float>(face->glyph->bitmap_left), static_cast<float>(face->glyph->bitmap_top)),
                 Vec2(static_cast<float>(face->glyph->advance.x >> 6), static_cast<float>(face->glyph->advance.y >> 6))};

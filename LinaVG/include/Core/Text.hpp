@@ -47,7 +47,6 @@ namespace LinaVG
 
     struct TextCharacter
     {
-        BackendHandle texture   = 0;
         Vec2          m_uv      = Vec2(0.0f, 0.0f);
         Vec2          m_size    = Vec2(0.0f, 0.0f);
         Vec2          m_bearing = Vec2(0.0f, 0.0f);
