@@ -31,6 +31,7 @@ SOFTWARE.
 #include "Core/Drawer.hpp"
 #include "Core/Math.hpp"
 #include "Core/Text.hpp"
+#include "Utility/Utility.hpp"
 #include <math.h>
 
 namespace LinaVG
@@ -88,20 +89,19 @@ namespace LinaVG
 
     void Render()
     {
-        const int  diff  = Internal::g_rendererData.m_maxDrawOrder - Internal::g_rendererData.m_minDrawOrder;
-        const bool valid = !(diff == 0 || diff < 0);
+        
+        Utility::QuickSortArray<int>(Internal::g_rendererData.m_drawOrders, 0, Internal::g_rendererData.m_drawOrders.m_size -1);
 
-        const int start = valid ? Internal::g_rendererData.m_maxDrawOrder : 0;
-        const int end   = valid ? Internal::g_rendererData.m_minDrawOrder - 1 : -1;
-
-        auto drawBuffers = [valid, start, end](DrawBufferShapeType shapeType) {
-            for (int k = start; k > end; k--)
+        auto& arr = Internal::g_rendererData.m_drawOrders;
+        auto drawBuffers = [&](DrawBufferShapeType shapeType) {
+            for (int i = arr.m_size - 1; i > -1; i--)
             {
+                const int drawOrder = arr[i];
                 for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
                 {
                     DrawBuffer& buf = Internal::g_rendererData.m_defaultBuffers[i];
 
-                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
+                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder)
                         Backend::DrawDefault(&(buf));
                 }
 
@@ -109,7 +109,7 @@ namespace LinaVG
                 {
                     GradientDrawBuffer& buf = Internal::g_rendererData.m_gradientBuffers[i];
 
-                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
+                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder)
                         Backend::DrawGradient(&buf);
                 }
 
@@ -117,7 +117,7 @@ namespace LinaVG
                 {
                     TextureDrawBuffer& buf = Internal::g_rendererData.m_textureBuffers[i];
 
-                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
+                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder)
                         Backend::DrawTextured(&buf);
                 }
 
@@ -125,7 +125,7 @@ namespace LinaVG
                 {
                     SimpleTextDrawBuffer& buf = Internal::g_rendererData.m_simpleTextBuffers[i];
 
-                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
+                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder)
                         Backend::DrawSimpleText(&buf);
                 }
 
@@ -133,7 +133,7 @@ namespace LinaVG
                 {
                     SDFTextDrawBuffer& buf = Internal::g_rendererData.m_sdfTextBuffers[i];
 
-                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
+                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder)
                         Backend::DrawSDFText(&buf);
                 }
             }
@@ -152,8 +152,7 @@ namespace LinaVG
         Backend::EndFrame();
 
         Internal::g_rendererData.m_gcFrameCounter++;
-        Internal::g_rendererData.m_minDrawOrder = -1;
-        Internal::g_rendererData.m_maxDrawOrder = -1;
+        Internal::g_rendererData.m_drawOrders.clear();
 
         if (Internal::g_rendererData.m_gcFrameCounter > Config.m_gcCollectInterval)
         {
@@ -344,11 +343,18 @@ namespace LinaVG
 
     void RendererData::SetDrawOrderLimits(int drawOrder)
     {
-        if (m_minDrawOrder == -1 || drawOrder < m_minDrawOrder)
-            m_minDrawOrder = drawOrder;
+        bool found = false;
+        for (int i = 0; i < m_drawOrders.m_size; i++)
+        {
+            if (m_drawOrders[i] == drawOrder)
+            {
+                found = true;
+                break;
+            }
+        }
 
-        if (m_maxDrawOrder == -1 || drawOrder > m_maxDrawOrder)
-            m_maxDrawOrder = drawOrder;
+        if (!found)
+            m_drawOrders.push_back(drawOrder);
     }
 
 } // namespace LinaVG

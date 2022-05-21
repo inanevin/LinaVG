@@ -51,9 +51,8 @@ namespace LinaVG
         Array<TextureDrawBuffer>    m_textureBuffers;
         Array<SimpleTextDrawBuffer> m_simpleTextBuffers;
         Array<SDFTextDrawBuffer>    m_sdfTextBuffers;
+        Array<int>                  m_drawOrders;
         int                         m_gcFrameCounter = 0;
-        int                         m_minDrawOrder   = -1;
-        int                         m_maxDrawOrder   = -1;
         bool                        m_frameStarted   = false;
 
         void                  SetDrawOrderLimits(int drawOrder);
