@@ -122,7 +122,7 @@ namespace LinaVG
                // textOpts.m_outlineColor = Vec4(1,1,1,1);
                LinaVG::DrawText("T", LinaVG::Vec2(300, 500), textOpts, 0, true);
 
-                LinaVG::DrawText("SA!", LinaVG::Vec2(300, 800), textOpts, 0);
+                LinaVG::DrawText("JESUS PERKELE VITTU SAATANA", LinaVG::Vec2(300, 1000), textOpts, 0);
                 // LinaVG::DrawText("moprngh", LinaVG::Vec2(800, 800), 1, opts, 0);
                 // Lina VG Render & end frame.
                 LinaVG::Render();

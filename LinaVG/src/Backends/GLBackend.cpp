@@ -85,12 +85,12 @@ namespace LinaVG::Backend
                                                    "{\n"
                                                    "float a = texture(diffuse, fUV).r; \n"
                                                    "float thickness = 0.6f;\n"
-                                                   "float softness = 0.05f;\n"
+                                                   "float softness = 0.02f;\n"
                                                    "float outlineThickness = 0.5f;\n"
-                                                   "float outlineSoftness = 0.2f;\n"
+                                                   "float outlineSoftness = 0.1f;\n"
                                                    "float outline = smoothstep(outlineThickness - outlineSoftness, outlineThickness + outlineSoftness, a); \n"
                                                    "a = smoothstep(1.0 - thickness - softness, 1.0 - thickness + softness, a); \n"
-                                                   "vec3 outlineColor = vec3(1,0,1);\n"
+                                                   "vec3 outlineColor = vec3(0,0,0);\n"
                                                    "fragColor = vec4(mix(outlineColor, fCol.rgb, outline), a); \n"
                                                    "}\0";
         // float outline = smoothstep(outlineThickness - outlineSoftness, outlineThickness + outlineSoftness, a);
