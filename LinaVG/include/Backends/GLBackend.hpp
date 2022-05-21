@@ -75,7 +75,7 @@ namespace LinaVG::Backend
     BackendHandle CreateFontTexture(int width, int height);
     void          BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, void* data);
     BackendHandle CreateShader(const char* vert, const char* frag);
-
+    BackendHandle GenerateFontTexture(int width, int height, void* data);
     extern LINAVG_API GLState g_glState;
 } // namespace LinaVG::Backend
 

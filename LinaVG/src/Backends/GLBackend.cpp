@@ -83,11 +83,17 @@ namespace LinaVG::Backend
                                                    "uniform sampler2D diffuse;\n"
                                                    "void main()\n"
                                                    "{\n"
-                                                   "   vec4 sampled = vec4(1,1,1,texture(diffuse, fUV).r); \n"
-                                                   "   if(sampled.a < 0.5) discard; \n"
-                                                   "   fragColor = vec4(fCol.rgb, sampled.a); \n"
+                                                   "float a = texture(diffuse, fUV).r; \n"
+                                                   "float thickness = 0.6f;\n"
+                                                   "float softness = 0.05f;\n"
+                                                   "float outlineThickness = 0.5f;\n"
+                                                   "float outlineSoftness = 0.2f;\n"
+                                                   "float outline = smoothstep(outlineThickness - outlineSoftness, outlineThickness + outlineSoftness, a); \n"
+                                                   "a = smoothstep(1.0 - thickness - softness, 1.0 - thickness + softness, a); \n"
+                                                   "vec3 outlineColor = vec3(1,0,1);\n"
+                                                   "fragColor = vec4(mix(outlineColor, fCol.rgb, outline), a); \n"
                                                    "}\0";
-
+        // float outline = smoothstep(outlineThickness - outlineSoftness, outlineThickness + outlineSoftness, a);
         Internal::g_backendData.m_roundedGradientFragShader = "#version 330 core\n"
                                                               "out vec4 fragColor;\n"
                                                               "in vec2 fUV;\n"
@@ -576,25 +582,25 @@ namespace LinaVG::Backend
         glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, GL_RED, GL_UNSIGNED_BYTE, data);
     }
 
-    //  BackendHandle GenerateFontTexture(int width, int height, void* data)
-    //  {
-    //      if (data == nullptr)
-    //          return 0;
-    //
-    //      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    //
-    //      // Generate texture
-    //      unsigned int texture;
-    //      glGenTextures(1, &texture);
-    //      glBindTexture(GL_TEXTURE_2D, texture);
-    //      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, static_cast<GLvoid*>(data));
-    //
-    //      // Options
-    //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //      return static_cast<BackendHandle>(texture);
-    //  }
+    BackendHandle GenerateFontTexture(int width, int height, void* data)
+    {
+        if (data == nullptr)
+            return 0;
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        // Generate texture
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, static_cast<GLvoid*>(data));
+
+        // Options
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        return static_cast<BackendHandle>(texture);
+    }
 
 } // namespace LinaVG::Backend

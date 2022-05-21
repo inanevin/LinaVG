@@ -77,7 +77,7 @@ namespace LinaVG
             // Init LinaVG
             LinaVG::Initialize();
 
-            LinaVG::LoadFont("Resources/Fonts/OpenSans-Regular.ttf", 96);
+            LinaVG::LoadFont("Resources/Fonts/OpenSans-Regular.ttf", 64);
 
             float prev = exampleBackend.GetTime();
 
@@ -115,13 +115,14 @@ namespace LinaVG
                 textOpts.m_color.m_gradientType = GradientType::Vertical;
                 textOpts.m_color.m_start        = Vec4(1, 0, 0, 1);
                 textOpts.m_color.m_end          = Vec4(0, 0, 1, 1);
+                textOpts.m_textScale = 1.0f;
                 //textOpts.m_dropShadowOffset     = Vec2(5.0f, 5.5f);
                // textOpts.m_textScale            = 0.8f;
                // textOpts.m_outlineThickness = 1.0f;
                // textOpts.m_outlineColor = Vec4(1,1,1,1);
-                LinaVG::DrawText("T", LinaVG::Vec2(300, 500), textOpts, 0, true);
+               // LinaVG::DrawText("T", LinaVG::Vec2(300, 500), textOpts, 0, true);
 
-                LinaVG::DrawText("曖ま真!", LinaVG::Vec2(300, 800), textOpts, 0);
+                LinaVG::DrawText("SA!", LinaVG::Vec2(300, 800), textOpts, 0);
                 // LinaVG::DrawText("moprngh", LinaVG::Vec2(800, 800), 1, opts, 0);
                 // Lina VG Render & end frame.
                 LinaVG::Render();

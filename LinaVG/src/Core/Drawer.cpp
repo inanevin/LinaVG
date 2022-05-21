@@ -723,12 +723,13 @@ namespace LinaVG
 
             const float         scale     = opts.m_textScale * Config.m_framebufferScale.x;
             BackendHandle       txt       = font->m_texture;
-            DrawBufferShapeType shapeType = isDropShadow ? DrawBufferShapeType::DropShadow : (isOutline ? DrawBufferShapeType::TextOutline : DrawBufferShapeType::Shape);
-            DrawBuffer&         buf       = Internal::g_rendererData.GetCharBuffer(txt, drawOrder, shapeType);
-
+         
             for (c = text.begin(); c != text.end(); c++)
             {
                 auto&     ch         = font->m_characterGlyphs[*c];
+                DrawBufferShapeType shapeType = isDropShadow ? DrawBufferShapeType::DropShadow : (isOutline ? DrawBufferShapeType::TextOutline : DrawBufferShapeType::Shape);
+                DrawBuffer& buf = Internal::g_rendererData.GetCharBuffer(ch.texture, drawOrder, shapeType);
+
                 const int startIndex = buf.m_vertexBuffer.m_size;
 
                 float x2 = pos.x + ch.m_bearing.x * scale;
@@ -793,25 +794,28 @@ namespace LinaVG
                 v2.m_pos = Vec2(x2 + dropShadowOffset.x + w, y2 + h + dropShadowOffset.y);
                 v3.m_pos = Vec2(x2 + dropShadowOffset.x, y2 + h + dropShadowOffset.y);
 
-                if (isOutline)
-                {
-                    Array<Vec2> points;
-                    points.push_back(v0.m_pos);
-                    points.push_back(v1.m_pos);
-                    points.push_back(v2.m_pos);
-                    points.push_back(v3.m_pos);
-                    const Vec2  center       = Math::GetPolygonCentroidFast(&points[0], 4);
-                    const float outlineScale = 1.1f;
-                    v0.m_pos                 = Math::ScalePoint(v0.m_pos, center, outlineScale);
-                    v1.m_pos                 = Math::ScalePoint(v1.m_pos, center, outlineScale);
-                    v2.m_pos                 = Math::ScalePoint(v2.m_pos, center, outlineScale);
-                    v3.m_pos                 = Math::ScalePoint(v3.m_pos, center, outlineScale);
-                }
-
-                v0.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y);
-                v1.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y);
-                v2.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
-                v3.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
+             // if (isOutline)
+             // {
+             //     Array<Vec2> points;
+             //     points.push_back(v0.m_pos);
+             //     points.push_back(v1.m_pos);
+             //     points.push_back(v2.m_pos);
+             //     points.push_back(v3.m_pos);
+             //     const Vec2  center       = Math::GetPolygonCentroidFast(&points[0], 4);
+             //     const float outlineScale = 1.1f;
+             //     v0.m_pos                 = Math::ScalePoint(v0.m_pos, center, outlineScale);
+             //     v1.m_pos                 = Math::ScalePoint(v1.m_pos, center, outlineScale);
+             //     v2.m_pos                 = Math::ScalePoint(v2.m_pos, center, outlineScale);
+             //     v3.m_pos                 = Math::ScalePoint(v3.m_pos, center, outlineScale);
+             // }
+                v0.m_uv = Vec2(0.0f, 0.0f);
+                v1.m_uv = Vec2(1.0f, 0.0f);
+                v2.m_uv = Vec2(1.0f, 1.0f);
+                v3.m_uv = Vec2(0.0f, 1.0f);
+              //  v0.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y);
+              //  v1.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y);
+              //  v2.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
+              //  v3.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
                 }
         
 
