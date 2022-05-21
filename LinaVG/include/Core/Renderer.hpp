@@ -46,24 +46,26 @@ namespace LinaVG
     /// </summary>
     struct RendererData
     {
-        Array<DrawBuffer>         m_defaultBuffers;
-        Array<GradientDrawBuffer> m_gradientBuffers;
-        Array<TextureDrawBuffer>  m_textureBuffers;
-        Array<CharDrawBuffer>     m_charBuffers;
-        int                       m_gcFrameCounter = 0;
-        int                       m_minDrawOrder   = -1;
-        int                       m_maxDrawOrder   = -1;
-        bool                      m_frameStarted   = false;
+        Array<DrawBuffer>           m_defaultBuffers;
+        Array<GradientDrawBuffer>   m_gradientBuffers;
+        Array<TextureDrawBuffer>    m_textureBuffers;
+        Array<SimpleTextDrawBuffer> m_simpleTextBuffers;
+        Array<SDFTextDrawBuffer>    m_sdfTextBuffers;
+        int                         m_gcFrameCounter = 0;
+        int                         m_minDrawOrder   = -1;
+        int                         m_maxDrawOrder   = -1;
+        bool                        m_frameStarted   = false;
 
-        void                SetDrawOrderLimits(int drawOrder);
-        int                 GetBufferIndexInGradientArray(DrawBuffer* buf);
-        int                 GetBufferIndexInTextureArray(DrawBuffer* buf);
-        int                 GetBufferIndexInDefaultArray(DrawBuffer* buf);
-        int                 GetBufferIndexInCharArray(DrawBuffer* buf);
-        DrawBuffer&         GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType);
-        GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
-        TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType);
-        CharDrawBuffer&     GetCharBuffer(BackendHandle glyphHandle, int drawOrder, DrawBufferShapeType shapeType);
+        void                  SetDrawOrderLimits(int drawOrder);
+        int                   GetBufferIndexInGradientArray(DrawBuffer* buf);
+        int                   GetBufferIndexInTextureArray(DrawBuffer* buf);
+        int                   GetBufferIndexInDefaultArray(DrawBuffer* buf);
+        int                   GetBufferIndexInCharArray(DrawBuffer* buf);
+        DrawBuffer&           GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType);
+        GradientDrawBuffer&   GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
+        TextureDrawBuffer&    GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType);
+        SimpleTextDrawBuffer& GetSimpleTextBuffer(BackendHandle glyphHandle, int drawOrder);
+        SDFTextDrawBuffer&    GetSDFTextBuffer(BackendHandle glyphHandle, int drawOrder, const TextOptions& opts);
     };
 
     namespace Internal

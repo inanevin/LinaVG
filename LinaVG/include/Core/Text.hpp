@@ -47,10 +47,10 @@ namespace LinaVG
 
     struct TextCharacter
     {
-        Vec2          m_uv      = Vec2(0.0f, 0.0f);
-        Vec2          m_size    = Vec2(0.0f, 0.0f);
-        Vec2          m_bearing = Vec2(0.0f, 0.0f);
-        Vec2          m_advance = Vec2(0.0f, 0.0f);
+        Vec2 m_uv      = Vec2(0.0f, 0.0f);
+        Vec2 m_size    = Vec2(0.0f, 0.0f);
+        Vec2 m_bearing = Vec2(0.0f, 0.0f);
+        Vec2 m_advance = Vec2(0.0f, 0.0f);
     };
 
     class LinaVGFont
@@ -58,6 +58,7 @@ namespace LinaVG
     public:
         BackendHandle                           m_texture     = 0;
         int                                     m_size        = 0;
+        bool                                    m_isSDF       = false;
         Vec2                                    m_textureSize = Vec2(0.0f, 0.0f);
         std::unordered_map<char, TextCharacter> m_characterGlyphs;
     };
@@ -99,7 +100,7 @@ namespace LinaVG
     /// Best quality would be achieved by loading fonts with bigger sizes and scaling them down using TextOptions.
     /// </summary>
     /// <returns>Font handle, store this handle if you like to use multiple fonts. You can pass the handle inside TextOptions to draw with a specific font. </returns>
-    LINAVG_API FontHandle LoadFont(const std::string& file, int size = 48);
+    LINAVG_API FontHandle LoadFont(const std::string& file, bool loadAsSDF, int size = 48);
 
     /// <summary>
     /// While drawing texts, the system will try to use the font passed inside TextOptions.

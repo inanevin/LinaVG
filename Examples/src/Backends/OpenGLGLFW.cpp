@@ -121,6 +121,14 @@ namespace LinaVG
                         ExampleApp::Get()->OnNumKeyCallback(4);
                     else if (key == GLFW_KEY_5)
                         ExampleApp::Get()->OnNumKeyCallback(5);
+                    else if (key == GLFW_KEY_6)
+                        ExampleApp::Get()->OnNumKeyCallback(6);
+                    else if (key == GLFW_KEY_7)
+                        ExampleApp::Get()->OnNumKeyCallback(7);
+                    else if (key == GLFW_KEY_8)
+                        ExampleApp::Get()->OnNumKeyCallback(8);
+                    else if (key == GLFW_KEY_9)
+                        ExampleApp::Get()->OnNumKeyCallback(9);
                 }
             };
 

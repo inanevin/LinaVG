@@ -47,6 +47,10 @@ namespace LinaVG
     {
         ExampleApp* ExampleApp::s_exampleApp = nullptr;
 
+        static float thickness        = 0.3f;
+        static float softness         = 0.0f;
+        static float outlineThickness = 0.0f;
+
         void ExampleApp::Run()
         {
             s_exampleApp = this;
@@ -77,7 +81,8 @@ namespace LinaVG
             // Init LinaVG
             LinaVG::Initialize();
 
-            LinaVG::LoadFont("Resources/Fonts/OpenSans-Regular.ttf", 64);
+            auto sdfHandle = LinaVG::LoadFont("Resources/Fonts/OpenSans-Regular.ttf", true, 45);
+            auto handle    = LinaVG::LoadFont("Resources/Fonts/OpenSans-Regular.ttf", false, 35);
 
             float prev = exampleBackend.GetTime();
 
@@ -110,19 +115,25 @@ namespace LinaVG
                 //   opts.m_outlineOptions.m_thickness = 2.0f;
                 LinaVG::DrawRect(LinaVG::Vec2(100, 200), LinaVG::Vec2(300, 500), opts, 40.0f, 0);
 
-
                 TextOptions textOpts;
-                textOpts.m_color.m_gradientType = GradientType::Vertical;
+                textOpts.m_font                 = sdfHandle;
+                textOpts.m_color.m_gradientType = GradientType::Horizontal;
                 textOpts.m_color.m_start        = Vec4(1, 0, 0, 1);
                 textOpts.m_color.m_end          = Vec4(0, 0, 1, 1);
-                textOpts.m_textScale = 1.0f;
-                //textOpts.m_dropShadowOffset     = Vec2(5.0f, 5.5f);
-               // textOpts.m_textScale            = 0.8f;
-               // textOpts.m_outlineThickness = 1.0f;
-               // textOpts.m_outlineColor = Vec4(1,1,1,1);
-               LinaVG::DrawText("T", LinaVG::Vec2(300, 500), textOpts, 0, true);
+                textOpts.m_textScale            = 0.6f;
+                textOpts.m_sdfSoftness          = softness;
+                textOpts.m_sdfThickness         = thickness;
+                textOpts.m_sdfOutlineOffset     = Vec2(0.5f ,0.5f);
+                textOpts.m_sdfOutlineThickness  = outlineThickness;
+                textOpts.m_sdfOutlineColor      = Vec4(0, 0, 0, 1);
+                // LinaVG::DrawText("T", LinaVG::Vec2(300, 500), textOpts, 0, true);
 
-                LinaVG::DrawText("JESUS PERKELE VITTU SAATANA", LinaVG::Vec2(300, 1000), textOpts, 0);
+                LinaVG::DrawText("VITTU PERKELE SAATANA", LinaVG::Vec2(300, 1000), textOpts, 0);
+
+                textOpts.m_font = handle;
+                LinaVG::DrawText(std::string("Softness ") + std::to_string(textOpts.m_sdfSoftness), LinaVG::Vec2(300, 800), textOpts, 0);
+                LinaVG::DrawText(std::string("Thickness ") + std::to_string(textOpts.m_sdfThickness), LinaVG::Vec2(300, 830), textOpts, 0);
+                LinaVG::DrawText(std::string("Outline Thickness ") + std::to_string(textOpts.m_sdfOutlineThickness), LinaVG::Vec2(300, 890), textOpts, 0);
                 // LinaVG::DrawText("moprngh", LinaVG::Vec2(800, 800), 1, opts, 0);
                 // Lina VG Render & end frame.
                 LinaVG::Render();
@@ -153,6 +164,18 @@ namespace LinaVG
 
         void ExampleApp::OnNumKeyCallback(int key)
         {
+            if (key == 1)
+                thickness += 0.05f;
+            else if (key == 2)
+                thickness -= 0.05f;
+            if (key == 3)
+                softness += 0.05f;
+            else if (key == 4)
+                softness -= 0.05f;
+            if (key == 5)
+                outlineThickness += 0.05f;
+            else if (key == 6)
+                outlineThickness -= 0.05f;
         }
 
         void ExampleApp::OnFCallback()

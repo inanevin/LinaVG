@@ -45,7 +45,8 @@ namespace LinaVG
         Internal::g_rendererData.m_defaultBuffers.reserve(Config.m_defaultBufferReserve);
         Internal::g_rendererData.m_gradientBuffers.reserve(Config.m_gradientBufferReserve);
         Internal::g_rendererData.m_textureBuffers.reserve(Config.m_textureBufferReserve);
-        Internal::g_rendererData.m_charBuffers.reserve(Config.m_charBufferReserve);
+        Internal::g_rendererData.m_simpleTextBuffers.reserve(Config.m_textBuffersReserve);
+        Internal::g_rendererData.m_sdfTextBuffers.reserve(Config.m_textBuffersReserve);
 
         if (!Backend::Initialize())
         {
@@ -120,18 +121,24 @@ namespace LinaVG
                         Backend::DrawTextured(&buf);
                 }
 
-                for (int i = 0; i < Internal::g_rendererData.m_charBuffers.m_size; i++)
+                for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
                 {
-                    CharDrawBuffer& buf = Internal::g_rendererData.m_charBuffers[i];
+                    SimpleTextDrawBuffer& buf = Internal::g_rendererData.m_simpleTextBuffers[i];
 
                     if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
-                        Backend::DrawText(&buf);
+                        Backend::DrawSimpleText(&buf);
+                }
+
+                for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
+                {
+                    SDFTextDrawBuffer& buf = Internal::g_rendererData.m_sdfTextBuffers[i];
+
+                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == k)
+                        Backend::DrawSDFText(&buf);
                 }
             }
         };
 
-        drawBuffers(DrawBufferShapeType::DropShadow);
-        drawBuffers(DrawBufferShapeType::TextOutline);
         drawBuffers(DrawBufferShapeType::Shape);
         drawBuffers(DrawBufferShapeType::Outline);
         drawBuffers(DrawBufferShapeType::AA);
@@ -165,10 +172,15 @@ namespace LinaVG
 
             Internal::g_rendererData.m_defaultBuffers.clear();
 
-            for (int i = 0; i < Internal::g_rendererData.m_charBuffers.m_size; i++)
-                Internal::g_rendererData.m_charBuffers[i].Clear();
+            for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
+                Internal::g_rendererData.m_simpleTextBuffers[i].Clear();
 
-            Internal::g_rendererData.m_charBuffers.clear();
+            Internal::g_rendererData.m_simpleTextBuffers.clear();
+
+            for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
+                Internal::g_rendererData.m_sdfTextBuffers[i].Clear();
+
+            Internal::g_rendererData.m_sdfTextBuffers.clear();
         }
         else
         {
@@ -187,10 +199,15 @@ namespace LinaVG
 
             Internal::g_rendererData.m_defaultBuffers.resize(0);
 
-            for (int i = 0; i < Internal::g_rendererData.m_charBuffers.m_size; i++)
-                Internal::g_rendererData.m_charBuffers[i].ResizeZero();
+            for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
+                Internal::g_rendererData.m_simpleTextBuffers[i].ResizeZero();
 
-            Internal::g_rendererData.m_charBuffers.resize(0);
+            Internal::g_rendererData.m_simpleTextBuffers.resize(0);
+
+            for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
+                Internal::g_rendererData.m_sdfTextBuffers[i].ResizeZero();
+
+            Internal::g_rendererData.m_sdfTextBuffers.resize(0);
         }
     }
 
@@ -253,19 +270,35 @@ namespace LinaVG
         return m_textureBuffers.last_ref();
     }
 
-    CharDrawBuffer& RendererData::GetCharBuffer(BackendHandle textureHandle, int drawOrder, DrawBufferShapeType shapeType)
+    SimpleTextDrawBuffer& RendererData::GetSimpleTextBuffer(BackendHandle textureHandle, int drawOrder)
     {
-        for (int i = 0; i < m_charBuffers.m_size; i++)
+        for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
         {
-            auto& buf = m_charBuffers[i];
-            if (buf.m_shapeType == shapeType &&buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle)
-                return m_charBuffers[i];
+            auto& buf = m_simpleTextBuffers[i];
+            if (buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle)
+                return m_simpleTextBuffers[i];
         }
 
         SetDrawOrderLimits(drawOrder);
 
-        m_charBuffers.push_back(CharDrawBuffer(textureHandle, drawOrder, shapeType));
-        return m_charBuffers.last_ref();
+        m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(textureHandle, drawOrder));
+        return m_simpleTextBuffers.last_ref();
+    }
+
+    SDFTextDrawBuffer& RendererData::GetSDFTextBuffer(BackendHandle textureHandle, int drawOrder, const TextOptions& opts)
+    {
+        for (int i = 0; i < m_sdfTextBuffers.m_size; i++)
+        {
+            auto& buf = m_sdfTextBuffers[i];
+            if (buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && buf.m_thickness == opts.m_sdfThickness && buf.m_softness == opts.m_sdfSoftness &&
+                buf.m_outlineThickness == opts.m_sdfOutlineThickness && Math::IsEqual(buf.m_outlineColor, opts.m_sdfOutlineColor))
+                return m_sdfTextBuffers[i];
+        }
+
+        SetDrawOrderLimits(drawOrder);
+
+        m_sdfTextBuffers.push_back(SDFTextDrawBuffer(textureHandle, drawOrder, opts));
+        return m_sdfTextBuffers.last_ref();
     }
 
     int RendererData::GetBufferIndexInDefaultArray(DrawBuffer* buf)
@@ -280,9 +313,9 @@ namespace LinaVG
 
     int RendererData::GetBufferIndexInCharArray(DrawBuffer* buf)
     {
-        for (int i = 0; i < m_charBuffers.m_size; i++)
+        for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
         {
-            if (buf == &m_charBuffers[i])
+            if (buf == &m_simpleTextBuffers[i])
                 return i;
         }
         return -1;

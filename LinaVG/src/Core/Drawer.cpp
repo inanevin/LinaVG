@@ -697,152 +697,111 @@ namespace LinaVG
 
     void DrawText(const std::string& text, const Vec2& position, const TextOptions& opts, int drawOrder, bool dbg)
     {
-        auto draw = [&](bool isDropShadow, bool isOutline) {
-            std::string::const_iterator c;
-            Vec2                        pos              = position;
-            FontHandle                  fontHandle       = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
-            Vec2                        dropShadowOffset = Vec2(0.0f, 0.0f);
-            auto*                       font             = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
+        std::string::const_iterator c;
+        Vec2                        pos        = position;
+        FontHandle                  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
+        LinaVGFont*                 font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
 
-            if (isDropShadow)
+        // Coloring & grad options
+        int                characterCount      = 0;
+        const int          totalCharacterCount = text.length();
+        const bool         isGradientText      = !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
+        const GradientType gradType            = opts.m_color.m_gradientType;
+        const Vec4         minGrad             = opts.m_color.m_start;
+        const Vec4         maxGrad             = opts.m_color.m_end;
+        Vec4               lastMinGrad         = minGrad;
+
+        const float   scale = opts.m_textScale * Config.m_framebufferScale.x;
+        BackendHandle txt   = font->m_texture;
+        DrawBuffer*   buf   = nullptr;
+
+        if (font->m_isSDF)
+            buf = &Internal::g_rendererData.GetSDFTextBuffer(txt, drawOrder, opts);
+        else
+            buf = &Internal::g_rendererData.GetSimpleTextBuffer(txt, drawOrder);
+
+        for (c = text.begin(); c != text.end(); c++)
+        {
+            auto& ch = font->m_characterGlyphs[*c];
+
+            const int startIndex = buf->m_vertexBuffer.m_size;
+
+            float x2 = pos.x + ch.m_bearing.x * scale;
+            float y2 = pos.y - ch.m_bearing.y * scale;
+            float w  = ch.m_size.x * scale;
+            float h  = ch.m_size.y * scale;
+            pos.x += ch.m_advance.x * scale + 15;
+            pos.y += ch.m_advance.y * scale;
+
+            if (w == 0.0f || h == 0.0f)
+                continue;
+
+            Vertex v0, v1, v2, v3;
+
+            if (isGradientText)
             {
-                dropShadowOffset.x = opts.m_dropShadowOffset.x * Config.m_framebufferScale.x;
-                dropShadowOffset.y = opts.m_dropShadowOffset.y * Config.m_framebufferScale.x;
+                if (gradType == GradientType::Horizontal)
+                {
+                    const float maxT       = static_cast<float>(characterCount + 1) / static_cast<float>(totalCharacterCount);
+                    const Vec4  currentMin = lastMinGrad;
+                    const Vec4  currentMax = Math::Lerp(minGrad, maxGrad, maxT);
+                    lastMinGrad            = currentMax;
+
+                    v0.m_col = currentMin;
+                    v1.m_col = currentMax;
+                    v2.m_col = currentMax;
+                    v3.m_col = currentMin;
+                }
+                else // fallback is vertical since radial gradients are not supported.
+                {
+                    v0.m_col = minGrad;
+                    v1.m_col = minGrad;
+                    v2.m_col = maxGrad;
+                    v3.m_col = maxGrad;
+                }
+            }
+            else
+                v0.m_col = v1.m_col = v2.m_col = v3.m_col = opts.m_color.m_start;
+
+            // DEBUG ATLAS TEXTURE
+            if (dbg)
+            {
+                v0.m_pos = Vec2(300, 500);
+                v1.m_pos = Vec2(300 + font->m_textureSize.x, 500);
+                v2.m_pos = Vec2(300 + font->m_textureSize.x, 500 + font->m_textureSize.y);
+                v3.m_pos = Vec2(300, 500 + font->m_textureSize.y);
+                v0.m_uv  = Vec2(0.0f, 0.0f);
+                v1.m_uv  = Vec2(1.0f, 0.0f);
+                v2.m_uv  = Vec2(1.0f, 1.0f);
+                v3.m_uv  = Vec2(0.0f, 1.0f);
+            }
+            else
+            {
+
+                v0.m_pos = Vec2(x2, y2);
+                v1.m_pos = Vec2(x2 + w, y2);
+                v2.m_pos = Vec2(x2 + w, y2 + h);
+                v3.m_pos = Vec2(x2, y2 + h);
+
+                v0.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y);
+                v1.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y);
+                v2.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
+                v3.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
             }
 
-            // Coloring & grad options
-            int                characterCount      = 0;
-            const int          totalCharacterCount = text.length();
-            const bool         isGradientOutline   = opts.m_outlineThickness != 0.0f && !Math::IsEqual(opts.m_outlineColor.m_start, opts.m_outlineColor.m_end);
-            const bool         isGradientText      = !isGradientOutline && !isOutline && !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
-            const bool         useGradientColors   = isGradientOutline || isGradientText;
-            const GradientType gradType            = isGradientOutline ? opts.m_outlineColor.m_gradientType : opts.m_color.m_gradientType;
-            const Vec4         minGrad             = isGradientOutline ? opts.m_outlineColor.m_start : opts.m_color.m_start;
-            const Vec4         maxGrad             = isGradientOutline ? opts.m_outlineColor.m_end : opts.m_color.m_end;
-            Vec4               lastMinGrad         = minGrad;
+            buf->PushVertex(v0);
+            buf->PushVertex(v1);
+            buf->PushVertex(v2);
+            buf->PushVertex(v3);
 
-            const float         scale     = opts.m_textScale * Config.m_framebufferScale.x;
-            BackendHandle       txt       = font->m_texture;
-            DrawBufferShapeType shapeType = isDropShadow ? DrawBufferShapeType::DropShadow : (isOutline ? DrawBufferShapeType::TextOutline : DrawBufferShapeType::Shape);
-            DrawBuffer& buf = Internal::g_rendererData.GetCharBuffer(txt, drawOrder, shapeType);
-
-            for (c = text.begin(); c != text.end(); c++)
-            {
-                auto&     ch         = font->m_characterGlyphs[*c];
- 
-
-                const int startIndex = buf.m_vertexBuffer.m_size;
-
-                float x2 = pos.x + ch.m_bearing.x * scale;
-                float y2 = pos.y - ch.m_bearing.y * scale;
-                float w  = ch.m_size.x * scale;
-                float h  = ch.m_size.y * scale;
-
-                pos.x += ch.m_advance.x * scale;
-                pos.y += ch.m_advance.y * scale;
-
-                if (w == 0.0f || h == 0.0f)
-                    continue;
-
-                Vertex v0, v1, v2, v3;
-
-                if (isDropShadow)
-                    v0.m_col = v1.m_col = v2.m_col = v3.m_col = opts.m_dropShadowColor;
-                else if (isGradientOutline || isGradientText)
-                {
-
-                    if (gradType == GradientType::Horizontal)
-                    {
-                        const float maxT       = static_cast<float>(characterCount + 1) / static_cast<float>(totalCharacterCount);
-                        const Vec4  currentMin = lastMinGrad;
-                        const Vec4  currentMax = Math::Lerp(minGrad, maxGrad, maxT);
-                        lastMinGrad            = currentMax;
-
-                        v0.m_col = currentMin;
-                        v1.m_col = currentMax;
-                        v2.m_col = currentMax;
-                        v3.m_col = currentMin;
-                    }
-                    else // fallback is vertical since radial gradients are not supported.
-                    {
-                        v0.m_col = minGrad;
-                        v1.m_col = minGrad;
-                        v2.m_col = maxGrad;
-                        v3.m_col = maxGrad;
-                    }
-                }
-                else
-                    v0.m_col = v1.m_col = v2.m_col = v3.m_col = isOutline ? opts.m_outlineColor.m_start : opts.m_color.m_start;
-
-                // DEBUG ATLAS TEXTURE
-                if (dbg)
-                {
-                    v0.m_pos = Vec2(300, 500);
-                    v1.m_pos = Vec2(300 + font->m_textureSize.x, 500);
-                    v2.m_pos = Vec2(300 + font->m_textureSize.x, 500 + font->m_textureSize.y);
-                    v3.m_pos = Vec2(300, 500 + font->m_textureSize.y);
-                    v0.m_uv = Vec2(0.0f, 0.0f);
-                    v1.m_uv = Vec2(1.0f, 0.0f);
-                    v2.m_uv = Vec2(1.0f, 1.0f);
-                    v3.m_uv = Vec2(0.0f, 1.0f);
-                }
-                else
-                {
-                
-
-                v0.m_pos = Vec2(x2 + dropShadowOffset.x, y2 + dropShadowOffset.y);
-                v1.m_pos = Vec2(x2 + dropShadowOffset.x + w, y2 + dropShadowOffset.y);
-                v2.m_pos = Vec2(x2 + dropShadowOffset.x + w, y2 + h + dropShadowOffset.y);
-                v3.m_pos = Vec2(x2 + dropShadowOffset.x, y2 + h + dropShadowOffset.y);
-
-             // if (isOutline)
-             // {
-             //     Array<Vec2> points;
-             //     points.push_back(v0.m_pos);
-             //     points.push_back(v1.m_pos);
-             //     points.push_back(v2.m_pos);
-             //     points.push_back(v3.m_pos);
-             //     const Vec2  center       = Math::GetPolygonCentroidFast(&points[0], 4);
-             //     const float outlineScale = 1.1f;
-             //     v0.m_pos                 = Math::ScalePoint(v0.m_pos, center, outlineScale);
-             //     v1.m_pos                 = Math::ScalePoint(v1.m_pos, center, outlineScale);
-             //     v2.m_pos                 = Math::ScalePoint(v2.m_pos, center, outlineScale);
-             //     v3.m_pos                 = Math::ScalePoint(v3.m_pos, center, outlineScale);
-             // }
-              //  v0.m_uv = Vec2(0.0f, 0.0f);
-              //  v1.m_uv = Vec2(1.0f, 0.0f);
-              //  v2.m_uv = Vec2(1.0f, 1.0f);
-              //  v3.m_uv = Vec2(0.0f, 1.0f);
-              v0.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y);
-              v1.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y);
-              v2.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
-              v3.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
-                }
-        
-
-                buf.PushVertex(v0);
-                buf.PushVertex(v1);
-                buf.PushVertex(v2);
-                buf.PushVertex(v3);
-
-                buf.PushIndex(startIndex);
-                buf.PushIndex(startIndex + 1);
-                buf.PushIndex(startIndex + 3);
-                buf.PushIndex(startIndex + 1);
-                buf.PushIndex(startIndex + 2);
-                buf.PushIndex(startIndex + 3);
-
-                characterCount++;
-            }
-        };
-
-        draw(false, false);
-
-        if (opts.m_dropShadowOffset.x != 0.0f || opts.m_dropShadowOffset.y != 0.0f)
-            draw(true, false);
-
-        if (opts.m_outlineThickness != 0.0f)
-            draw(false, true);
+            buf->PushIndex(startIndex);
+            buf->PushIndex(startIndex + 1);
+            buf->PushIndex(startIndex + 3);
+            buf->PushIndex(startIndex + 1);
+            buf->PushIndex(startIndex + 2);
+            buf->PushIndex(startIndex + 3);
+            characterCount++;
+        }
     }
 
     void Internal::FillRect_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts, int drawOrder)

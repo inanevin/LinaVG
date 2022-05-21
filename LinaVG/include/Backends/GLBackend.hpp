@@ -50,6 +50,7 @@ namespace LinaVG::Backend
         bool m_stencilTestEnabled = false;
         bool m_depthTestEnabled   = false;
         bool m_scissorTestEnabled = false;
+        bool m_depthMaskEnabled   = false;
         int  m_blendEq            = 0;
         int  m_blendSrcAlpha      = 0;
         int  m_blendSrcRGB        = 0;
@@ -64,18 +65,19 @@ namespace LinaVG::Backend
     void DrawGradient(GradientDrawBuffer* buf);
     void DrawTextured(TextureDrawBuffer* buf);
     void DrawDefault(DrawBuffer* buf);
-    void DrawText(CharDrawBuffer* buf);
+    void DrawSimpleText(SimpleTextDrawBuffer* buf);
+    void DrawSDFText(SDFTextDrawBuffer* buf);
 
     void EndFrame();
 
-    void          SaveAPIState();
-    void          RestoreAPIState();
-    void          BindVAO(BackendHandle vao);
-    void          AddShaderUniforms(BackendHandle shader);
-    BackendHandle CreateFontTexture(int width, int height);
-    void          BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, void* data);
-    BackendHandle CreateShader(const char* vert, const char* frag);
-    BackendHandle GenerateFontTexture(int width, int height, void* data);
+    void                      SaveAPIState();
+    void                      RestoreAPIState();
+    void                      BindVAO(BackendHandle vao);
+    void                      AddShaderUniforms(BackendHandle shader);
+    BackendHandle             CreateFontTexture(int width, int height);
+    void                      BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, void* data);
+    BackendHandle             CreateShader(const char* vert, const char* frag);
+    BackendHandle             GenerateFontTexture(int width, int height, void* data);
     extern LINAVG_API GLState g_glState;
 } // namespace LinaVG::Backend
 

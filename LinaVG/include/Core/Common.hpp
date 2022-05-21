@@ -363,6 +363,12 @@ namespace LinaVG
         Vec2 m_textureUVOffset = Vec2(0.0f, 0.0f);
     };
 
+    /// <summary>
+    /// Text styling, DrawText will render the given text as normal or via signed-distance-field (SDF) methods.
+    /// This depends on the font handle given with options (or default font if not-provided).
+    /// If you DrawText() using a font handle which was generated with SDF option, it's gonna use SDF rendering.
+    /// thickness, softness, drop shadow and outline options are only available on SDF rendering.
+    /// </summary>
     LINAVG_API struct TextOptions
     {
         /// <summary>
@@ -381,28 +387,11 @@ namespace LinaVG
         /// </summary>
         float m_textScale = 1.0f;
 
-        /// <summary>
-        /// Defines how to offset the drop shadow from the original text.
-        /// Set to 0.0f, 0.0f to disable.
-        /// </summary>
-        Vec2 m_dropShadowOffset = Vec2(0.0f, 0.0f);
-
-        /// <summary>
-        /// Defines drop shadow color.
-        /// </summary>
-        Vec4 m_dropShadowColor = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-        /// <summary>
-        /// Used to outline the text, outlines are drawn as simple duplicate quads right now. 
-        /// Set to 0.0 to disable.
-        /// !May effect performance at the moment!
-        /// </summary>
-        float m_outlineThickness = 0.0f;
-
-        /// <summary>
-        /// Defines outline color, similar to text color, only flat, horizontal/vertical gradients are supported.
-        /// </summary>
-        Vec4Grad m_outlineColor = Vec4Grad(Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+        float m_sdfThickness        = 1.0f;
+        float m_sdfSoftness         = 0.02f;
+        float m_sdfOutlineThickness = 1.0f;
+        Vec4  m_sdfOutlineColor     = Vec4(1, 1, 1, 1);
+        Vec2  m_sdfOutlineOffset    = Vec2(0.0f, 0.0f);
     };
     /// <summary>
     /// Style options used to draw various effects around the target shape.
@@ -550,9 +539,10 @@ namespace LinaVG
         int m_textureBufferReserve = 5;
 
         /// <summary>
-        /// This amount of character buffers for text rendering are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
+        /// This amount of text buffers for text rendering are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
+        /// General idea is that each font you load create a new buffer, so you can reserve the same amount of fonts you plan on using on your application.
         /// </summary>
-        int m_charBufferReserve = 100;
+        int m_textBuffersReserve = 10;
 
         /// <summary>
         /// Set this to your own function to receive error callbacks from LinaVG.
@@ -604,7 +594,9 @@ namespace LinaVG
     {
         Default,
         Gradient,
-        Textured
+        Textured,
+        SimpleText,
+        SDFText,
     };
 
     enum class DrawBufferShapeType
@@ -612,8 +604,6 @@ namespace LinaVG
         Shape,
         Outline,
         AA,
-        DropShadow,
-        TextOutline,
     };
 
     struct DrawBuffer
@@ -679,14 +669,30 @@ namespace LinaVG
         Vec2          m_textureUVOffset = Vec2(0.0f, 0.0f);
     };
 
-    struct CharDrawBuffer : public DrawBuffer
+    struct SimpleTextDrawBuffer : public DrawBuffer
     {
-        CharDrawBuffer(){};
-        CharDrawBuffer(BackendHandle glyphHandle, int drawOrder, DrawBufferShapeType shapeType)
+        SimpleTextDrawBuffer(){};
+        SimpleTextDrawBuffer(BackendHandle glyphHandle, int drawOrder)
             : m_textureHandle(glyphHandle),
-              DrawBuffer(drawOrder, DrawBufferType::Textured, shapeType){};
+              DrawBuffer(drawOrder, DrawBufferType::SimpleText, DrawBufferShapeType::Shape){};
 
         BackendHandle m_textureHandle = 0;
+    };
+
+    struct SDFTextDrawBuffer : public DrawBuffer
+    {
+        SDFTextDrawBuffer(){};
+        SDFTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, const TextOptions& opts)
+            : m_textureHandle(glyphHandle), m_thickness(opts.m_sdfThickness),
+              m_softness(opts.m_sdfSoftness), m_outlineThickness(opts.m_sdfOutlineThickness),
+              m_outlineColor(opts.m_sdfOutlineColor),
+              DrawBuffer(drawOrder, DrawBufferType::SDFText, DrawBufferShapeType::Shape){};
+
+        float         m_thickness        = 0.0f;
+        float         m_softness         = 0.0f;
+        float         m_outlineThickness = 0.0f;
+        Vec4          m_outlineColor     = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        BackendHandle m_textureHandle    = 0;
     };
 
 } // namespace LinaVG
