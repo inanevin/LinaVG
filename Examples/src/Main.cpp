@@ -1,4 +1,4 @@
-/*
+﻿/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -77,7 +77,7 @@ namespace LinaVG
             // Init LinaVG
             LinaVG::Initialize();
 
-            LinaVG::LoadFont("Resources/Fonts/OpenSans-Regular.ttf");
+            LinaVG::LoadFont("Resources/Fonts/OpenSans-Regular.ttf", 96);
 
             float prev = exampleBackend.GetTime();
 
@@ -98,7 +98,7 @@ namespace LinaVG
                 //  Define style options & render rect.
                 LinaVG::StyleOptions opts;
                 opts.m_isFilled        = true;
-                opts.m_color           = LinaVG::Vec4(1,1,1,1);
+                opts.m_color           = LinaVG::Vec4(1, 1, 1, 1);
                 opts.m_thickness       = 5.0f;
                 opts.m_rounding        = 0.0f;
                 opts.m_textureUVTiling = Vec2(1.0f, 1.0f);
@@ -110,7 +110,19 @@ namespace LinaVG
                 //   opts.m_outlineOptions.m_thickness = 2.0f;
                 LinaVG::DrawRect(LinaVG::Vec2(100, 200), LinaVG::Vec2(300, 500), opts, 40.0f, 0);
 
-                //  LinaVG::DrawText("Tabi amina koyim ya!", LinaVG::Vec2(300, 500), 1, opts, 0);
+
+                TextOptions textOpts;
+                textOpts.m_color.m_gradientType = GradientType::Vertical;
+                textOpts.m_color.m_start        = Vec4(1, 0, 0, 1);
+                textOpts.m_color.m_end          = Vec4(0, 0, 1, 1);
+                //textOpts.m_dropShadowOffset     = Vec2(5.0f, 5.5f);
+               // textOpts.m_textScale            = 0.8f;
+               // textOpts.m_outlineThickness = 1.0f;
+               // textOpts.m_outlineColor = Vec4(1,1,1,1);
+                LinaVG::DrawText("T", LinaVG::Vec2(300, 500), textOpts, 0, true);
+
+                LinaVG::DrawText("曖ま真!", LinaVG::Vec2(300, 800), textOpts, 0);
+                // LinaVG::DrawText("moprngh", LinaVG::Vec2(800, 800), 1, opts, 0);
                 // Lina VG Render & end frame.
                 LinaVG::Render();
                 LinaVG::EndFrame();

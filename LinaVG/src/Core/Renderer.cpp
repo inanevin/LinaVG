@@ -130,6 +130,8 @@ namespace LinaVG
             }
         };
 
+        drawBuffers(DrawBufferShapeType::DropShadow);
+        drawBuffers(DrawBufferShapeType::TextOutline);
         drawBuffers(DrawBufferShapeType::Shape);
         drawBuffers(DrawBufferShapeType::Outline);
         drawBuffers(DrawBufferShapeType::AA);
@@ -199,7 +201,7 @@ namespace LinaVG
         for (int i = 0; i < m_gradientBuffers.m_size; i++)
         {
             auto& buf = m_gradientBuffers[i];
-            if (buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.m_start, grad.m_start) && Math::IsEqual(buf.m_color.m_end, grad.m_end) && buf.m_color.m_gradientType == grad.m_gradientType)
+            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.m_start, grad.m_start) && Math::IsEqual(buf.m_color.m_end, grad.m_end) && buf.m_color.m_gradientType == grad.m_gradientType)
             {
                 if (grad.m_gradientType == GradientType::Radial || grad.m_gradientType == GradientType::RadialCorner)
                 {
@@ -225,7 +227,7 @@ namespace LinaVG
         for (int i = 0; i < m_defaultBuffers.m_size; i++)
         {
             auto& buf = m_defaultBuffers[i];
-            if (m_defaultBuffers[i].m_drawOrder == drawOrder)
+            if (m_defaultBuffers[i].m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
                 return m_defaultBuffers[i];
         }
 
@@ -241,7 +243,7 @@ namespace LinaVG
         for (int i = 0; i < m_textureBuffers.m_size; i++)
         {
             auto& buf = m_textureBuffers[i];
-            if (buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer)
+            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer)
                 return m_textureBuffers[i];
         }
 
@@ -251,18 +253,18 @@ namespace LinaVG
         return m_textureBuffers.last_ref();
     }
 
-    CharDrawBuffer& RendererData::GetCharBuffer(BackendHandle glyphHandle, int drawOrder)
+    CharDrawBuffer& RendererData::GetCharBuffer(BackendHandle textureHandle, int drawOrder, DrawBufferShapeType shapeType)
     {
         for (int i = 0; i < m_charBuffers.m_size; i++)
         {
             auto& buf = m_charBuffers[i];
-            if (buf.m_drawOrder == drawOrder && buf.m_glyphHandle == glyphHandle)
+            if (buf.m_shapeType == shapeType &&buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle)
                 return m_charBuffers[i];
         }
 
         SetDrawOrderLimits(drawOrder);
 
-        m_charBuffers.push_back(CharDrawBuffer(glyphHandle, drawOrder));
+        m_charBuffers.push_back(CharDrawBuffer(textureHandle, drawOrder, shapeType));
         return m_charBuffers.last_ref();
     }
 

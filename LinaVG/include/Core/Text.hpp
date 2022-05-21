@@ -67,9 +67,13 @@ namespace LinaVG
     /// </summary>
     struct TextData
     {
-        FT_Library         m_ftlib = nullptr;
+        FT_Library m_ftlib       = nullptr;
+        int        m_defaultFont = 0;
+
+        /// <summary>
+        /// !OFFSETTED BY 1! always access m_loadedFonts[myFontHandle - 1];
+        /// </summary>
         Array<LinaVGFont*> m_loadedFonts;
-        int                m_activeFont = 0;
     };
 
     namespace Internal
@@ -79,7 +83,7 @@ namespace LinaVG
         /// <summary>
         /// !Internal! Do not modify.
         /// </summary>
-        extern LINAVG_API int g_fontCounter;
+        extern LINAVG_API FontHandle g_fontCounter;
     } // namespace Internal
 
     namespace Text
@@ -88,9 +92,23 @@ namespace LinaVG
         LINAVG_API void Terminate();
     } // namespace Text
 
-    LINAVG_API int LoadFont(const std::string& file, int size = 48);
+    /// <summary>
+    /// Loads the given font & generates textures based on given size.
+    /// You can load the same font with different sizes to achieve varying text scales.
+    /// Alternatively, you can use the scale modifier in TextOptions but it's not recommended to upscale.
+    /// Best quality would be achieved by loading fonts with bigger sizes and scaling them down using TextOptions.
+    /// </summary>
+    /// <returns>Font handle, store this handle if you like to use multiple fonts. You can pass the handle inside TextOptions to draw with a specific font. </returns>
+    LINAVG_API FontHandle LoadFont(const std::string& file, int size = 48);
 
-    LINAVG_API void SetActiveFont(int activeFont);
+    /// <summary>
+    /// While drawing texts, the system will try to use the font passed inside TextOptions.
+    /// If its 0 or doesn't exists, it will fall-back to the default font.
+    /// Set the default font handle using this method.
+    /// !NOTE!: When you load a font, it's always set as Default font. So only use this method after you are done loading all your fonts.
+    /// </summary>
+    /// <returns></returns>
+    LINAVG_API void SetDefaultFont(FontHandle font);
 }; // namespace LinaVG
 
 #endif

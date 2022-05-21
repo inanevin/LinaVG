@@ -35,8 +35,8 @@ namespace LinaVG
 {
     namespace Internal
     {
-        TextData g_textData;
-        int      g_fontCounter = 0;
+        TextData   g_textData;
+        FontHandle g_fontCounter = 0;
     } // namespace Internal
 
 #define MAX_WIDTH 1024
@@ -65,7 +65,7 @@ namespace LinaVG
         }
     } // namespace Text
 
-    int LoadFont(const std::string& file, int size)
+    FontHandle LoadFont(const std::string& file, int size)
     {
         FT_Face face;
         if (FT_New_Face(Internal::g_textData.m_ftlib, file.c_str(), 0, &face))
@@ -75,6 +75,7 @@ namespace LinaVG
         }
 
         FT_Set_Pixel_Sizes(face, 0, size);
+        FT_Select_Charmap(face, FT_ENCODING_UNICODE);
 
         // Texture alignment changes might be necessary on some APIs such as OpenGL
         Backend::SaveAPIState();
@@ -91,7 +92,7 @@ namespace LinaVG
         unsigned int w = 0;
         unsigned int h = 0;
 
-        for (unsigned char c = 0; c < Config.m_maxGlyphCharSize; c++)
+        for (unsigned char c = 32; c < Config.m_maxGlyphCharSize; c++)
         {
             if (FT_Load_Char(face, c, FT_LOAD_RENDER))
             {
@@ -122,8 +123,9 @@ namespace LinaVG
         int offsetX         = 0;
         int offsetY         = 0;
         rowh                = 0;
+        FT_GlyphSlot slot = face->glyph; // <-- This is new
 
-        for (unsigned char c = 0; c < Config.m_maxGlyphCharSize; c++)
+        for (unsigned char c = 32; c < Config.m_maxGlyphCharSize; c++)
         {
             if (FT_Load_Char(face, c, FT_LOAD_RENDER))
             {
@@ -141,6 +143,8 @@ namespace LinaVG
                 offsetX = 0;
             }
 
+            FT_Render_Glyph(slot, FT_RENDER_MODE_SDF); // <-- And this is new
+
             Backend::BufferFontTextureAtlas(glyphWidth, glyphRows, offsetX, offsetY, static_cast<void*>(face->glyph->bitmap.buffer));
 
             characterMap[c] = {
@@ -157,16 +161,16 @@ namespace LinaVG
         Backend::RestoreAPIState();
 
         Config.m_logCallback("LinaVG: Successfuly loaded font!");
-        const int currentCounter          = Internal::g_fontCounter;
-        Internal::g_textData.m_activeFont = Internal::g_fontCounter;
+        Internal::g_fontCounter++;
+        Internal::g_textData.m_defaultFont = Internal::g_fontCounter;
         Internal::g_textData.m_loadedFonts.push_back(font);
-        return currentCounter;
+        return Internal::g_fontCounter;
     }
 
-    LINAVG_API void SetActiveFont(int activeFont)
+    LINAVG_API void SetDefaultFont(FontHandle activeFont)
     {
         _ASSERT(activeFont < Internal::g_textData.m_loadedFonts.m_size && activeFont > -1);
-        Internal::g_textData.m_activeFont = activeFont;
+        Internal::g_textData.m_defaultFont = activeFont;
     }
 
 } // namespace LinaVG

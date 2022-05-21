@@ -242,7 +242,7 @@ namespace LinaVG
     /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
     LINAVG_API void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 
-    LINAVG_API void DrawText(const std::string& text, const Vec2& position, float scale, StyleOptions& style, int drawOrder = 0);
+    LINAVG_API void DrawText(const std::string& text, const Vec2& position, const TextOptions& opts, int drawOrder = 0, bool dbg = false);
 
     namespace Internal
     {

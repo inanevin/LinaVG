@@ -84,7 +84,8 @@ namespace LinaVG::Backend
                                                    "void main()\n"
                                                    "{\n"
                                                    "   vec4 sampled = vec4(1,1,1,texture(diffuse, fUV).r); \n"
-                                                   "   fragColor = vec4(fCol.rgb, 1.0f) * sampled; \n"
+                                                   "   if(sampled.a < 0.5) discard; \n"
+                                                   "   fragColor = vec4(fCol.rgb, sampled.a); \n"
                                                    "}\0";
 
         Internal::g_backendData.m_roundedGradientFragShader = "#version 330 core\n"
@@ -192,6 +193,7 @@ namespace LinaVG::Backend
         SaveAPIState();
 
         // Apply GL state
+        glDepthMask(GL_FALSE);
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -347,11 +349,11 @@ namespace LinaVG::Backend
         BindVAO(Internal::g_backendData.m_textVAO);
 
         glUseProgram(Internal::g_backendData.m_textShaderHandle);
-        glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_defaultShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+        glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_textShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 
-        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_defaultShaderHandle]["diffuse"], 0);
+        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_textShaderHandle]["diffuse"], 0);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, buf->m_glyphHandle);
+        glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
 
         glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_textVBO);
         glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
@@ -451,6 +453,7 @@ namespace LinaVG::Backend
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glDepthMask(GL_TRUE);
 
         // Reset GL state
         RestoreAPIState();

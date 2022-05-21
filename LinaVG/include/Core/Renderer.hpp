@@ -63,7 +63,7 @@ namespace LinaVG
         DrawBuffer&         GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType);
         GradientDrawBuffer& GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
         TextureDrawBuffer&  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType);
-        CharDrawBuffer&     GetCharBuffer(BackendHandle glyphHandle, int drawOrder);
+        CharDrawBuffer&     GetCharBuffer(BackendHandle glyphHandle, int drawOrder, DrawBufferShapeType shapeType);
     };
 
     namespace Internal

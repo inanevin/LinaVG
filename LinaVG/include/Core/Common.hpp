@@ -53,6 +53,7 @@ namespace LinaVG
 
     typedef unsigned int Index;
     typedef unsigned int BackendHandle;
+    typedef uint_fast8_t FontHandle;
 
     /// <summary>
     /// Color vector, range 0.0f - 1.0f
@@ -362,6 +363,47 @@ namespace LinaVG
         Vec2 m_textureUVOffset = Vec2(0.0f, 0.0f);
     };
 
+    LINAVG_API struct TextOptions
+    {
+        /// <summary>
+        /// Font to use while drawing this text. Handles are achieved through LoadFont() method.
+        /// </summary>
+        FontHandle m_font = 0;
+
+        /// <summary>
+        /// Text color, only flat color, horizontal or vertical gradients are supported.
+        /// </summary>
+        Vec4Grad m_color = Vec4Grad(Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+        /// <summary>
+        /// Multiplies the text vertices, !it is not recommended to change text size based on this scale!
+        /// Rather try to load the same font with bigger sizes.
+        /// </summary>
+        float m_textScale = 1.0f;
+
+        /// <summary>
+        /// Defines how to offset the drop shadow from the original text.
+        /// Set to 0.0f, 0.0f to disable.
+        /// </summary>
+        Vec2 m_dropShadowOffset = Vec2(0.0f, 0.0f);
+
+        /// <summary>
+        /// Defines drop shadow color.
+        /// </summary>
+        Vec4 m_dropShadowColor = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+        /// <summary>
+        /// Used to outline the text, outlines are drawn as simple duplicate quads right now. 
+        /// Set to 0.0 to disable.
+        /// !May effect performance at the moment!
+        /// </summary>
+        float m_outlineThickness = 0.0f;
+
+        /// <summary>
+        /// Defines outline color, similar to text color, only flat, horizontal/vertical gradients are supported.
+        /// </summary>
+        Vec4Grad m_outlineColor = Vec4Grad(Vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    };
     /// <summary>
     /// Style options used to draw various effects around the target shape.
     /// </summary>
@@ -569,7 +611,9 @@ namespace LinaVG
     {
         Shape,
         Outline,
-        AA
+        AA,
+        DropShadow,
+        TextOutline,
     };
 
     struct DrawBuffer
@@ -638,11 +682,11 @@ namespace LinaVG
     struct CharDrawBuffer : public DrawBuffer
     {
         CharDrawBuffer(){};
-        CharDrawBuffer(BackendHandle glyphHandle, int drawOrder)
-            : m_glyphHandle(glyphHandle),
-              DrawBuffer(drawOrder, DrawBufferType::Textured, DrawBufferShapeType::Shape){};
+        CharDrawBuffer(BackendHandle glyphHandle, int drawOrder, DrawBufferShapeType shapeType)
+            : m_textureHandle(glyphHandle),
+              DrawBuffer(drawOrder, DrawBufferType::Textured, shapeType){};
 
-        BackendHandle m_glyphHandle = 0;
+        BackendHandle m_textureHandle = 0;
     };
 
 } // namespace LinaVG
