@@ -317,6 +317,14 @@ namespace LinaVG
                     ++data;
             return data;
         }
+
+        inline void swap(int start, int end)
+        {
+            _ASSERT(start > -1 && start < m_size && end > -1 && end < m_size);
+            T temp = m_data[start];
+            m_data[start] = end;
+            m_data[end] = temp;
+        }
     };
 
     LINAVG_API enum class OutlineDrawDirection
@@ -397,7 +405,15 @@ namespace LinaVG
         /// </summary>
         float m_textScale = 1.0f;
 
+        /// <summary>
+        /// Drop shadow color, lol.
+        /// </summary>
         Vec4 m_dropShadowColor  = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+        /// <summary>
+        /// Defines how far the drop shadow is rendered, in screen-units.
+        /// Set to 0.0f, 0.0f to disable drop-shadows.
+        /// </summary>
         Vec2 m_dropShadowOffset = Vec2(0.0f, 0.0f);
     };
 
@@ -414,22 +430,49 @@ namespace LinaVG
             m_dropShadowOffset       = opts.m_dropShadowOffset;
             m_sdfDropShadowThickness = opts.m_sdfDropShadowThickness;
             m_sdfOutlineColor        = opts.m_sdfOutlineColor;
-            m_sdfOutlineOffset       = opts.m_sdfOutlineOffset;
             m_sdfOutlineThickness    = opts.m_sdfOutlineThickness;
             m_sdfSoftness            = opts.m_sdfSoftness;
             m_sdfThickness           = opts.m_sdfThickness;
             m_sdfDropShadowSoftness  = opts.m_sdfDropShadowSoftness;
         }
 
+        /// <summary>
+        /// 0.0f - 1.0f range, defines how strongly the text is extruded. 
+        /// !NOTE! 0.0f might make the text invisible
+        /// </summary>
+        float m_sdfThickness = 1.0f;
+
+        /// <summary>
+        /// Defines text blurring/smoothing. 0.0f - 1.0f range
+        /// </summary>
+        float m_sdfSoftness = 0.02f;
+
+        /// <summary>
+        /// 0.0f - 1.0f range, defines how strongly the outline is extruded. 
+        /// </summary>
+        float m_sdfOutlineThickness = 1.0f;
+
+        /// <summary>
+        /// Well, outline color.
+        /// </summary>
+        Vec4  m_sdfOutlineColor = Vec4(1, 1, 1, 1);
+
+        /// <summary>
+        /// 0.0f - 1.0f range, defines how strongly the drop shadow is extruded.
+        /// </summary>
         float m_sdfDropShadowThickness = 0.0f;
+
+        /// <summary>
+        /// Defines drop shadow blurring/smoothing. 0.0f - 1.0f range
+        /// </summary>
         float m_sdfDropShadowSoftness  = 0.02f;
 
+        /// <summary>
+        /// Flips the alpha mask in-out, can be used to create create cut-out font rendering, e.g. letter is transparent, surrounding
+        /// quad is colored.
+        /// </summary>
         bool  m_flipAlpha           = false;
-        float m_sdfThickness        = 1.0f;
-        float m_sdfSoftness         = 0.02f;
-        float m_sdfOutlineThickness = 1.0f;
-        Vec4  m_sdfOutlineColor     = Vec4(1, 1, 1, 1);
-        Vec2  m_sdfOutlineOffset    = Vec2(0.0f, 0.0f);
+      
     };
     /// <summary>
     /// Style options used to draw various effects around the target shape.

@@ -695,7 +695,7 @@ namespace LinaVG
         }
     }
 
-    LINAVG_API void DrawTextSDF(const std::string& text, const Vec2& position, const SDFTextOptions& opts, int drawOrder)
+    LINAVG_API void DrawTextSDF(const std::string& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
@@ -709,19 +709,22 @@ namespace LinaVG
         const float scale      = opts.m_textScale * Config.m_framebufferScale.x;
         DrawBuffer* buf        = &Internal::g_rendererData.GetSDFTextBuffer(font->m_texture, drawOrder, opts, false);
         const bool  isGradient = !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
-        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, isGradient, scale);
+
+        const int start = buf->m_vertexBuffer.m_size;
+        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, isGradient, scale, rotateAngle);
 
         if (opts.m_dropShadowOffset.x != 0.0f || opts.m_dropShadowOffset.y != 0.0f)
         {
             SDFTextOptions usedOpts = SDFTextOptions(opts);
             usedOpts.m_sdfThickness = opts.m_sdfDropShadowThickness;
-            usedOpts.m_sdfSoftness = opts.m_sdfDropShadowSoftness;
-            DrawBuffer* dsBuf = &Internal::g_rendererData.GetSDFTextBuffer(font->m_texture, drawOrder, usedOpts, true);
-            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, false, scale);
+            usedOpts.m_sdfSoftness  = opts.m_sdfDropShadowSoftness;
+            DrawBuffer* dsBuf       = &Internal::g_rendererData.GetSDFTextBuffer(font->m_texture, drawOrder, usedOpts, true);
+            const int   dsStart     = buf->m_vertexBuffer.m_size;
+            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, false, scale, rotateAngle);
         }
     }
 
-    void DrawTextNormal(const std::string& text, const Vec2& position, const TextOptions& opts, int drawOrder)
+    void DrawTextNormal(const std::string& text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
@@ -739,12 +742,12 @@ namespace LinaVG
 
         DrawBuffer* buf        = &Internal::g_rendererData.GetSimpleTextBuffer(font->m_texture, drawOrder, false);
         const bool  isGradient = !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
-        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, isGradient, scale);
+        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, isGradient, scale, rotateAngle);
 
         if (opts.m_dropShadowOffset.x != 0.0f || opts.m_dropShadowOffset.y != 0.0f)
         {
             DrawBuffer* dsBuf = &Internal::g_rendererData.GetSimpleTextBuffer(font->m_texture, drawOrder, true);
-            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, false, scale);
+            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, false, scale, rotateAngle);
         }
         // auto& draw = [&](bool isDropShadow) {
         //     std::string::const_iterator c;
@@ -2183,6 +2186,22 @@ namespace LinaVG
         return Vec2(centerAnglePoint.x - center.x, centerAnglePoint.y - center.y);
     }
 
+    Vec2 Internal::GetVerticesCenter(DrawBuffer* buf, int startIndex, int endIndex)
+    {
+        Vec2 total = Vec2(0.0f, 0.0f);
+
+        for (int i = startIndex; i <= endIndex; i++)
+        {
+            total.x += buf->m_vertexBuffer[startIndex].m_pos.x;
+            total.y += buf->m_vertexBuffer[startIndex].m_pos.y;
+        }
+
+        const int count = endIndex - startIndex + 1;
+        total.x /= static_cast<float>(count);
+        total.y /= static_cast<float>(count);
+        return total;
+    }
+
     void Internal::CalculateLine(Line& line, const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection lineCapToAdd)
     {
         const Vec2 up = Math::Normalized(Math::Rotate90(Vec2(p2.x - p1.x, p2.y - p1.y), true));
@@ -2901,22 +2920,23 @@ namespace LinaVG
         return sourceBuffer;
     }
 
-    void Internal::DrawDebugFontAtlas(LinaVGFont* font)
-    {
-        //  v0.m_pos = Vec2(300, 500);
-        //  v1.m_pos = Vec2(300 + font->m_textureSize.x, 500);
-        //  v2.m_pos = Vec2(300 + font->m_textureSize.x, 500 + font->m_textureSize.y);
-        //  v3.m_pos = Vec2(300, 500 + font->m_textureSize.y);
-        //  v0.m_uv = Vec2(0.0f, 0.0f);
-        //  v1.m_uv = Vec2(1.0f, 0.0f);
-        //  v2.m_uv = Vec2(1.0f, 1.0f);
-        //  v3.m_uv = Vec2(0.0f, 1.0f);
-    }
+    // void Internal::DrawDebugFontAtlas(LinaVGFont* font)
+    // {
+    //     //  v0.m_pos = Vec2(300, 500);
+    //     //  v1.m_pos = Vec2(300 + font->m_textureSize.x, 500);
+    //     //  v2.m_pos = Vec2(300 + font->m_textureSize.x, 500 + font->m_textureSize.y);
+    //     //  v3.m_pos = Vec2(300, 500 + font->m_textureSize.y);
+    //     //  v0.m_uv = Vec2(0.0f, 0.0f);
+    //     //  v1.m_uv = Vec2(1.0f, 0.0f);
+    //     //  v2.m_uv = Vec2(1.0f, 1.0f);
+    //     //  v3.m_uv = Vec2(0.0f, 1.0f);
+    // }
 
-    void Internal::DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, bool isGradient, float scale)
+    void Internal::DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, bool isGradient, float scale, float rotateAngle)
     {
         int                         characterCount      = 0;
         const int                   totalCharacterCount = text.length();
+        const int                   bufStart            = buf->m_vertexBuffer.m_size;
         std::string::const_iterator c;
         Vec2                        pos = position;
 
@@ -2988,6 +3008,12 @@ namespace LinaVG
             buf->PushIndex(startIndex + 2);
             buf->PushIndex(startIndex + 3);
             characterCount++;
+        }
+
+        if (rotateAngle != 0.0f)
+        {
+            const Vec2 center = Internal::GetVerticesCenter(buf, bufStart, buf->m_vertexBuffer.m_size - 1);
+            Internal::RotateVertices(buf->m_vertexBuffer, center, bufStart, buf->m_vertexBuffer.m_size - 1, rotateAngle);
         }
     }
 

@@ -22,12 +22,14 @@ project(Examples)
 set(EXAMPLES_SOURCES 
 
 src/Main.cpp
+src/DemoScreens.cpp
 src/Backends/OpenGLGLFW.cpp
 )
 
 set(EXAMPLES_HEADERS
 
 include/Main.hpp
+include/DemoScreens.hpp
 include/Backends/OpenGLGLFW.hpp
 )
 

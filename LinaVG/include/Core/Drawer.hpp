@@ -214,7 +214,7 @@ namespace LinaVG
     /// Draws the given set of points. !Rounding options do not apply!
     /// If you are not going to fill the convex shape (styling options -> m_isFilled), then prefer using DrawLines instead of this so that you can use proper line joints.
     /// </summary>
-    
+
     /// <summary>
     /// Draws a convex shape defined by the set of points. All points must be unique.
     /// </summary>
@@ -243,8 +243,30 @@ namespace LinaVG
     /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
     LINAVG_API void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 
-    LINAVG_API void DrawTextNormal(const std::string& text, const Vec2& position, const TextOptions& opts, int drawOrder = 0);
-    LINAVG_API void DrawTextSDF(const std::string& text, const Vec2& position, const SDFTextOptions& opts, int drawOrder = 0);
+    /// <summary>
+    /// Draws the given text at position. The font used in Text Options must be loaded as normal font, e.g. non-sdf.
+    /// </summary>
+    /// <param name="text">Text to draw.</param>
+    /// <param name="position">Screen-space position.</param>
+    /// <param name="style">Style options.</param>
+    /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <returns></returns>
+    LINAVG_API void DrawTextNormal(const std::string& text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0);
+
+    /// <summary>
+    /// Draws the given text at position as an SDF text, which produces a lot more high-quality results than normal text, regardless
+    /// of scaling & rotation. Also SDF texts has a lot more styling options, such as outlines and more paramaterized drop shadows.
+    /// The font used in Text Options must be loaded as an SDF-font.
+    /// </summary>
+    /// <param name="text">Text to draw.</param>
+    /// <param name="position">Screen-space position.</param>
+    /// <param name="style">Style options.</param>
+    /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
+    /// <returns></returns>
+    LINAVG_API void DrawTextSDF(const std::string& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0);
+
     namespace Internal
     {
         // No rounding, vertical or horizontal gradient
@@ -313,7 +335,7 @@ namespace LinaVG
         /// Triangle bounding box.
         void GetTriangleBoundingBox(const Vec2& p1, const Vec2& p2, const Vec2& p3, Vec2& outMin, Vec2& outMax);
 
-         /// Triangulates & fills the index array given a start and end vertex index.
+        /// Triangulates & fills the index array given a start and end vertex index.
         void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices, bool skipLastTriangle = false);
 
         /// Fills convex shapes without the assumption of a center vertex. Used for filling outer areas of non-filled shapes.
@@ -348,6 +370,11 @@ namespace LinaVG
         /// </summary>
         Vec2 GetArcDirection(const Vec2& center, float radius, float startAngle, float endAngle);
 
+        /// <summary>
+        /// Returns the average center position for the given vertices.
+        /// </summary>
+        Vec2 GetVerticesCenter(DrawBuffer* buf, int startIndex, int endIndex);
+
         /// Line calculation methods.
         void       CalculateLine(Line& line, const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection lineCapToAdd);
         void       JoinLines(Line& line1, Line& line2, StyleOptions& opts, LineJointType joinType, bool mergeUpperVertices);
@@ -372,8 +399,18 @@ namespace LinaVG
         /// <returns></returns>
         DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, int drawOrder = 0, bool isAAOutline = false, bool reverseDrawDir = false);
 
-        void DrawDebugFontAtlas(LinaVGFont* font);
-        void DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, bool isGradient, float scale);
+        /// <summary>
+        /// DrawText implementation.
+        /// </summary>
+        /// <param name="buf"></param>
+        /// <param name="font"></param>
+        /// <param name="text"></param>
+        /// <param name="pos"></param>
+        /// <param name="offset"></param>
+        /// <param name="color"></param>
+        /// <param name="isGradient"></param>
+        /// <param name="scale"></param>
+        void DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, bool isGradient, float scale, float rotateAngle);
 
     }; // namespace Internal
 

@@ -50,9 +50,11 @@ namespace LinaVG
             void OnWindowCloseCallback();
 
         private:
+            int                m_currentDemoScreen = 0;
             float              m_deltaTime   = 0.0f;
             bool               m_shouldClose = false;
             static ExampleApp* s_exampleApp;
+
         };
     } // namespace Examples
 } // namespace LinaVG

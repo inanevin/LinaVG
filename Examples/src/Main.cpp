@@ -27,6 +27,7 @@ SOFTWARE.
 */
 
 #include "Main.hpp"
+#include "DemoScreens.hpp"
 #include "LinaVG.hpp"
 #include <chrono>
 
@@ -47,18 +48,13 @@ namespace LinaVG
     {
         ExampleApp* ExampleApp::s_exampleApp = nullptr;
 
-        static float thickness        = 0.3f;
-        static float softness         = 0.0f;
-        static float outlineThickness = 0.0f;
-        static float dropShadowThickness = 0.0f;
-
         void ExampleApp::Run()
         {
             s_exampleApp = this;
             ExampleBackend exampleBackend;
 
-            const float sizeX = 1920.0f;
-            const float sizeY = 1080.0f;
+            const float sizeX = 1440.0f;
+            const float sizeY = 960.0f;
 
             // Initialize example exampleBackend.
             exampleBackend.InitWindow(static_cast<int>(sizeX), static_cast<int>(sizeY));
@@ -79,20 +75,20 @@ namespace LinaVG
                 std::cout << log.c_str() << std::endl;
             };
 
+            DemoScreens demoScreens;
+
             // Init LinaVG
             LinaVG::Initialize();
+            demoScreens.Initialize(this);
 
-            auto sdfHandle = LinaVG::LoadFont("Resources/Fonts/OpenSans-Regular.ttf", true, 45);
-            auto handle    = LinaVG::LoadFont("Resources/Fonts/OpenSans-Regular.ttf", false, 35);
-
-            float prev = exampleBackend.GetTime();
+            float prevTime = exampleBackend.GetTime();
 
             // Application loop.
             while (!m_shouldClose)
             {
                 float now   = exampleBackend.GetTime();
-                m_deltaTime = now - prev;
-                prev        = now;
+                m_deltaTime = now - prevTime;
+                prevTime    = now;
 
                 // Example exampleBackend input & rendering.
                 exampleBackend.Poll();
@@ -101,52 +97,20 @@ namespace LinaVG
                 // Lina VG start frame.
                 LinaVG::StartFrame();
 
-                //  Define style options & render rect.
-                LinaVG::StyleOptions opts;
-                opts.m_isFilled        = true;
-                opts.m_color           = LinaVG::Vec4(1, 1, 1, 1);
-                opts.m_thickness       = 5.0f;
-                opts.m_rounding        = 0.0f;
-                opts.m_textureUVTiling = Vec2(1.0f, 1.0f);
-                opts.m_textureUVOffset = Vec2(0.0f, 0.0f);
-                // opts.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
-                opts.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Both;
-                opts.m_outlineOptions.m_color         = LinaVG::Vec4Grad(LinaVG::Vec4(1, 0, 0, 1), LinaVG::Vec4(0, 0, 1, 1));
-                opts.m_outlineOptions.m_thickness     = 7;
-                //   opts.m_outlineOptions.m_thickness = 2.0f;
-                LinaVG::DrawRect(LinaVG::Vec2(100, 200), LinaVG::Vec2(300, 500), opts, 40.0f, 0);
 
-                TextOptions textOpts;
-                textOpts.m_font                 = handle;
-                textOpts.m_color.m_gradientType = GradientType::Horizontal;
-                textOpts.m_color.m_start        = Vec4(1, 0, 0, 1);
-                textOpts.m_color.m_end          = Vec4(0, 0, 1, 1);
-                textOpts.m_textScale            = 0.6f;
-                textOpts.m_dropShadowOffset = Vec2(1.2f, 2.0f);
-                LinaVG::DrawTextNormal("TEST", LinaVG::Vec2(300, 800), textOpts, 0);
+                demoScreens.ShowBackground();
 
-                SDFTextOptions sdfOpts;
-                sdfOpts.m_font = sdfHandle;
-                sdfOpts.m_color.m_gradientType = GradientType::Horizontal;
-                sdfOpts.m_color.m_start = Vec4(1, 0, 0, 1);
-                sdfOpts.m_color.m_end = Vec4(0, 0, 1, 1);
-                sdfOpts.m_textScale = 0.6f;  
-                sdfOpts.m_sdfSoftness = softness;
-                sdfOpts.m_sdfThickness = thickness;
-                sdfOpts.m_sdfOutlineOffset = Vec2(0.5f, 0.5f);
-                sdfOpts.m_sdfOutlineThickness = outlineThickness;
-                sdfOpts.m_sdfOutlineColor = Vec4(0, 0, 0, 1);
-                sdfOpts.m_dropShadowOffset = Vec2(1.2f, 2.0f);
-                sdfOpts.m_sdfDropShadowThickness = dropShadowThickness;
-                sdfOpts.m_sdfDropShadowSoftness = softness;
-               LinaVG::DrawTextSDF("VITTU PERKELE SAATANA", LinaVG::Vec2(300, 1000), sdfOpts, 0);
-               //textOpts.m_font = handle;
-               LinaVG::DrawTextNormal(std::string("Softness ") + std::to_string(sdfOpts.m_sdfSoftness), LinaVG::Vec2(300, 760), textOpts, 0);
-               LinaVG::DrawTextNormal(std::string("Thickness ") + std::to_string(sdfOpts.m_sdfThickness), LinaVG::Vec2(300, 810), textOpts, 0);
-               LinaVG::DrawTextNormal(std::string("Outline Thickness ") + std::to_string(sdfOpts.m_sdfOutlineThickness), LinaVG::Vec2(300, 850), textOpts, 0);
-               LinaVG::DrawTextNormal(std::string("DS Thickness ") + std::to_string(sdfOpts.m_sdfDropShadowThickness), LinaVG::Vec2(300, 890), textOpts, 0);
-                // LinaVG::DrawText("moprngh", LinaVG::Vec2(800, 800), 1, opts, 0);
-                // Lina VG Render & end frame.
+                if (m_currentDemoScreen == 0)
+                    demoScreens.ShowDemoScreen1_Shapes();
+                else if (m_currentDemoScreen == 1)
+                    demoScreens.ShowDemoScreen2_Outlines();
+                else if (m_currentDemoScreen == 2)
+                    demoScreens.ShowDemoScreen3_Colors();
+                else if (m_currentDemoScreen == 3)
+                    demoScreens.ShowDemoScreen4_Lines();
+                else if (m_currentDemoScreen == 4)
+                    demoScreens.ShowDemoScreen5_Texts();
+
                 LinaVG::Render();
                 LinaVG::EndFrame();
 
@@ -175,22 +139,7 @@ namespace LinaVG
 
         void ExampleApp::OnNumKeyCallback(int key)
         {
-            if (key == 1)
-                thickness += 0.05f;
-            else if (key == 2)
-                thickness -= 0.05f;
-            if (key == 3)
-                softness += 0.05f;
-            else if (key == 4)
-                softness -= 0.05f;
-            if (key == 5)
-                outlineThickness += 0.05f;
-            else if (key == 6)
-                outlineThickness -= 0.05f;
-            if (key == 7)
-                dropShadowThickness += 0.05f;
-            else if (key == 8)
-                dropShadowThickness -= 0.05f;
+            m_currentDemoScreen = key;
         }
 
         void ExampleApp::OnFCallback()
