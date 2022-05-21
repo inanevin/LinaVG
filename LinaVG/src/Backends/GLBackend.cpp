@@ -30,6 +30,7 @@ SOFTWARE.
 #include "Core/Backend.hpp"
 #include "Core/Renderer.hpp"
 #include "Core/Drawer.hpp"
+#include "Core/Math.hpp"
 #include <iostream>
 #include <stdio.h>
 
@@ -99,30 +100,17 @@ namespace LinaVG::Backend
                                                       "uniform vec2 outlineOffset; \n"
                                                       "uniform float outlineThickness; \n"
                                                       "uniform vec4 outlineColor; \n"
-                                                      "const float glowMin = 0.4; \n"
-                                                      "const float glowMax = 0.6; \n "
+                                                      "uniform int flipAlpha; \n"
                                                       "void main()\n"
                                                       "{\n"
-                                                      "vec4 texColor = texture(diffuse, fUV);"
-                                                      "float dst = texColor.r;"
-                                                      "float alpha = smoothstep(thickness - softness, thickness + softness, dst);"
-                                                      "float glowDst = texture(diffuse, fUV + (fUV * vec2(0.0f, 0.01f))).r;"
-                                                      "vec4 glow = vec4(0,0,0,1) * smoothstep(glowMin, glowMax, glowDst);"
-                                                      "float mask = 1.0-alpha;"
-                                                      "vec4 base = vec4(fCol.rgb, 1) * vec4(vec3(1.0), alpha);"
-                                                      "fragColor = mix(base, glow, mask);"
-                                                      // "float distance = texture(diffuse, fUV).r;\n"
-                                                      // "float alpha = smoothstep(thickness - softness, thickness + softness, distance);\n"
-                                                      // "vec3 baseColor = fCol.rgb;\n"
-                                                      // "if(outlineEnabled == 1){\n"
-                                                      // " float border = smoothstep(thickness + outlineThickness - softness, thickness + outlineThickness + softness, distance);\n"
-                                                      // " baseColor = mix(outlineColor, fCol, border).rgb;\n"
-                                                      // "}\n"
-                                                      // " float glowDst = texture(diffuse, fUV + vec2(0.1f, 0.01f)).a;\n"
-                                                      // " vec4 glow = vec4(0,0,0,1) * smoothstep(glowMin, glowMax, glowDst);\n"
-                                                      // " float mask = 1.0-alpha;\n"
-                                                      // " vec4 base = fCol * vec4(vec3(1.0), alpha);\n"
-                                                      // "fragColor = mix(base, glow, mask);\n"
+                                                      "float distance = texture(diffuse, fUV).r;\n"
+                                                      "float alpha = smoothstep(thickness - softness, thickness + softness, distance);\n"
+                                                      "vec3 baseColor = fCol.rgb;\n"
+                                                      "if(outlineEnabled == 1){\n"
+                                                      " float border = smoothstep(thickness + outlineThickness - softness, thickness + outlineThickness + softness, distance);\n"
+                                                      " baseColor = mix(outlineColor, fCol, border).rgb;\n"
+                                                      "}\n"
+                                                      "fragColor = vec4(baseColor, flipAlpha == 1 ? 1.0f - alpha : alpha);\n"
                                                       "}\0";
 
         Internal::g_backendData.m_roundedGradientFragShader = "#version 330 core\n"
@@ -416,11 +404,15 @@ namespace LinaVG::Backend
         glUseProgram(Internal::g_backendData.m_sdfTextShaderHandle);
         glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 
+        const float thickness        = 1.0f - Math::Clamp(buf->m_thickness, 0.0f, 1.0f);
+        const float softness         = Math::Clamp(buf->m_softness, 0.0f, 1.0f);
+        const float outlineThickness = Math::Clamp(buf->m_outlineThickness, 0.0f, 1.0f);
         glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["diffuse"], 0);
-        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["thickness"], buf->m_thickness);
-        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["softness"], buf->m_softness);
-        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["outlineEnabled"], buf->m_outlineThickness != 0.0f ? 1 : 0);
-        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["outlineThickness"], buf->m_outlineThickness);
+        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["thickness"], thickness);
+        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["softness"], softness);
+        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["outlineEnabled"], outlineThickness != 0.0f ? 1 : 0);
+        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["flipAlpha"], buf->m_flipAlpha ? 1 : 0);
+        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["outlineThickness"], outlineThickness);
         glUniform4f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["outlineColor"], buf->m_outlineColor.x, buf->m_outlineColor.y, buf->m_outlineColor.z, buf->m_outlineColor.w);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);

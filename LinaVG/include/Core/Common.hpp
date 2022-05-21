@@ -371,6 +371,16 @@ namespace LinaVG
     /// </summary>
     LINAVG_API struct TextOptions
     {
+        TextOptions(){};
+        TextOptions(const TextOptions& opts)
+        {
+            m_font             = opts.m_font;
+            m_color            = opts.m_color;
+            m_textScale        = opts.m_textScale;
+            m_dropShadowColor  = opts.m_dropShadowColor;
+            m_dropShadowOffset = opts.m_dropShadowOffset;
+        }
+
         /// <summary>
         /// Font to use while drawing this text. Handles are achieved through LoadFont() method.
         /// </summary>
@@ -387,6 +397,34 @@ namespace LinaVG
         /// </summary>
         float m_textScale = 1.0f;
 
+        Vec4 m_dropShadowColor  = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        Vec2 m_dropShadowOffset = Vec2(0.0f, 0.0f);
+    };
+
+    LINAVG_API struct SDFTextOptions : public TextOptions
+    {
+        SDFTextOptions()
+            : TextOptions(){};
+        SDFTextOptions(const SDFTextOptions& opts)
+        {
+            m_font                   = opts.m_font;
+            m_color                  = opts.m_color;
+            m_textScale              = opts.m_textScale;
+            m_dropShadowColor        = opts.m_dropShadowColor;
+            m_dropShadowOffset       = opts.m_dropShadowOffset;
+            m_sdfDropShadowThickness = opts.m_sdfDropShadowThickness;
+            m_sdfOutlineColor        = opts.m_sdfOutlineColor;
+            m_sdfOutlineOffset       = opts.m_sdfOutlineOffset;
+            m_sdfOutlineThickness    = opts.m_sdfOutlineThickness;
+            m_sdfSoftness            = opts.m_sdfSoftness;
+            m_sdfThickness           = opts.m_sdfThickness;
+            m_sdfDropShadowSoftness  = opts.m_sdfDropShadowSoftness;
+        }
+
+        float m_sdfDropShadowThickness = 0.0f;
+        float m_sdfDropShadowSoftness  = 0.02f;
+
+        bool  m_flipAlpha           = false;
         float m_sdfThickness        = 1.0f;
         float m_sdfSoftness         = 0.02f;
         float m_sdfOutlineThickness = 1.0f;
@@ -601,6 +639,7 @@ namespace LinaVG
 
     enum class DrawBufferShapeType
     {
+        DropShadow,
         Shape,
         Outline,
         AA,
@@ -672,22 +711,25 @@ namespace LinaVG
     struct SimpleTextDrawBuffer : public DrawBuffer
     {
         SimpleTextDrawBuffer(){};
-        SimpleTextDrawBuffer(BackendHandle glyphHandle, int drawOrder)
-            : m_textureHandle(glyphHandle),
-              DrawBuffer(drawOrder, DrawBufferType::SimpleText, DrawBufferShapeType::Shape){};
+        SimpleTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, bool isDropShadow)
+            : m_textureHandle(glyphHandle), m_isDropShadow(isDropShadow),
+              DrawBuffer(drawOrder, DrawBufferType::SimpleText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape){};
 
         BackendHandle m_textureHandle = 0;
+        bool          m_isDropShadow  = false;
     };
 
     struct SDFTextDrawBuffer : public DrawBuffer
     {
         SDFTextDrawBuffer(){};
-        SDFTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, const TextOptions& opts)
+        SDFTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow)
             : m_textureHandle(glyphHandle), m_thickness(opts.m_sdfThickness),
               m_softness(opts.m_sdfSoftness), m_outlineThickness(opts.m_sdfOutlineThickness),
-              m_outlineColor(opts.m_sdfOutlineColor),
-              DrawBuffer(drawOrder, DrawBufferType::SDFText, DrawBufferShapeType::Shape){};
+              m_outlineColor(opts.m_sdfOutlineColor), m_flipAlpha(opts.m_flipAlpha), m_isDropShadow(isDropShadow),
+              DrawBuffer(drawOrder, DrawBufferType::SDFText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape){};
 
+        bool          m_isDropShadow     = false;
+        bool          m_flipAlpha        = false;
         float         m_thickness        = 0.0f;
         float         m_softness         = 0.0f;
         float         m_outlineThickness = 0.0f;

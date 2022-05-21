@@ -695,113 +695,164 @@ namespace LinaVG
         }
     }
 
-    void DrawText(const std::string& text, const Vec2& position, const TextOptions& opts, int drawOrder, bool dbg)
+    LINAVG_API void DrawTextSDF(const std::string& text, const Vec2& position, const SDFTextOptions& opts, int drawOrder)
     {
-        std::string::const_iterator c;
-        Vec2                        pos        = position;
-        FontHandle                  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
-        LinaVGFont*                 font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
+        FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
+        LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
 
-        // Coloring & grad options
-        int                characterCount      = 0;
-        const int          totalCharacterCount = text.length();
-        const bool         isGradientText      = !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
-        const GradientType gradType            = opts.m_color.m_gradientType;
-        const Vec4         minGrad             = opts.m_color.m_start;
-        const Vec4         maxGrad             = opts.m_color.m_end;
-        Vec4               lastMinGrad         = minGrad;
+        if (!font->m_isSDF)
+        {
+            Config.m_errorCallback("LinaVG: The font you are trying to draw is not loaded as an SDF font, but DrawTextSDF was called! Please use DrawTextNormal().");
+            return;
+        }
 
-        const float   scale = opts.m_textScale * Config.m_framebufferScale.x;
-        BackendHandle txt   = font->m_texture;
-        DrawBuffer*   buf   = nullptr;
+        const float scale      = opts.m_textScale * Config.m_framebufferScale.x;
+        DrawBuffer* buf        = &Internal::g_rendererData.GetSDFTextBuffer(font->m_texture, drawOrder, opts, false);
+        const bool  isGradient = !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
+        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, isGradient, scale);
+
+        if (opts.m_dropShadowOffset.x != 0.0f || opts.m_dropShadowOffset.y != 0.0f)
+        {
+            SDFTextOptions usedOpts = SDFTextOptions(opts);
+            usedOpts.m_sdfThickness = opts.m_sdfDropShadowThickness;
+            usedOpts.m_sdfSoftness = opts.m_sdfDropShadowSoftness;
+            DrawBuffer* dsBuf = &Internal::g_rendererData.GetSDFTextBuffer(font->m_texture, drawOrder, usedOpts, true);
+            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, false, scale);
+        }
+    }
+
+    void DrawTextNormal(const std::string& text, const Vec2& position, const TextOptions& opts, int drawOrder)
+    {
+        FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
+        LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
 
         if (font->m_isSDF)
-            buf = &Internal::g_rendererData.GetSDFTextBuffer(txt, drawOrder, opts);
-        else
-            buf = &Internal::g_rendererData.GetSimpleTextBuffer(txt, drawOrder);
-
-        for (c = text.begin(); c != text.end(); c++)
         {
-            auto& ch = font->m_characterGlyphs[*c];
-
-            const int startIndex = buf->m_vertexBuffer.m_size;
-
-            float x2 = pos.x + ch.m_bearing.x * scale;
-            float y2 = pos.y - ch.m_bearing.y * scale;
-            float w  = ch.m_size.x * scale;
-            float h  = ch.m_size.y * scale;
-            pos.x += ch.m_advance.x * scale + 15;
-            pos.y += ch.m_advance.y * scale;
-
-            if (w == 0.0f || h == 0.0f)
-                continue;
-
-            Vertex v0, v1, v2, v3;
-
-            if (isGradientText)
-            {
-                if (gradType == GradientType::Horizontal)
-                {
-                    const float maxT       = static_cast<float>(characterCount + 1) / static_cast<float>(totalCharacterCount);
-                    const Vec4  currentMin = lastMinGrad;
-                    const Vec4  currentMax = Math::Lerp(minGrad, maxGrad, maxT);
-                    lastMinGrad            = currentMax;
-
-                    v0.m_col = currentMin;
-                    v1.m_col = currentMax;
-                    v2.m_col = currentMax;
-                    v3.m_col = currentMin;
-                }
-                else // fallback is vertical since radial gradients are not supported.
-                {
-                    v0.m_col = minGrad;
-                    v1.m_col = minGrad;
-                    v2.m_col = maxGrad;
-                    v3.m_col = maxGrad;
-                }
-            }
-            else
-                v0.m_col = v1.m_col = v2.m_col = v3.m_col = opts.m_color.m_start;
-
-            // DEBUG ATLAS TEXTURE
-            if (dbg)
-            {
-                v0.m_pos = Vec2(300, 500);
-                v1.m_pos = Vec2(300 + font->m_textureSize.x, 500);
-                v2.m_pos = Vec2(300 + font->m_textureSize.x, 500 + font->m_textureSize.y);
-                v3.m_pos = Vec2(300, 500 + font->m_textureSize.y);
-                v0.m_uv  = Vec2(0.0f, 0.0f);
-                v1.m_uv  = Vec2(1.0f, 0.0f);
-                v2.m_uv  = Vec2(1.0f, 1.0f);
-                v3.m_uv  = Vec2(0.0f, 1.0f);
-            }
-            else
-            {
-
-                v0.m_pos = Vec2(x2, y2);
-                v1.m_pos = Vec2(x2 + w, y2);
-                v2.m_pos = Vec2(x2 + w, y2 + h);
-                v3.m_pos = Vec2(x2, y2 + h);
-
-                v0.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y);
-                v1.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y);
-                v2.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
-                v3.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
-            }
-
-            buf->PushVertex(v0);
-            buf->PushVertex(v1);
-            buf->PushVertex(v2);
-            buf->PushVertex(v3);
-
-            buf->PushIndex(startIndex);
-            buf->PushIndex(startIndex + 1);
-            buf->PushIndex(startIndex + 3);
-            buf->PushIndex(startIndex + 1);
-            buf->PushIndex(startIndex + 2);
-            buf->PushIndex(startIndex + 3);
-            characterCount++;
+            Config.m_errorCallback("LinaVG: The font you are trying to draw with is loaded SDF font, but DrawTextNormal was called! Please use DrawTextSDF().");
+            return;
         }
+
+        //  BackendHandle txt                 = font->m_texture;
+        // int           characterCount      = 0;
+        // const int     totalCharacterCount = text.length();
+        const float scale = opts.m_textScale * Config.m_framebufferScale.x;
+
+        DrawBuffer* buf        = &Internal::g_rendererData.GetSimpleTextBuffer(font->m_texture, drawOrder, false);
+        const bool  isGradient = !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
+        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, isGradient, scale);
+
+        if (opts.m_dropShadowOffset.x != 0.0f || opts.m_dropShadowOffset.y != 0.0f)
+        {
+            DrawBuffer* dsBuf = &Internal::g_rendererData.GetSimpleTextBuffer(font->m_texture, drawOrder, true);
+            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, false, scale);
+        }
+        // auto& draw = [&](bool isDropShadow) {
+        //     std::string::const_iterator c;
+        //     Vec2                        pos = position;
+        //
+        //     // Coloring & grad options
+        //     const bool  isGradient  = !isDropShadow && !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
+        //     Vec4        lastMinGrad = opts.m_color.m_start;
+        //     Vec4        defColor    = isDropShadow ? opts.m_dropShadowColor : opts.m_color.m_start;
+        //     Vec2        offset      = isDropShadow ? Vec2(opts.m_dropShadowColor.x * Config.m_framebufferScale.x, opts.m_dropShadowColor.y * Config.m_framebufferScale.y) : Vec2(0.0f, 0.0f);
+        //     DrawBuffer* buf         = nullptr;
+        //
+        //     if (font->m_isSDF)
+        //     {
+        //         TextOptions usedOpts = TextOptions(opts);
+        //         buf = &Internal::g_rendererData.GetSDFTextBuffer(txt, drawOrder, opts, isDropShadow);
+        //     }
+        //     else
+        //         buf = &Internal::g_rendererData.GetSimpleTextBuffer(txt, drawOrder, isDropShadow);
+        //
+        //     for (c = text.begin(); c != text.end(); c++)
+        //     {
+        //         auto& ch = font->m_characterGlyphs[*c];
+        //
+        //         const int startIndex = buf->m_vertexBuffer.m_size;
+        //
+        //         float x2 = pos.x + ch.m_bearing.x * scale;
+        //         float y2 = pos.y - ch.m_bearing.y * scale;
+        //         float w  = ch.m_size.x * scale;
+        //         float h  = ch.m_size.y * scale;
+        //         pos.x += ch.m_advance.x * scale + offset.x;
+        //         pos.y += ch.m_advance.y * scale + offset.y;
+        //
+        //         if (w == 0.0f || h == 0.0f)
+        //             continue;
+        //
+        //         Vertex v0, v1, v2, v3;
+        //
+        //         if (isGradient)
+        //         {
+        //             if (opts.m_color.m_gradientType == GradientType::Horizontal)
+        //             {
+        //                 const float maxT       = static_cast<float>(characterCount + 1) / static_cast<float>(totalCharacterCount);
+        //                 const Vec4  currentMin = lastMinGrad;
+        //                 const Vec4  currentMax = Math::Lerp(opts.m_color.m_start, opts.m_color.m_end, maxT);
+        //                 lastMinGrad            = currentMax;
+        //
+        //                 v0.m_col = currentMin;
+        //                 v1.m_col = currentMax;
+        //                 v2.m_col = currentMax;
+        //                 v3.m_col = currentMin;
+        //             }
+        //             else // fallback is vertical since radial gradients are not supported.
+        //             {
+        //                 v0.m_col = opts.m_color.m_start;
+        //                 v1.m_col = opts.m_color.m_start;
+        //                 v2.m_col = opts.m_color.m_end;
+        //                 v3.m_col = opts.m_color.m_end;
+        //             }
+        //         }
+        //         else
+        //             v0.m_col = v1.m_col = v2.m_col = v3.m_col = defColor;
+        //
+        //         // DEBUG ATLAS TEXTURE
+        //         if (dbg)
+        //         {
+        //             v0.m_pos = Vec2(300, 500);
+        //             v1.m_pos = Vec2(300 + font->m_textureSize.x, 500);
+        //             v2.m_pos = Vec2(300 + font->m_textureSize.x, 500 + font->m_textureSize.y);
+        //             v3.m_pos = Vec2(300, 500 + font->m_textureSize.y);
+        //             v0.m_uv  = Vec2(0.0f, 0.0f);
+        //             v1.m_uv  = Vec2(1.0f, 0.0f);
+        //             v2.m_uv  = Vec2(1.0f, 1.0f);
+        //             v3.m_uv  = Vec2(0.0f, 1.0f);
+        //         }
+        //         else
+        //         {
+        //
+        //             v0.m_pos = Vec2(x2, y2);
+        //             v1.m_pos = Vec2(x2 + w, y2);
+        //             v2.m_pos = Vec2(x2 + w, y2 + h);
+        //             v3.m_pos = Vec2(x2, y2 + h);
+        //
+        //             v0.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y);
+        //             v1.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y);
+        //             v2.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
+        //             v3.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
+        //         }
+        //
+        //         buf->PushVertex(v0);
+        //         buf->PushVertex(v1);
+        //         buf->PushVertex(v2);
+        //         buf->PushVertex(v3);
+        //
+        //         buf->PushIndex(startIndex);
+        //         buf->PushIndex(startIndex + 1);
+        //         buf->PushIndex(startIndex + 3);
+        //         buf->PushIndex(startIndex + 1);
+        //         buf->PushIndex(startIndex + 2);
+        //         buf->PushIndex(startIndex + 3);
+        //         characterCount++;
+        //     }
+        // };
+
+        //   draw(false);
+
+        // if (opts.m_dropShadowOffset.x != 0.0f || opts.m_dropShadowOffset.y != 0.0f)
+        //     draw(true);
     }
 
     void Internal::FillRect_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts, int drawOrder)
@@ -2848,6 +2899,96 @@ namespace LinaVG
         }
 
         return sourceBuffer;
+    }
+
+    void Internal::DrawDebugFontAtlas(LinaVGFont* font)
+    {
+        //  v0.m_pos = Vec2(300, 500);
+        //  v1.m_pos = Vec2(300 + font->m_textureSize.x, 500);
+        //  v2.m_pos = Vec2(300 + font->m_textureSize.x, 500 + font->m_textureSize.y);
+        //  v3.m_pos = Vec2(300, 500 + font->m_textureSize.y);
+        //  v0.m_uv = Vec2(0.0f, 0.0f);
+        //  v1.m_uv = Vec2(1.0f, 0.0f);
+        //  v2.m_uv = Vec2(1.0f, 1.0f);
+        //  v3.m_uv = Vec2(0.0f, 1.0f);
+    }
+
+    void Internal::DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, bool isGradient, float scale)
+    {
+        int                         characterCount      = 0;
+        const int                   totalCharacterCount = text.length();
+        std::string::const_iterator c;
+        Vec2                        pos = position;
+
+        // Coloring & grad options
+        Vec4 lastMinGrad = color.m_start;
+
+        for (c = text.begin(); c != text.end(); c++)
+        {
+            auto& ch = font->m_characterGlyphs[*c];
+
+            const int startIndex = buf->m_vertexBuffer.m_size;
+
+            float x2 = pos.x + ch.m_bearing.x * scale;
+            float y2 = pos.y - ch.m_bearing.y * scale;
+            float w  = ch.m_size.x * scale;
+            float h  = ch.m_size.y * scale;
+            pos.x += ch.m_advance.x * scale;
+            pos.y += ch.m_advance.y * scale;
+
+            if (w == 0.0f || h == 0.0f)
+                continue;
+
+            Vertex v0, v1, v2, v3;
+
+            if (isGradient)
+            {
+                if (color.m_gradientType == GradientType::Horizontal)
+                {
+                    const float maxT       = static_cast<float>(characterCount + 1) / static_cast<float>(totalCharacterCount);
+                    const Vec4  currentMin = lastMinGrad;
+                    const Vec4  currentMax = Math::Lerp(color.m_start, color.m_end, maxT);
+                    lastMinGrad            = currentMax;
+
+                    v0.m_col = currentMin;
+                    v1.m_col = currentMax;
+                    v2.m_col = currentMax;
+                    v3.m_col = currentMin;
+                }
+                else // fallback is vertical since radial gradients are not supported.
+                {
+                    v0.m_col = color.m_start;
+                    v1.m_col = color.m_start;
+                    v2.m_col = color.m_end;
+                    v3.m_col = color.m_end;
+                }
+            }
+            else
+                v0.m_col = v1.m_col = v2.m_col = v3.m_col = color.m_start;
+
+            v0.m_pos = Vec2(x2 + offset.x, y2 + offset.y);
+            v1.m_pos = Vec2(x2 + offset.x + w, y2 + offset.y);
+            v2.m_pos = Vec2(x2 + offset.x + w, y2 + h + offset.y);
+            v3.m_pos = Vec2(x2 + offset.x, y2 + h + offset.y);
+
+            v0.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y);
+            v1.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y);
+            v2.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
+            v3.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
+
+            buf->PushVertex(v0);
+            buf->PushVertex(v1);
+            buf->PushVertex(v2);
+            buf->PushVertex(v3);
+
+            buf->PushIndex(startIndex);
+            buf->PushIndex(startIndex + 1);
+            buf->PushIndex(startIndex + 3);
+            buf->PushIndex(startIndex + 1);
+            buf->PushIndex(startIndex + 2);
+            buf->PushIndex(startIndex + 3);
+            characterCount++;
+        }
     }
 
 } // namespace LinaVG

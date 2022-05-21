@@ -44,6 +44,7 @@ Timestamp: 3/24/2022 10:57:37 PM
 
 namespace LinaVG
 {
+    class LinaVGFont;
 
     struct LineTriangle
     {
@@ -242,8 +243,8 @@ namespace LinaVG
     /// <param name="drawOrder">Shapes with lower draw order is drawn on top.</param>
     LINAVG_API void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 
-    LINAVG_API void DrawText(const std::string& text, const Vec2& position, const TextOptions& opts, int drawOrder = 0, bool dbg = false);
-
+    LINAVG_API void DrawTextNormal(const std::string& text, const Vec2& position, const TextOptions& opts, int drawOrder = 0);
+    LINAVG_API void DrawTextSDF(const std::string& text, const Vec2& position, const SDFTextOptions& opts, int drawOrder = 0);
     namespace Internal
     {
         // No rounding, vertical or horizontal gradient
@@ -370,6 +371,9 @@ namespace LinaVG
         /// <param name="opts"></param>
         /// <returns></returns>
         DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, int drawOrder = 0, bool isAAOutline = false, bool reverseDrawDir = false);
+
+        void DrawDebugFontAtlas(LinaVGFont* font);
+        void DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, bool isGradient, float scale);
 
     }; // namespace Internal
 

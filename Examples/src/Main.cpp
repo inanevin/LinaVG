@@ -50,6 +50,7 @@ namespace LinaVG
         static float thickness        = 0.3f;
         static float softness         = 0.0f;
         static float outlineThickness = 0.0f;
+        static float dropShadowThickness = 0.0f;
 
         void ExampleApp::Run()
         {
@@ -116,24 +117,34 @@ namespace LinaVG
                 LinaVG::DrawRect(LinaVG::Vec2(100, 200), LinaVG::Vec2(300, 500), opts, 40.0f, 0);
 
                 TextOptions textOpts;
-                textOpts.m_font                 = sdfHandle;
+                textOpts.m_font                 = handle;
                 textOpts.m_color.m_gradientType = GradientType::Horizontal;
                 textOpts.m_color.m_start        = Vec4(1, 0, 0, 1);
                 textOpts.m_color.m_end          = Vec4(0, 0, 1, 1);
                 textOpts.m_textScale            = 0.6f;
-                textOpts.m_sdfSoftness          = softness;
-                textOpts.m_sdfThickness         = thickness;
-                textOpts.m_sdfOutlineOffset     = Vec2(0.5f ,0.5f);
-                textOpts.m_sdfOutlineThickness  = outlineThickness;
-                textOpts.m_sdfOutlineColor      = Vec4(0, 0, 0, 1);
-                // LinaVG::DrawText("T", LinaVG::Vec2(300, 500), textOpts, 0, true);
+                textOpts.m_dropShadowOffset = Vec2(1.2f, 2.0f);
+                LinaVG::DrawTextNormal("TEST", LinaVG::Vec2(300, 800), textOpts, 0);
 
-                LinaVG::DrawText("VITTU PERKELE SAATANA", LinaVG::Vec2(300, 1000), textOpts, 0);
-
-                textOpts.m_font = handle;
-                LinaVG::DrawText(std::string("Softness ") + std::to_string(textOpts.m_sdfSoftness), LinaVG::Vec2(300, 800), textOpts, 0);
-                LinaVG::DrawText(std::string("Thickness ") + std::to_string(textOpts.m_sdfThickness), LinaVG::Vec2(300, 830), textOpts, 0);
-                LinaVG::DrawText(std::string("Outline Thickness ") + std::to_string(textOpts.m_sdfOutlineThickness), LinaVG::Vec2(300, 890), textOpts, 0);
+                SDFTextOptions sdfOpts;
+                sdfOpts.m_font = sdfHandle;
+                sdfOpts.m_color.m_gradientType = GradientType::Horizontal;
+                sdfOpts.m_color.m_start = Vec4(1, 0, 0, 1);
+                sdfOpts.m_color.m_end = Vec4(0, 0, 1, 1);
+                sdfOpts.m_textScale = 0.6f;  
+                sdfOpts.m_sdfSoftness = softness;
+                sdfOpts.m_sdfThickness = thickness;
+                sdfOpts.m_sdfOutlineOffset = Vec2(0.5f, 0.5f);
+                sdfOpts.m_sdfOutlineThickness = outlineThickness;
+                sdfOpts.m_sdfOutlineColor = Vec4(0, 0, 0, 1);
+                sdfOpts.m_dropShadowOffset = Vec2(1.2f, 2.0f);
+                sdfOpts.m_sdfDropShadowThickness = dropShadowThickness;
+                sdfOpts.m_sdfDropShadowSoftness = softness;
+               LinaVG::DrawTextSDF("VITTU PERKELE SAATANA", LinaVG::Vec2(300, 1000), sdfOpts, 0);
+               //textOpts.m_font = handle;
+               LinaVG::DrawTextNormal(std::string("Softness ") + std::to_string(sdfOpts.m_sdfSoftness), LinaVG::Vec2(300, 760), textOpts, 0);
+               LinaVG::DrawTextNormal(std::string("Thickness ") + std::to_string(sdfOpts.m_sdfThickness), LinaVG::Vec2(300, 810), textOpts, 0);
+               LinaVG::DrawTextNormal(std::string("Outline Thickness ") + std::to_string(sdfOpts.m_sdfOutlineThickness), LinaVG::Vec2(300, 850), textOpts, 0);
+               LinaVG::DrawTextNormal(std::string("DS Thickness ") + std::to_string(sdfOpts.m_sdfDropShadowThickness), LinaVG::Vec2(300, 890), textOpts, 0);
                 // LinaVG::DrawText("moprngh", LinaVG::Vec2(800, 800), 1, opts, 0);
                 // Lina VG Render & end frame.
                 LinaVG::Render();
@@ -176,6 +187,10 @@ namespace LinaVG
                 outlineThickness += 0.05f;
             else if (key == 6)
                 outlineThickness -= 0.05f;
+            if (key == 7)
+                dropShadowThickness += 0.05f;
+            else if (key == 8)
+                dropShadowThickness -= 0.05f;
         }
 
         void ExampleApp::OnFCallback()

@@ -64,8 +64,8 @@ namespace LinaVG
         DrawBuffer&           GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType);
         GradientDrawBuffer&   GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
         TextureDrawBuffer&    GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType);
-        SimpleTextDrawBuffer& GetSimpleTextBuffer(BackendHandle glyphHandle, int drawOrder);
-        SDFTextDrawBuffer&    GetSDFTextBuffer(BackendHandle glyphHandle, int drawOrder, const TextOptions& opts);
+        SimpleTextDrawBuffer& GetSimpleTextBuffer(BackendHandle glyphHandle, int drawOrder, bool isDropShadow);
+        SDFTextDrawBuffer&    GetSDFTextBuffer(BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow);
     };
 
     namespace Internal
