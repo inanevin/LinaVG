@@ -252,7 +252,7 @@ namespace LinaVG
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     /// <returns></returns>
-    LINAVG_API void DrawTextNormal(const std::string& text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0);
+    LINAVG_API void DrawTextNormal(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
     /// Draws the given text at position as an SDF text, which produces a lot more high-quality results than normal text, regardless
@@ -265,7 +265,10 @@ namespace LinaVG
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     /// <returns></returns>
-    LINAVG_API void DrawTextSDF(const std::string& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0);
+    LINAVG_API void DrawTextSDF(const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0);
+
+    LINAVG_API Vec2 CalculateTextSize(const char *text, const TextOptions& opts);
+    LINAVG_API Vec2 CalculateTextSize(const char *text, const SDFTextOptions& opts);
 
     namespace Internal
     {
@@ -402,15 +405,13 @@ namespace LinaVG
         /// <summary>
         /// DrawText implementation.
         /// </summary>
-        /// <param name="buf"></param>
-        /// <param name="font"></param>
-        /// <param name="text"></param>
-        /// <param name="pos"></param>
-        /// <param name="offset"></param>
-        /// <param name="color"></param>
-        /// <param name="isGradient"></param>
-        /// <param name="scale"></param>
-        void DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, float wrapWidth, bool isGradient, float scale, float rotateAngle);
+        void DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, float wrapWidth, bool isGradient, float scale, float rotateAngle);
+
+        /// <summary>
+        /// Returns the total text size, taking wrap & spacing into account.
+        /// </summary>
+        /// <returns></returns>
+        Vec2 CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing, float wrapping);
 
     }; // namespace Internal
 

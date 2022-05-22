@@ -31,6 +31,7 @@ SOFTWARE.
 #include "Core/Renderer.hpp"
 #include "Core/Backend.hpp"
 #include "Core/Text.hpp"
+#include "Utility/Utility.hpp"
 #include <iostream>
 #include <stdio.h>
 
@@ -695,7 +696,7 @@ namespace LinaVG
         }
     }
 
-    LINAVG_API void DrawTextSDF(const std::string& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder)
+    LINAVG_API void DrawTextSDF(const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
@@ -724,7 +725,21 @@ namespace LinaVG
         }
     }
 
-    void DrawTextNormal(const std::string& text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder)
+    LINAVG_API Vec2 CalculateTextSize(const char* text, const TextOptions& opts)
+    {
+        FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
+        LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
+        return Internal::CalcTextSize(text, font, opts.m_textScale, opts.m_spacing, opts.m_wrapWidth);
+    }
+
+    LINAVG_API Vec2 CalculateTextSize(const char* text, const SDFTextOptions& opts)
+    {
+        FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
+        LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
+        return Internal::CalcTextSize(text, font, opts.m_textScale, opts.m_spacing, opts.m_wrapWidth);
+    }
+
+    void DrawTextNormal(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
@@ -2932,20 +2947,35 @@ namespace LinaVG
     //     //  v3.m_uv = Vec2(0.0f, 1.0f);
     // }
 
-    void Internal::DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, float spacing, float wrapWidth, bool isGradient, float scale, float rotateAngle)
+    void Internal::DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, float spacing, float wrapWidth, bool isGradient, float scale, float rotateAngle)
     {
-        int                         characterCount      = 0;
-        const int                   totalCharacterCount = text.length();
-        const int                   bufStart            = buf->m_vertexBuffer.m_size;
-        const bool                  useWrap             = wrapWidth != 0.0f;
-        std::string::const_iterator c;
-        Vec2                        pos = position;
+        int            characterCount      = 0;
+        const int      totalCharacterCount = Utility::GetTextCharacterSize(text);
+        const int      bufStart            = buf->m_vertexBuffer.m_size;
+        const bool     useWrap             = wrapWidth != 0.0f;
+        Vec2           pos                 = position;
+        const uint8_t* c;
 
-        // Coloring & grad options
+        float firstLineMaxH = 0.0f;
+        float maxHCalcPosX  = pos.x;
+        for (c = (const uint8_t*)text; *c; c++)
+        {
+            auto& ch = font->m_characterGlyphs[*c];
+            float x  = maxHCalcPosX + ch.m_bearing.x * scale + ch.m_size.x * scale;
+
+            if (useWrap && x - pos.x > wrapWidth)
+                break;
+
+            maxHCalcPosX += ch.m_advance.x * scale;
+            firstLineMaxH = Math::Max(firstLineMaxH, ch.m_size.y * scale);
+        }
+        pos.y += firstLineMaxH;
+
         Vec4  lastMinGrad = color.m_start;
         float usedSpacing = 0.0f;
         float newLineY    = 0.0f;
-        for (c = text.begin(); c != text.end(); c++)
+        bool  wrappedLast = false;
+        for (c = (const uint8_t*)text; *c; c++)
         {
             auto&     ch         = font->m_characterGlyphs[*c];
             const int startIndex = buf->m_vertexBuffer.m_size;
@@ -2954,11 +2984,19 @@ namespace LinaVG
             float y2 = pos.y - ch.m_bearing.y * scale;
             float w  = ch.m_size.x * scale;
             float h  = ch.m_size.y * scale;
-            pos.x += ch.m_advance.x * scale;
-            pos.y += ch.m_advance.y * scale;
 
             if (w == 0.0f || h == 0.0f)
+            {
+                if (!wrappedLast)
+                {
+                    pos.x += ch.m_advance.x * scale;
+                    pos.y += ch.m_advance.y * scale;
+                }
                 continue;
+            }
+
+            pos.x += ch.m_advance.x * scale;
+            pos.y += ch.m_advance.y * scale;
 
             Vertex v0, v1, v2, v3;
 
@@ -3011,10 +3049,14 @@ namespace LinaVG
             characterCount++;
             usedSpacing += spacing;
 
-            if (useWrap && (v1.m_pos.x > position.x + wrapWidth || v2.m_pos.x > position.x + wrapWidth))
+            wrappedLast = false;
+
+            if (useWrap && (v1.m_pos.x > position.x + wrapWidth))
             {
                 newLineY += (v3.m_pos.y - v0.m_pos.y) + 5.0f * Config.m_framebufferScale.x;
-                pos.x    = position.x;
+                pos.x       = position.x;
+                usedSpacing = 0.0f;
+                wrappedLast = true;
             }
         }
 
@@ -3023,6 +3065,86 @@ namespace LinaVG
             const Vec2 center = Internal::GetVerticesCenter(buf, bufStart, buf->m_vertexBuffer.m_size - 1);
             Internal::RotateVertices(buf->m_vertexBuffer, center, bufStart, buf->m_vertexBuffer.m_size - 1, rotateAngle);
         }
+    }
+
+    Vec2 Internal::CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing, float wrapping)
+    {
+        const bool     useWrap = wrapping != 0.0f;
+        Vec2           pos     = Vec2(0.0f, 0.0f);
+        const uint8_t* c;
+
+        float firstLineMaxH = 0.0f;
+        float maxHCalcPosX  = pos.x;
+        for (c = (const uint8_t*)text; *c; c++)
+        {
+            auto& ch = font->m_characterGlyphs[*c];
+            float x  = maxHCalcPosX + ch.m_bearing.x * scale + ch.m_size.x * scale;
+
+            if (useWrap && x - pos.x > wrapping)
+                break;
+
+            maxHCalcPosX += ch.m_advance.x * scale;
+            firstLineMaxH = Math::Max(firstLineMaxH, ch.m_size.y * scale);
+        }
+
+        pos.y += firstLineMaxH;
+
+        float usedSpacing         = 0.0f;
+        float newLineY            = 0.0f;
+        bool  wrappedLast         = false;
+        Vec2  position            = Vec2(0.0f, 0.0f);
+        bool  wrapReached         = false;
+        int   characterCount      = 0;
+        int   totalCharacterCount = Utility::GetTextCharacterSize(text);
+        float firstY              = 0.0f;
+        float lastY               = 0.0f;
+        for (c = (const uint8_t*)text; *c; c++)
+        {
+            auto& ch = font->m_characterGlyphs[*c];
+
+            float x2 = pos.x + ch.m_bearing.x * scale;
+            float y2 = pos.y - ch.m_bearing.y * scale;
+            float w  = ch.m_size.x * scale;
+            float h  = ch.m_size.y * scale;
+
+            if (w == 0.0f || h == 0.0f)
+            {
+                if (!wrappedLast)
+                {
+                    pos.x += ch.m_advance.x * scale;
+                    pos.y += ch.m_advance.y * scale;
+                }
+                characterCount++;
+                continue;
+            }
+
+            pos.x += ch.m_advance.x * scale;
+            pos.y += ch.m_advance.y * scale;
+
+            Vec2 v1 = Vec2(x2 + usedSpacing + w, y2 + newLineY);
+            Vec2 v2 = Vec2(x2 + usedSpacing + w, y2 + h + newLineY);
+
+            if (characterCount == 0)
+                firstY = v1.y;
+            else if (characterCount == totalCharacterCount - 2)
+                lastY = v2.y;
+
+            usedSpacing += spacing;
+            wrappedLast = false;
+
+            if (useWrap && (v1.x > position.x + wrapping))
+            {
+                newLineY += (v2.y - v1.y) + 5.0f * Config.m_framebufferScale.x;
+                pos.x       = position.x;
+                usedSpacing = 0.0f;
+                wrappedLast = true;
+                wrapReached = true;
+            }
+
+            characterCount++;
+        }
+
+        return Vec2(wrapReached ? wrapping : pos.x, lastY - firstY);
     }
 
 } // namespace LinaVG

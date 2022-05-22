@@ -91,6 +91,7 @@ namespace LinaVG
             QuickSortArray<T>(arr, p + 1, end);
         }
 
+        int GetTextCharacterSize(const char* text);
 	}
 }
 #endif

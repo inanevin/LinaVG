@@ -67,6 +67,7 @@ namespace LinaVG
 
     FontHandle LoadFont(const std::string& file, bool loadAsSDF, int size)
     {
+        size *= Config.m_framebufferScale.x;
         FT_Face face;
         if (FT_New_Face(Internal::g_textData.m_ftlib, file.c_str(), 0, &face))
         {

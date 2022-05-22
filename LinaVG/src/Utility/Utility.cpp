@@ -34,6 +34,11 @@ namespace LinaVG
 {
     namespace Utility
     {
-
+        int GetTextCharacterSize(const char* text)
+        {
+            int size = 0;
+            while (text[size] != '\0') size++;
+            return size;
+        }
     } // namespace Utility
 }
