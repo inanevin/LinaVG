@@ -420,7 +420,7 @@ namespace LinaVG
         /// <summary>
         /// DrawText implementation.
         /// </summary>
-        void DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, float wrapWidth, bool isGradient, float scale, float rotateAngle);
+        void DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, float wrapWidth, bool isGradient, float scale, float rotateAngle, TextAlignment align);
 
         /// <summary>
         /// Returns the total text size, taking wrap & spacing into account.

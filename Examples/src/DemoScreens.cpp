@@ -75,30 +75,21 @@ namespace LinaVG
             const std::string frameTimeStr     = "Frame: " + std::to_string(ExampleApp::Get()->GetFrameTimeRead()) + " ms";
             const std::string fpsStr           = "FPS: " + std::to_string(ExampleApp::Get()->GetFPS()) + " " + frameTimeStr;
 
-            Vec2        textPosition = Vec2(statsWindowX + 10, statsWindowY + 25);
+            Vec2        textPosition = Vec2(statsWindowX + 10, statsWindowY + 15);
             TextOptions textStyle;
             textStyle.m_textScale = 0.6f;
-           //LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-           //textPosition.y += 25;
-           //LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-           //textPosition.y += 25;
-           //LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-           //textPosition.y += 25;
-           //LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            textPosition.y += 25;
+            LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            textPosition.y += 25;
+            LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            textPosition.y += 25;
+            LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
 
             // Draw semi-transparent black rectangle on the bottom of the screen.
             style.m_color    = Vec4(0, 0, 0, 0.5f);
             style.m_rounding = 0.0f;
             LinaVG::DrawRect(Vec2(0.0f, screenSize.y - screenSize.y * 0.1f), screenSize, style, 0.0f, 1);
-
-            const std::string txt = "OH BEE     ANASINI SIKIM YETER ARTIK";
-           textStyle.m_wrapWidth = 80;
-           textStyle.m_spacing = 5;
-            const Vec2 textSize   = LinaVG::CalculateTextSize(txt.c_str(), textStyle);
-            Vec2 center = Vec2(screenSize.x / 2.0f, screenSize.y / 2.0f);
-            Vec2       txtPos     =Vec2(center.x, center.y - textSize.y / 2.0f);
-            LinaVG::DrawTextNormal(txt.c_str(), txtPos, textStyle);
-            LinaVG::DrawPoint(center, Vec4(1, 0, 0, 1));
         }
 
         void DemoScreens::ShowDemoScreen1_Shapes()

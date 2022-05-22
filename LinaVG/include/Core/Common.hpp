@@ -371,6 +371,12 @@ namespace LinaVG
         Vec2 m_textureUVOffset = Vec2(0.0f, 0.0f);
     };
 
+    enum class TextAlignment
+    {
+        Left = 0,
+        Center,
+        Right
+    };
     /// <summary>
     /// Text styling, DrawText will render the given text as normal or via signed-distance-field (SDF) methods.
     /// This depends on the font handle given with options (or default font if not-provided).
@@ -400,11 +406,16 @@ namespace LinaVG
         Vec4Grad m_color = Vec4Grad(Vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
         /// <summary>
+        /// Text alignment.
+        /// </summary>
+        TextAlignment m_alignment = TextAlignment::Left;
+
+        /// <summary>
         /// Multiplies the text vertices, !it is not recommended to change text size based on this scale!
         /// Rather try to load the same font with bigger sizes.
         /// </summary>
         float m_textScale = 1.0f;
-        
+
         /// <summary>
         /// Defines extra spacing between each letter.
         /// </summary>
