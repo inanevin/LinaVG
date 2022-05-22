@@ -354,16 +354,7 @@ namespace LinaVG
         return i;
     }
 
-    float Math::Min(float a, float b)
-    {
-        return a < b ? a : b;
-    }
-
-    float Math::Max(float a, float b)
-    {
-        return a > b ? a : b;
-    }
-
+  
     Vec4 Math::Lerp(const Vec4& val, const Vec4& val2, float amt)
     {
         float t  = (1.0f - amt);

@@ -322,7 +322,7 @@ namespace LinaVG
         {
             _ASSERT(start > -1 && start < m_size && end > -1 && end < m_size);
             T temp        = m_data[start];
-            m_data[start] = end;
+            m_data[start] = m_data[end];
             m_data[end]   = temp;
         }
     };
@@ -429,7 +429,7 @@ namespace LinaVG
         /// <summary>
         /// Drop shadow color, lol.
         /// </summary>
-        Vec4 m_dropShadowColor = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        Vec4 m_dropShadowColor = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
         /// <summary>
         /// Defines how far the drop shadow is rendered, in screen-units.

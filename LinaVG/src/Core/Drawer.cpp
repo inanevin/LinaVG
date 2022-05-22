@@ -63,41 +63,11 @@ namespace LinaVG
 
     void DrawPoint(const Vec2& p1, const Vec4& col)
     {
-#ifdef NONDEBUG
         StyleOptions style;
         style.m_color        = col;
+        style.m_isFilled     = true;
         const float distance = Config.m_framebufferScale.x / 2.0f;
         DrawRect(Vec2(p1.x - distance, p1.y - distance), Vec2(p1.x + distance, p1.y + distance), style);
-#else
-        const float distance = Config.m_framebufferScale.x * 0.5f;
-        Vertex      p1u, p2u, p1d, p2d;
-        p1u.m_pos.x = p1.x - distance;
-        p1u.m_pos.y = p1.y + distance;
-        p2u.m_pos.x = p1.x + distance;
-        p2u.m_pos.y = p1.y + distance;
-        p1d.m_pos.x = p1.x - distance;
-        p1d.m_pos.y = p1.y - distance;
-        p2d.m_pos.x = p1.x + distance;
-        p2d.m_pos.y = p1.y - distance;
-        p1u.m_col   = col;
-        p2u.m_col   = col;
-        p2d.m_col   = col;
-        p1d.m_col   = col;
-
-        auto&       buf  = Internal::g_rendererData.GetDefaultBuffer(0, DrawBufferShapeType::Shape);
-        const Index curr = buf.m_vertexBuffer.m_size;
-        buf.PushVertex(p1u);
-        buf.PushVertex(p2u);
-        buf.PushVertex(p2d);
-        buf.PushVertex(p1d);
-
-        buf.PushIndex(curr);
-        buf.PushIndex(curr + 1);
-        buf.PushIndex(curr + 3);
-        buf.PushIndex(curr + 1);
-        buf.PushIndex(curr + 2);
-        buf.PushIndex(curr + 3);
-#endif
     }
 
     void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap, float rotateAngle, int drawOrder)
@@ -2843,25 +2813,40 @@ namespace LinaVG
         Vec2           pos                 = position;
         const uint8_t* c;
 
+
+        // Calculate first line height offset.
         float firstLineMaxH = 0.0f;
         float maxHCalcPosX  = pos.x;
+        float totalWidth = 0.0f;
         for (c = (const uint8_t*)text; *c; c++)
         {
             auto& ch = font->m_characterGlyphs[*c];
             float x  = maxHCalcPosX + ch.m_bearing.x * scale + ch.m_size.x * scale;
+            DrawPoint(Vec2(x, position.y), Vec4(1,0,0,1));
 
-            if (useWrap && x - pos.x > wrapWidth)
-                break;
 
             maxHCalcPosX += ch.m_advance.x * scale;
             firstLineMaxH = Math::Max(firstLineMaxH, ch.m_size.y * scale);
+
+            totalWidth +=  ch.m_advance.x * scale;
         }
+
+        DrawPoint(Vec2(position.x + totalWidth, position.y+5), Vec4(0,1,1,1));
         pos.y += firstLineMaxH;
 
         Vec4  lastMinGrad = color.m_start;
         float usedSpacing = 0.0f;
         float newLineY    = 0.0f;
         bool  wrappedLast = false;
+
+        // Alignment offset.
+        float startPositionX = pos.x;
+        if (align == TextAlignment::Right)
+            startPositionX -= (maxHCalcPosX - pos.x);
+        else if (align == TextAlignment::Center)
+            startPositionX -= (maxHCalcPosX - pos.x) / 2.0f;
+        pos.x = startPositionX;
+
         for (c = (const uint8_t*)text; *c; c++)
         {
             auto&     ch         = font->m_characterGlyphs[*c];
@@ -2938,10 +2923,10 @@ namespace LinaVG
             usedSpacing += spacing;
             wrappedLast = false;
 
-            if (useWrap && (v1.m_pos.x > position.x + wrapWidth))
+            if (useWrap && (v1.m_pos.x > position.x + wrapWidth + offset.x))
             {
                 newLineY += (v3.m_pos.y - v0.m_pos.y) + 5.0f * Config.m_framebufferScale.x;
-                pos.x       = position.x;
+                pos.x       = startPositionX;
                 usedSpacing = 0.0f;
                 wrappedLast = true;
             }

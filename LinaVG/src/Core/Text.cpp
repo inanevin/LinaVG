@@ -67,7 +67,6 @@ namespace LinaVG
 
     FontHandle LoadFont(const std::string& file, bool loadAsSDF, int size)
     {
-        size *= Config.m_framebufferScale.x;
         FT_Face face;
         if (FT_New_Face(Internal::g_textData.m_ftlib, file.c_str(), 0, &face))
         {
@@ -76,7 +75,7 @@ namespace LinaVG
         }
 
         FT_Set_Pixel_Sizes(face, 0, size);
-        // FT_Select_Charmap(face, FT_ENCODING_UNICODE);
+        FT_Select_Charmap(face, FT_ENCODING_UNICODE);
 
         // Texture alignment changes might be necessary on some APIs such as OpenGL
         Backend::SaveAPIState();
@@ -95,8 +94,10 @@ namespace LinaVG
         unsigned int h    = 0;
         FT_GlyphSlot slot = face->glyph;
 
-        FT_Int32 loadFlags = loadAsSDF ? FT_LOAD_DEFAULT : FT_LOAD_RENDER;
+        FT_Int32 loadFlags       = loadAsSDF ? FT_LOAD_DEFAULT : FT_LOAD_RENDER;
+        int      textureXAdvance = static_cast<int>(Config.m_framebufferScale.x + 2.0f);
 
+        // First calculate the texture atlas size.
         for (unsigned char c = 32; c < Config.m_maxGlyphCharSize; c++)
         {
             if (FT_Load_Char(face, c, loadFlags))
@@ -111,7 +112,7 @@ namespace LinaVG
             const unsigned int glyphWidth = face->glyph->bitmap.width;
             const unsigned int glyphRows  = face->glyph->bitmap.rows;
 
-            if (roww + glyphWidth + Config.m_framebufferScale.x + 1.5f >= MAX_WIDTH)
+            if (roww + glyphWidth + textureXAdvance >= MAX_WIDTH)
             {
                 w = Math::Max(w, roww);
                 h += rowh;
@@ -119,20 +120,22 @@ namespace LinaVG
                 rowh = 0;
             }
 
-            roww += glyphWidth + Config.m_framebufferScale.x + 1.5f;
+            roww += glyphWidth + textureXAdvance;
             rowh = Math::Max(rowh, glyphRows);
         }
 
         w = Math::Max(w, roww);
         h += rowh;
 
+        // Generate atlas
         BackendHandle tex   = Backend::CreateFontTexture(w, h);
-        font->m_textureSize = Vec2(w, h);
+        font->m_textureSize = Vec2(static_cast<float>(w), static_cast<float>(h));
         font->m_texture     = tex;
         int offsetX         = 0;
         int offsetY         = 0;
         rowh                = 0;
 
+        // Now atlas is generated, feed each character into it.
         for (unsigned char c = 32; c < Config.m_maxGlyphCharSize; c++)
         {
             if (FT_Load_Char(face, c, loadFlags))
@@ -156,7 +159,6 @@ namespace LinaVG
             }
 
             Backend::BufferFontTextureAtlas(glyphWidth, glyphRows, offsetX, offsetY, static_cast<void*>(face->glyph->bitmap.buffer));
-            // BackendHandle txt = Backend::GenerateFontTexture(glyphWidth, glyphRows, static_cast<void*>(face->glyph->bitmap.buffer));
             characterMap[c] = {
                 Vec2(static_cast<float>(offsetX / (float)w), static_cast<float>(offsetY / (float)h)),
                 Vec2(static_cast<float>(glyphWidth), static_cast<float>(glyphRows)),
@@ -164,7 +166,7 @@ namespace LinaVG
                 Vec2(static_cast<float>(face->glyph->advance.x >> 6), static_cast<float>(face->glyph->advance.y >> 6))};
 
             rowh = Math::Max(rowh, glyphRows);
-            offsetX += glyphWidth + Config.m_framebufferScale.x + 1.5f;
+            offsetX += glyphWidth + textureXAdvance;
         }
 
         FT_Done_Face(face);

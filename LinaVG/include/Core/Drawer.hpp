@@ -245,6 +245,7 @@ namespace LinaVG
 
     /// <summary>
     /// Draws the given text at position. The font used in Text Options must be loaded as normal font, e.g. non-sdf.
+    /// Given position will be upper-left corner of the text. Use CalculateTextSize to offset the text, e.g. center.
     /// </summary>
     /// <param name="text">Text to draw.</param>
     /// <param name="position">Screen-space position.</param>
@@ -258,6 +259,7 @@ namespace LinaVG
     /// Draws the given text at position as an SDF text, which produces a lot more high-quality results than normal text, regardless
     /// of scaling & rotation. Also SDF texts has a lot more styling options, such as outlines and more paramaterized drop shadows.
     /// The font used in Text Options must be loaded as an SDF-font.
+    /// Given position will be upper-left corner of the text. Use CalculateTextSize to offset the text, e.g. center.
     /// </summary>
     /// <param name="text">Text to draw.</param>
     /// <param name="position">Screen-space position.</param>

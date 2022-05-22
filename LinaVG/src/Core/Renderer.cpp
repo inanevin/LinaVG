@@ -89,60 +89,62 @@ namespace LinaVG
 
     void Render()
     {
-        
-        Utility::QuickSortArray<int>(Internal::g_rendererData.m_drawOrders, 0, Internal::g_rendererData.m_drawOrders.m_size -1);
 
-        auto& arr = Internal::g_rendererData.m_drawOrders;
-        auto drawBuffers = [&](DrawBufferShapeType shapeType) {
-            for (int i = 0; i < arr.m_size; i++)
+        auto& renderBuffs = [](int drawOrder, DrawBufferShapeType shapeType)
+        {
+            for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
             {
-                const int drawOrder = arr[i];
-                for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
-                {
-                    DrawBuffer& buf = Internal::g_rendererData.m_defaultBuffers[i];
+                DrawBuffer& buf = Internal::g_rendererData.m_defaultBuffers[i];
 
-                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder)
-                        Backend::DrawDefault(&(buf));
-                }
+                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
+                    Backend::DrawDefault(&(buf));
+            }
 
-                for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
-                {
-                    GradientDrawBuffer& buf = Internal::g_rendererData.m_gradientBuffers[i];
+            for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
+            {
+                GradientDrawBuffer& buf = Internal::g_rendererData.m_gradientBuffers[i];
 
-                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder)
-                        Backend::DrawGradient(&buf);
-                }
+                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
+                    Backend::DrawGradient(&buf);
+            }
 
-                for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
-                {
-                    TextureDrawBuffer& buf = Internal::g_rendererData.m_textureBuffers[i];
+            for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
+            {
+                TextureDrawBuffer& buf = Internal::g_rendererData.m_textureBuffers[i];
 
-                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder)
-                        Backend::DrawTextured(&buf);
-                }
+                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
+                    Backend::DrawTextured(&buf);
+            }
 
-                for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
-                {
-                    SimpleTextDrawBuffer& buf = Internal::g_rendererData.m_simpleTextBuffers[i];
+            for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
+            {
+                SimpleTextDrawBuffer& buf = Internal::g_rendererData.m_simpleTextBuffers[i];
 
-                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder)
-                        Backend::DrawSimpleText(&buf);
-                }
+                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
+                    Backend::DrawSimpleText(&buf);
+            }
 
-                for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
-                {
-                    SDFTextDrawBuffer& buf = Internal::g_rendererData.m_sdfTextBuffers[i];
+            for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
+            {
+                SDFTextDrawBuffer& buf = Internal::g_rendererData.m_sdfTextBuffers[i];
 
-                    if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder)
-                        Backend::DrawSDFText(&buf);
-                }
+                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
+                    Backend::DrawSDFText(&buf);
             }
         };
 
-        drawBuffers(DrawBufferShapeType::DropShadow);
-        drawBuffers(DrawBufferShapeType::Shape);
-        drawBuffers(DrawBufferShapeType::Outline);
-        drawBuffers(DrawBufferShapeType::AA);
+        auto& arr = Internal::g_rendererData.m_drawOrders;
+
+        for (int i = 0; i < arr.m_size; i++)
+        {
+            const int drawOrder = arr[i];
+            renderBuffs(drawOrder, DrawBufferShapeType::DropShadow);
+            renderBuffs(drawOrder, DrawBufferShapeType::Shape);
+            renderBuffs(drawOrder, DrawBufferShapeType::Outline);
+            renderBuffs(drawOrder, DrawBufferShapeType::AA);
+        }
+
+        
     }
 
     void EndFrame()
@@ -354,7 +356,10 @@ namespace LinaVG
         }
 
         if (!found)
+        {
             m_drawOrders.push_back(drawOrder);
+            Utility::QuickSortArray<int>(m_drawOrders, 0, m_drawOrders.m_size - 1);
+        }
     }
 
 } // namespace LinaVG

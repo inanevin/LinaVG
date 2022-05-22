@@ -89,8 +89,19 @@ namespace LinaVG
         static float Abs(float f);
         static float Clamp(float f, float min, float max);
         static int   Clamp(int i, int min, int max);
-        static float Min(float a, float b);
-        static float Max(float a, float b);
+
+        template <typename T>
+        static T Min(T a, T b)
+        {
+            return a < b ? a : b;
+        }
+
+        template <typename T>
+        static T Max(T a, T b)
+        {
+            return a > b ? a : b;
+        }
+
         template <typename T, typename U>
         static T Lerp(const T& val1, const T& val2, const U& amt)
         {
