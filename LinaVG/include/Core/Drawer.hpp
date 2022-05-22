@@ -267,8 +267,23 @@ namespace LinaVG
     /// <returns></returns>
     LINAVG_API void DrawTextSDF(const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0);
 
-    LINAVG_API Vec2 CalculateTextSize(const char *text, const TextOptions& opts);
-    LINAVG_API Vec2 CalculateTextSize(const char *text, const SDFTextOptions& opts);
+    /// <summary>
+    /// Returns a Vec2 containing max width & height this text will occupy.
+    /// Takes spacing and wrapping into account.
+    /// </summary>
+    /// <param name="text">Text, lol.</param>
+    /// <param name="opts">Style options used to draw the text.</param>
+    /// <returns></returns>
+    LINAVG_API Vec2 CalculateTextSize(const char* text, const TextOptions& opts);
+
+    /// <summary>
+    /// Returns a Vec2 containing max width & height this text will occupy.
+    /// Takes spacing and wrapping into account.
+    /// </summary>
+    /// <param name="text">Text, lol.</param>
+    /// <param name="opts">Style options used to draw the text.</param>
+    /// <returns></returns>
+    LINAVG_API Vec2 CalculateTextSize(const char* text, const SDFTextOptions& opts);
 
     namespace Internal
     {
