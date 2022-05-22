@@ -404,6 +404,16 @@ namespace LinaVG
         /// Rather try to load the same font with bigger sizes.
         /// </summary>
         float m_textScale = 1.0f;
+        
+        /// <summary>
+        /// Defines extra spacing between each letter.
+        /// </summary>
+        float m_spacing = 0.0f;
+
+        /// <summary>
+        /// Text will wrap at, e.g. go to a new line when it reaches = position.x + m_wrapWidth
+        /// </summary>
+        float m_wrapWidth = 0.0f;
 
         /// <summary>
         /// Drop shadow color, lol.

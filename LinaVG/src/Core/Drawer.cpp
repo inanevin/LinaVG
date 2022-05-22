@@ -711,7 +711,7 @@ namespace LinaVG
         const bool  isGradient = !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
 
         const int start = buf->m_vertexBuffer.m_size;
-        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, isGradient, scale, rotateAngle);
+        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, opts.m_spacing, opts.m_wrapWidth, isGradient, scale, rotateAngle);
 
         if (opts.m_dropShadowOffset.x != 0.0f || opts.m_dropShadowOffset.y != 0.0f)
         {
@@ -720,7 +720,7 @@ namespace LinaVG
             usedOpts.m_sdfSoftness  = opts.m_sdfDropShadowSoftness;
             DrawBuffer* dsBuf       = &Internal::g_rendererData.GetSDFTextBuffer(font->m_texture, drawOrder, usedOpts, true);
             const int   dsStart     = buf->m_vertexBuffer.m_size;
-            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, false, scale, rotateAngle);
+            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, opts.m_spacing, opts.m_wrapWidth, false, scale, rotateAngle);
         }
     }
 
@@ -742,12 +742,12 @@ namespace LinaVG
 
         DrawBuffer* buf        = &Internal::g_rendererData.GetSimpleTextBuffer(font->m_texture, drawOrder, false);
         const bool  isGradient = !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
-        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, isGradient, scale, rotateAngle);
+        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, opts.m_spacing, opts.m_wrapWidth, isGradient, scale, rotateAngle);
 
         if (opts.m_dropShadowOffset.x != 0.0f || opts.m_dropShadowOffset.y != 0.0f)
         {
             DrawBuffer* dsBuf = &Internal::g_rendererData.GetSimpleTextBuffer(font->m_texture, drawOrder, true);
-            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, false, scale, rotateAngle);
+            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, opts.m_spacing, opts.m_wrapWidth, false, scale, rotateAngle);
         }
         // auto& draw = [&](bool isDropShadow) {
         //     std::string::const_iterator c;
@@ -2932,21 +2932,22 @@ namespace LinaVG
     //     //  v3.m_uv = Vec2(0.0f, 1.0f);
     // }
 
-    void Internal::DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, bool isGradient, float scale, float rotateAngle)
+    void Internal::DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, float spacing, float wrapWidth, bool isGradient, float scale, float rotateAngle)
     {
         int                         characterCount      = 0;
         const int                   totalCharacterCount = text.length();
         const int                   bufStart            = buf->m_vertexBuffer.m_size;
+        const bool                  useWrap             = wrapWidth != 0.0f;
         std::string::const_iterator c;
         Vec2                        pos = position;
 
         // Coloring & grad options
-        Vec4 lastMinGrad = color.m_start;
-
+        Vec4  lastMinGrad = color.m_start;
+        float usedSpacing = 0.0f;
+        float newLineY    = 0.0f;
         for (c = text.begin(); c != text.end(); c++)
         {
-            auto& ch = font->m_characterGlyphs[*c];
-
+            auto&     ch         = font->m_characterGlyphs[*c];
             const int startIndex = buf->m_vertexBuffer.m_size;
 
             float x2 = pos.x + ch.m_bearing.x * scale;
@@ -2986,10 +2987,10 @@ namespace LinaVG
             else
                 v0.m_col = v1.m_col = v2.m_col = v3.m_col = color.m_start;
 
-            v0.m_pos = Vec2(x2 + offset.x, y2 + offset.y);
-            v1.m_pos = Vec2(x2 + offset.x + w, y2 + offset.y);
-            v2.m_pos = Vec2(x2 + offset.x + w, y2 + h + offset.y);
-            v3.m_pos = Vec2(x2 + offset.x, y2 + h + offset.y);
+            v0.m_pos = Vec2(x2 + usedSpacing + offset.x, y2 + offset.y + newLineY);
+            v1.m_pos = Vec2(x2 + usedSpacing + offset.x + w, y2 + offset.y + newLineY);
+            v2.m_pos = Vec2(x2 + usedSpacing + offset.x + w, y2 + h + offset.y + newLineY);
+            v3.m_pos = Vec2(x2 + usedSpacing + offset.x, y2 + h + offset.y + newLineY);
 
             v0.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y);
             v1.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y);
@@ -3008,6 +3009,13 @@ namespace LinaVG
             buf->PushIndex(startIndex + 2);
             buf->PushIndex(startIndex + 3);
             characterCount++;
+            usedSpacing += spacing;
+
+            if (useWrap && (v1.m_pos.x > position.x + wrapWidth || v2.m_pos.x > position.x + wrapWidth))
+            {
+                newLineY += (v3.m_pos.y - v0.m_pos.y) + 5.0f * Config.m_framebufferScale.x;
+                pos.x    = position.x;
+            }
         }
 
         if (rotateAngle != 0.0f)

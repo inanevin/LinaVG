@@ -92,6 +92,11 @@ namespace LinaVG
             style.m_color    = Vec4(0, 0, 0, 0.5f);
             style.m_rounding = 0.0f;
             LinaVG::DrawRect(Vec2(0.0f, screenSize.y - screenSize.y * 0.1f), screenSize, style, 0.0f, 1);
+
+            //textStyle.m_spacing = 15;
+            textStyle.m_wrapWidth = 80;
+            LinaVG::DrawTextNormal("TEST STRING YOOOOOOO RAHMETULLAH BISMILLAH BE", Vec2(500, 500), textStyle);
+            LinaVG::DrawPoint(Vec2(550, 500), Vec4(1,0,0,1));
         }
 
         void DemoScreens::ShowDemoScreen1_Shapes()

@@ -410,7 +410,7 @@ namespace LinaVG
         /// <param name="color"></param>
         /// <param name="isGradient"></param>
         /// <param name="scale"></param>
-        void DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, bool isGradient, float scale, float rotateAngle);
+        void DrawText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, float wrapWidth, bool isGradient, float scale, float rotateAngle);
 
     }; // namespace Internal
 
