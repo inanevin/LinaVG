@@ -169,6 +169,7 @@ namespace LinaVG
             offsetX += glyphWidth + textureXAdvance;
         }
 
+        font->m_spaceAdvance = characterMap[' '].m_advance.x;
         FT_Done_Face(face);
         Backend::RestoreAPIState();
 

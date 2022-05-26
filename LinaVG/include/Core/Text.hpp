@@ -56,10 +56,11 @@ namespace LinaVG
     class LinaVGFont
     {
     public:
-        BackendHandle                           m_texture     = 0;
-        int                                     m_size        = 0;
-        bool                                    m_isSDF       = false;
-        Vec2                                    m_textureSize = Vec2(0.0f, 0.0f);
+        BackendHandle                           m_texture      = 0;
+        int                                     m_size         = 0;
+        bool                                    m_isSDF        = false;
+        Vec2                                    m_textureSize  = Vec2(0.0f, 0.0f);
+        float                                   m_spaceAdvance = 0.0f;
         std::unordered_map<char, TextCharacter> m_characterGlyphs;
     };
 

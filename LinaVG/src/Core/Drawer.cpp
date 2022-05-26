@@ -666,7 +666,7 @@ namespace LinaVG
         }
     }
 
-    LINAVG_API void DrawTextSDF(const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder)
+    LINAVG_API void DrawTextSDF(const std::string& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
@@ -677,10 +677,10 @@ namespace LinaVG
             return;
         }
 
-        const float scale      = opts.m_textScale * Config.m_framebufferScale.x;
+        const float scale      = opts.m_textScale;
         DrawBuffer* buf        = &Internal::g_rendererData.GetSDFTextBuffer(font->m_texture, drawOrder, opts, false);
         const bool  isGradient = !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
-        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, opts.m_spacing, opts.m_wrapWidth, isGradient, scale, rotateAngle, opts.m_alignment);
+        Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, opts.m_spacing, isGradient, scale, opts.m_wrapWidth, rotateAngle, opts.m_alignment, opts.m_newLineSpacing);
 
         if (opts.m_dropShadowOffset.x != 0.0f || opts.m_dropShadowOffset.y != 0.0f)
         {
@@ -689,11 +689,11 @@ namespace LinaVG
             usedOpts.m_sdfSoftness  = opts.m_sdfDropShadowSoftness;
             DrawBuffer* dsBuf       = &Internal::g_rendererData.GetSDFTextBuffer(font->m_texture, drawOrder, usedOpts, true);
             const int   dsStart     = buf->m_vertexBuffer.m_size;
-            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, opts.m_spacing, opts.m_wrapWidth, false, scale, rotateAngle, opts.m_alignment);
+            Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, opts.m_spacing, false, scale, opts.m_wrapWidth, rotateAngle, opts.m_alignment, opts.m_newLineSpacing);
         }
     }
 
-    void DrawTextNormal(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder)
+    void DrawTextNormal(const std::string& text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
@@ -704,30 +704,39 @@ namespace LinaVG
             return;
         }
 
-        const float scale      = opts.m_textScale * Config.m_framebufferScale.x;
+        const float scale      = opts.m_textScale;
         DrawBuffer* buf        = &Internal::g_rendererData.GetSimpleTextBuffer(font->m_texture, drawOrder, false);
         const bool  isGradient = !Math::IsEqual(opts.m_color.m_start, opts.m_color.m_end);
-        Internal::DrawText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, opts.m_spacing, opts.m_wrapWidth, isGradient, scale, rotateAngle, opts.m_alignment);
-
+        Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.m_color, opts.m_spacing, isGradient, scale, opts.m_wrapWidth, rotateAngle, opts.m_alignment, opts.m_newLineSpacing);
         if (opts.m_dropShadowOffset.x != 0.0f || opts.m_dropShadowOffset.y != 0.0f)
         {
             DrawBuffer* dsBuf = &Internal::g_rendererData.GetSimpleTextBuffer(font->m_texture, drawOrder, true);
-            Internal::DrawText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, opts.m_spacing, opts.m_wrapWidth, false, scale, rotateAngle, opts.m_alignment);
+            Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.m_dropShadowOffset.x * Config.m_framebufferScale.x, opts.m_dropShadowOffset.y * Config.m_framebufferScale.y), opts.m_dropShadowColor, opts.m_spacing, false, scale, opts.m_wrapWidth, rotateAngle, opts.m_alignment, opts.m_newLineSpacing);
         }
     }
 
-    LINAVG_API Vec2 CalculateTextSize(const char* text, const TextOptions& opts)
+    LINAVG_API Vec2 CalculateTextSize(const std::string& text, TextOptions& opts)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
-        return Internal::CalcTextSize(text, font, opts.m_textScale, opts.m_spacing, opts.m_wrapWidth);
+        const float scale      = opts.m_textScale;
+
+        if (opts.m_wrapWidth == 0.0f)
+            return Internal::CalcTextSize(text.c_str(), font, scale, opts.m_spacing);
+        else
+            return Internal::CalcTextSizeWrapped(text, font, &opts);
     }
 
-    LINAVG_API Vec2 CalculateTextSize(const char* text, const SDFTextOptions& opts)
+    LINAVG_API Vec2 CalculateTextSize(const std::string& text, SDFTextOptions& opts)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
-        return Internal::CalcTextSize(text, font, opts.m_textScale, opts.m_spacing, opts.m_wrapWidth);
+        const float scale      = opts.m_textScale;
+
+        if (opts.m_wrapWidth == 0.0f)
+            return Internal::CalcTextSize(text.c_str(), font, scale, opts.m_spacing);
+        else
+            return Internal::CalcTextSizeWrapped(text, font, &opts);
     }
 
     void Internal::FillRect_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts, int drawOrder)
@@ -2792,6 +2801,109 @@ namespace LinaVG
         return sourceBuffer;
     }
 
+    void Internal::ParseTextIntoWords(Array<TextWord>& arr, const std::string& text, LinaVGFont* font, float scale, float spacing)
+    {
+        TextWord tw;
+        bool     added = false;
+        for (auto x : text)
+        {
+            if (x == ' ')
+            {
+                if (added)
+                    arr.push_back(tw);
+                added     = false;
+                tw.m_size = Vec2(0.0f, 0.0f);
+                tw.m_word = "";
+            }
+            else
+            {
+                auto& ch    = font->m_characterGlyphs[x];
+                tw.m_size.y = Math::Max(tw.m_size.y, ch.m_size.y * scale);
+                tw.m_size.x += ch.m_advance.x * scale + spacing;
+                tw.m_word = tw.m_word + x;
+                added     = true;
+            }
+        }
+
+        arr.push_back(tw);
+    }
+
+    void Internal::ProcessText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing)
+    {
+        if (wrapWidth == 0.0f)
+        {
+            Vec2 size    = Internal::CalcTextSize(text.c_str(), font, scale, spacing);
+            Vec2 usedPos = pos;
+            usedPos.y += size.y;
+            if (alignment == TextAlignment::Center)
+                usedPos.x -= size.x / 2.0f;
+            else if (alignment == TextAlignment::Right)
+                usedPos.x -= size.x;
+            Internal::DrawText(buf, font, text.c_str(), usedPos, offset, color, spacing, isGradient, scale);
+        }
+        else
+        {
+            Array<TextWord> arr;
+            ParseTextIntoWords(arr, text, font, scale, spacing);
+
+            Vec2        usedPos      = pos;
+            float       totalWidth   = 0.0f;
+            std::string append       = "";
+            const int   wordCount    = arr.m_size;
+            float       maxHeight    = 0.0f;
+            const float spaceAdvance = font->m_spaceAdvance * scale;
+            bool        bumpedHeight = false;
+            for (int i = 0; i < wordCount; i++)
+            {
+                TextWord& w = arr[i];
+
+                if (totalWidth + spaceAdvance + w.m_size.x >= wrapWidth)
+                {
+                    if (i == 0)
+                        break;
+
+                    if (!bumpedHeight)
+                    {
+                        bumpedHeight = true;
+                        usedPos.y += maxHeight;
+                    }
+
+                    if (alignment == TextAlignment::Left)
+                        usedPos.x = pos.x;
+                    else if (alignment == TextAlignment::Center)
+                        usedPos.x = pos.x - totalWidth / 2.0f;
+                    else if (alignment == TextAlignment::Right)
+                        usedPos.x = pos.x - totalWidth;
+
+                    // render appended shit so far.
+                    Internal::DrawText(buf, font, append.c_str(), usedPos, offset, color, spacing, isGradient, scale);
+                    append     = w.m_word + " ";
+                    totalWidth = w.m_size.x + spaceAdvance;
+                    maxHeight  = 0.0f;
+                    usedPos.y += maxHeight + newLineSpacing;
+                }
+                else
+                {
+                    append += w.m_word + " ";
+                    totalWidth += w.m_size.x + spaceAdvance;
+                    maxHeight = Math::Max(maxHeight, w.m_size.y);
+                }
+            }
+
+            if (!bumpedHeight)
+                usedPos.y += maxHeight;
+
+            if (alignment == TextAlignment::Left)
+                usedPos.x = pos.x;
+            else if (alignment == TextAlignment::Center)
+                usedPos.x = pos.x - totalWidth / 2.0f;
+            else if (alignment == TextAlignment::Right)
+                usedPos.x = pos.x - totalWidth;
+
+            Internal::DrawText(buf, font, append.c_str(), usedPos, offset, color, spacing, isGradient, scale);
+        }
+    }
+
     // void Internal::DrawDebugFontAtlas(LinaVGFont* font)
     // {
     //     //  v0.m_pos = Vec2(300, 500);
@@ -2804,50 +2916,16 @@ namespace LinaVG
     //     //  v3.m_uv = Vec2(0.0f, 1.0f);
     // }
 
-    void Internal::DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, float spacing, float wrapWidth, bool isGradient, float scale, float rotateAngle, TextAlignment align)
+    void Internal::DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale)
     {
-        int            characterCount      = 0;
+        const uint8_t* c;
         const int      totalCharacterCount = Utility::GetTextCharacterSize(text);
         const int      bufStart            = buf->m_vertexBuffer.m_size;
-        const bool     useWrap             = wrapWidth != 0.0f;
+        Vec4           lastMinGrad         = color.m_start;
         Vec2           pos                 = position;
-        const uint8_t* c;
+        int            characterCount      = 0;
 
-
-        // Calculate first line height offset.
-        float firstLineMaxH = 0.0f;
-        float maxHCalcPosX  = pos.x;
-        float totalWidth = 0.0f;
-        for (c = (const uint8_t*)text; *c; c++)
-        {
-            auto& ch = font->m_characterGlyphs[*c];
-            float x  = maxHCalcPosX + ch.m_bearing.x * scale + ch.m_size.x * scale;
-            DrawPoint(Vec2(x, position.y), Vec4(1,0,0,1));
-
-
-            maxHCalcPosX += ch.m_advance.x * scale;
-            firstLineMaxH = Math::Max(firstLineMaxH, ch.m_size.y * scale);
-
-            totalWidth +=  ch.m_advance.x * scale;
-        }
-
-        DrawPoint(Vec2(position.x + totalWidth, position.y+5), Vec4(0,1,1,1));
-        pos.y += firstLineMaxH;
-
-        Vec4  lastMinGrad = color.m_start;
-        float usedSpacing = 0.0f;
-        float newLineY    = 0.0f;
-        bool  wrappedLast = false;
-
-        // Alignment offset.
-        float startPositionX = pos.x;
-        if (align == TextAlignment::Right)
-            startPositionX -= (maxHCalcPosX - pos.x);
-        else if (align == TextAlignment::Center)
-            startPositionX -= (maxHCalcPosX - pos.x) / 2.0f;
-        pos.x = startPositionX;
-
-        for (c = (const uint8_t*)text; *c; c++)
+        for (c = (uint8_t*)text; *c; c++)
         {
             auto&     ch         = font->m_characterGlyphs[*c];
             const int startIndex = buf->m_vertexBuffer.m_size;
@@ -2857,19 +2935,11 @@ namespace LinaVG
             float w  = ch.m_size.x * scale;
             float h  = ch.m_size.y * scale;
 
-            if (w == 0.0f || h == 0.0f)
-            {
-                if (!wrappedLast)
-                {
-                    pos.x += ch.m_advance.x * scale;
-                    pos.y += ch.m_advance.y * scale;
-                }
-                usedSpacing += spacing;
-                continue;
-            }
-
-            pos.x += ch.m_advance.x * scale;
+            pos.x += ch.m_advance.x * scale + spacing;
             pos.y += ch.m_advance.y * scale;
+
+            if (w == 0.0f || h == 0.0f)
+                continue;
 
             Vertex v0, v1, v2, v3;
 
@@ -2898,10 +2968,10 @@ namespace LinaVG
             else
                 v0.m_col = v1.m_col = v2.m_col = v3.m_col = color.m_start;
 
-            v0.m_pos = Vec2(x2 + usedSpacing + offset.x, y2 + offset.y + newLineY);
-            v1.m_pos = Vec2(x2 + usedSpacing + offset.x + w, y2 + offset.y + newLineY);
-            v2.m_pos = Vec2(x2 + usedSpacing + offset.x + w, y2 + h + offset.y + newLineY);
-            v3.m_pos = Vec2(x2 + usedSpacing + offset.x, y2 + h + offset.y + newLineY);
+            v0.m_pos = Vec2(x2 + offset.x, y2 + offset.y);
+            v1.m_pos = Vec2(x2 + offset.x + w, y2 + offset.y);
+            v2.m_pos = Vec2(x2 + offset.x + w, y2 + h + offset.y);
+            v3.m_pos = Vec2(x2 + offset.x, y2 + h + offset.y);
 
             v0.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y);
             v1.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y);
@@ -2920,104 +2990,75 @@ namespace LinaVG
             buf->PushIndex(startIndex + 2);
             buf->PushIndex(startIndex + 3);
             characterCount++;
-            usedSpacing += spacing;
-            wrappedLast = false;
-
-            if (useWrap && (v1.m_pos.x > position.x + wrapWidth + offset.x))
-            {
-                newLineY += (v3.m_pos.y - v0.m_pos.y) + 5.0f * Config.m_framebufferScale.x;
-                pos.x       = startPositionX;
-                usedSpacing = 0.0f;
-                wrappedLast = true;
-            }
         }
 
-        if (rotateAngle != 0.0f)
-        {
-            const Vec2 center = Internal::GetVerticesCenter(buf, bufStart, buf->m_vertexBuffer.m_size - 1);
-            Internal::RotateVertices(buf->m_vertexBuffer, center, bufStart, buf->m_vertexBuffer.m_size - 1, rotateAngle);
-        }
+        // if (rotateAngle != 0.0f)
+        // {
+        //     const Vec2 center = Internal::GetVerticesCenter(buf, bufStart, buf->m_vertexBuffer.m_size - 1);
+        //     Internal::RotateVertices(buf->m_vertexBuffer, center, bufStart, buf->m_vertexBuffer.m_size - 1, rotateAngle);
+        // }
     }
 
-    Vec2 Internal::CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing, float wrapping)
+    Vec2 Internal::CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing)
     {
-        const bool     useWrap = wrapping != 0.0f;
-        Vec2           pos     = Vec2(0.0f, 0.0f);
+        float          maxCharacterHeight = 0.0f;
+        float          totalWidth         = 0.0f;
         const uint8_t* c;
 
-        float firstLineMaxH = 0.0f;
-        float maxHCalcPosX  = pos.x;
+        // Iterate through the whole text and determine max width & height
+        // As well as line breaks based on wrapping.
         for (c = (const uint8_t*)text; *c; c++)
         {
             auto& ch = font->m_characterGlyphs[*c];
-            float x  = maxHCalcPosX + ch.m_bearing.x * scale + ch.m_size.x * scale;
-
-            if (useWrap && x - pos.x > wrapping)
-                break;
-
-            maxHCalcPosX += ch.m_advance.x * scale;
-            firstLineMaxH = Math::Max(firstLineMaxH, ch.m_size.y * scale);
+            totalWidth += ch.m_advance.x * scale + spacing;
+            maxCharacterHeight = Math::Max(maxCharacterHeight, ch.m_size.y * scale);
         }
 
-        pos.y += firstLineMaxH;
+        return Vec2(totalWidth, maxCharacterHeight);
+    }
 
-        float usedSpacing         = 0.0f;
-        float newLineY            = 0.0f;
-        bool  wrappedLast         = false;
-        Vec2  position            = Vec2(0.0f, 0.0f);
-        bool  wrapReached         = false;
-        int   characterCount      = 0;
-        int   totalCharacterCount = Utility::GetTextCharacterSize(text);
-        float firstY              = 0.0f;
-        float lastY               = 0.0f;
-        for (c = (const uint8_t*)text; *c; c++)
+    Vec2 Internal::CalcTextSizeWrapped(const std::string& text, LinaVGFont* font, TextOptions* opts)
+    {
+        Array<TextWord> arr;
+        ParseTextIntoWords(arr, text, font, opts->m_textScale, opts->m_spacing);
+
+        Vec2        usedPos      = Vec2(0.0f, 0.0f);
+        float       totalWidth   = 0.0f;
+        const int   wordCount    = arr.m_size;
+        float       maxHeight    = 0.0f;
+        const float spaceAdvance = font->m_spaceAdvance * opts->m_textScale;
+        bool        bumpedHeight = false;
+        for (int i = 0; i < wordCount; i++)
         {
-            auto& ch = font->m_characterGlyphs[*c];
+            TextWord& w = arr[i];
 
-            float x2 = pos.x + ch.m_bearing.x * scale;
-            float y2 = pos.y - ch.m_bearing.y * scale;
-            float w  = ch.m_size.x * scale;
-            float h  = ch.m_size.y * scale;
-
-            if (w == 0.0f || h == 0.0f)
+            if (totalWidth + spaceAdvance + w.m_size.x >= opts->m_wrapWidth)
             {
-                if (!wrappedLast)
+                if (i == 0)
+                    break;
+
+                if (!bumpedHeight)
                 {
-                    pos.x += ch.m_advance.x * scale;
-                    pos.y += ch.m_advance.y * scale;
+                    bumpedHeight = true;
+                    usedPos.y += maxHeight;
                 }
-                usedSpacing += spacing;
-                characterCount++;
-                continue;
+
+                usedPos.x  = Math::Max(usedPos.x, totalWidth - spaceAdvance);
+                totalWidth = w.m_size.x + spaceAdvance;
+                maxHeight  = 0.0f;
+                usedPos.y += maxHeight + opts->m_newLineSpacing;
             }
-
-            pos.x += ch.m_advance.x * scale;
-            pos.y += ch.m_advance.y * scale;
-
-            Vec2 v1 = Vec2(x2 + usedSpacing + w, y2 + newLineY);
-            Vec2 v2 = Vec2(x2 + usedSpacing + w, y2 + h + newLineY);
-
-            if (characterCount == 0)
-                firstY = v1.y;
-            else if (characterCount == totalCharacterCount - 2)
-                lastY = v2.y;
-
-            usedSpacing += spacing;
-            wrappedLast = false;
-
-            if (useWrap && (v1.x > position.x + wrapping))
+            else
             {
-                newLineY += (v2.y - v1.y) + 5.0f * Config.m_framebufferScale.x;
-                pos.x       = position.x;
-                usedSpacing = 0.0f;
-                wrappedLast = true;
-                wrapReached = true;
+                totalWidth += w.m_size.x + spaceAdvance;
+                maxHeight = Math::Max(maxHeight, w.m_size.y);
             }
-
-            characterCount++;
         }
 
-        return Vec2(wrapReached ? wrapping : pos.x, lastY - firstY);
+        if (!bumpedHeight)
+            usedPos.y += maxHeight;
+
+        return usedPos;
     }
 
 } // namespace LinaVG

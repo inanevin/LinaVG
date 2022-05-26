@@ -422,6 +422,11 @@ namespace LinaVG
         float m_spacing = 0.0f;
 
         /// <summary>
+        /// Spacing used if the text is word-wrapped and dropped to a new line.
+        /// </summary>
+        float m_newLineSpacing = 0.0f;
+
+        /// <summary>
         /// Text will wrap at, e.g. go to a new line when it reaches = position.x + m_wrapWidth
         /// </summary>
         float m_wrapWidth = 0.0f;
@@ -436,6 +441,7 @@ namespace LinaVG
         /// Set to 0.0f, 0.0f to disable drop-shadows.
         /// </summary>
         Vec2 m_dropShadowOffset = Vec2(0.0f, 0.0f);
+
     };
 
     LINAVG_API struct SDFTextOptions : public TextOptions

@@ -65,7 +65,7 @@ namespace LinaVG
             style.m_rounding         = 0.2f;
             style.m_onlyRoundTheseCorners.push_back(0);
             style.m_onlyRoundTheseCorners.push_back(3);
-          //  LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.17f), style, 0.0f, 1);
+            //  LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.17f), style, 0.0f, 1);
             style.m_onlyRoundTheseCorners.clear();
 
             // Draw stats texts.
@@ -74,7 +74,7 @@ namespace LinaVG
             const std::string vertexCountStr   = "Vertex Count: " + std::to_string(vertexCount);
             const std::string frameTimeStr     = "Frame: " + std::to_string(ExampleApp::Get()->GetFrameTimeRead()) + " ms";
             const std::string fpsStr           = "FPS: " + std::to_string(ExampleApp::Get()->GetFPS()) + " " + frameTimeStr;
-        
+
             Vec2        textPosition = Vec2(statsWindowX + 10, statsWindowY + 15);
             TextOptions textStyle;
             textStyle.m_textScale = 0.6f;
@@ -85,13 +85,20 @@ namespace LinaVG
             // LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
             // textPosition.y += 25;
             // LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
-            // 
-            // textStyle.m_alignment = TextAlignment::Center;
-            // textStyle.m_wrapWidth = 50;
-            LinaVG::DrawTextNormal("Selamun aleykum bababaaaaaaaa", Vec2(screenSize.x * 0.5f, screenSize.y / 2.0f), textStyle, 0, 2);
+            //
+            // textStyle.m_spacing = 12;
+            textStyle.m_alignment      = TextAlignment::Center;
+            textStyle.m_wrapWidth      = 140;
+            textStyle.m_newLineSpacing = 15.0f;
+            Vec2 size                  = LinaVG::CalculateTextSize("This is a wrapped text, sick of exampl heh.", textStyle);
+            Vec2 dp                    = Vec2(1000, 500);
+            LinaVG::DrawTextNormal("This is a wrapped text, sick of exampl heh.", dp, textStyle, 0, 2);
 
-           DrawPoint(Vec2(screenSize.x * 0.5f, screenSize.y / 2.0f), Vec4(1,1,1,1));
-          // Draw semi-transparent black rectangle on the bottom of the screen.
+            DrawPoint(Vec2(dp.x - size.x / 2.0f, dp.y), Vec4(1, 1, 1, 1));
+
+            DrawPoint(Vec2(dp.x + size.x / 2.0f, dp.y + size.y), Vec4(1, 1, 0, 1));
+
+            // Draw semi-transparent black rectangle on the bottom of the screen.
             style.m_color    = Vec4(0, 0, 0, 0.5f);
             style.m_rounding = 0.0f;
             LinaVG::DrawRect(Vec2(0.0f, screenSize.y - screenSize.y * 0.1f), screenSize, style, 0.0f, 1);
