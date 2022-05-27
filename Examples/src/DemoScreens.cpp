@@ -42,7 +42,7 @@ namespace LinaVG
 
         void DemoScreens::Initialize()
         {
-            defaultFont                  = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 28);
+            defaultFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 28);
         }
 
         /// <summary>
@@ -54,21 +54,21 @@ namespace LinaVG
             StyleOptions style;
 
             // Draw background gradient.
-            style.m_color.m_start        = Vec4(0.55f, 0.772, 0.988f, 1.0f);
-            style.m_color.m_end          = Vec4(0.995f, 0.764f, 0.988f, 1.0f);
-            style.m_color.m_gradientType = LinaVG::GradientType::Vertical;
-            style.m_isFilled             = true;
-            LinaVG::DrawRect(Vec2(0.0f, 0.0f), screenSize, style, 0.0f, 0);
+         //   style.m_color.m_start        = Vec4(0.55f, 0.772, 0.988f, 1.0f);
+         //   style.m_color.m_end          = Vec4(0.995f, 0.764f, 0.988f, 1.0f);
+         //   style.m_color.m_gradientType = LinaVG::GradientType::Vertical;
+         //   style.m_isFilled             = true;
+         //   LinaVG::DrawRect(Vec2(0.0f, 0.0f), screenSize, style, 0.0f, 0);
 
             // Draw stats window.
-            const float statsWindowX = screenSize.x - screenSize.x * 0.18f;
-            const float statsWindowY = screenSize.y * 0.05f;
-            style.m_color            = Vec4(0, 0, 0, 0.5f);
-            style.m_rounding         = 0.2f;
-            style.m_onlyRoundTheseCorners.push_back(0);
-            style.m_onlyRoundTheseCorners.push_back(3);
-            //  LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.17f), style, 0.0f, 1);
-            style.m_onlyRoundTheseCorners.clear();
+        //   const float statsWindowX = screenSize.x - screenSize.x * 0.18f;
+        //   const float statsWindowY = screenSize.y * 0.05f;
+        //   style.m_color            = Vec4(0, 0, 0, 0.5f);
+        //   style.m_rounding         = 0.2f;
+        //   style.m_onlyRoundTheseCorners.push_back(0);
+        //   style.m_onlyRoundTheseCorners.push_back(3);
+        //   LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.17f), style, 0.0f, 1);
+        //   style.m_onlyRoundTheseCorners.clear();
 
             // Draw stats texts.
             const std::string drawCountStr     = "Draw Count: " + std::to_string(drawCount);
@@ -77,50 +77,16 @@ namespace LinaVG
             const std::string frameTimeStr     = "Frame: " + std::to_string(ExampleApp::Get()->GetFrameTimeRead()) + " ms";
             const std::string fpsStr           = "FPS: " + std::to_string(ExampleApp::Get()->GetFPS()) + " " + frameTimeStr;
 
-            Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 15);
-            SDFTextOptions textStyle;
-            textStyle.m_textScale = 0.6f;
-            // LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-            // textPosition.y += 25;
-            // LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-            // textPosition.y += 25;
-            // LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-            // textPosition.y += 25;
-            // LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
-            //
-            // textStyle.m_spacing = 12;
-            // textStyle.m_sdfThickness = 0.55f;
-            // textStyle.m_sdfOutlineThickness = 0.0f;
-            textStyle.m_alignment      = TextAlignment::Left;
-          //  textStyle.m_wrapWidth      = 100;
-         //   textStyle.m_newLineSpacing = 15.0f;
-
-            // textStyle.m_spacing = 45;
-            // textStyle.m_sdfOutlineThickness = 0.03f;
-            textStyle.m_color.m_start = Vec4(1, 0, 0, 1);
-            textStyle.m_color.m_end   = Vec4(1, 1, 0, 1);
-            Vec2 size                 = LinaVG::CalculateTextSize("agabum This is a wrapped text, sick of examples heh.", textStyle);
-            Vec2 dp                   = Vec2(1000, 500);
-            LinaVG::DrawTextNormal("aq", dp, textStyle, 0, 2);
-            LinaVG::Internal::DrawDebugFontAtlas(Vec2(300, 300), textStyle.m_font);
-
-            StyleOptions opts;
-            opts.m_isFilled = true;
-            
-            Config.m_clipPosX = 300;
-            Config.m_clipPosY = 400;
-            Config.m_clipSizeX = 300;
-            Config.m_clipSizeY = 300;
-            LinaVG::DrawRect(Vec2(300, 400), Vec2(600, 700), opts);
-            opts.m_color = Vec4(0,0,0,1);
-            LinaVG::DrawRect(Vec2(450, 450), Vec2(750, 650), opts, 0, 1);
-            Config.m_clipPosX = 0;
-            Config.m_clipPosY = 0;
-            Config.m_clipSizeX = 0;
-            Config.m_clipSizeY = 0;
-
-            LinaVG::DrawRect(Vec2(800, 400), Vec2(1100, 700), opts);
-
+        //    Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 15);
+        //    SDFTextOptions textStyle;
+        //    textStyle.m_textScale = 0.6f;
+        //    LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+        //    textPosition.y += 25;
+        //    LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+        //    textPosition.y += 25;
+        //    LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+        //    textPosition.y += 25;
+        //    LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
 
             // Draw semi-transparent black rectangle on the bottom of the screen.
             style.m_color    = Vec4(0, 0, 0, 0.5f);
