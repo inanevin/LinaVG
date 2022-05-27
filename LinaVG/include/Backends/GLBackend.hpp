@@ -41,8 +41,16 @@ Timestamp: 3/24/2022 11:33:52 PM
 // Headers here.
 #include "Core/Common.hpp"
 
+namespace LinaVG
+{
+    namespace Internal
+    {
+        class ShaderData;
+    }
+} // namespace LinaVG
 namespace LinaVG::Backend
 {
+
     struct GLState
     {
         bool m_blendEnabled       = false;
@@ -67,16 +75,15 @@ namespace LinaVG::Backend
     void DrawDefault(DrawBuffer* buf);
     void DrawSimpleText(SimpleTextDrawBuffer* buf);
     void DrawSDFText(SDFTextDrawBuffer* buf);
-
+    void SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height);
     void EndFrame();
 
     void                      SaveAPIState();
     void                      RestoreAPIState();
-    void                      BindVAO(BackendHandle vao);
-    void                      AddShaderUniforms(BackendHandle shader);
+    void                      AddShaderUniforms(Internal::ShaderData& data);
     BackendHandle             CreateFontTexture(int width, int height);
     void                      BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, void* data);
-    BackendHandle             CreateShader(const char* vert, const char* frag);
+    void                      CreateShader(Internal::ShaderData& data, const char* vert, const char* frag);
     BackendHandle             GenerateFontTexture(int width, int height, void* data);
     extern LINAVG_API GLState g_glState;
 } // namespace LinaVG::Backend

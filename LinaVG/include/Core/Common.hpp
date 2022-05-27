@@ -40,13 +40,19 @@ Timestamp: 3/26/2022 10:36:46 AM
 #define LinaVGCommon_HPP
 
 // Headers here.
-#include <iostream>
-#include <sstream>
 #include <functional>
-#include <unordered_map>
 
 namespace LinaVG
 {
+
+#define LINAVG_STRING std::string
+#include <unordered_map>
+#define LINAVG_MAP     std::unordered_map
+#define LINAVG_MEMCPY  std::memcpy
+#define LINAVG_MEMMOVE std::memmove
+#define LINAVG_MALLOC  std::malloc
+#define LINAVG_FREE    std::free
+
 #define LVG_RAD2DEG 57.2957f
 #define LVG_DEG2RAD 0.0174533f
 #define LINAVG_API  // TODO
@@ -113,13 +119,6 @@ namespace LinaVG
 
         float x = 0.0f;
         float y = 0.0f;
-
-        std::string ToString() const
-        {
-            std::stringstream ss;
-            ss << "X:" << x << "   Y:" << y;
-            return ss.str();
-        }
     };
 
     LINAVG_API struct ThicknessGrad
@@ -176,7 +175,7 @@ namespace LinaVG
             if (m_data)
             {
                 m_size = m_capacity = m_lastSize = 0;
-                std::free(m_data);
+                LINAVG_FREE(m_data);
                 m_data = nullptr;
             }
         }
@@ -220,7 +219,7 @@ namespace LinaVG
                 reserve(growCapacity(newSize));
             if (newSize > m_size)
                 for (int n = m_size; n < newSize; n++)
-                    std::memcpy(&m_data[n], &v, sizeof(v));
+                    LINAVG_MEMCPY(&m_data[n], &v, sizeof(v));
             m_size = newSize;
         }
 
@@ -228,13 +227,13 @@ namespace LinaVG
         {
             if (newCapacity < m_capacity)
                 return;
-            T* newData = (T*)std::malloc((size_t)newCapacity * sizeof(T));
+            T* newData = (T*)LINAVG_MALLOC((size_t)newCapacity * sizeof(T));
 
             if (m_data)
             {
                 if (newData != 0)
-                    std::memcpy(newData, m_data, (size_t)m_size * sizeof(T));
-                std::free(m_data);
+                    LINAVG_MEMCPY(newData, m_data, (size_t)m_size * sizeof(T));
+                LINAVG_FREE(m_data);
             }
             m_data     = newData;
             m_capacity = newCapacity;
@@ -250,7 +249,7 @@ namespace LinaVG
         {
             checkGrow();
             auto s = sizeof(v);
-            std::memcpy(&m_data[m_size], &v, s);
+            LINAVG_MEMCPY(&m_data[m_size], &v, s);
             m_size++;
             return last();
         }
@@ -441,7 +440,6 @@ namespace LinaVG
         /// Set to 0.0f, 0.0f to disable drop-shadows.
         /// </summary>
         Vec2 m_dropShadowOffset = Vec2(0.0f, 0.0f);
-
     };
 
     LINAVG_API struct SDFTextOptions : public TextOptions
@@ -581,6 +579,11 @@ namespace LinaVG
 
     LINAVG_API struct Configuration
     {
+        BackendHandle m_clipPosX  = 0;
+        BackendHandle m_clipPosY  = 0;
+        BackendHandle m_clipSizeX = 0;
+        BackendHandle m_clipSizeY = 0;
+
         /// <summary>
         /// Set this to your application's display pos (viewport pos).
         /// </summary>
@@ -656,12 +659,12 @@ namespace LinaVG
         /// <summary>
         /// Set this to your own function to receive error callbacks from LinaVG.
         /// </summary>
-        std::function<void(const std::string&)> m_errorCallback;
+        std::function<void(const LINAVG_STRING&)> m_errorCallback;
 
         /// <summary>
         /// Set this to your own function to receive log callbacks from LinaVG.
         /// </summary>
-        std::function<void(const std::string&)> m_logCallback;
+        std::function<void(const LINAVG_STRING&)> m_logCallback;
 
         /// <summary>
         /// For debugging purposes, sets to draw polygon/wireframe mode.
@@ -720,13 +723,28 @@ namespace LinaVG
     {
         DrawBuffer(){};
         DrawBuffer(int drawOrder, DrawBufferType type, DrawBufferShapeType shapeType)
-            : m_drawOrder(drawOrder), m_drawBufferType(type), m_shapeType(shapeType){};
+            : m_drawOrder(drawOrder), m_drawBufferType(type), m_shapeType(shapeType)
+        {
+            m_clipPosX  = Config.m_clipPosX;
+            m_clipPosY  = Config.m_clipPosY;
+            m_clipSizeX = Config.m_clipSizeX;
+            m_clipSizeY = Config.m_clipSizeY;
+        };
 
         Array<Vertex>       m_vertexBuffer;
         Array<Index>        m_indexBuffer;
         int                 m_drawOrder      = -1;
         DrawBufferType      m_drawBufferType = DrawBufferType::Default;
         DrawBufferShapeType m_shapeType      = DrawBufferShapeType::Shape;
+        BackendHandle       m_clipPosX       = 0;
+        BackendHandle       m_clipPosY       = 0;
+        BackendHandle       m_clipSizeX      = 0;
+        BackendHandle       m_clipSizeY      = 0;
+
+        bool IsClipDifferent(BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+        {
+            return (m_clipPosX != clipPosX || m_clipPosY != clipPosY || m_clipSizeX != clipSizeX || m_clipSizeY != clipSizeY);
+        }
 
         inline void Clear()
         {

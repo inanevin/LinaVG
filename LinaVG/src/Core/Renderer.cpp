@@ -90,8 +90,7 @@ namespace LinaVG
     void Render()
     {
 
-        auto& renderBuffs = [](int drawOrder, DrawBufferShapeType shapeType)
-        {
+        auto& renderBuffs = [](int drawOrder, DrawBufferShapeType shapeType) {
             for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
             {
                 DrawBuffer& buf = Internal::g_rendererData.m_defaultBuffers[i];
@@ -143,8 +142,6 @@ namespace LinaVG
             renderBuffs(drawOrder, DrawBufferShapeType::Outline);
             renderBuffs(drawOrder, DrawBufferShapeType::AA);
         }
-
-        
     }
 
     void EndFrame()
@@ -220,7 +217,7 @@ namespace LinaVG
         for (int i = 0; i < m_gradientBuffers.m_size; i++)
         {
             auto& buf = m_gradientBuffers[i];
-            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.m_start, grad.m_start) && Math::IsEqual(buf.m_color.m_end, grad.m_end) && buf.m_color.m_gradientType == grad.m_gradientType)
+            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.m_start, grad.m_start) && Math::IsEqual(buf.m_color.m_end, grad.m_end) && buf.m_color.m_gradientType == grad.m_gradientType && !buf.IsClipDifferent(Config.m_clipPosX, Config.m_clipPosY, Config.m_clipSizeX, Config.m_clipSizeY))
             {
                 if (grad.m_gradientType == GradientType::Radial || grad.m_gradientType == GradientType::RadialCorner)
                 {
@@ -246,7 +243,7 @@ namespace LinaVG
         for (int i = 0; i < m_defaultBuffers.m_size; i++)
         {
             auto& buf = m_defaultBuffers[i];
-            if (m_defaultBuffers[i].m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
+            if (m_defaultBuffers[i].m_drawOrder == drawOrder && buf.m_shapeType == shapeType && !buf.IsClipDifferent(Config.m_clipPosX, Config.m_clipPosY, Config.m_clipSizeX, Config.m_clipSizeY))
                 return m_defaultBuffers[i];
         }
 
@@ -262,7 +259,7 @@ namespace LinaVG
         for (int i = 0; i < m_textureBuffers.m_size; i++)
         {
             auto& buf = m_textureBuffers[i];
-            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer)
+            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(Config.m_clipPosX, Config.m_clipPosY, Config.m_clipSizeX, Config.m_clipSizeY))
                 return m_textureBuffers[i];
         }
 
@@ -277,7 +274,7 @@ namespace LinaVG
         for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
         {
             auto& buf = m_simpleTextBuffers[i];
-            if (buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle)
+            if (buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && !buf.IsClipDifferent(Config.m_clipPosX, Config.m_clipPosY, Config.m_clipSizeX, Config.m_clipSizeY))
                 return m_simpleTextBuffers[i];
         }
 
@@ -293,7 +290,7 @@ namespace LinaVG
         {
             auto& buf = m_sdfTextBuffers[i];
             if (buf.m_isDropShadow == isDropShadow && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && buf.m_thickness == opts.m_sdfThickness && buf.m_softness == opts.m_sdfSoftness &&
-                buf.m_outlineThickness == opts.m_sdfOutlineThickness && buf.m_flipAlpha == opts.m_flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.m_sdfOutlineColor))
+                buf.m_outlineThickness == opts.m_sdfOutlineThickness && buf.m_flipAlpha == opts.m_flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.m_sdfOutlineColor) && !buf.IsClipDifferent(Config.m_clipPosX, Config.m_clipPosY, Config.m_clipSizeX, Config.m_clipSizeY))
                 return m_sdfTextBuffers[i];
         }
 

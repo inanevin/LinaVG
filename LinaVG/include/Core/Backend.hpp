@@ -48,32 +48,38 @@ Timestamp: 3/28/2022 2:55:16 PM
 
 namespace LinaVG::Internal
 {
+    class ShaderData
+    {
+    public:
+        BackendHandle                            m_handle = 0;
+        LINAVG_MAP<LINAVG_STRING, BackendHandle> m_uniformMap;
+    };
+
     /// <summary>
     /// Rendering data for various backends.
     /// </summary>
     struct BackendData
     {
-        BackendHandle                                                                     m_vbo                    = 0;
-        BackendHandle                                                                     m_vao                    = 0;
-        BackendHandle                                                                     m_ebo                    = 0;
-        BackendHandle                                                                     m_textVBO                = 0;
-        BackendHandle                                                                     m_textVAO                = 0;
-        BackendHandle                                                                     m_textEBO                = 0;
-        BackendHandle                                                                     m_boundVAO               = 0;
-        BackendHandle                                                                     m_defaultShaderHandle    = 0;
-        BackendHandle                                                                     m_gradientShaderHandle   = 0;
-        BackendHandle                                                                     m_texturedShaderHandle   = 0;
-        BackendHandle                                                                     m_sdfTextShaderHandle    = 0;
-        BackendHandle                                                                     m_simpleTextShaderHandle = 0;
-        std::unordered_map<BackendHandle, std::unordered_map<std::string, BackendHandle>> m_shaderUniformMap;
-        float                                                                             m_proj[4][4]                = {0};
-        char*                                                                             m_defaultVtxShader          = nullptr;
-        char*                                                                             m_defaultFragShader         = nullptr;
-        char*                                                                             m_roundedGradientFragShader = nullptr;
-        char*                                                                             m_texturedFragShader        = nullptr;
-        char*                                                                             m_sdfTextFragShader         = nullptr;
-        char*                                                                             m_simpleTextFragShader      = nullptr;
-        bool                                                                              m_skipDraw                  = false;
+        BackendHandle m_vbo = 0;
+        BackendHandle m_vao = 0;
+        BackendHandle m_ebo = 0;
+        ShaderData    m_defaultShaderData;
+        ShaderData    m_gradientShaderData;
+        ShaderData    m_texturedShaderData;
+        ShaderData    m_sdfTextShaderData;
+        ShaderData    m_simpleTextShaderData;
+        float         m_proj[4][4]                = {0};
+        char*         m_defaultVtxShader          = nullptr;
+        char*         m_defaultFragShader         = nullptr;
+        char*         m_roundedGradientFragShader = nullptr;
+        char*         m_texturedFragShader        = nullptr;
+        char*         m_sdfTextFragShader         = nullptr;
+        char*         m_simpleTextFragShader      = nullptr;
+        bool          m_skipDraw                  = false;
+        BackendHandle m_lastClipPosX              = 0;
+        BackendHandle m_lastClipPosY              = 0;
+        BackendHandle m_lastClipSizeX             = 0;
+        BackendHandle m_lastClipSizeY             = 0;
     };
 
     extern LINAVG_API BackendData g_backendData;

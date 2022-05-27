@@ -27,8 +27,10 @@ SOFTWARE.
 */
 
 #include "DemoScreens.hpp"
+#define LINAVG_CUSTOM_MALLOC std::malloc
 #include "Main.hpp"
 #include "LinaVG.hpp"
+#include <string>
 
 namespace LinaVG
 {
@@ -40,9 +42,7 @@ namespace LinaVG
 
         void DemoScreens::Initialize()
         {
-           // GlyphEncoding customRanges[] = {0x015F, 0x015F, 0x011F, 0x011F, 0x0411, 0x0411, 0x25c0, 0x25c0, 0x00E7, 0x00E7 };
-            defaultFont                  = LinaVG::LoadFont("Resources/Fonts/NotoSansJP-Regular.otf", false, 28);
-            //Config.m_useUnicodeEncoding = true;
+            defaultFont                  = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 28);
         }
 
         /// <summary>
@@ -92,21 +92,35 @@ namespace LinaVG
             // textStyle.m_sdfThickness = 0.55f;
             // textStyle.m_sdfOutlineThickness = 0.0f;
             textStyle.m_alignment      = TextAlignment::Left;
-            textStyle.m_wrapWidth      = 100;
-            textStyle.m_newLineSpacing = 15.0f;
+          //  textStyle.m_wrapWidth      = 100;
+         //   textStyle.m_newLineSpacing = 15.0f;
 
             // textStyle.m_spacing = 45;
             // textStyle.m_sdfOutlineThickness = 0.03f;
             textStyle.m_color.m_start = Vec4(1, 0, 0, 1);
             textStyle.m_color.m_end   = Vec4(1, 1, 0, 1);
-            Vec2 size                 = LinaVG::CalculateTextSize("çaşabum This is a wrapped text, sick of examples heh.", textStyle);
+            Vec2 size                 = LinaVG::CalculateTextSize("agabum This is a wrapped text, sick of examples heh.", textStyle);
             Vec2 dp                   = Vec2(1000, 500);
-            LinaVG::DrawTextNormal("Finall q", dp, textStyle, 0, 2);
+            LinaVG::DrawTextNormal("aq", dp, textStyle, 0, 2);
             LinaVG::Internal::DrawDebugFontAtlas(Vec2(300, 300), textStyle.m_font);
 
-            DrawPoint(Vec2(dp.x, dp.y), Vec4(1, 1, 1, 1));
+            StyleOptions opts;
+            opts.m_isFilled = true;
+            
+            Config.m_clipPosX = 300;
+            Config.m_clipPosY = 400;
+            Config.m_clipSizeX = 300;
+            Config.m_clipSizeY = 300;
+            LinaVG::DrawRect(Vec2(300, 400), Vec2(600, 700), opts);
+            opts.m_color = Vec4(0,0,0,1);
+            LinaVG::DrawRect(Vec2(450, 450), Vec2(750, 650), opts, 0, 1);
+            Config.m_clipPosX = 0;
+            Config.m_clipPosY = 0;
+            Config.m_clipSizeX = 0;
+            Config.m_clipSizeY = 0;
 
-            DrawPoint(Vec2(dp.x + size.x, dp.y + size.y), Vec4(0, 0, 0, 1));
+            LinaVG::DrawRect(Vec2(800, 400), Vec2(1100, 700), opts);
+
 
             // Draw semi-transparent black rectangle on the bottom of the screen.
             style.m_color    = Vec4(0, 0, 0, 0.5f);

@@ -73,7 +73,7 @@ namespace LinaVG
     LINAVG_API FontHandle LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize)
     {
         FT_Face face;
-        if (FT_New_Memory_Face(Internal::g_textData.m_ftlib, static_cast<FT_Byte*>(data), dataSize, 0, &face))
+        if (FT_New_Memory_Face(Internal::g_textData.m_ftlib, static_cast<FT_Byte*>(data),static_cast<FT_Long>(dataSize), 0, &face))
         {
             Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
             return -1;
@@ -168,7 +168,7 @@ namespace LinaVG
                     else
                     {
                         for (FT_ULong c = customRanges[index]; c < customRanges[index + 1]; c++)
-                            setSizes(customRanges[index]);
+                            setSizes(c);
                     }
                     index += 2;
                 }
@@ -235,7 +235,7 @@ namespace LinaVG
                     else
                     {
                         for (FT_ULong c = customRanges[index]; c < customRanges[index + 1]; c++)
-                            generateTextures(customRanges[index]);
+                            generateTextures(c);
                     }
                     index += 2;
                 }

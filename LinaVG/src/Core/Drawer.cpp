@@ -32,11 +32,8 @@ SOFTWARE.
 #include "Core/Backend.hpp"
 #include "Core/Text.hpp"
 #include "Utility/Utility.hpp"
-#include <iostream>
-#include <stdio.h>
-#include <string>
 #include <codecvt> // for std::codecvt_utf8
-#include <locale>  // for std::wstring_convert
+
 namespace LinaVG
 {
     RectOverrideData g_rectOverrideData;
@@ -668,7 +665,7 @@ namespace LinaVG
         }
     }
 
-    LINAVG_API void DrawTextSDF(const std::string& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder)
+    LINAVG_API void DrawTextSDF(const LINAVG_STRING& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
@@ -695,7 +692,7 @@ namespace LinaVG
         }
     }
 
-    void DrawTextNormal(const std::string& text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder)
+    void DrawTextNormal(const LINAVG_STRING& text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
@@ -717,7 +714,7 @@ namespace LinaVG
         }
     }
 
-    LINAVG_API Vec2 CalculateTextSize(const std::string& text, TextOptions& opts)
+    LINAVG_API Vec2 CalculateTextSize(const LINAVG_STRING& text, TextOptions& opts)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
@@ -729,7 +726,7 @@ namespace LinaVG
             return Internal::CalcTextSizeWrapped(text, font, &opts);
     }
 
-    LINAVG_API Vec2 CalculateTextSize(const std::string& text, SDFTextOptions& opts)
+    LINAVG_API Vec2 CalculateTextSize(const LINAVG_STRING& text, SDFTextOptions& opts)
     {
         FontHandle  fontHandle = opts.m_font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.m_font - 1 ? opts.m_font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
@@ -2803,7 +2800,7 @@ namespace LinaVG
         return sourceBuffer;
     }
 
-    void Internal::ParseTextIntoWords(Array<TextWord>& arr, const std::string& text, LinaVGFont* font, float scale, float spacing)
+    void Internal::ParseTextIntoWords(Array<TextWord>& arr, const LINAVG_STRING& text, LinaVGFont* font, float scale, float spacing)
     {
         TextWord tw;
         bool     added = false;
@@ -2830,7 +2827,7 @@ namespace LinaVG
         arr.push_back(tw);
     }
 
-    void Internal::ProcessText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing)
+    void Internal::ProcessText(DrawBuffer* buf, LinaVGFont* font, const LINAVG_STRING& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing)
     {
         const int bufStart = buf->m_vertexBuffer.m_size;
 
@@ -2850,13 +2847,13 @@ namespace LinaVG
             Array<TextWord> arr;
             ParseTextIntoWords(arr, text, font, scale, spacing);
 
-            Vec2        usedPos      = pos;
-            float       totalWidth   = 0.0f;
-            std::string append       = "";
-            const int   wordCount    = arr.m_size;
-            float       maxHeight    = 0.0f;
-            const float spaceAdvance = font->m_spaceAdvance * scale;
-            bool        bumpedHeight = false;
+            Vec2          usedPos      = pos;
+            float         totalWidth   = 0.0f;
+            LINAVG_STRING append       = "";
+            const int     wordCount    = arr.m_size;
+            float         maxHeight    = 0.0f;
+            const float   spaceAdvance = font->m_spaceAdvance * scale;
+            bool          bumpedHeight = false;
             for (int i = 0; i < wordCount; i++)
             {
                 TextWord& w = arr[i];
@@ -3018,9 +3015,13 @@ namespace LinaVG
 
         if (Config.m_useUnicodeEncoding)
         {
+// _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#pragma warning(disable : 4996)
+
             std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
             auto                                                        str32 = cv.from_bytes(text);
-            std::u32string::iterator it;
+            std::u32string::iterator                                    it;
+
             for (it = str32.begin(); it < str32.end(); it++)
             {
                 auto& ch = font->m_characterGlyphs[*it];
@@ -3035,7 +3036,6 @@ namespace LinaVG
                 drawChar(ch);
             }
         }
-     
     }
 
     Vec2 Internal::CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing)
@@ -3056,7 +3056,7 @@ namespace LinaVG
         return Vec2(totalWidth, maxCharacterHeight);
     }
 
-    Vec2 Internal::CalcTextSizeWrapped(const std::string& text, LinaVGFont* font, TextOptions* opts)
+    Vec2 Internal::CalcTextSizeWrapped(const LINAVG_STRING& text, LinaVGFont* font, TextOptions* opts)
     {
         Array<TextWord> arr;
         ParseTextIntoWords(arr, text, font, opts->m_textScale, opts->m_spacing);

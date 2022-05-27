@@ -149,11 +149,11 @@ namespace LinaVG::Backend
 
         try
         {
-            Internal::g_backendData.m_defaultShaderHandle    = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_defaultFragShader);
-            Internal::g_backendData.m_gradientShaderHandle   = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_roundedGradientFragShader);
-            Internal::g_backendData.m_texturedShaderHandle   = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_texturedFragShader);
-            Internal::g_backendData.m_simpleTextShaderHandle = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_simpleTextFragShader);
-            Internal::g_backendData.m_sdfTextShaderHandle    = CreateShader(Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_sdfTextFragShader);
+            CreateShader(Internal::g_backendData.m_defaultShaderData, Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_defaultFragShader);
+            CreateShader(Internal::g_backendData.m_gradientShaderData, Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_roundedGradientFragShader);
+            CreateShader(Internal::g_backendData.m_texturedShaderData, Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_texturedFragShader);
+            CreateShader(Internal::g_backendData.m_simpleTextShaderData, Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_simpleTextFragShader);
+            CreateShader(Internal::g_backendData.m_sdfTextShaderData, Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_sdfTextFragShader);
         }
         catch (const std::runtime_error& err)
         {
@@ -181,14 +181,14 @@ namespace LinaVG::Backend
         glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(4 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
-        glGenVertexArrays(1, &Internal::g_backendData.m_textVAO);
-        glGenBuffers(1, &Internal::g_backendData.m_textVBO);
-        glGenBuffers(1, &Internal::g_backendData.m_textEBO);
+        glGenVertexArrays(1, &Internal::g_backendData.m_vao);
+        glGenBuffers(1, &Internal::g_backendData.m_vbo);
+        glGenBuffers(1, &Internal::g_backendData.m_ebo);
 
-        glBindVertexArray(Internal::g_backendData.m_textVAO);
+        glBindVertexArray(Internal::g_backendData.m_vao);
 
-        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_textVBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_textEBO);
+        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
 
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
@@ -226,7 +226,7 @@ namespace LinaVG::Backend
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
-        glDisable(GL_SCISSOR_TEST);
+        glEnable(GL_SCISSOR_TEST);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         if (Config.m_debugWireframeEnabled)
@@ -282,6 +282,8 @@ namespace LinaVG::Backend
         Internal::g_backendData.m_proj[3][1] = (T + B) / (B - T);
         Internal::g_backendData.m_proj[3][2] = 0.0f;
         Internal::g_backendData.m_proj[3][3] = 1.0f;
+
+        glBindVertexArray(Internal::g_backendData.m_vao);
     }
 
     void DrawGradient(GradientDrawBuffer* buf)
@@ -289,15 +291,17 @@ namespace LinaVG::Backend
         if (Internal::g_backendData.m_skipDraw)
             return;
 
-        BindVAO(Internal::g_backendData.m_vao);
+        SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
 
-        glUseProgram(Internal::g_backendData.m_gradientShaderHandle);
-        glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
-        glUniform4f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["startColor"], (GLfloat)buf->m_color.m_start.x, (GLfloat)buf->m_color.m_start.y, (GLfloat)buf->m_color.m_start.z, (GLfloat)buf->m_color.m_start.w);
-        glUniform4f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["endColor"], (GLfloat)buf->m_color.m_end.x, (GLfloat)buf->m_color.m_end.y, (GLfloat)buf->m_color.m_end.z, (GLfloat)buf->m_color.m_end.w);
-        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["gradientType"], (GLint)((int)buf->m_color.m_gradientType));
-        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["radialSize"], (GLfloat)buf->m_color.m_radialSize);
-        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
+        Internal::ShaderData& data = Internal::g_backendData.m_gradientShaderData;
+        glUseProgram(data.m_handle);
+
+        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+        glUniform4f(data.m_uniformMap["startColor"], (GLfloat)buf->m_color.m_start.x, (GLfloat)buf->m_color.m_start.y, (GLfloat)buf->m_color.m_start.z, (GLfloat)buf->m_color.m_start.w);
+        glUniform4f(data.m_uniformMap["endColor"], (GLfloat)buf->m_color.m_end.x, (GLfloat)buf->m_color.m_end.y, (GLfloat)buf->m_color.m_end.z, (GLfloat)buf->m_color.m_end.w);
+        glUniform1i(data.m_uniformMap["gradientType"], (GLint)((int)buf->m_color.m_gradientType));
+        glUniform1f(data.m_uniformMap["radialSize"], (GLfloat)buf->m_color.m_radialSize);
+        glUniform1i(data.m_uniformMap["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
 
         glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
         glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
@@ -317,17 +321,17 @@ namespace LinaVG::Backend
         if (Internal::g_backendData.m_skipDraw)
             return;
 
-        BindVAO(Internal::g_backendData.m_vao);
+        SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
 
-        const Vec2 uv = Config.m_flipTextureUVs ? Vec2(buf->m_textureUVTiling.x, -buf->m_textureUVTiling.y) : buf->m_textureUVTiling;
+        const Vec2            uv   = Config.m_flipTextureUVs ? Vec2(buf->m_textureUVTiling.x, -buf->m_textureUVTiling.y) : buf->m_textureUVTiling;
+        Internal::ShaderData& data = Internal::g_backendData.m_texturedShaderData;
+        glUseProgram(data.m_handle);
+        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 
-        glUseProgram(Internal::g_backendData.m_texturedShaderHandle);
-        glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
-
-        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["diffuse"], 0);
-        glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["tiling"], (GLfloat)uv.x, (GLfloat)uv.y);
-        glUniform2f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_texturedShaderHandle]["offset"], (GLfloat)buf->m_textureUVOffset.x, (GLfloat)buf->m_textureUVOffset.y);
-        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_gradientShaderHandle]["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
+        glUniform1i(data.m_uniformMap["diffuse"], 0);
+        glUniform2f(data.m_uniformMap["tiling"], (GLfloat)uv.x, (GLfloat)uv.y);
+        glUniform2f(data.m_uniformMap["offset"], (GLfloat)buf->m_textureUVOffset.x, (GLfloat)buf->m_textureUVOffset.y);
+        glUniform1i(data.m_uniformMap["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
 
@@ -349,10 +353,11 @@ namespace LinaVG::Backend
         if (Internal::g_backendData.m_skipDraw)
             return;
 
-        BindVAO(Internal::g_backendData.m_vao);
+        SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
+        Internal::ShaderData& data = Internal::g_backendData.m_defaultShaderData;
 
-        glUseProgram(Internal::g_backendData.m_defaultShaderHandle);
-        glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_defaultShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+        glUseProgram(data.m_handle);
+        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 
         glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
         glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
@@ -372,19 +377,20 @@ namespace LinaVG::Backend
         if (Internal::g_backendData.m_skipDraw)
             return;
 
-        BindVAO(Internal::g_backendData.m_textVAO);
+        SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
+        Internal::ShaderData& data = Internal::g_backendData.m_simpleTextShaderData;
+        glUseProgram(data.m_handle);
 
-        glUseProgram(Internal::g_backendData.m_simpleTextShaderHandle);
-        glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_simpleTextShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 
-        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_simpleTextShaderHandle]["diffuse"], 0);
+        glUniform1i(data.m_uniformMap["diffuse"], 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
 
-        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_textVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
         glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_textEBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -399,28 +405,28 @@ namespace LinaVG::Backend
         if (Internal::g_backendData.m_skipDraw)
             return;
 
-        BindVAO(Internal::g_backendData.m_textVAO);
-
-        glUseProgram(Internal::g_backendData.m_sdfTextShaderHandle);
-        glUniformMatrix4fv(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+        SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
+        Internal::ShaderData& data = Internal::g_backendData.m_sdfTextShaderData;
+        glUseProgram(data.m_handle);
+        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 
         const float thickness        = 1.0f - Math::Clamp(buf->m_thickness, 0.0f, 1.0f);
         const float softness         = Math::Clamp(buf->m_softness, 0.0f, 1.0f);
         const float outlineThickness = Math::Clamp(buf->m_outlineThickness, 0.0f, 1.0f);
-        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["diffuse"], 0);
-        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["thickness"], thickness);
-        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["softness"], softness);
-        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["outlineEnabled"], outlineThickness != 0.0f ? 1 : 0);
-        glUniform1i(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["flipAlpha"], buf->m_flipAlpha ? 1 : 0);
-        glUniform1f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["outlineThickness"], outlineThickness);
-        glUniform4f(Internal::g_backendData.m_shaderUniformMap[Internal::g_backendData.m_sdfTextShaderHandle]["outlineColor"], buf->m_outlineColor.x, buf->m_outlineColor.y, buf->m_outlineColor.z, buf->m_outlineColor.w);
+        glUniform1i(data.m_uniformMap["diffuse"], 0);
+        glUniform1f(data.m_uniformMap["thickness"], thickness);
+        glUniform1f(data.m_uniformMap["softness"], softness);
+        glUniform1i(data.m_uniformMap["outlineEnabled"], outlineThickness != 0.0f ? 1 : 0);
+        glUniform1i(data.m_uniformMap["flipAlpha"], buf->m_flipAlpha ? 1 : 0);
+        glUniform1f(data.m_uniformMap["outlineThickness"], outlineThickness);
+        glUniform4f(data.m_uniformMap["outlineColor"], buf->m_outlineColor.x, buf->m_outlineColor.y, buf->m_outlineColor.z, buf->m_outlineColor.w);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
 
-        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_textVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
         glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_textEBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -428,6 +434,28 @@ namespace LinaVG::Backend
         Config.m_debugCurrentDrawCalls++;
         Config.m_debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
         Config.m_debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
+    }
+
+    void SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height)
+    {
+        if (x != Internal::g_backendData.m_lastClipPosX || y != Internal::g_backendData.m_lastClipPosY || width != Internal::g_backendData.m_lastClipSizeX || height != Internal::g_backendData.m_lastClipSizeY)
+        {
+            if (width == 0 || height == 0)
+            {
+                Internal::g_backendData.m_lastClipPosX  = x;
+                Internal::g_backendData.m_lastClipPosY  = y;
+                Internal::g_backendData.m_lastClipSizeX = width;
+                Internal::g_backendData.m_lastClipSizeY = height;
+                glScissor(static_cast<GLint>(Config.m_displayPos.x), static_cast<GLint>(Config.m_displayPos.y), static_cast<GLint>(Config.m_displaySize.x), static_cast<GLint>(Config.m_displaySize.y));
+                return;
+            }
+
+            Internal::g_backendData.m_lastClipPosX  = x;
+            Internal::g_backendData.m_lastClipPosY  = y;
+            Internal::g_backendData.m_lastClipSizeX = width;
+            Internal::g_backendData.m_lastClipSizeY = height;
+            glScissor(x, Config.m_displaySize.y - (y + height), width, height);
+        }
     }
 
     void SaveAPIState()
@@ -507,15 +535,6 @@ namespace LinaVG::Backend
         glPixelStorei(GL_UNPACK_ALIGNMENT, g_glState.m_unpackAlignment);
     }
 
-    void BindVAO(BackendHandle vao)
-    {
-        if (Internal::g_backendData.m_boundVAO != vao)
-        {
-            glBindVertexArray(vao);
-            Internal::g_backendData.m_boundVAO = vao;
-        }
-    }
-
     void EndFrame()
     {
         // Restore state.
@@ -523,6 +542,7 @@ namespace LinaVG::Backend
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
 
         // Reset GL state
         RestoreAPIState();
@@ -532,7 +552,7 @@ namespace LinaVG::Backend
     {
     }
 
-    BackendHandle CreateShader(const char* vert, const char* frag)
+    void CreateShader(Internal::ShaderData& data, const char* vert, const char* frag)
     {
         unsigned int vertex, fragment;
         int          success;
@@ -583,19 +603,18 @@ namespace LinaVG::Backend
         glDeleteShader(vertex);
         glDeleteShader(fragment);
 
-        AddShaderUniforms((BackendHandle)handle);
-
-        return (BackendHandle)handle;
+        data.m_handle = (BackendHandle)handle;
+        AddShaderUniforms(data);
     }
 
-    void AddShaderUniforms(BackendHandle shader)
+    void AddShaderUniforms(Internal::ShaderData& data)
     {
         // Load uniforms.
         GLint numUniforms = 0;
-        glGetProgramiv(shader, GL_ACTIVE_UNIFORMS, &numUniforms);
+        glGetProgramiv(data.m_handle, GL_ACTIVE_UNIFORMS, &numUniforms);
 
         // Iterate through uniforms.
-        std::vector<GLchar> uniformName(256);
+        GLchar chars[256];
         for (GLint uniform = 0; uniform < numUniforms; ++uniform)
         {
             GLint   arraySize    = 0;
@@ -603,21 +622,10 @@ namespace LinaVG::Backend
             GLsizei actualLength = 0;
 
             // Get sampler uniform data & store it on our sampler map.
-            glGetActiveUniform(shader, uniform, (GLsizei)uniformName.size(), &actualLength, &arraySize, &type, &uniformName[0]);
+            glGetActiveUniform(data.m_handle, uniform, (GLsizei)256, &actualLength, &arraySize, &type, &chars[0]);
 
-            std::string name((char*)&uniformName[0], actualLength - 1);
-            GLint       loc                                                     = glGetUniformLocation(shader, (char*)&uniformName[0]);
-            Internal::g_backendData.m_shaderUniformMap[shader][&uniformName[0]] = loc;
-
-            for (int i = 1; i < arraySize; i++)
-            {
-                std::string name((char*)&uniformName[0], actualLength - 2);
-                name = name + std::to_string(i) + "]";
-
-                std::string newName(name.c_str(), actualLength - 1);
-                GLint       loc                                                     = glGetUniformLocation(shader, name.c_str());
-                Internal::g_backendData.m_shaderUniformMap[shader][&uniformName[0]] = loc;
-            }
+            GLint loc                    = glGetUniformLocation(data.m_handle, (char*)&chars[0]);
+            data.m_uniformMap[&chars[0]] = loc;
         }
     }
 

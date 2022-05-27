@@ -28,7 +28,9 @@ SOFTWARE.
 
 #include "Main.hpp"
 #include "DemoScreens.hpp"
+
 #include "LinaVG.hpp"
+#include <iostream>
 #include <chrono>
 
 #ifdef LINAVG_BACKEND_GL

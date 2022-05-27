@@ -44,6 +44,7 @@ Timestamp: 12/29/2018 10:43:46 PM
 
 namespace LinaVG
 {
+    typedef FT_ULong GlyphEncoding;
 
     struct TextCharacter
     {
@@ -56,12 +57,12 @@ namespace LinaVG
     class LinaVGFont
     {
     public:
-        BackendHandle                              m_texture      = 0;
-        int                                        m_size         = 0;
-        bool                                       m_isSDF        = false;
-        Vec2                                       m_textureSize  = Vec2(0.0f, 0.0f);
-        float                                      m_spaceAdvance = 0.0f;
-        std::unordered_map<uint8_t, TextCharacter> m_characterGlyphs;
+        BackendHandle                            m_texture      = 0;
+        int                                      m_size         = 0;
+        bool                                     m_isSDF        = false;
+        Vec2                                     m_textureSize  = Vec2(0.0f, 0.0f);
+        float                                    m_spaceAdvance = 0.0f;
+        LINAVG_MAP<GlyphEncoding, TextCharacter> m_characterGlyphs;
     };
 
     /// <summary>
@@ -83,8 +84,6 @@ namespace LinaVG
         LINAVG_API bool Initialize();
         LINAVG_API void Terminate();
     } // namespace Text
-
-    typedef FT_ULong GlyphEncoding;
 
     /// <summary>
     /// You can also pass a custom glyph range, currently 32-bit encoding (unsigned long) to load additional glyphs for non-ASCII characters.

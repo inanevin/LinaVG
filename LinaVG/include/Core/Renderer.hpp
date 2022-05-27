@@ -37,7 +37,6 @@ Timestamp: 12/29/2018 10:43:46 PM
 #define LinaVGRenderer_HPP
 
 #include "Common.hpp"
-#include <functional>
 
 namespace LinaVG
 {
