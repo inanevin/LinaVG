@@ -2459,7 +2459,7 @@ namespace LinaVG
         if (useTextureBuffer)
         {
             const int sourceIndex = Internal::g_rendererData.GetBufferIndexInTextureArray(sourceBuffer);
-            destBuf               = &Internal::g_rendererData.GetTextureBuffer(opts.m_outlineOptions.m_textureHandle, opts.m_outlineOptions.m_textureUVTiling, opts.m_outlineOptions.m_textureUVOffset, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Outline);
+            destBuf               = &Internal::g_rendererData.GetTextureBuffer(opts.m_outlineOptions.m_textureHandle, opts.m_outlineOptions.m_textureUVTiling, opts.m_outlineOptions.m_textureUVOffset, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_textureBuffers[sourceIndex];
@@ -2467,7 +2467,7 @@ namespace LinaVG
         else if (useGradBuffer)
         {
             const int sourceIndex = Internal::g_rendererData.GetBufferIndexInGradientArray(sourceBuffer);
-            destBuf               = &Internal::g_rendererData.GetGradientBuffer(opts.m_outlineOptions.m_color, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Outline);
+            destBuf               = &Internal::g_rendererData.GetGradientBuffer(opts.m_outlineOptions.m_color, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_gradientBuffers[sourceIndex];
@@ -2475,7 +2475,7 @@ namespace LinaVG
         else
         {
             const int sourceIndex = Internal::g_rendererData.GetBufferIndexInDefaultArray(sourceBuffer);
-            destBuf               = &Internal::g_rendererData.GetDefaultBuffer(drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Outline);
+            destBuf               = &Internal::g_rendererData.GetDefaultBuffer(drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_defaultBuffers[sourceIndex];
@@ -2569,7 +2569,7 @@ namespace LinaVG
         if (useTextureBuffer)
         {
             const int sourceIndex = Internal::g_rendererData.GetBufferIndexInTextureArray(sourceBuffer);
-            destBuf               = &Internal::g_rendererData.GetTextureBuffer(opts.m_outlineOptions.m_textureHandle, opts.m_outlineOptions.m_textureUVTiling, opts.m_outlineOptions.m_textureUVOffset, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Outline);
+            destBuf               = &Internal::g_rendererData.GetTextureBuffer(opts.m_outlineOptions.m_textureHandle, opts.m_outlineOptions.m_textureUVTiling, opts.m_outlineOptions.m_textureUVOffset, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_textureBuffers[sourceIndex];
@@ -2577,13 +2577,13 @@ namespace LinaVG
         else if (useGradBuffer)
         {
             const int sourceIndex = Internal::g_rendererData.GetBufferIndexInGradientArray(sourceBuffer);
-            destBuf               = &Internal::g_rendererData.GetGradientBuffer(opts.m_outlineOptions.m_color, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Outline);
+            destBuf               = &Internal::g_rendererData.GetGradientBuffer(opts.m_outlineOptions.m_color, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_gradientBuffers[sourceIndex];
         }
         else
-            destBuf = &Internal::g_rendererData.GetDefaultBuffer(drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Outline);
+            destBuf = &Internal::g_rendererData.GetDefaultBuffer(drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
         int startIndex, endIndex;
 

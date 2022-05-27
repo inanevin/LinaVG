@@ -54,39 +54,39 @@ namespace LinaVG
             StyleOptions style;
 
             // Draw background gradient.
-         //   style.m_color.m_start        = Vec4(0.55f, 0.772, 0.988f, 1.0f);
-         //   style.m_color.m_end          = Vec4(0.995f, 0.764f, 0.988f, 1.0f);
-         //   style.m_color.m_gradientType = LinaVG::GradientType::Vertical;
-         //   style.m_isFilled             = true;
-         //   LinaVG::DrawRect(Vec2(0.0f, 0.0f), screenSize, style, 0.0f, 0);
+            style.m_color.m_start        = Vec4(0.55f, 0.772, 0.988f, 1.0f);
+            style.m_color.m_end          = Vec4(0.995f, 0.764f, 0.988f, 1.0f);
+            style.m_color.m_gradientType = LinaVG::GradientType::Vertical;
+            style.m_isFilled             = true;
+            LinaVG::DrawRect(Vec2(0.0f, 0.0f), screenSize, style, 0.0f, 0);
 
             // Draw stats window.
-        //   const float statsWindowX = screenSize.x - screenSize.x * 0.18f;
-        //   const float statsWindowY = screenSize.y * 0.05f;
-        //   style.m_color            = Vec4(0, 0, 0, 0.5f);
-        //   style.m_rounding         = 0.2f;
-        //   style.m_onlyRoundTheseCorners.push_back(0);
-        //   style.m_onlyRoundTheseCorners.push_back(3);
-        //   LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.17f), style, 0.0f, 1);
-        //   style.m_onlyRoundTheseCorners.clear();
+            const float statsWindowX = screenSize.x - screenSize.x * 0.18f;
+            const float statsWindowY = screenSize.y * 0.05f;
+            style.m_color            = Vec4(0, 0, 0, 0.5f);
+            style.m_rounding         = 0.2f;
+            style.m_onlyRoundTheseCorners.push_back(0);
+            style.m_onlyRoundTheseCorners.push_back(3);
+            LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.17f), style, 0.0f, 1);
+            style.m_onlyRoundTheseCorners.clear();
 
             // Draw stats texts.
-            const std::string drawCountStr     = "Draw Count: " + std::to_string(drawCount);
+            const std::string drawCountStr     = "Draw Calls: " + std::to_string(drawCount);
             const std::string triangleCountStr = "Tris Count: " + std::to_string(triangleCount);
             const std::string vertexCountStr   = "Vertex Count: " + std::to_string(vertexCount);
             const std::string frameTimeStr     = "Frame: " + std::to_string(ExampleApp::Get()->GetFrameTimeRead()) + " ms";
             const std::string fpsStr           = "FPS: " + std::to_string(ExampleApp::Get()->GetFPS()) + " " + frameTimeStr;
 
-        //    Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 15);
-        //    SDFTextOptions textStyle;
-        //    textStyle.m_textScale = 0.6f;
-        //    LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-        //    textPosition.y += 25;
-        //    LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-        //    textPosition.y += 25;
-        //    LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-        //    textPosition.y += 25;
-        //    LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 15);
+            SDFTextOptions textStyle;
+            textStyle.m_textScale = 0.6f;
+            LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            textPosition.y += 25;
+            LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            textPosition.y += 25;
+            LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            textPosition.y += 25;
+            LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
 
             // Draw semi-transparent black rectangle on the bottom of the screen.
             style.m_color    = Vec4(0, 0, 0, 0.5f);
