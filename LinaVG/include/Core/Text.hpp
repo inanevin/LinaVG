@@ -56,11 +56,11 @@ namespace LinaVG
     class LinaVGFont
     {
     public:
-        BackendHandle                           m_texture      = 0;
-        int                                     m_size         = 0;
-        bool                                    m_isSDF        = false;
-        Vec2                                    m_textureSize  = Vec2(0.0f, 0.0f);
-        float                                   m_spaceAdvance = 0.0f;
+        BackendHandle                              m_texture      = 0;
+        int                                        m_size         = 0;
+        bool                                       m_isSDF        = false;
+        Vec2                                       m_textureSize  = Vec2(0.0f, 0.0f);
+        float                                      m_spaceAdvance = 0.0f;
         std::unordered_map<uint8_t, TextCharacter> m_characterGlyphs;
     };
 
@@ -78,16 +78,6 @@ namespace LinaVG
         Array<LinaVGFont*> m_loadedFonts;
     };
 
-    namespace Internal
-    {
-        extern LINAVG_API TextData g_textData;
-
-        /// <summary>
-        /// !Internal! Do not modify.
-        /// </summary>
-        extern LINAVG_API FontHandle g_fontCounter;
-    } // namespace Internal
-
     namespace Text
     {
         LINAVG_API bool Initialize();
@@ -97,14 +87,38 @@ namespace LinaVG
     typedef FT_ULong GlyphEncoding;
 
     /// <summary>
+    /// You can also pass a custom glyph range, currently 32-bit encoding (unsigned long) to load additional glyphs for non-ASCII characters.
+    /// </summary>
+    /// <returns>Font handle, store this handle if you like to use multiple fonts. You can pass the handle inside TextOptions to draw with a specific font. </returns>
+
+    /// <summary>
     /// Loads the given font & generates textures based on given size.
     /// You can load the same font with different sizes to achieve varying text scales.
     /// Alternatively, you can use the scale modifier in TextOptions but it's not recommended to upscale.
     /// Best quality would be achieved by loading fonts with bigger sizes and scaling them down using TextOptions.
-    /// You can also pass a custom glyph range, currently 32-bit encoding (unsigned long) to load additional glyphs for non-ASCII characters.
     /// </summary>
-    /// <returns>Font handle, store this handle if you like to use multiple fonts. You can pass the handle inside TextOptions to draw with a specific font. </returns>
+    /// <param name="file">TTF or OTF file.</param>
+    /// <param name="loadAsSDF">Creates an SDF font.</param>
+    /// <param name="size">Font height, width will automatically adjust.</param>
+    /// <param name="customRanges">Send custom ranges in utf16 or utf32 encoding e.g. 0x0E7 to load specific non-ascii characters or character sets.</param>
+    /// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
+    /// <returns></returns>
     LINAVG_API FontHandle LoadFont(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0);
+
+    /// <summary>
+    /// Loads the given font & generates textures based on given size.
+    /// You can load the same font with different sizes to achieve varying text scales.
+    /// Alternatively, you can use the scale modifier in TextOptions but it's not recommended to upscale.
+    /// Best quality would be achieved by loading fonts with bigger sizes and scaling them down using TextOptions.
+    /// </summary>
+    /// <param name="data">Binary font data.</param>
+    /// <param name="size">Binary font data size.</param>
+    /// <param name="loadAsSDF">Creates an SDF font.</param>
+    /// <param name="size">Font height, width will automatically adjust.</param>
+    /// <param name="customRanges">Send custom ranges in utf16 or utf32 encoding e.g. 0x0E7 to load specific non-ascii characters or character sets.</param>
+    /// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
+    /// <returns></returns>
+    LINAVG_API FontHandle LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0);
 
     /// <summary>
     /// While drawing texts, the system will try to use the font passed inside TextOptions.
@@ -114,6 +128,22 @@ namespace LinaVG
     /// </summary>
     /// <returns></returns>
     LINAVG_API void SetDefaultFont(FontHandle font);
+
+    namespace Internal
+    {
+        extern LINAVG_API TextData g_textData;
+
+        /// <summary>
+        /// !Internal! Do not modify.
+        /// </summary>
+        extern LINAVG_API FontHandle g_fontCounter;
+
+        /// <summary>
+        /// Uses loaded face (from file or mem) to setup rest of the font data.
+        /// </summary>
+        int SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize);
+    } // namespace Internal
+
 }; // namespace LinaVG
 
 #endif

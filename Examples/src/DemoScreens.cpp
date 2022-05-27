@@ -40,8 +40,9 @@ namespace LinaVG
 
         void DemoScreens::Initialize()
         {
-            GlyphEncoding customRanges[] = {0x015F, 0x015F, 0x011F, 0x011F, 0x0411, 0x0411, 0x25c0, 0x25c0, 0x00E7, 0x00E7 };
-            defaultFont                  = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 28, customRanges, 10);
+           // GlyphEncoding customRanges[] = {0x015F, 0x015F, 0x011F, 0x011F, 0x0411, 0x0411, 0x25c0, 0x25c0, 0x00E7, 0x00E7 };
+            defaultFont                  = LinaVG::LoadFont("Resources/Fonts/NotoSansJP-Regular.otf", false, 28);
+            //Config.m_useUnicodeEncoding = true;
         }
 
         /// <summary>
@@ -100,7 +101,7 @@ namespace LinaVG
             textStyle.m_color.m_end   = Vec4(1, 1, 0, 1);
             Vec2 size                 = LinaVG::CalculateTextSize("çaşabum This is a wrapped text, sick of examples heh.", textStyle);
             Vec2 dp                   = Vec2(1000, 500);
-            LinaVG::DrawTextNormal(u8"şğçab", dp, textStyle, 0, 2);
+            LinaVG::DrawTextNormal("Finall q", dp, textStyle, 0, 2);
             LinaVG::Internal::DrawDebugFontAtlas(Vec2(300, 300), textStyle.m_font);
 
             DrawPoint(Vec2(dp.x, dp.y), Vec4(1, 1, 1, 1));
