@@ -1,4 +1,4 @@
-/*
+﻿/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -34,7 +34,9 @@ SOFTWARE.
 #include "Utility/Utility.hpp"
 #include <iostream>
 #include <stdio.h>
-
+#include <string>
+#include <codecvt> // for std::codecvt_utf8
+#include <locale>  // for std::wstring_convert
 namespace LinaVG
 {
     RectOverrideData g_rectOverrideData;
@@ -2073,8 +2075,8 @@ namespace LinaVG
 
         for (int i = startIndex; i <= endIndex; i++)
         {
-            total.x += buf->m_vertexBuffer[startIndex].m_pos.x;
-            total.y += buf->m_vertexBuffer[startIndex].m_pos.y;
+            total.x += buf->m_vertexBuffer[i].m_pos.x;
+            total.y += buf->m_vertexBuffer[i].m_pos.y;
         }
 
         const int count = endIndex - startIndex + 1;
@@ -2830,6 +2832,8 @@ namespace LinaVG
 
     void Internal::ProcessText(DrawBuffer* buf, LinaVGFont* font, const std::string& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing)
     {
+        const int bufStart = buf->m_vertexBuffer.m_size;
+
         if (wrapWidth == 0.0f)
         {
             Vec2 size    = Internal::CalcTextSize(text.c_str(), font, scale, spacing);
@@ -2902,19 +2906,41 @@ namespace LinaVG
 
             Internal::DrawText(buf, font, append.c_str(), usedPos, offset, color, spacing, isGradient, scale);
         }
+        if (rotateAngle != 0.0f)
+        {
+            const Vec2 center = Internal::GetVerticesCenter(buf, bufStart, buf->m_vertexBuffer.m_size - 1);
+            Internal::RotateVertices(buf->m_vertexBuffer, center, bufStart, buf->m_vertexBuffer.m_size - 1, rotateAngle);
+        }
     }
 
-    // void Internal::DrawDebugFontAtlas(LinaVGFont* font)
-    // {
-    //     //  v0.m_pos = Vec2(300, 500);
-    //     //  v1.m_pos = Vec2(300 + font->m_textureSize.x, 500);
-    //     //  v2.m_pos = Vec2(300 + font->m_textureSize.x, 500 + font->m_textureSize.y);
-    //     //  v3.m_pos = Vec2(300, 500 + font->m_textureSize.y);
-    //     //  v0.m_uv = Vec2(0.0f, 0.0f);
-    //     //  v1.m_uv = Vec2(1.0f, 0.0f);
-    //     //  v2.m_uv = Vec2(1.0f, 1.0f);
-    //     //  v3.m_uv = Vec2(0.0f, 1.0f);
-    // }
+    void Internal::DrawDebugFontAtlas(const Vec2& pos, FontHandle handle)
+    {
+        FontHandle  fontHandle = handle > 0 && Internal::g_textData.m_loadedFonts.m_size > handle - 1 ? handle : Internal::g_textData.m_defaultFont;
+        LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
+        DrawBuffer* buf        = &Internal::g_rendererData.GetSimpleTextBuffer(font->m_texture, 999, false);
+        const int   startIndex = buf->m_vertexBuffer.m_size;
+        Vertex      v0, v1, v2, v3;
+        v0.m_pos = Vec2(pos.x, pos.y);
+        v1.m_pos = Vec2(pos.x + font->m_textureSize.x, pos.y);
+        v2.m_pos = Vec2(pos.x + font->m_textureSize.x, pos.y + font->m_textureSize.y);
+        v3.m_pos = Vec2(pos.x, pos.y + font->m_textureSize.y);
+        v0.m_uv  = Vec2(0.0f, 0.0f);
+        v1.m_uv  = Vec2(1.0f, 0.0f);
+        v2.m_uv  = Vec2(1.0f, 1.0f);
+        v3.m_uv  = Vec2(0.0f, 1.0f);
+
+        buf->PushVertex(v0);
+        buf->PushVertex(v1);
+        buf->PushVertex(v2);
+        buf->PushVertex(v3);
+
+        buf->PushIndex(startIndex);
+        buf->PushIndex(startIndex + 1);
+        buf->PushIndex(startIndex + 3);
+        buf->PushIndex(startIndex + 1);
+        buf->PushIndex(startIndex + 2);
+        buf->PushIndex(startIndex + 3);
+    }
 
     void Internal::DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale)
     {
@@ -2925,9 +2951,7 @@ namespace LinaVG
         Vec2           pos                 = position;
         int            characterCount      = 0;
 
-        for (c = (uint8_t*)text; *c; c++)
-        {
-            auto&     ch         = font->m_characterGlyphs[*c];
+        auto drawChar = [&](TextCharacter& ch) {
             const int startIndex = buf->m_vertexBuffer.m_size;
 
             float x2 = pos.x + ch.m_bearing.x * scale;
@@ -2939,7 +2963,7 @@ namespace LinaVG
             pos.y += ch.m_advance.y * scale;
 
             if (w == 0.0f || h == 0.0f)
-                continue;
+                return;
 
             Vertex v0, v1, v2, v3;
 
@@ -2990,13 +3014,28 @@ namespace LinaVG
             buf->PushIndex(startIndex + 2);
             buf->PushIndex(startIndex + 3);
             characterCount++;
-        }
+        };
 
-        // if (rotateAngle != 0.0f)
-        // {
-        //     const Vec2 center = Internal::GetVerticesCenter(buf, bufStart, buf->m_vertexBuffer.m_size - 1);
-        //     Internal::RotateVertices(buf->m_vertexBuffer, center, bufStart, buf->m_vertexBuffer.m_size - 1, rotateAngle);
-        // }
+        if (Config.m_useUnicodeEncoding)
+        {
+            std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
+            auto                                                        str32 = cv.from_bytes(text);
+            std::u32string::iterator it;
+            for (it = str32.begin(); it < str32.end(); it++)
+            {
+                auto& ch = font->m_characterGlyphs[*it];
+                drawChar(ch);
+            }
+        }
+        else
+        {
+            for (c = (uint8_t*)text; *c; c++)
+            {
+                auto& ch = font->m_characterGlyphs[*c];
+                drawChar(ch);
+            }
+        }
+     
     }
 
     Vec2 Internal::CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing)

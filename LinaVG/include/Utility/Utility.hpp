@@ -36,6 +36,7 @@ Timestamp: 3/28/2022 2:38:21 PM
 #define LinaVGUtility_HPP
 
 #include "Core/Common.hpp"
+
 namespace LinaVG
 {
 	namespace Utility
@@ -92,6 +93,7 @@ namespace LinaVG
         }
 
         int GetTextCharacterSize(const char* text);
+
 	}
 }
 #endif

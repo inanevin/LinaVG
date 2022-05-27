@@ -65,17 +65,17 @@ namespace LinaVG
         }
     } // namespace Text
 
-    FontHandle LoadFont(const std::string& file, bool loadAsSDF, int size)
+    FontHandle LoadFont(const char* file, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize)
     {
         FT_Face face;
-        if (FT_New_Face(Internal::g_textData.m_ftlib, file.c_str(), 0, &face))
+        if (FT_New_Face(Internal::g_textData.m_ftlib, file, 0, &face))
         {
             Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
             return -1;
         }
 
         FT_Set_Pixel_Sizes(face, 0, size);
-        FT_Select_Charmap(face, FT_ENCODING_UNICODE);
+        FT_Select_Charmap(face, ft_encoding_unicode);
 
         // Texture alignment changes might be necessary on some APIs such as OpenGL
         Backend::SaveAPIState();
@@ -97,13 +97,11 @@ namespace LinaVG
         FT_Int32 loadFlags       = loadAsSDF ? FT_LOAD_DEFAULT : FT_LOAD_RENDER;
         int      textureXAdvance = static_cast<int>(Config.m_framebufferScale.x + 2.0f);
 
-        // First calculate the texture atlas size.
-        for (unsigned char c = 32; c < Config.m_maxGlyphCharSize; c++)
-        {
+        auto setSizes = [&](int c) {
             if (FT_Load_Char(face, c, loadFlags))
             {
                 Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load character!");
-                continue;
+                return false;
             }
 
             if (loadAsSDF)
@@ -122,6 +120,35 @@ namespace LinaVG
 
             roww += glyphWidth + textureXAdvance;
             rowh = Math::Max(rowh, glyphRows);
+            return true;
+        };
+
+        // First calculate the texture atlas size.
+        for (FT_ULong c = 32; c < 128; c++)
+            setSizes(c);
+
+        bool useCustomRanges = customRangesSize != 0;
+        if (customRangesSize % 2 == 1)
+        {
+            useCustomRanges = false;
+            Config.m_errorCallback("LinaVG: Custom ranges given to font loading must have a size multiple of 2!");
+        }
+
+        if (useCustomRanges)
+        {
+            int       index            = 0;
+            const int customRangeCount = customRangesSize / 2;
+            for (int i = 0; i < customRangeCount; i++)
+            {
+                if (customRanges[index] == customRanges[index + 1])
+                    setSizes(customRanges[index]);
+                else
+                {
+                    for (FT_ULong c = customRanges[index]; c < customRanges[index + 1]; c++)
+                        setSizes(customRanges[index]);
+                }
+                index += 2;
+            }
         }
 
         w = Math::Max(w, roww);
@@ -135,20 +162,18 @@ namespace LinaVG
         int offsetY         = 0;
         rowh                = 0;
 
-        // Now atlas is generated, feed each character into it.
-        for (unsigned char c = 32; c < Config.m_maxGlyphCharSize; c++)
-        {
+        auto generateTextures = [&](FT_ULong c) {
             if (FT_Load_Char(face, c, loadFlags))
             {
                 Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load character!");
-                continue;
+                return false;
             }
 
             if (loadAsSDF)
                 FT_Render_Glyph(slot, FT_RENDER_MODE_SDF);
 
-            const unsigned int glyphWidth = face->glyph->bitmap.width;
-            const unsigned int glyphRows  = face->glyph->bitmap.rows;
+            unsigned int glyphWidth = face->glyph->bitmap.width;
+            unsigned int glyphRows  = face->glyph->bitmap.rows;
 
             if (offsetX + glyphWidth + Config.m_framebufferScale.x + 1.5f >= MAX_WIDTH)
             {
@@ -167,6 +192,30 @@ namespace LinaVG
 
             rowh = Math::Max(rowh, glyphRows);
             offsetX += glyphWidth + textureXAdvance;
+
+
+            return true;
+        };
+
+        // Now atlas is generated, feed each character into it.
+        for (FT_ULong c = 32; c < 128; c++)
+            generateTextures(c);
+
+        if (useCustomRanges)
+        {
+            int       index            = 0;
+            const int customRangeCount = customRangesSize / 2;
+            for (int i = 0; i < customRangeCount; i++)
+            {
+                if (customRanges[index] == customRanges[index + 1])
+                    generateTextures(customRanges[index]);
+                else
+                {
+                    for (FT_ULong c = customRanges[index]; c < customRanges[index + 1]; c++)
+                        generateTextures(customRanges[index]);
+                }
+                index += 2;
+            }
         }
 
         font->m_spaceAdvance = characterMap[' '].m_advance.x;

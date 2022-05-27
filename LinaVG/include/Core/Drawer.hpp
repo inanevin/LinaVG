@@ -458,6 +458,8 @@ namespace LinaVG
         /// </summary>
         Vec2 CalcTextSizeWrapped(const std::string& text, LinaVGFont*, TextOptions* opts);
 
+        void DrawDebugFontAtlas(const Vec2& pos, FontHandle handle);
+
     }; // namespace Internal
 
 

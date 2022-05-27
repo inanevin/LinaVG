@@ -477,7 +477,7 @@ namespace LinaVG
         /// <summary>
         /// 0.0f - 1.0f range, defines how strongly the outline is extruded.
         /// </summary>
-        float m_sdfOutlineThickness = 1.0f;
+        float m_sdfOutlineThickness = 0.0f;
 
         /// <summary>
         /// Well, outline color.
@@ -618,10 +618,12 @@ namespace LinaVG
         bool m_flipTextureUVs = false;
 
         /// <summary>
-        /// Text backend loads this amount of character glyphs when loading a font.
-        /// 128 covers all ASCII character set, load more if you are using fonts that require more characters.
+        /// If true, texts will be drawn by interpreting each character w/ 32 bit encoding.
+        /// Set this to true if you want to draw unicode characters.
+        /// Also you need to load the glyph ranges using customRanges in LoadFont.
+        /// Do not forget to send your text with in utf8-format, e.g. c++11 > u8"my string"
         /// </summary>
-        int m_maxGlyphCharSize = 128;
+        bool m_useUnicodeEncoding = false;
 
         /// <summary>
         /// Every interval ticks system will garbage collect all vertex & index buffers, meaning that will clear all the arrays.

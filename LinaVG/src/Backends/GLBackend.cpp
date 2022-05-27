@@ -109,7 +109,7 @@ namespace LinaVG::Backend
                                                       "if(outlineEnabled == 1){\n"
                                                       " float border = smoothstep(thickness + outlineThickness - softness, thickness + outlineThickness + softness, distance);\n"
                                                       " baseColor = mix(outlineColor, fCol, border).rgb;\n"
-                                                      "}\n"
+                                                      "} \n"
                                                       "fragColor = vec4(baseColor, flipAlpha == 1 ? 1.0f - alpha : alpha);\n"
                                                       "}\0";
 

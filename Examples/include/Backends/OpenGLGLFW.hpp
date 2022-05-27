@@ -48,7 +48,7 @@ namespace LinaVG
             void SwapBuffers();
             void Terminate();
             float GetTime();
-
+            
             inline float GetFramebufferScale()
             {
                 return m_frameBufferScaleX;

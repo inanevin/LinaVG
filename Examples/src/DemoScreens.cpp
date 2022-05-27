@@ -40,7 +40,8 @@ namespace LinaVG
 
         void DemoScreens::Initialize()
         {
-            defaultFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 28);
+            GlyphEncoding customRanges[] = {0x015F, 0x015F, 0x011F, 0x011F, 0x0411, 0x0411, 0x25c0, 0x25c0, 0x00E7, 0x00E7 };
+            defaultFont                  = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 28, customRanges, 10);
         }
 
         /// <summary>
@@ -75,8 +76,8 @@ namespace LinaVG
             const std::string frameTimeStr     = "Frame: " + std::to_string(ExampleApp::Get()->GetFrameTimeRead()) + " ms";
             const std::string fpsStr           = "FPS: " + std::to_string(ExampleApp::Get()->GetFPS()) + " " + frameTimeStr;
 
-            Vec2        textPosition = Vec2(statsWindowX + 10, statsWindowY + 15);
-            TextOptions textStyle;
+            Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 15);
+            SDFTextOptions textStyle;
             textStyle.m_textScale = 0.6f;
             // LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
             // textPosition.y += 25;
@@ -87,16 +88,24 @@ namespace LinaVG
             // LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
             //
             // textStyle.m_spacing = 12;
-            textStyle.m_alignment      = TextAlignment::Center;
-            textStyle.m_wrapWidth      = 140;
+            // textStyle.m_sdfThickness = 0.55f;
+            // textStyle.m_sdfOutlineThickness = 0.0f;
+            textStyle.m_alignment      = TextAlignment::Left;
+            textStyle.m_wrapWidth      = 100;
             textStyle.m_newLineSpacing = 15.0f;
-            Vec2 size                  = LinaVG::CalculateTextSize("This is a wrapped text, sick of exampl heh.", textStyle);
-            Vec2 dp                    = Vec2(1000, 500);
-            LinaVG::DrawTextNormal("This is a wrapped text, sick of exampl heh.", dp, textStyle, 0, 2);
 
-            DrawPoint(Vec2(dp.x - size.x / 2.0f, dp.y), Vec4(1, 1, 1, 1));
+            // textStyle.m_spacing = 45;
+            // textStyle.m_sdfOutlineThickness = 0.03f;
+            textStyle.m_color.m_start = Vec4(1, 0, 0, 1);
+            textStyle.m_color.m_end   = Vec4(1, 1, 0, 1);
+            Vec2 size                 = LinaVG::CalculateTextSize("çaşabum This is a wrapped text, sick of examples heh.", textStyle);
+            Vec2 dp                   = Vec2(1000, 500);
+            LinaVG::DrawTextNormal(u8"şğçab", dp, textStyle, 0, 2);
+            LinaVG::Internal::DrawDebugFontAtlas(Vec2(300, 300), textStyle.m_font);
 
-            DrawPoint(Vec2(dp.x + size.x / 2.0f, dp.y + size.y), Vec4(1, 1, 0, 1));
+            DrawPoint(Vec2(dp.x, dp.y), Vec4(1, 1, 1, 1));
+
+            DrawPoint(Vec2(dp.x + size.x, dp.y + size.y), Vec4(0, 0, 0, 1));
 
             // Draw semi-transparent black rectangle on the bottom of the screen.
             style.m_color    = Vec4(0, 0, 0, 0.5f);
