@@ -438,24 +438,15 @@ namespace LinaVG::Backend
 
     void SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height)
     {
-        if (x != Internal::g_backendData.m_lastClipPosX || y != Internal::g_backendData.m_lastClipPosY || width != Internal::g_backendData.m_lastClipSizeX || height != Internal::g_backendData.m_lastClipSizeY)
+        if (width == 0 || height == 0)
         {
-            if (width == 0 || height == 0)
-            {
-                Internal::g_backendData.m_lastClipPosX  = x;
-                Internal::g_backendData.m_lastClipPosY  = y;
-                Internal::g_backendData.m_lastClipSizeX = width;
-                Internal::g_backendData.m_lastClipSizeY = height;
-                glScissor(static_cast<GLint>(Config.m_displayPos.x), static_cast<GLint>(Config.m_displayPos.y), static_cast<GLint>(Config.m_displaySize.x), static_cast<GLint>(Config.m_displaySize.y));
-                return;
-            }
-
-            Internal::g_backendData.m_lastClipPosX  = x;
-            Internal::g_backendData.m_lastClipPosY  = y;
-            Internal::g_backendData.m_lastClipSizeX = width;
-            Internal::g_backendData.m_lastClipSizeY = height;
-            glScissor(x, Config.m_displaySize.y - (y + height), width, height);
+            x      = static_cast<GLint>(Config.m_displayPos.x);
+            y      = static_cast<GLint>(Config.m_displayPos.y);
+            width  = static_cast<GLint>(Config.m_displaySize.x);
+            height = static_cast<GLint>(Config.m_displaySize.y);
         }
+
+        glScissor(x, Config.m_displaySize.y - (y + height), width, height);
     }
 
     void SaveAPIState()

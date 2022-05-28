@@ -30,7 +30,7 @@ SOFTWARE.
 #include "Core/Renderer.hpp"
 #include "Core/Backend.hpp"
 #include "Core/Math.hpp"
-#define MAX_WIDTH 1024
+#define MAX_WIDTH 600
 
 namespace LinaVG
 {
@@ -73,7 +73,7 @@ namespace LinaVG
     LINAVG_API FontHandle LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize)
     {
         FT_Face face;
-        if (FT_New_Memory_Face(Internal::g_textData.m_ftlib, static_cast<FT_Byte*>(data),static_cast<FT_Long>(dataSize), 0, &face))
+        if (FT_New_Memory_Face(Internal::g_textData.m_ftlib, static_cast<FT_Byte*>(data), static_cast<FT_Long>(dataSize), 0, &face))
         {
             Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
             return -1;
@@ -99,26 +99,25 @@ namespace LinaVG
             FT_Set_Pixel_Sizes(face, 0, size);
             FT_Select_Charmap(face, ft_encoding_unicode);
 
-
             // Texture alignment changes might be necessary on some APIs such as OpenGL
             Backend::SaveAPIState();
 
             LinaVGFont* font = new LinaVGFont();
-            font->m_size = size;
-            font->m_isSDF = loadAsSDF;
+            font->m_size     = size;
+            font->m_isSDF    = loadAsSDF;
 
             auto& characterMap = font->m_characterGlyphs;
-            int   maxHeight = 0;
+            int   maxHeight    = 0;
 
             unsigned int roww = 0;
             unsigned int rowh = 0;
 
-            unsigned int w = 0;
-            unsigned int h = 0;
+            unsigned int w    = 3;
+            unsigned int h    = 3;
             FT_GlyphSlot slot = face->glyph;
 
-            FT_Int32 loadFlags = loadAsSDF ? FT_LOAD_DEFAULT : FT_LOAD_RENDER;
-            int      textureXAdvance = static_cast<int>(Config.m_framebufferScale.x + 2.0f);
+            FT_Int32 loadFlags       = loadAsSDF ? FT_LOAD_DEFAULT : FT_LOAD_RENDER;
+            int      textureXAdvance = 3.5f;
 
             auto setSizes = [&](FT_ULong c) {
                 if (FT_Load_Char(face, c, loadFlags))
@@ -131,12 +130,12 @@ namespace LinaVG
                     FT_Render_Glyph(slot, FT_RENDER_MODE_SDF);
 
                 const unsigned int glyphWidth = face->glyph->bitmap.width;
-                const unsigned int glyphRows = face->glyph->bitmap.rows;
+                const unsigned int glyphRows  = face->glyph->bitmap.rows;
 
                 if (roww + glyphWidth + textureXAdvance >= MAX_WIDTH)
                 {
                     w = Math::Max(w, roww);
-                    h += rowh;
+                    h += rowh + 3;
                     roww = 0;
                     rowh = 0;
                 }
@@ -159,7 +158,7 @@ namespace LinaVG
 
             if (useCustomRanges)
             {
-                int       index = 0;
+                int       index            = 0;
                 const int customRangeCount = customRangesSize / 2;
                 for (int i = 0; i < customRangeCount; i++)
                 {
@@ -178,12 +177,12 @@ namespace LinaVG
             h += rowh;
 
             // Generate atlas
-            BackendHandle tex = Backend::CreateFontTexture(w, h);
+            BackendHandle tex   = Backend::CreateFontTexture(w, h);
             font->m_textureSize = Vec2(static_cast<float>(w), static_cast<float>(h));
-            font->m_texture = tex;
-            int offsetX = 0;
-            int offsetY = 0;
-            rowh = 0;
+            font->m_texture     = tex;
+            int offsetX         = 3;
+            int offsetY         = 3;
+            rowh                = 0;
 
             auto generateTextures = [&](FT_ULong c) {
                 if (FT_Load_Char(face, c, loadFlags))
@@ -196,26 +195,48 @@ namespace LinaVG
                     FT_Render_Glyph(slot, FT_RENDER_MODE_SDF);
 
                 unsigned int glyphWidth = face->glyph->bitmap.width;
-                unsigned int glyphRows = face->glyph->bitmap.rows;
+                unsigned int glyphRows  = face->glyph->bitmap.rows;
 
                 if (offsetX + glyphWidth + Config.m_framebufferScale.x + 1.5f >= MAX_WIDTH)
                 {
 
-                    offsetY += rowh;
-                    rowh = 0;
-                    offsetX = 0;
+                    offsetY += rowh + 3;
+                    rowh    = 0;
+                    offsetX = 3;
                 }
+
+                const Vec2  size       = Vec2(static_cast<float>(glyphWidth), static_cast<float>(glyphRows));
+                const float fontWidth  = static_cast<float>(w);
+                const float fontHeight = static_cast<float>(h);
+                const float xx         = (float)offsetX / fontWidth;
+                const float yy         = (float)offsetY / fontHeight;
+                Vec2 uv1 = Vec2(xx, yy);
+                Vec2 uv2 = Vec2(xx + size.x / fontWidth, yy);
+                Vec2 uv3 = Vec2(xx + size.x / fontWidth, yy + size.y / fontHeight);
+                Vec2 uv4 = Vec2(xx, yy + size.y / fontHeight);
+
+       
+                Vec2 points[] = {uv1, uv2, uv3, uv4};
+                const Vec2 avg = Math::GetPolygonCentroidFast(points, 4);
+                uv1 = Math::ScalePoint(points[0], avg, 1.1f);
+                uv2 = Math::ScalePoint(points[1], avg, 1.1f);
+                uv3 = Math::ScalePoint(points[2], avg, 1.1f);
+                uv4 = Math::ScalePoint(points[3], avg, 1.1f);
+             
+                const Vec4  uv12 = Vec4(uv1.x, uv1.y, uv2.x, uv2.y);
+                const Vec4  uv34 = Vec4(uv3.x, uv3.y, uv4.x, uv4.y);
+
 
                 Backend::BufferFontTextureAtlas(glyphWidth, glyphRows, offsetX, offsetY, static_cast<void*>(face->glyph->bitmap.buffer));
                 characterMap[c] = {
-                    Vec2(static_cast<float>(offsetX / (float)w), static_cast<float>(offsetY / (float)h)),
-                    Vec2(static_cast<float>(glyphWidth), static_cast<float>(glyphRows)),
+                    uv12,
+                    uv34,
+                    size,
                     Vec2(static_cast<float>(face->glyph->bitmap_left), static_cast<float>(face->glyph->bitmap_top)),
-                    Vec2(static_cast<float>(face->glyph->advance.x >> 6), static_cast<float>(face->glyph->advance.y >> 6)) };
+                    Vec2(static_cast<float>(face->glyph->advance.x >> 6), static_cast<float>(face->glyph->advance.y >> 6))};
 
                 rowh = Math::Max(rowh, glyphRows);
                 offsetX += glyphWidth + textureXAdvance;
-
 
                 return true;
             };
@@ -226,7 +247,7 @@ namespace LinaVG
 
             if (useCustomRanges)
             {
-                int       index = 0;
+                int       index            = 0;
                 const int customRangeCount = customRangesSize / 2;
                 for (int i = 0; i < customRangeCount; i++)
                 {
@@ -252,6 +273,5 @@ namespace LinaVG
             return Internal::g_fontCounter;
         }
     } // namespace Internal
-
 
 } // namespace LinaVG

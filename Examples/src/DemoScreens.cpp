@@ -30,6 +30,7 @@ SOFTWARE.
 #define LINAVG_CUSTOM_MALLOC std::malloc
 #include "Main.hpp"
 #include "LinaVG.hpp"
+#include "Utility/Utility.hpp"
 #include <string>
 
 namespace LinaVG
@@ -37,12 +38,18 @@ namespace LinaVG
     namespace Examples
     {
 
-        FontHandle defaultFont;
-        int        drawCount, triangleCount, vertexCount = 0;
-
+        FontHandle  defaultFont;
+        FontHandle  bigFont;
+        int         drawCount, triangleCount, vertexCount = 0;
+        int         currentScreen        = 0;
+        std::string screenTitles[]       = {"SHAPES", "COLORS", "OUTLINE", "LINES", "TEXTS", "Z-ORDER", "CLIPPING"};
+        std::string screenDescriptions[] = {
+            "Shows out of the box shape types that can be drawn with LinaVG. All shapes also support filled & non-filled versions. "
+        };
         void DemoScreens::Initialize()
         {
-            defaultFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 28);
+            defaultFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 18);
+            bigFont     = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 42);
         }
 
         /// <summary>
@@ -54,10 +61,8 @@ namespace LinaVG
             StyleOptions style;
 
             // Draw background gradient.
-            style.m_color.m_start        = Vec4(0.55f, 0.772, 0.988f, 1.0f);
-            style.m_color.m_end          = Vec4(0.995f, 0.764f, 0.988f, 1.0f);
-            style.m_color.m_gradientType = LinaVG::GradientType::Vertical;
-            style.m_isFilled             = true;
+            style.m_color    = Utility::HexToVec4(0x818D92);
+            style.m_isFilled = true;
             LinaVG::DrawRect(Vec2(0.0f, 0.0f), screenSize, style, 0.0f, 0);
 
             // Draw stats window.
@@ -70,6 +75,8 @@ namespace LinaVG
             LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.17f), style, 0.0f, 1);
             style.m_onlyRoundTheseCorners.clear();
 
+            LinaVG::Internal::DrawDebugFontAtlas(Vec2(300, 500), defaultFont);
+
             // Draw stats texts.
             const std::string drawCountStr     = "Draw Calls: " + std::to_string(drawCount);
             const std::string triangleCountStr = "Tris Count: " + std::to_string(triangleCount);
@@ -79,7 +86,8 @@ namespace LinaVG
 
             Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 15);
             SDFTextOptions textStyle;
-            textStyle.m_textScale = 0.6f;
+            textStyle.m_textScale = 0.82f;
+            textStyle.m_font = defaultFont;
             LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
             textPosition.y += 25;
             LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
@@ -89,26 +97,56 @@ namespace LinaVG
             LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
 
             // Draw semi-transparent black rectangle on the bottom of the screen.
-            style.m_color    = Vec4(0, 0, 0, 0.5f);
-            style.m_rounding = 0.0f;
-            LinaVG::DrawRect(Vec2(0.0f, screenSize.y - screenSize.y * 0.1f), screenSize, style, 0.0f, 1);
+            style.m_color      = Vec4(0, 0, 0, 0.5f);
+            style.m_rounding   = 0.0f;
+            const Vec2 rectMin = Vec2(0.0f, screenSize.y - screenSize.y * 0.1f);
+            LinaVG::DrawRect(rectMin, screenSize, style, 0.0f, 1);
+
+            textStyle.m_font      = bigFont;
+            Vec2 size             = LinaVG::CalculateTextSize(screenTitles[currentScreen], textStyle);
+            textStyle.m_color     = Utility::HexToVec4(0xFCAA67);
+            textStyle.m_alignment = TextAlignment::Right;
+            LinaVG::DrawTextNormal(screenTitles[currentScreen], Vec2(screenSize.x - 20, rectMin.y + 20 + size.y / 2.0f), textStyle, 0, 2);
+            
+            textStyle.m_textScale = 1.0f;
+            textStyle.m_font = defaultFont;
+            textStyle.m_color = Vec4(1,1,1,1);
+            textStyle.m_alignment = TextAlignment::Left;
+            textStyle.m_wrapWidth = screenSize.x * 0.4f;
+            textStyle.m_newLineSpacing = 10;
+            const Vec2 descSize = LinaVG::CalculateTextSize(screenDescriptions[currentScreen], textStyle);
+            LinaVG::DrawTextNormal(screenDescriptions[currentScreen], Vec2(20, rectMin.y + 20), textStyle, 0, 2);
         }
 
         void DemoScreens::ShowDemoScreen1_Shapes()
         {
+            currentScreen = 0;
         }
         void DemoScreens::ShowDemoScreen2_Outlines()
         {
+            currentScreen = 1;
         }
         void DemoScreens::ShowDemoScreen3_Colors()
         {
+            currentScreen = 2;
         }
         void DemoScreens::ShowDemoScreen4_Lines()
         {
+            currentScreen = 3;
         }
         void DemoScreens::ShowDemoScreen5_Texts()
         {
+            currentScreen = 4;
         }
+        void DemoScreens::ShowDemoScreen6_DrawOrder()
+        {
+            currentScreen = 5;
+        }
+        void DemoScreens::ShowDemoScreen7_Clipping()
+        {
+            currentScreen = 6;
+        }
+
         void DemoScreens::PreEndFrame()
         {
             drawCount     = Config.m_debugCurrentDrawCalls;

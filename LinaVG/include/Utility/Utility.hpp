@@ -93,6 +93,7 @@ namespace LinaVG
         }
 
         int GetTextCharacterSize(const char* text);
+        Vec4 HexToVec4(int hex);
 
 	}
 }

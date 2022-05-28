@@ -41,6 +41,8 @@ namespace LinaVG
             void ShowDemoScreen3_Colors();
             void ShowDemoScreen4_Lines();
             void ShowDemoScreen5_Texts();
+            void ShowDemoScreen6_DrawOrder();
+            void ShowDemoScreen7_Clipping();
             void PreEndFrame();
 
         };

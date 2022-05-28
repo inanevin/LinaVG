@@ -76,10 +76,6 @@ namespace LinaVG::Internal
         char*         m_sdfTextFragShader         = nullptr;
         char*         m_simpleTextFragShader      = nullptr;
         bool          m_skipDraw                  = false;
-        BackendHandle m_lastClipPosX              = 0;
-        BackendHandle m_lastClipPosY              = 0;
-        BackendHandle m_lastClipSizeX             = 0;
-        BackendHandle m_lastClipSizeY             = 0;
     };
 
     extern LINAVG_API BackendData g_backendData;

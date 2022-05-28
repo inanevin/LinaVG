@@ -2880,8 +2880,8 @@ namespace LinaVG
                     Internal::DrawText(buf, font, append.c_str(), usedPos, offset, color, spacing, isGradient, scale);
                     append     = w.m_word + " ";
                     totalWidth = w.m_size.x + spaceAdvance;
-                    maxHeight  = 0.0f;
                     usedPos.y += maxHeight + newLineSpacing;
+                    maxHeight = 0.0f;
                 }
                 else
                 {
@@ -2994,10 +2994,14 @@ namespace LinaVG
             v2.m_pos = Vec2(x2 + offset.x + w, y2 + h + offset.y);
             v3.m_pos = Vec2(x2 + offset.x, y2 + h + offset.y);
 
-            v0.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y);
-            v1.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y);
-            v2.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
-            v3.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
+           //v0.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y );
+           //v1.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y);
+           //v2.m_uv = Vec2(ch.m_uv.x + ch.m_size.x / font->m_textureSize.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
+           //v3.m_uv = Vec2(ch.m_uv.x, ch.m_uv.y + ch.m_size.y / font->m_textureSize.y);
+            v0.m_uv = Vec2(ch.m_uv12.x, ch.m_uv12.y);
+            v1.m_uv = Vec2(ch.m_uv12.z, ch.m_uv12.w);
+            v2.m_uv = Vec2(ch.m_uv34.x, ch.m_uv34.y);
+            v3.m_uv = Vec2(ch.m_uv34.z, ch.m_uv34.w);
 
             buf->PushVertex(v0);
             buf->PushVertex(v1);
@@ -3084,8 +3088,8 @@ namespace LinaVG
 
                 usedPos.x  = Math::Max(usedPos.x, totalWidth - spaceAdvance);
                 totalWidth = w.m_size.x + spaceAdvance;
-                maxHeight  = 0.0f;
                 usedPos.y += maxHeight + opts->m_newLineSpacing;
+                maxHeight = 0.0f;
             }
             else
             {
