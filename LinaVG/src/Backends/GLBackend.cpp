@@ -440,13 +440,13 @@ namespace LinaVG::Backend
     {
         if (width == 0 || height == 0)
         {
-            x      = static_cast<GLint>(Config.m_displayPos.x);
-            y      = static_cast<GLint>(Config.m_displayPos.y);
-            width  = static_cast<GLint>(Config.m_displaySize.x);
-            height = static_cast<GLint>(Config.m_displaySize.y);
+            x      = static_cast<BackendHandle>(Config.m_displayPos.x);
+            y      = static_cast<BackendHandle>(Config.m_displayPos.y);
+            width  = static_cast<BackendHandle>(Config.m_displaySize.x);
+            height = static_cast<BackendHandle>(Config.m_displaySize.y);
         }
 
-        glScissor(x, Config.m_displaySize.y - (y + height), width, height);
+        glScissor(x, static_cast<GLint>(Config.m_displaySize.y - (y + height)), static_cast<GLint>(width), static_cast<GLint>(height));
     }
 
     void SaveAPIState()

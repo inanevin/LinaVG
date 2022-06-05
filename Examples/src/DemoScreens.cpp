@@ -38,18 +38,17 @@ namespace LinaVG
     namespace Examples
     {
 
-        FontHandle  defaultFont;
-        FontHandle  bigFont;
+        FontHandle  defaultFont, titleFont, titleFont2;
         int         drawCount, triangleCount, vertexCount = 0;
         int         currentScreen        = 0;
-        std::string screenTitles[]       = {"SHAPES", "COLORS", "OUTLINE", "LINES", "TEXTS", "Z-ORDER", "CLIPPING"};
+        std::string screenTitles[]       = {"SIKEYIM BOLE ISI BE YETER ARTIK", "COLORS", "OUTLINE", "LINES", "TEXTS", "Z-ORDER", "CLIPPING"};
         std::string screenDescriptions[] = {
-            "Shows out of the box shape types that can be drawn with LinaVG. All shapes also support filled & non-filled versions. "
-        };
+            "Shows out of the box shape types that can be drawn with LinaVG. All shapes also support filled & non-filled versions. "};
         void DemoScreens::Initialize()
         {
             defaultFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 18);
-            bigFont     = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 42);
+            titleFont   = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 25);
+            titleFont2  = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 25);
         }
 
         /// <summary>
@@ -75,8 +74,6 @@ namespace LinaVG
             LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.17f), style, 0.0f, 1);
             style.m_onlyRoundTheseCorners.clear();
 
-            LinaVG::Internal::DrawDebugFontAtlas(Vec2(300, 500), defaultFont);
-
             // Draw stats texts.
             const std::string drawCountStr     = "Draw Calls: " + std::to_string(drawCount);
             const std::string triangleCountStr = "Tris Count: " + std::to_string(triangleCount);
@@ -84,38 +81,61 @@ namespace LinaVG
             const std::string frameTimeStr     = "Frame: " + std::to_string(ExampleApp::Get()->GetFrameTimeRead()) + " ms";
             const std::string fpsStr           = "FPS: " + std::to_string(ExampleApp::Get()->GetFPS()) + " " + frameTimeStr;
 
-            Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 15);
-            SDFTextOptions textStyle;
-            textStyle.m_textScale = 0.82f;
-            textStyle.m_font = defaultFont;
-            LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-            textPosition.y += 25;
-            LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-            textPosition.y += 25;
-            LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
-            textPosition.y += 25;
-            LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            // Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 15);
+            // SDFTextOptions textStyle;
+            // textStyle.m_textScale = 0.82f;
+            // textStyle.m_font = defaultFont;
+            // LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            // textPosition.y += 25;
+            // LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            // textPosition.y += 25;
+            // LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+            // textPosition.y += 25;
+            // LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
 
             // Draw semi-transparent black rectangle on the bottom of the screen.
-            style.m_color      = Vec4(0, 0, 0, 0.5f);
-            style.m_rounding   = 0.0f;
+            style.m_color    = Vec4(0, 0, 0, 0.5f);
+            style.m_rounding = 0.0f;
+
             const Vec2 rectMin = Vec2(0.0f, screenSize.y - screenSize.y * 0.1f);
             LinaVG::DrawRect(rectMin, screenSize, style, 0.0f, 1);
 
-            textStyle.m_font      = bigFont;
-            Vec2 size             = LinaVG::CalculateTextSize(screenTitles[currentScreen], textStyle);
-            textStyle.m_color     = Utility::HexToVec4(0xFCAA67);
-            textStyle.m_alignment = TextAlignment::Right;
-            LinaVG::DrawTextNormal(screenTitles[currentScreen], Vec2(screenSize.x - 20, rectMin.y + 20 + size.y / 2.0f), textStyle, 0, 2);
-            
-            textStyle.m_textScale = 1.0f;
-            textStyle.m_font = defaultFont;
-            textStyle.m_color = Vec4(1,1,1,1);
-            textStyle.m_alignment = TextAlignment::Left;
-            textStyle.m_wrapWidth = screenSize.x * 0.4f;
-            textStyle.m_newLineSpacing = 10;
-            const Vec2 descSize = LinaVG::CalculateTextSize(screenDescriptions[currentScreen], textStyle);
-            LinaVG::DrawTextNormal(screenDescriptions[currentScreen], Vec2(20, rectMin.y + 20), textStyle, 0, 2);
+            SDFTextOptions sdfStyle;
+            const float    rectHeight = screenSize.y - rectMin.y;
+            sdfStyle.m_font           = titleFont;
+
+            // const Vec2 titlePos = Vec2(rectMin.x + 20, rectMin.y + rectHeight / 2.0f - size.y / 2.0f);
+            const Vec2 titlePos     = Vec2(rectMin.x + 20, rectMin.y);
+            sdfStyle.m_wrapWidth    = 250;
+            sdfStyle.m_color        = Utility::HexToVec4(0xFCAA67);
+            sdfStyle.m_sdfThickness = 0.55f;
+            sdfStyle.m_sdfSoftness  = 0.05f;
+
+            const Vec2 size         = LinaVG::CalculateTextSize(screenTitles[currentScreen], sdfStyle);
+            LinaVG::DrawTextSDF(screenTitles[currentScreen], titlePos, sdfStyle, 0, 2);
+            DrawPoint(Vec2(titlePos.x, titlePos.y), Vec4(1, 0, 0, 1));
+            DrawPoint(Vec2(titlePos.x + size.x, titlePos.y + size.y), Vec4(0, 1, 0, 1));
+
+            LinaVG::Internal::DrawDebugFontAtlas(Vec2(100, 100), titleFont);
+            LinaVG::Internal::DrawDebugFontAtlas(Vec2(700, 100), titleFont2);
+            TextOptions tt;
+           // tt.m_wrapWidth = 400;
+            tt.m_font      = titleFont2;
+            // const Vec2 size2 = LinaVG::CalculateTextSize(screenTitles[currentScreen], tt);
+            // DrawPoint(Vec2(titlePos.x + size2.x, titlePos.y + size2.y), Vec4(0, 1, 0, 1));
+
+         //   LinaVG::DrawTextNormal(screenTitles[currentScreen], titlePos, tt, 0, 2);
+            // DrawPoint(Vec2(rectMin.x + 10, rectMin.y + rectHeight / 2.0f), Vec4(1,0,0,1));
+            // DrawPoint(Vec2(rectMin.x + 10, rectMin.y + rectHeight / 2.0f - size.y / 2.0f), Vec4(1,1,0,1));
+            // DrawPoint(Vec2(rectMin.x + 10, rectMin.y + rectHeight / 2.0f + size.y / 2.0f), Vec4(1,1,0,1));
+            // textStyle.m_textScale = 1.0f;
+            // textStyle.m_font = defaultFont;
+            // textStyle.m_color = Vec4(1,1,1,1);
+            // textStyle.m_alignment = TextAlignment::Left;
+            // textStyle.m_wrapWidth = screenSize.x * 0.4f;
+            // textStyle.m_newLineSpacing = 10;
+            // const Vec2 descSize = LinaVG::CalculateTextSize(screenDescriptions[currentScreen], textStyle);
+            // LinaVG::DrawTextNormal(screenDescriptions[currentScreen], Vec2(20, rectMin.y + 20), textStyle, 0, 2);
         }
 
         void DemoScreens::ShowDemoScreen1_Shapes()

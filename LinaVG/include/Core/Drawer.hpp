@@ -436,11 +436,15 @@ namespace LinaVG
         /// </summary>
         void ParseTextIntoWords(Array<TextWord>& arr, const LINAVG_STRING& text, LinaVGFont* font, float scale, float spacing);
 
+        /// <summary>
+        /// Converts the given words into a set of lines based on wrapping.
+        /// </summary>
+        void ParseWordsIntoLines(Array<TextLine>& lines, const Array<TextWord>& words, LinaVGFont* font, float scale, float spacing, float wrapWidth);
 
         /// <summary>
         /// Process, parse & draw text according to options.
         /// </summary>
-        void ProcessText(DrawBuffer* buf, LinaVGFont* font, const LINAVG_STRING& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing);
+        void ProcessText(DrawBuffer* buf, LinaVGFont* font, const LINAVG_STRING& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness);
 
         /// <summary>
         /// DrawText implementation.
@@ -451,12 +455,14 @@ namespace LinaVG
         /// Returns the total text size for non-wrapped text.
         /// </summary>
         /// <returns></returns>
-        Vec2 CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing);
+        Vec2 CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing, float sdfThickness);
+
+        Vec2 CalcMaxCharOffset(const char* text, LinaVGFont* font, float scale);
 
         /// <summary>
         /// Returns the total text size for wrapped text.
         /// </summary>
-        Vec2 CalcTextSizeWrapped(const LINAVG_STRING& text, LinaVGFont*, TextOptions* opts);
+        Vec2 CalcTextSizeWrapped(const LINAVG_STRING& text, LinaVGFont*, float newLineSpacing, float wrapping, float scale, float spacing, float sdfThickness);
 
         void DrawDebugFontAtlas(const Vec2& pos, FontHandle handle);
 

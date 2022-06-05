@@ -53,6 +53,10 @@ namespace LinaVG
         Vec2 m_size    = Vec2(0.0f, 0.0f);
         Vec2 m_bearing = Vec2(0.0f, 0.0f);
         Vec2 m_advance = Vec2(0.0f, 0.0f);
+
+        /// Cleaned after load.
+        unsigned char* m_buffer    = nullptr;
+        float*         m_sdfBuffer = nullptr;
     };
 
     class LinaVGFont
@@ -100,7 +104,7 @@ namespace LinaVG
     /// <param name="file">TTF or OTF file.</param>
     /// <param name="loadAsSDF">Creates an SDF font.</param>
     /// <param name="size">Font height, width will automatically adjust.</param>
-    /// <param name="customRanges">Send custom ranges in utf16 or utf32 encoding e.g. 0x0E7 to load specific non-ascii characters or character sets.</param>
+    /// <param name="customRanges">Send custom ranges in UTF32 encoding, e.g. 0x1F028, to load specific characters or sets.</param>
     /// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
     /// <returns></returns>
     LINAVG_API FontHandle LoadFont(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0);
@@ -115,7 +119,7 @@ namespace LinaVG
     /// <param name="size">Binary font data size.</param>
     /// <param name="loadAsSDF">Creates an SDF font.</param>
     /// <param name="size">Font height, width will automatically adjust.</param>
-    /// <param name="customRanges">Send custom ranges in utf16 or utf32 encoding e.g. 0x0E7 to load specific non-ascii characters or character sets.</param>
+    /// <param name="customRanges">Send custom ranges in UTF32 encoding, e.g. 0x1F028, to load specific characters or sets.</param>
     /// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
     /// <returns></returns>
     LINAVG_API FontHandle LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0);
