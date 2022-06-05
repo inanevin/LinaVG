@@ -114,7 +114,7 @@ namespace LinaVG
             unsigned int w               = 3;
             unsigned int h               = 3;
             FT_GlyphSlot slot            = face->glyph;
-            int          textureXAdvance = 3.5f;
+            int          textureXAdvance = 3;
 
             auto setSizes = [&](FT_ULong c) {
                 auto           i     = FT_Get_Char_Index(face, c);

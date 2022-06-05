@@ -47,7 +47,7 @@ namespace LinaVG
         void DemoScreens::Initialize()
         {
             defaultFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 18);
-            titleFont   = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 25);
+            titleFont   = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 35);
             titleFont2  = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 25);
         }
 
@@ -105,13 +105,14 @@ namespace LinaVG
             sdfStyle.m_font           = titleFont;
 
             // const Vec2 titlePos = Vec2(rectMin.x + 20, rectMin.y + rectHeight / 2.0f - size.y / 2.0f);
-            const Vec2 titlePos     = Vec2(rectMin.x + 20, rectMin.y);
-            sdfStyle.m_wrapWidth    = 250;
-            sdfStyle.m_color        = Utility::HexToVec4(0xFCAA67);
-            sdfStyle.m_sdfThickness = 0.55f;
-            sdfStyle.m_sdfSoftness  = 0.05f;
+            const Vec2 titlePos       = Vec2(rectMin.x + 20, rectMin.y);
+            sdfStyle.m_newLineSpacing = 10.0f;
+            sdfStyle.m_wrapWidth      = 150;
+            sdfStyle.m_color          = Utility::HexToVec4(0xFCAA67);
+            sdfStyle.m_sdfThickness   = 0.55f;
+            sdfStyle.m_sdfSoftness    = 0.05f;
 
-            const Vec2 size         = LinaVG::CalculateTextSize(screenTitles[currentScreen], sdfStyle);
+            const Vec2 size = LinaVG::CalculateTextSize(screenTitles[currentScreen], sdfStyle);
             LinaVG::DrawTextSDF(screenTitles[currentScreen], titlePos, sdfStyle, 0, 2);
             DrawPoint(Vec2(titlePos.x, titlePos.y), Vec4(1, 0, 0, 1));
             DrawPoint(Vec2(titlePos.x + size.x, titlePos.y + size.y), Vec4(0, 1, 0, 1));
@@ -119,12 +120,12 @@ namespace LinaVG
             LinaVG::Internal::DrawDebugFontAtlas(Vec2(100, 100), titleFont);
             LinaVG::Internal::DrawDebugFontAtlas(Vec2(700, 100), titleFont2);
             TextOptions tt;
-           // tt.m_wrapWidth = 400;
-            tt.m_font      = titleFont2;
-            // const Vec2 size2 = LinaVG::CalculateTextSize(screenTitles[currentScreen], tt);
-            // DrawPoint(Vec2(titlePos.x + size2.x, titlePos.y + size2.y), Vec4(0, 1, 0, 1));
+            tt.m_wrapWidth   = 200;
+            tt.m_font        = titleFont2;
+            const Vec2 size2 = LinaVG::CalculateTextSize(screenTitles[currentScreen], tt);
+            DrawPoint(Vec2(titlePos.x + size2.x, titlePos.y + size2.y), Vec4(0, 1, 0, 1));
 
-         //   LinaVG::DrawTextNormal(screenTitles[currentScreen], titlePos, tt, 0, 2);
+            LinaVG::DrawTextNormal(screenTitles[currentScreen], titlePos, tt, 0, 2);
             // DrawPoint(Vec2(rectMin.x + 10, rectMin.y + rectHeight / 2.0f), Vec4(1,0,0,1));
             // DrawPoint(Vec2(rectMin.x + 10, rectMin.y + rectHeight / 2.0f - size.y / 2.0f), Vec4(1,1,0,1));
             // DrawPoint(Vec2(rectMin.x + 10, rectMin.y + rectHeight / 2.0f + size.y / 2.0f), Vec4(1,1,0,1));

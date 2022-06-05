@@ -45,8 +45,6 @@ Timestamp: 3/26/2022 10:36:46 AM
 namespace LinaVG
 {
 
-#include <vector>
-
 #define LINAVG_STRING std::string
 #include <unordered_map>
 #define LINAVG_MAP     std::unordered_map
@@ -123,7 +121,6 @@ namespace LinaVG
         float y = 0.0f;
     };
 
-
     LINAVG_API struct ThicknessGrad
     {
         ThicknessGrad(){};
@@ -144,189 +141,208 @@ namespace LinaVG
     /// </summary>
     /// <typeparam name="T"></typeparam>
     template <typename T>
-    class Array : public std::vector<T>
+    class Array
     {
     public:
-     //  T*  m_data     = nullptr;
-     //  int m_size     = 0;
-     //  int m_lastSize = 0;
-     //  int m_capacity = 0;
-     //
-     //  Array()
-     //  {
-     //      m_size = m_capacity = m_lastSize = 0;
-     //      m_data                           = nullptr;
-     //  }
-     //
-     //  Array(const Array&) = delete;
-     //  Array& operator=(const Array<T>& a) = delete;
-     //
-     //  ~Array()
-     //  {
-     //      clear();
-     //  }
-     //
-     //  inline void from(const Array& t)
-     //  {
-     //      clear();
-     //      for (int i = 0; i < t.m_size; i++)
-     //          push_back(t.m_data[i]);
-     //  }
-     //
-     //  inline void clear()
-     //  {
-     //      if (m_data)
-     //      {
-     //          m_size = m_capacity = m_lastSize = 0;
-     //          LINAVG_FREE(m_data);
-     //          m_data = nullptr;
-     //      }
-     //  }
-     //
-     //  inline bool isEmpty()
-     //  {
-     //      return m_size == 0;
-     //  }
-     //
-     //  inline int sizeBytes() const
-     //  {
-     //      return m_size * (int)sizeof(T);
-     //  }
-     //
-     //  inline T* begin()
-     //  {
-     //      return m_data;
-     //  }
-     //
-     //  inline T* end()
-     //  {
-     //      return m_data + m_size;
-     //  }
-     //
-     //  inline int growCapacity(int sz) const
-     //  {
-     //      const int newCapacity = m_capacity ? (m_capacity + m_capacity / 2) : 8;
-     //      return newCapacity > sz ? newCapacity : sz;
-     //  }
-     //
-     //  inline void resize(int newSize)
-     //  {
-     //      if (newSize > m_capacity)
-     //          reserve(growCapacity(newSize));
-     //      m_size = newSize;
-     //  }
-     //
-     //  inline void resize(int newSize, const T& v)
-     //  {
-     //      if (newSize > m_capacity)
-     //          reserve(growCapacity(newSize));
-     //      if (newSize > m_size)
-     //          for (int n = m_size; n < newSize; n++)
-     //              LINAVG_MEMCPY(&m_data[n], &v, sizeof(v));
-     //      m_size = newSize;
-     //  }
-     //
-     //  inline void reserve(int newCapacity)
-     //  {
-     //      if (newCapacity < m_capacity)
-     //          return;
-     //      T* newData = (T*)LINAVG_MALLOC((size_t)newCapacity * sizeof(T));
-     //
-     //      if (m_data)
-     //      {
-     //          if (newData != 0)
-     //              LINAVG_MEMCPY(newData, m_data, (size_t)m_size * sizeof(T));
-     //          LINAVG_FREE(m_data);
-     //      }
-     //      m_data     = newData;
-     //      m_capacity = newCapacity;
-     //  }
-     //
-     //  inline void checkGrow()
-     //  {
-     //      if (m_size == m_capacity)
-     //          reserve(growCapacity(m_size + 1));
-     //  }
-     //
-     //  inline T* push_back(const T& v)
-     //  {
-     //      checkGrow();
-     //      auto s = sizeof(v);
-     //      LINAVG_MEMCPY(&m_data[m_size], &v, s);
-     //      m_size++;
-     //      return last();
-     //  }
-     //
-     //  inline T* push_back_copy(const T& v)
-     //  {
-     //      checkGrow();
-     //      auto s         = sizeof(v);
-     //      m_data[m_size] = v;
-     //      m_size++;
-     //      return last();
-     //  }
-     //
-     //  inline T* erase(const T* it)
-     //  {
-     //      _ASSERT(it >= m_data && it < m_data + m_size);
-     //      const ptrdiff_t off = it - m_data;
-     //      std::memmove(m_data + off, m_data + off + 1, ((size_t)m_size - (size_t)off - 1) * sizeof(T));
-     //      m_size--;
-     //      return m_data + off;
-     //  }
-     //
-     //  inline T* last()
-     //  {
-     //      return &m_data[m_size - 1];
-     //  }
-     //
-     //  inline T& last_ref()
-     //  {
-     //      return m_data[m_size - 1];
-     //  }
-     //
-     //  inline T& operator[](int i)
-     //  {
-     //      _ASSERT(i >= 0 && i < m_capacity);
-     //      return m_data[i];
-     //  }
-     //
-     //  inline const T& operator[](int i) const
-     //  {
-     //      _ASSERT(i >= 0 && i < m_capacity);
-     //      return m_data[i];
-     //  }
-     //
-     //  inline int findIndex(const T& t) const
-     //  {
-     //      for (int i = 0; i < m_size; i++)
-     //      {
-     //          if (m_data[i] == t)
-     //              return i;
-     //      }
-     //
-     //      return -1;
-     //  }
-     //
-     //  inline T* findAddr(const T& v)
-     //  {
-     //      T*       data     = m_data;
-     //      const T* data_end = m_data + m_size;
-     //      while (data < data_end)
-     //          if (*data == v)
-     //              break;
-     //          else
-     //              ++data;
-     //      return data;
-     //  }
-     //
-     //  inline void swap(int start, int end)
-     //  {
-     //      _ASSERT(start > -1 && start < m_size && end > -1 && end < m_size);
-     //      T temp        = m_data[start];
-     //      m_data[start] = m_data[end];
-     //      m_data[end]   = temp;
-     //  }
+        T*                        m_data     = nullptr;
+        int                       m_size     = 0;
+        int                       m_lastSize = 0;
+        int                       m_capacity = 0;
+        typedef T                 value_type;
+        typedef value_type*       iterator;
+        typedef const value_type* const_iterator;
+        Array()
+        {
+            m_size = m_capacity = m_lastSize = 0;
+            m_data                           = nullptr;
+        }
+
+        Array(const Array<T>& other)
+        {
+            resize(other.m_size);
+            LINAVG_MEMCPY(m_data, other.m_data, size_t(other.m_size) * sizeof(T));
+        }
+
+        // inline Array(const Array<T>& src)
+        // {
+        //     m_size = m_capacity = m_lastSize = 0;
+        //     m_data = NULL;
+        //     operator        =(src);
+        // }
+
+        inline Array<T>& operator=(const Array<T>& other)
+        {
+            clear();
+            resize(other.m_size);
+            LINAVG_MEMCPY(m_data, other.m_data, size_t(other.m_size) * sizeof(T));
+            return *this;
+        }
+        ~Array()
+        {
+            clear();
+        }
+
+        inline void from(const Array& t)
+        {
+            clear();
+            for (int i = 0; i < t.m_size; i++)
+                push_back(t.m_data[i]);
+        }
+
+        inline void clear()
+        {
+            if (m_data)
+            {
+                m_size = m_capacity = m_lastSize = 0;
+                LINAVG_FREE(m_data);
+                m_data = nullptr;
+            }
+        }
+
+        inline bool isEmpty()
+        {
+            return m_size == 0;
+        }
+
+        inline int sizeBytes() const
+        {
+            return m_size * (int)sizeof(T);
+        }
+
+        inline T* begin()
+        {
+            return m_data;
+        }
+
+        inline T* end()
+        {
+            return m_data + m_size;
+        }
+
+        inline int growCapacity(int sz) const
+        {
+            const int newCapacity = m_capacity ? (m_capacity + m_capacity / 2) : 8;
+            return newCapacity > sz ? newCapacity : sz;
+        }
+
+        inline void resize(int newSize)
+        {
+            if (newSize > m_capacity)
+                reserve(growCapacity(newSize));
+            m_size = newSize;
+        }
+
+        inline void resize(int newSize, const T& v)
+        {
+            if (newSize > m_capacity)
+                reserve(growCapacity(newSize));
+            if (newSize > m_size)
+                for (int n = m_size; n < newSize; n++)
+                    LINAVG_MEMCPY(&m_data[n], &v, sizeof(v));
+            m_size = newSize;
+        }
+
+        inline void reserve(int newCapacity)
+        {
+            if (newCapacity < m_capacity)
+                return;
+            T* newData = (T*)LINAVG_MALLOC((size_t)newCapacity * sizeof(T));
+
+            if (m_data)
+            {
+                if (newData != 0)
+                    LINAVG_MEMCPY(newData, m_data, (size_t)m_size * sizeof(T));
+                LINAVG_FREE(m_data);
+            }
+            m_data     = newData;
+            m_capacity = newCapacity;
+        }
+
+        inline void checkGrow()
+        {
+            if (m_size == m_capacity)
+                reserve(growCapacity(m_size + 1));
+        }
+
+        inline T* push_back(const T& v)
+        {
+            checkGrow();
+            auto s = sizeof(v);
+            LINAVG_MEMCPY(&m_data[m_size], &v, s);
+            m_size++;
+            return last();
+        }
+
+        inline T* push_back_copy(const T& v)
+        {
+            checkGrow();
+            auto s         = sizeof(v);
+            m_data[m_size] = v;
+            m_size++;
+            return last();
+        }
+
+        inline T* erase(const T* it)
+        {
+            _ASSERT(it >= m_data && it < m_data + m_size);
+            const ptrdiff_t off = it - m_data;
+            std::memmove(m_data + off, m_data + off + 1, ((size_t)m_size - (size_t)off - 1) * sizeof(T));
+            m_size--;
+            return m_data + off;
+        }
+
+        inline T* last()
+        {
+            return &m_data[m_size - 1];
+        }
+
+        inline T& last_ref()
+        {
+            return m_data[m_size - 1];
+        }
+
+        inline T& operator[](int i)
+        {
+            _ASSERT(i >= 0 && i < m_capacity);
+            return m_data[i];
+        }
+
+        inline const T& operator[](int i) const
+        {
+            _ASSERT(i >= 0 && i < m_capacity);
+            return m_data[i];
+        }
+
+        inline int findIndex(const T& t) const
+        {
+            for (int i = 0; i < m_size; i++)
+            {
+                if (m_data[i] == t)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        inline T* findAddr(const T& v)
+        {
+            T*       data     = m_data;
+            const T* data_end = m_data + m_size;
+            while (data < data_end)
+                if (*data == v)
+                    break;
+                else
+                    ++data;
+            return data;
+        }
+
+        inline void swap(int start, int end)
+        {
+            _ASSERT(start > -1 && start < m_size && end > -1 && end < m_size);
+            T temp        = m_data[start];
+            m_data[start] = m_data[end];
+            m_data[end]   = temp;
+        }
     };
 
     LINAVG_API enum class OutlineDrawDirection
@@ -426,7 +442,7 @@ namespace LinaVG
         /// <summary>
         /// Spacing used if the text is word-wrapped and dropped to a new line.
         /// </summary>
-        float m_newLineSpacing = 0.0f;
+        float m_newLineSpacing = 5.0f;
 
         /// <summary>
         /// Text will wrap at, e.g. go to a new line when it reaches = position.x + m_wrapWidth
@@ -515,7 +531,7 @@ namespace LinaVG
             m_thickness = opts.m_thickness;
             m_rounding  = opts.m_rounding;
 
-            //m_onlyRoundTheseCorners.from(opts.m_onlyRoundTheseCorners);
+            m_onlyRoundTheseCorners.from(opts.m_onlyRoundTheseCorners);
             m_outlineOptions  = opts.m_outlineOptions;
             m_textureHandle   = opts.m_textureHandle;
             m_textureUVTiling = opts.m_textureUVTiling;
@@ -774,8 +790,7 @@ namespace LinaVG
 
         inline Vertex* LastVertex()
         {
-            return &m_vertexBuffer[m_vertexBuffer.size() - 1];
-            //return m_vertexBuffer.last();
+            return m_vertexBuffer.last();
         }
     };
 

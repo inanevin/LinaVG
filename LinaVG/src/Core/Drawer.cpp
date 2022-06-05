@@ -2806,43 +2806,55 @@ namespace LinaVG
         return sourceBuffer;
     }
 
-    void Internal::ParseTextIntoWords(Array<TextWord>& arr, const LINAVG_STRING& text, LinaVGFont* font, float scale, float spacing)
+    void Internal::ParseTextIntoWords(Array<TextPart*>& arr, const LINAVG_STRING& text, LinaVGFont* font, float scale, float spacing)
     {
-        TextWord tw;
-        bool     added = false;
+        bool          added = false;
+        Vec2          size  = Vec2(0.0f, 0.0f);
+        LINAVG_STRING word  = "";
         for (auto x : text)
         {
             if (x == ' ')
             {
                 if (added)
-                    arr.push_back(tw);
-                added     = false;
-                tw.m_size = Vec2(0.0f, 0.0f);
-                tw.m_word = "";
+                {
+                    TextPart* w = new TextPart();
+                    w->m_size   = size;
+                    w->m_str   = word;
+                    arr.push_back(w);
+                }
+                added = false;
+                size  = Vec2(0.0f, 0.0f);
+                word  = "";
             }
             else
             {
-                auto& ch    = font->m_characterGlyphs[x];
-                tw.m_size.y = Math::Max(tw.m_size.y, ch.m_size.y * scale);
-                tw.m_size.x += ch.m_advance.x * scale + spacing;
-                tw.m_word = tw.m_word + x;
-                added     = true;
+                auto& ch = font->m_characterGlyphs[x];
+                size.y   = Math::Max(size.y, ch.m_size.y * scale);
+                size.x += ch.m_advance.x * scale + spacing;
+                word  = word + x;
+                added = true;
             }
         }
 
-        arr.push_back(tw);
+        TextPart* w = new TextPart();
+        w->m_size   = size;
+        w->m_str   = word;
+        arr.push_back(w);
     }
 
-    void Internal::ParseWordsIntoLines(Array<TextLine>& lines, const Array<TextWord>& words, LinaVGFont* font, float scale, float spacing, float wrapWidth)
+    void Internal::ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, LinaVGFont* font, float scale, float spacing, float wrapWidth, float sdfThickness)
     {
-        const float spaceAdvance = font->m_spaceAdvance * scale * spacing;
-        float       maxHeight  = 0.0f;
-        float       totalWidth = 0.0f;
-        LINAVG_STRING append = "";
+        const float   spaceAdvance = font->m_spaceAdvance * scale + spacing;
+        float         maxHeight    = 0.0f;
+        float         totalWidth   = 0.0f;
+        LINAVG_STRING append       = "";
+        float remap = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f) : 0.0f;
+        const Vec2 offset = Internal::CalcMaxCharOffset(words[0]->m_str.c_str(), font, scale);
+
         for (int i = 0; i < words.m_size; i++)
         {
-            totalWidth += words[i].m_size.x;
-            maxHeight = Math::Max(words[i].m_size.y, maxHeight);
+            totalWidth += words[i]->m_size.x;
+            maxHeight = Math::Max(words[i]->m_size.y - offset.y * remap, maxHeight);
 
             if (totalWidth > wrapWidth)
             {
@@ -2850,26 +2862,26 @@ namespace LinaVG
                 if (i == 0)
                     break;
 
-                TextLine newLine;
-                newLine.m_size.x = totalWidth;
-                newLine.m_size.y = maxHeight;
-                newLine.m_line = append;
+                TextPart* newLine = new TextPart();
+                newLine->m_size.x = totalWidth - words[i]->m_size.x - spaceAdvance;
+                newLine->m_size.y = maxHeight;
+                newLine->m_str   = append;
                 lines.push_back(newLine);
-                append = words[i].m_word + " ";
-                totalWidth  = words[i].m_size.x + spaceAdvance;
-                maxHeight   = words[i].m_size.y;
+                append     = words[i]->m_str + " ";
+                totalWidth = words[i]->m_size.x + spaceAdvance;
+                maxHeight  = words[i]->m_size.y - offset.y * remap;
             }
             else
             {
                 totalWidth += spaceAdvance;
-                append += words[i].m_word + " ";
+                append += words[i]->m_str + " ";
             }
         }
 
-        TextLine newLine;
-        newLine.m_size.x = totalWidth;
-        newLine.m_size.y = maxHeight;
-        newLine.m_line = append;
+        TextPart* newLine = new TextPart();
+        newLine->m_size.x = totalWidth;
+        newLine->m_size.y = maxHeight;
+        newLine->m_str   = append;
         lines.push_back(newLine);
     }
 
@@ -2895,22 +2907,31 @@ namespace LinaVG
         }
         else
         {
-            Array<TextWord> arr;
-            Array<TextLine> lines;
+            Array<TextPart*> arr;
+            Array<TextPart*> lines;
+            arr.reserve(10);
+            lines.reserve(5);
+
             ParseTextIntoWords(arr, text, font, scale, spacing);
-            ParseWordsIntoLines(lines, arr, font, scale, spacing, wrapWidth);
-            Config.m_errorCallback("--------------------------");
+            ParseWordsIntoLines(lines, arr, font, scale, spacing, wrapWidth, sdfThickness);
+
             for (int i = 0; i < lines.m_size; i++)
             {
-                Config.m_errorCallback(lines[i].m_line.c_str());
                 if (alignment == TextAlignment::Center)
                     usedPos.x = pos.x - size.x / 2.0f;
                 else if (alignment == TextAlignment::Right)
                     usedPos.x = pos.x - size.x;
 
-                Internal::DrawText(buf, font, lines[i].m_line.c_str(), usedPos, offset, color, spacing, isGradient, scale);
-                usedPos.y += lines[i].m_size.y + newLineSpacing;
+                Internal::DrawText(buf, font, lines[i]->m_str.c_str(), usedPos, offset, color, spacing, isGradient, scale);
+                usedPos.y += lines[i]->m_size.y + newLineSpacing;
+                delete lines[i];
             }
+
+            for (int i = 0; i < arr.m_size; i++)
+                delete arr[i];
+
+            arr.clear();
+            lines.clear();
         }
 
         if (rotateAngle != 0.0f)
@@ -3108,20 +3129,48 @@ namespace LinaVG
 
     Vec2 Internal::CalcTextSizeWrapped(const LINAVG_STRING& text, LinaVGFont* font, float newLineSpacing, float wrapWidth, float scale, float spacing, float sdfThickness)
     {
-        Array<TextWord> arr;
-        Array<TextLine> lines;
+        Array<TextPart*> arr;
+        Array<TextPart*> lines;
+        arr.reserve(10);
+        lines.reserve(5);
         ParseTextIntoWords(arr, text, font, scale, spacing);
-        ParseWordsIntoLines(lines, arr, font, scale, spacing, wrapWidth);
+        ParseWordsIntoLines(lines, arr, font, scale, spacing, wrapWidth, sdfThickness);
 
-        Vec2 size = Vec2(0.0f, 0.0f);
-        for (int i = 0; i < lines.m_size; i++)
+        if (lines.m_size == 1)
         {
-            LINAVG_STRING aq = lines[i].m_line;
-            const Vec2 calcSize = lines[i].m_size;
-            size.x              = Math::Max(calcSize.x, size.x);
-            size.y += calcSize.y + newLineSpacing;
+            const Vec2 finalSize = Internal::CalcTextSize(lines[0]->m_str.c_str(), font, scale, spacing, sdfThickness);
+
+            for (int i = 0; i < lines.m_size; i++)
+                delete lines[i];
+
+            for (int i = 0; i < arr.m_size; i++)
+                delete arr[i];
+
+            arr.clear();
+            lines.clear();
+            return finalSize;
         }
 
+        Vec2       size   = Vec2(0.0f, 0.0f);
+
+        for (int i = 0; i < lines.m_size; i++)
+        {
+            const Vec2 calcSize = lines[i]->m_size;
+            size.x              = Math::Max(calcSize.x, size.x);
+            size.y += calcSize.y;
+
+            if(i < lines.m_size - 1)
+                size.y += newLineSpacing;
+
+            delete lines[i];
+        }
+
+        for (int i = 0; i < arr.m_size; i++)
+            delete arr[i];
+
+        arr.clear();
+        lines.clear();
+        // size.y -= offset.y * remap;
         return size;
     }
 

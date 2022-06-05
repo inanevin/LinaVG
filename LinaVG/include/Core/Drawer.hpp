@@ -51,15 +51,9 @@ namespace LinaVG
         int m_indices[3];
     };
 
-    struct TextWord
+    struct TextPart
     {
-        LINAVG_STRING m_word = "";
-        Vec2        m_size = Vec2(0.0f, 0.0f);
-    };
-
-    struct TextLine
-    {
-        LINAVG_STRING m_line = "";
+        LINAVG_STRING m_str = "";
         Vec2        m_size = Vec2(0.0f, 0.0f);
     };
 
@@ -434,12 +428,12 @@ namespace LinaVG
         /// <summary>
         /// Break down text into words, with each word having calculated size properties.
         /// </summary>
-        void ParseTextIntoWords(Array<TextWord>& arr, const LINAVG_STRING& text, LinaVGFont* font, float scale, float spacing);
+        void ParseTextIntoWords(Array<TextPart*>& arr, const LINAVG_STRING& text, LinaVGFont* font, float scale, float spacing);
 
         /// <summary>
         /// Converts the given words into a set of lines based on wrapping.
         /// </summary>
-        void ParseWordsIntoLines(Array<TextLine>& lines, const Array<TextWord>& words, LinaVGFont* font, float scale, float spacing, float wrapWidth);
+        void ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, LinaVGFont* font, float scale, float spacing, float wrapWidth, float sdfThickness);
 
         /// <summary>
         /// Process, parse & draw text according to options.
@@ -457,6 +451,10 @@ namespace LinaVG
         /// <returns></returns>
         Vec2 CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing, float sdfThickness);
 
+        /// <summary>
+        /// Max character offset from the quad corners for SDF characters.
+        /// </summary>
+        /// <returns></returns>
         Vec2 CalcMaxCharOffset(const char* text, LinaVGFont* font, float scale);
 
         /// <summary>
