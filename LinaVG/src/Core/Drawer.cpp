@@ -2492,7 +2492,7 @@ namespace LinaVG
         for (int i = 0; i < vertexCount; i++)
         {
             Vertex v;
-            v.m_col = opts.m_outlineOptions.m_color.m_start;
+            v.m_col = isAAOutline ? sourceBuffer->m_vertexBuffer[indicesOrder[i]].m_col : opts.m_outlineOptions.m_color.m_start;
             v.m_pos = sourceBuffer->m_vertexBuffer[indicesOrder[i]].m_pos;
             v.m_uv  = sourceBuffer->m_vertexBuffer[indicesOrder[i]].m_uv;
 
@@ -2515,7 +2515,7 @@ namespace LinaVG
             const int current = destBufStart + i;
             Vertex    v;
             v.m_uv  = destBuf->m_vertexBuffer[current].m_uv;
-            v.m_col = opts.m_outlineOptions.m_color.m_end;
+            v.m_col = isAAOutline ? sourceBuffer->m_vertexBuffer[indicesOrder[i]].m_col : opts.m_outlineOptions.m_color.m_end;
 
             if (isAAOutline)
                 v.m_col.w = 0.0f;
