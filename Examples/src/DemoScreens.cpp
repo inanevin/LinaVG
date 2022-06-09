@@ -143,7 +143,7 @@ namespace LinaVG
             Vec2 startPos           = Vec2(screenSize.x * 0.05f, screenSize.y * 0.05f);
 
             //*************************** ROW 1 ***************************/
-           
+
             // Rect - filled
             LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
 
@@ -374,106 +374,110 @@ namespace LinaVG
 
             StyleOptions defaultStyle;
             defaultStyle.m_isFilled = true;
-            defaultStyle.m_outlineOptions.m_thickness = 3.0f;
+
             //*************************** ROW 1 ***************************/
 
             // Filled
-     //      defaultStyle.m_thickness = 5.0f;
-     //      defaultStyle.m_outlineOptions.m_color     = Vec4(0, 0, 0, 1);
-     //      LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
-     //
-     //      // Non filled outer
-     //      startPos.x += 200;
-     //      defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
-     //      defaultStyle.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
-     //      defaultStyle.m_isFilled                       = false;
-     //      LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
-     //
-     //      // Non filled inner
-     //      startPos.x += 200;
-     //      defaultStyle.m_outlineOptions.m_color         = Vec4(0, 0.5f, 0, 1);
-     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
-     //      defaultStyle.m_isFilled                       = false;
-     //      LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
-     //
-     //      // Both
-     //      startPos.x += 200;
-     //      defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
-     //      defaultStyle.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
-     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Both;
-     //      defaultStyle.m_isFilled                       = false;
-     //      LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
-     //
-     //      //*************************** ROW 2 ***************************/
-     //
-     //      // Filled
-     //      startPos.x = screenSize.x * 0.05f;
-     //      startPos.y += 200;
-     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-     //      defaultStyle.m_rounding = 0.4f;
-     //      defaultStyle.m_isFilled = true;
-     //      defaultStyle.m_thickness = 8.0f;
-     //      defaultStyle.m_outlineOptions.m_color = Vec4(0, 0, 0, 1);
-     //      defaultStyle.m_outlineOptions.m_thickness = 5.0f;
-     //      LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
-     //
-     //      // Non filled outer
-     //      startPos.x += 200;
-     //      defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
-     //      defaultStyle.m_outlineOptions.m_color.m_end = Vec4(0, 0, 1, 1);
-     //      defaultStyle.m_isFilled = false;
-     //      LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
-     //
-     //      // Non filled inner
-     //      startPos.x += 200;
-     //      defaultStyle.m_outlineOptions.m_color = Vec4(0, 0.5f, 0, 1);
-     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
-     //      defaultStyle.m_isFilled = false;
-     //      LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
-     //
-     //      // Both
-     //      startPos.x += 200;
-     //      defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
-     //      defaultStyle.m_outlineOptions.m_color.m_end = Vec4(0, 0, 1, 1);
-     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Both;
-     //      defaultStyle.m_isFilled = false;
-     //      LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
-     //
-     //      //*************************** ROW 3 ***************************/
-     //
-     //      // Filled
-     //      startPos.x = screenSize.x * 0.05f;
-     //      startPos.y += 200;
-     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-     //      defaultStyle.m_rounding = 0.4f;
-     //      defaultStyle.m_isFilled = true;
-     //      defaultStyle.m_thickness = 8.0f;
-     //      defaultStyle.m_outlineOptions.m_color = Vec4(0, 0, 0, 1);
-     //      defaultStyle.m_outlineOptions.m_thickness = 5.0f;
-     //      LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 360.0f, 1);
-     //
-     //      // outer
-       startPos.x += 200;
-       defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
-       defaultStyle.m_outlineOptions.m_color.m_end = Vec4(0, 0, 1, 1);
-       defaultStyle.m_isFilled = true;
-       defaultStyle.m_outlineOptions.m_thickness = 0.0f;
-       LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 360.0f, 1);
-     //
-     //      // Non filled inner
-     //      startPos.x += 200;
-     //      defaultStyle.m_outlineOptions.m_color = Vec4(0, 0.5f, 0, 1);
-     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
-     //      defaultStyle.m_isFilled = false;
-     //      LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 90.0f, 360.0f, 1);
-     //
-     //      // Both
-    //   startPos.x += 200;
-    //   defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
-    //   defaultStyle.m_outlineOptions.m_color.m_end = Vec4(0, 0, 1, 1);
-    //   defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Both;
-    //   defaultStyle.m_isFilled = false;
-    //   LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 180.0f, 360.0f, 1);
+            defaultStyle.m_thickness                  = 5.0f;
+            defaultStyle.m_outlineOptions.m_color     = Vec4(0, 0, 0, 1);
+            defaultStyle.m_outlineOptions.m_thickness = 3.0f;
+            LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Non filled outer
+            startPos.x += 200;
+            defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+            defaultStyle.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
+            defaultStyle.m_isFilled                       = false;
+            LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Non filled inner
+            startPos.x += 200;
+            defaultStyle.m_outlineOptions.m_color         = Vec4(0, 0.5f, 0, 1);
+            defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
+            defaultStyle.m_isFilled                       = false;
+            LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Both
+            startPos.x += 200;
+            defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+            defaultStyle.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
+            defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Both;
+            defaultStyle.m_isFilled                       = false;
+            LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            //*************************** ROW 2 ***************************/
+
+            // Filled
+            startPos.x = screenSize.x * 0.05f;
+            startPos.y += 200;
+            defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
+            defaultStyle.m_rounding                       = 0.4f;
+            defaultStyle.m_isFilled                       = true;
+            defaultStyle.m_thickness                      = 8.0f;
+            defaultStyle.m_outlineOptions.m_color         = Vec4(0, 0, 0, 1);
+            defaultStyle.m_outlineOptions.m_thickness     = 5.0f;
+            LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Non filled outer
+            startPos.x += 200;
+            defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+            defaultStyle.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
+            defaultStyle.m_isFilled                       = false;
+            LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Non filled inner
+            startPos.x += 200;
+            defaultStyle.m_outlineOptions.m_color         = Vec4(0, 0.5f, 0, 1);
+            defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
+            defaultStyle.m_isFilled                       = false;
+            LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Both
+            startPos.x += 200;
+            defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+            defaultStyle.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
+            defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Both;
+            defaultStyle.m_isFilled                       = false;
+            LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            //*************************** ROW 3 ***************************/
+
+            // Filled
+            startPos.x = screenSize.x * 0.05f;
+            startPos.y += 200;
+            defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
+            defaultStyle.m_rounding                       = 0.4f;
+            defaultStyle.m_isFilled                       = true;
+            defaultStyle.m_thickness                      = 8.0f;
+            defaultStyle.m_outlineOptions.m_color         = Vec4(0, 0, 0, 1);
+            defaultStyle.m_outlineOptions.m_thickness     = 5.0f;
+            LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 360.0f, 1);
+
+            // outer
+            startPos.x += 200;
+            defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+            defaultStyle.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
+            defaultStyle.m_color.m_gradientType           = GradientType::Radial;
+            defaultStyle.m_color.m_start                  = Vec4(0.5f, 1.0f, 0.5f, 1.0f);
+            defaultStyle.m_isFilled                       = true;
+            LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.45f, 245.0f, 1);
+
+            // Non filled inner
+            startPos.x += 200;
+            defaultStyle.m_outlineOptions.m_color         = Vec4(0, 0.5f, 0, 1);
+            defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
+            defaultStyle.m_isFilled                       = false;
+            defaultStyle.m_color.m_gradientType           = GradientType::Vertical;
+            defaultStyle.m_color                          = Vec4(1, 1, 1, 1);
+            LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 90.0f, 360.0f, 1);
+
+            // Both
+            startPos.x += 200;
+            defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+            defaultStyle.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
+            defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Both;
+            defaultStyle.m_isFilled                       = false;
+            LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 180.0f, 360.0f, 1);
 
             //*************************** ROW 4 ***************************/
 

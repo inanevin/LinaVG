@@ -267,7 +267,7 @@ namespace LinaVG
             for (int i = totalUpperIndices.m_size - 1; i > -1; i--)
                 indicesOrder.push_back(totalUpperIndices[i]);
 
-            Internal::DrawOutlineAroundShape(destBuf, style, &indicesOrder[0], indicesOrder.m_size, style.m_outlineOptions.m_thickness, false, drawOrder, false);
+            Internal::DrawOutlineAroundShape(destBuf, style, &indicesOrder[0], indicesOrder.m_size, style.m_outlineOptions.m_thickness, false, drawOrder, Internal::OutlineCallType::Normal);
         }
         else if (Config.m_enableAA)
         {
@@ -281,7 +281,7 @@ namespace LinaVG
             for (int i = totalUpperIndices.m_size - 1; i > -1; i--)
                 indicesOrder.push_back(totalUpperIndices[i]);
 
-            Internal::DrawOutlineAroundShape(destBuf, opts2, &indicesOrder[0], indicesOrder.m_size, opts2.m_outlineOptions.m_thickness, false, drawOrder, true);
+            Internal::DrawOutlineAroundShape(destBuf, opts2, &indicesOrder[0], indicesOrder.m_size, opts2.m_outlineOptions.m_thickness, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -781,7 +781,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 4 : 8, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 4 : 8, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -821,7 +821,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 4 : 8, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 4 : 8, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -850,7 +850,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 4 : 8, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 4 : 8, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -948,7 +948,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? vertexCount : vertexCount * 2, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? vertexCount : vertexCount * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1019,7 +1019,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 3 : 6, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 3 : 6, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1055,7 +1055,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 3 : 6, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 3 : 6, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1085,7 +1085,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 3 : 6, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? 3 : 6, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1224,7 +1224,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? vertexCount : vertexCount * 2, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? vertexCount : vertexCount * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1282,7 +1282,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? n : n * 2, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? n : n * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1312,7 +1312,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? n : n * 2, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? n : n * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1341,7 +1341,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? n : n * 2, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? n : n * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1437,12 +1437,19 @@ namespace LinaVG
 
             if (opts.m_isFilled)
             {
-                Array<int> indices;
+                if (isFullCircle)
+                {
+                    buf = DrawOutline(buf, opts, opts.m_isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, Internal::OutlineCallType::AA);
+                }
+                else
+                {
+                    Array<int> indices;
 
-                for (int i = 0; i < v.m_size; i++)
-                    indices.push_back(startIndex + i);
+                    for (int i = 0; i < v.m_size; i++)
+                        indices.push_back(startIndex + i);
 
-                buf = DrawOutlineAroundShape(buf, opts2, &indices[0], v.m_size, opts2.m_outlineOptions.m_thickness, true, drawOrder, true);
+                    buf = DrawOutlineAroundShape(buf, opts2, &indices[0], v.m_size, opts2.m_outlineOptions.m_thickness, true, drawOrder, Internal::OutlineCallType::AA);
+                }
             }
             else if (opts.m_outlineOptions.m_drawDirection == OutlineDrawDirection::Both)
             {
@@ -1456,10 +1463,10 @@ namespace LinaVG
                 for (int i = fullSize - 1; i > halfSize - 1; i--)
                     indices.push_back(startIndex + i);
 
-                buf = DrawOutlineAroundShape(buf, opts2, &indices[0], halfSize * 2, opts2.m_outlineOptions.m_thickness, false, drawOrder, true);
+                buf = DrawOutlineAroundShape(buf, opts2, &indices[0], halfSize * 2, opts2.m_outlineOptions.m_thickness, false, drawOrder, Internal::OutlineCallType::AA);
             }
             else
-                buf = DrawOutline(buf, opts2, opts2.m_isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, true);
+                buf = DrawOutline(buf, opts2, opts2.m_isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1526,12 +1533,17 @@ namespace LinaVG
 
             if (opts.m_isFilled)
             {
-                Array<int> indices;
+                if (isFullCircle)
+                    buf = DrawOutline(buf, opts, opts.m_isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, Internal::OutlineCallType::AA);
+                else
+                {
+                    Array<int> indices;
 
-                for (int i = 0; i < v.m_size; i++)
-                    indices.push_back(startIndex + i);
+                    for (int i = 0; i < v.m_size; i++)
+                        indices.push_back(startIndex + i);
 
-                buf = DrawOutlineAroundShape(buf, opts2, &indices[0], v.m_size, opts2.m_outlineOptions.m_thickness, true, drawOrder, true);
+                    buf = DrawOutlineAroundShape(buf, opts2, &indices[0], v.m_size, opts2.m_outlineOptions.m_thickness, true, drawOrder, Internal::OutlineCallType::AA);
+                }
             }
             else if (opts.m_outlineOptions.m_drawDirection == OutlineDrawDirection::Both)
             {
@@ -1545,10 +1557,10 @@ namespace LinaVG
                 for (int i = fullSize - 1; i > halfSize - 1; i--)
                     indices.push_back(startIndex + i);
 
-                buf = DrawOutlineAroundShape(buf, opts2, &indices[0], halfSize * 2, opts2.m_outlineOptions.m_thickness, false, drawOrder, true);
+                buf = DrawOutlineAroundShape(buf, opts2, &indices[0], halfSize * 2, opts2.m_outlineOptions.m_thickness, false, drawOrder, Internal::OutlineCallType::AA);
             }
             else
-                buf = DrawOutline(buf, opts2, opts2.m_isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, true);
+                buf = DrawOutline(buf, opts2, opts2.m_isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1614,12 +1626,17 @@ namespace LinaVG
 
             if (opts.m_isFilled)
             {
-                Array<int> indices;
+                if (isFullCircle)
+                    buf = DrawOutline(buf, opts, opts.m_isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, Internal::OutlineCallType::AA);
+                else
+                {
+                    Array<int> indices;
 
-                for (int i = 0; i < v.m_size; i++)
-                    indices.push_back(startIndex + i);
+                    for (int i = 0; i < v.m_size; i++)
+                        indices.push_back(startIndex + i);
 
-                buf = DrawOutlineAroundShape(buf, opts2, &indices[0], v.m_size, opts2.m_outlineOptions.m_thickness, true, drawOrder, true);
+                    buf = DrawOutlineAroundShape(buf, opts2, &indices[0], v.m_size, opts2.m_outlineOptions.m_thickness, true, drawOrder, Internal::OutlineCallType::AA);
+                }
             }
             else if (opts.m_outlineOptions.m_drawDirection == OutlineDrawDirection::Both)
             {
@@ -1633,10 +1650,10 @@ namespace LinaVG
                 for (int i = fullSize - 1; i > halfSize - 1; i--)
                     indices.push_back(startIndex + i);
 
-                buf = DrawOutlineAroundShape(buf, opts2, &indices[0], halfSize * 2, opts2.m_outlineOptions.m_thickness, false, drawOrder, true);
+                buf = DrawOutlineAroundShape(buf, opts2, &indices[0], halfSize * 2, opts2.m_outlineOptions.m_thickness, false, drawOrder, Internal::OutlineCallType::AA);
             }
             else
-                buf = DrawOutline(buf, opts2, opts2.m_isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, true);
+                buf = DrawOutline(buf, opts2, opts2.m_isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1720,7 +1737,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? size : size * 2, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? size : size * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1764,7 +1781,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? size : size * 2, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? size : size * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1807,7 +1824,7 @@ namespace LinaVG
         {
             StyleOptions opts2     = StyleOptions(opts);
             opts2.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? size : size * 2, false, drawOrder, true);
+            buf                    = DrawOutline(buf, opts2, opts2.m_isFilled ? size : size * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -2451,12 +2468,19 @@ namespace LinaVG
         }
     }
 
-    DrawBuffer* Internal::DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw, int drawOrder, bool isAAOutline)
+    DrawBuffer* Internal::DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw, int drawOrder, OutlineCallType outlineType)
     {
-        const bool useTextureBuffer = opts.m_outlineOptions.m_textureHandle != 0;
-        const bool isGradient       = !Math::IsEqual(opts.m_outlineOptions.m_color.m_start, opts.m_outlineOptions.m_color.m_end) && (!isAAOutline || (isAAOutline && sourceBuffer->m_drawBufferType == DrawBufferType::Gradient));
+        float      thickness   = outlineType != OutlineCallType::Normal ? Config.m_framebufferScale.x * Config.m_aaMultiplier : (defThickness * Config.m_framebufferScale.x);
+        const bool isAAOutline = outlineType != OutlineCallType::Normal;
+
+        bool isGradient = false;
+        if (isAAOutline)
+            isGradient = sourceBuffer->m_drawBufferType == DrawBufferType::Gradient;
+        else
+            isGradient = !Math::IsEqual(opts.m_outlineOptions.m_color.m_start, opts.m_outlineOptions.m_color.m_end);
+
+        bool       useTextureBuffer = outlineType == OutlineCallType::AA ? (opts.m_textureHandle != 0) : (opts.m_outlineOptions.m_textureHandle != 0);
         const bool useGradBuffer    = !useTextureBuffer && isGradient;
-        float      thickness        = isAAOutline ? Config.m_framebufferScale.x * Config.m_aaMultiplier : (defThickness * Config.m_framebufferScale.x);
 
         // Determine which buffer to use.
         // Also correct the buffer pointer if getting a new buffer invalidated it.
@@ -2464,8 +2488,11 @@ namespace LinaVG
 
         if (useTextureBuffer)
         {
-            const int sourceIndex = Internal::g_rendererData.GetBufferIndexInTextureArray(sourceBuffer);
-            destBuf               = &Internal::g_rendererData.GetTextureBuffer(opts.m_outlineOptions.m_textureHandle, opts.m_outlineOptions.m_textureUVTiling, opts.m_outlineOptions.m_textureUVOffset, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+            const int           sourceIndex = Internal::g_rendererData.GetBufferIndexInTextureArray(sourceBuffer);
+            const BackendHandle handle      = outlineType == OutlineCallType::AA ? opts.m_textureHandle : opts.m_outlineOptions.m_textureHandle;
+            const Vec2          uvOffset    = outlineType == OutlineCallType::AA ? opts.m_textureUVOffset : opts.m_outlineOptions.m_textureUVOffset;
+            const Vec2          uvTiling    = outlineType == OutlineCallType::AA ? opts.m_textureUVTiling : opts.m_outlineOptions.m_textureUVTiling;
+            destBuf                         = &Internal::g_rendererData.GetTextureBuffer(handle, uvTiling, uvOffset, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_textureBuffers[sourceIndex];
@@ -2473,7 +2500,8 @@ namespace LinaVG
         else if (useGradBuffer)
         {
             const int sourceIndex = Internal::g_rendererData.GetBufferIndexInGradientArray(sourceBuffer);
-            destBuf               = &Internal::g_rendererData.GetGradientBuffer(opts.m_outlineOptions.m_color, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+            Vec4Grad  col         = outlineType == OutlineCallType::AA ? opts.m_color : opts.m_outlineOptions.m_color;
+            destBuf               = &Internal::g_rendererData.GetGradientBuffer(col, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_gradientBuffers[sourceIndex];
@@ -2487,6 +2515,9 @@ namespace LinaVG
                 sourceBuffer = &Internal::g_rendererData.m_defaultBuffers[sourceIndex];
         }
 
+        // only used if we are drawing AA.
+        Array<int> copiedVerticesOrder;
+
         const int destBufStart = destBuf->m_vertexBuffer.m_size;
         // First copy the given vertices, add them to the destination buffer.
         for (int i = 0; i < vertexCount; i++)
@@ -2498,6 +2529,9 @@ namespace LinaVG
 
             if (isAAOutline)
                 v.m_col.w = 1.0f;
+
+            if (Config.m_enableAA && !isAAOutline)
+                copiedVerticesOrder.push_back(destBuf->m_vertexBuffer.m_size);
 
             destBuf->PushVertex(v);
         }
@@ -2552,18 +2586,27 @@ namespace LinaVG
         if (Config.m_enableAA && !isAAOutline)
         {
             StyleOptions opts2 = StyleOptions(opts);
-            DrawOutlineAroundShape(destBuf, opts2, &extrudedVerticesOrder[0], extrudedVerticesOrder.m_size, defThickness, ccw, drawOrder, true);
+            destBuf = DrawOutlineAroundShape(destBuf, opts2, &extrudedVerticesOrder[0], extrudedVerticesOrder.m_size, defThickness, ccw, drawOrder, OutlineCallType::OutlineAA);
+            DrawOutlineAroundShape(destBuf, opts2, &copiedVerticesOrder[0], copiedVerticesOrder.m_size, -defThickness, !ccw, drawOrder, OutlineCallType::OutlineAA);
         }
 
         return sourceBuffer;
     }
 
-    DrawBuffer* Internal::DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds, int drawOrder, bool isAAOutline, bool reverseDrawDir)
+    DrawBuffer* Internal::DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds, int drawOrder, OutlineCallType outlineType, bool reverseDrawDir)
     {
-        const bool useTextureBuffer = opts.m_outlineOptions.m_textureHandle != 0;
-        const bool isGradient       = !Math::IsEqual(opts.m_outlineOptions.m_color.m_start, opts.m_outlineOptions.m_color.m_end) && (!isAAOutline || (isAAOutline && sourceBuffer->m_drawBufferType == DrawBufferType::Gradient));
+        const bool isAAOutline = outlineType != OutlineCallType::Normal;
+        float      thickness   = isAAOutline ? Config.m_framebufferScale.x * Config.m_aaMultiplier : (opts.m_outlineOptions.m_thickness * Config.m_framebufferScale.x);
+
+        bool isGradient = false;
+
+        if (isAAOutline)
+            isGradient = sourceBuffer->m_drawBufferType == DrawBufferType::Gradient;
+        else
+            isGradient = !Math::IsEqual(opts.m_outlineOptions.m_color.m_start, opts.m_outlineOptions.m_color.m_end);
+
+        bool       useTextureBuffer = outlineType == OutlineCallType::AA ? (opts.m_textureHandle != 0) : (opts.m_outlineOptions.m_textureHandle != 0);
         const bool useGradBuffer    = !useTextureBuffer && isGradient;
-        float      thickness        = isAAOutline ? Config.m_framebufferScale.x * Config.m_aaMultiplier : (opts.m_outlineOptions.m_thickness * Config.m_framebufferScale.x);
 
         if (reverseDrawDir)
             thickness = -thickness;
@@ -2574,8 +2617,11 @@ namespace LinaVG
 
         if (useTextureBuffer)
         {
-            const int sourceIndex = Internal::g_rendererData.GetBufferIndexInTextureArray(sourceBuffer);
-            destBuf               = &Internal::g_rendererData.GetTextureBuffer(opts.m_outlineOptions.m_textureHandle, opts.m_outlineOptions.m_textureUVTiling, opts.m_outlineOptions.m_textureUVOffset, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+            const int           sourceIndex = Internal::g_rendererData.GetBufferIndexInTextureArray(sourceBuffer);
+            const BackendHandle handle      = outlineType == OutlineCallType::AA ? opts.m_textureHandle : opts.m_outlineOptions.m_textureHandle;
+            const Vec2          uvOffset    = outlineType == OutlineCallType::AA ? opts.m_textureUVOffset : opts.m_outlineOptions.m_textureUVOffset;
+            const Vec2          uvTiling    = outlineType == OutlineCallType::AA ? opts.m_textureUVTiling : opts.m_outlineOptions.m_textureUVTiling;
+            destBuf                         = &Internal::g_rendererData.GetTextureBuffer(handle, uvTiling, uvOffset, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_textureBuffers[sourceIndex];
@@ -2583,7 +2629,8 @@ namespace LinaVG
         else if (useGradBuffer)
         {
             const int sourceIndex = Internal::g_rendererData.GetBufferIndexInGradientArray(sourceBuffer);
-            destBuf               = &Internal::g_rendererData.GetGradientBuffer(opts.m_outlineOptions.m_color, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+            Vec4Grad  col         = outlineType == OutlineCallType::AA ? opts.m_color : opts.m_outlineOptions.m_color;
+            destBuf               = &Internal::g_rendererData.GetGradientBuffer(col, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_gradientBuffers[sourceIndex];
@@ -2718,10 +2765,10 @@ namespace LinaVG
                 StyleOptions opts2                     = StyleOptions(opts);
                 opts2.m_isFilled                       = false;
                 opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, true);
+                DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
 
                 opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
-                DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, true);
+                DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
             }
         }
         else
@@ -2734,7 +2781,7 @@ namespace LinaVG
                     // AA outline to the shape we are drawing
                     StyleOptions opts3     = StyleOptions(opts);
                     opts3.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Inwards);
-                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, true);
+                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
                 }
 
                 copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, thickness, recalcUvs);
@@ -2744,10 +2791,10 @@ namespace LinaVG
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
 
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
                 }
             }
             else if (opts.m_outlineOptions.m_drawDirection == OutlineDrawDirection::Inwards)
@@ -2757,7 +2804,7 @@ namespace LinaVG
                     // // AA outline to the shape we are drawing
                     StyleOptions opts3     = StyleOptions(opts);
                     opts3.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Outwards);
-                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, true);
+                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
                 }
 
                 copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, -thickness, recalcUvs);
@@ -2767,10 +2814,10 @@ namespace LinaVG
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
 
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
                 }
             }
             else
@@ -2782,10 +2829,10 @@ namespace LinaVG
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
 
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
                 }
 
                 copyAndFill(sourceBuffer, destBuf, startIndex + vertexCount / 2, endIndex, thickness, recalcUvs);
@@ -2795,10 +2842,10 @@ namespace LinaVG
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
 
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, true);
+                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
                 }
             }
         }

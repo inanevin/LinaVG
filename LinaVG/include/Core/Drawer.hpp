@@ -290,6 +290,13 @@ namespace LinaVG
 
     namespace Internal
     {
+        enum class OutlineCallType
+        {
+            Normal,
+            AA,
+            OutlineAA
+        };
+
         // No rounding, vertical or horizontal gradient
         void FillRect_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts, int drawOrder);
 
@@ -408,7 +415,7 @@ namespace LinaVG
         /// Used for semi-circles, arcs, lines and alike.
         /// </summary>
         /// <returns></returns>
-        DrawBuffer* DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw = false, int drawOrder = 0, bool isAAOutline = false);
+        DrawBuffer* DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw = false, int drawOrder = 0, OutlineCallType = OutlineCallType::Normal);
 
         /// <summary>
         /// Draws an outline (or AA) around a convex shape.
@@ -418,7 +425,7 @@ namespace LinaVG
         /// <param name="vertexCount"></param>
         /// <param name="opts"></param>
         /// <returns></returns>
-        DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, int drawOrder = 0, bool isAAOutline = false, bool reverseDrawDir = false);
+        DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, int drawOrder = 0, OutlineCallType = OutlineCallType::Normal, bool reverseDrawDir = false);
 
         /// <summary>
         /// Break down text into words, with each word having calculated size properties.
