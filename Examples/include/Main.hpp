@@ -26,6 +26,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#ifndef MAIN_HPP
+#define MAIN_HPP
+
+#include "DemoScreens.hpp"
+
 namespace LinaVG
 {
     namespace Examples
@@ -44,6 +49,8 @@ namespace LinaVG
             void OnVerticalKeyCallback(float input);
             void OnSpaceCallback();
             void OnNumKeyCallback(int key);
+            void OnPCallback();
+            void OnRCallback();
             void OnFCallback();
             void OnMouseScrollCallback(float val);
             void OnWindowResizeCallback(int width, int height);
@@ -65,6 +72,7 @@ namespace LinaVG
             }
 
         private:
+            DemoScreens        m_demoScreens;
             int                m_currentDemoScreen = 0;
             float              m_deltaTime         = 0.0f;
             float              m_deltaTimeRead     = 0.0f;
@@ -74,3 +82,5 @@ namespace LinaVG
         };
     } // namespace Examples
 } // namespace LinaVG
+
+#endif

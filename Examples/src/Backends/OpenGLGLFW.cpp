@@ -108,6 +108,10 @@ namespace LinaVG
                         ExampleApp::Get()->OnFCallback();
                     else if (key == GLFW_KEY_SPACE)
                         ExampleApp::Get()->OnSpaceCallback();
+                    else if (key == GLFW_KEY_P)
+                        ExampleApp::Get()->OnPCallback();
+                    else if (key == GLFW_KEY_R)
+                        ExampleApp::Get()->OnRCallback();
 
                     else if (key == GLFW_KEY_0)
                         ExampleApp::Get()->OnNumKeyCallback(0);

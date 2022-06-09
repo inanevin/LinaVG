@@ -26,6 +26,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#define _CRTDBG_MAP_ALLOC
+
+#include <iostream>
+#include <crtdbg.h>
+
+#ifdef _DEBUG
+#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#define new DEBUG_NEW
+#endif
+
+
 #include "Core/Renderer.hpp"
 #include "Core/Backend.hpp"
 #include "Core/Drawer.hpp"
@@ -39,6 +50,34 @@ namespace LinaVG
     namespace Internal
     {
         RendererData g_rendererData;
+        LINAVG_API void ClearAllBuffers()
+        {
+
+            for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
+                Internal::g_rendererData.m_gradientBuffers[i].Clear();
+
+            Internal::g_rendererData.m_gradientBuffers.clear();
+
+            for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
+                Internal::g_rendererData.m_textureBuffers[i].Clear();
+
+            Internal::g_rendererData.m_textureBuffers.clear();
+
+            for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
+                Internal::g_rendererData.m_defaultBuffers[i].Clear();
+
+            Internal::g_rendererData.m_defaultBuffers.clear();
+
+            for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
+                Internal::g_rendererData.m_simpleTextBuffers[i].Clear();
+
+            Internal::g_rendererData.m_simpleTextBuffers.clear();
+
+            for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
+                Internal::g_rendererData.m_sdfTextBuffers[i].Clear();
+
+            Internal::g_rendererData.m_sdfTextBuffers.clear();
+        }
     }
 
     bool Initialize()
@@ -70,6 +109,7 @@ namespace LinaVG
     {
         Backend::Terminate();
         Text::Terminate();
+        Internal::ClearAllBuffers();
 
         // TODO - error check
         Config.m_logCallback("LinaVG: Renderer and Backend terminated successfuly.");
@@ -151,62 +191,30 @@ namespace LinaVG
         Backend::EndFrame();
 
         Internal::g_rendererData.m_gcFrameCounter++;
-        Internal::g_rendererData.m_drawOrders.clear();
 
         if (Internal::g_rendererData.m_gcFrameCounter > Config.m_gcCollectInterval)
         {
             Internal::g_rendererData.m_gcFrameCounter = 0;
-            for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
-                Internal::g_rendererData.m_gradientBuffers[i].Clear();
-
-            Internal::g_rendererData.m_gradientBuffers.clear();
-
-            for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
-                Internal::g_rendererData.m_textureBuffers[i].Clear();
-
-            Internal::g_rendererData.m_textureBuffers.clear();
-
-            for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
-                Internal::g_rendererData.m_defaultBuffers[i].Clear();
-
-            Internal::g_rendererData.m_defaultBuffers.clear();
-
-            for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
-                Internal::g_rendererData.m_simpleTextBuffers[i].Clear();
-
-            Internal::g_rendererData.m_simpleTextBuffers.clear();
-
-            for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
-                Internal::g_rendererData.m_sdfTextBuffers[i].Clear();
-
-            Internal::g_rendererData.m_sdfTextBuffers.clear();
+            Internal::ClearAllBuffers();
+            Internal::g_rendererData.m_drawOrders.clear();
         }
         else
         {
             for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
-                Internal::g_rendererData.m_gradientBuffers[i].ResizeZero();
-
-            Internal::g_rendererData.m_gradientBuffers.resize(0);
+                Internal::g_rendererData.m_gradientBuffers[i].ShrinkZero();
 
             for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
-                Internal::g_rendererData.m_textureBuffers[i].ResizeZero();
-
-            Internal::g_rendererData.m_textureBuffers.resize(0);
+                Internal::g_rendererData.m_textureBuffers[i].ShrinkZero();
 
             for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
-                Internal::g_rendererData.m_defaultBuffers[i].ResizeZero();
-
-            Internal::g_rendererData.m_defaultBuffers.resize(0);
+                Internal::g_rendererData.m_defaultBuffers[i].ShrinkZero();
 
             for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
-                Internal::g_rendererData.m_simpleTextBuffers[i].ResizeZero();
-
-            Internal::g_rendererData.m_simpleTextBuffers.resize(0);
+                Internal::g_rendererData.m_simpleTextBuffers[i].ShrinkZero();
 
             for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
-                Internal::g_rendererData.m_sdfTextBuffers[i].ResizeZero();
+                Internal::g_rendererData.m_sdfTextBuffers[i].ShrinkZero();
 
-            Internal::g_rendererData.m_sdfTextBuffers.resize(0);
         }
     }
 

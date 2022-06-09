@@ -2917,10 +2917,11 @@ namespace LinaVG
 
             for (int i = 0; i < lines.m_size; i++)
             {
+            
                 if (alignment == TextAlignment::Center)
-                    usedPos.x = pos.x - size.x / 2.0f;
+                    usedPos.x = pos.x - lines[i]->m_size.x / 2.0f;
                 else if (alignment == TextAlignment::Right)
-                    usedPos.x = pos.x - size.x;
+                    usedPos.x = pos.x - lines[i]->m_size.x;
 
                 Internal::DrawText(buf, font, lines[i]->m_str.c_str(), usedPos, offset, color, spacing, isGradient, scale);
                 usedPos.y += lines[i]->m_size.y + newLineSpacing;
@@ -3048,10 +3049,6 @@ namespace LinaVG
             v2.m_pos = Vec2(x2 + offset.x + w, y2 + h + offset.y);
             v3.m_pos = Vec2(x2 + offset.x, y2 + h + offset.y);
 
-            DrawPoint(v0.m_pos, Vec4(1, 1, 1, 1));
-            DrawPoint(v1.m_pos, Vec4(1, 1, 1, 1));
-            DrawPoint(v2.m_pos, Vec4(1, 1, 1, 1));
-            DrawPoint(v3.m_pos, Vec4(1, 1, 1, 1));
             v0.m_uv = Vec2(ch.m_uv12.x, ch.m_uv12.y);
             v1.m_uv = Vec2(ch.m_uv12.z, ch.m_uv12.w);
             v2.m_uv = Vec2(ch.m_uv34.x, ch.m_uv34.y);
@@ -3079,11 +3076,13 @@ namespace LinaVG
             std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
             auto                                                        str32 = cv.from_bytes(text);
             std::u32string::iterator                                    it;
-
+            const int totalSize = str32.size();
+            int counter = 0;
             for (it = str32.begin(); it < str32.end(); it++)
             {
                 auto& ch = font->m_characterGlyphs[*it];
                 drawChar(ch);
+                counter++;
             }
         }
         else

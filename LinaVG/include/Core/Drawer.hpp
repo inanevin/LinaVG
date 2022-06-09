@@ -188,11 +188,12 @@ namespace LinaVG
     /// Your points for the triangle must follow the given parameter order -- left, right and top edges.
     /// If you are drawing odd triangles, e.g. maxAngle > 90, rounding of the triangle might perform poorly on sharp edges.
     /// </summary>
-    /// <param name="left"> Bottom left corner. </param>
-    /// <param name="right"> Bottom right corner. </param>
     /// <param name="top"> Top corner. </param>
+    /// <param name="right"> Bottom right corner. </param>
+    /// <param name="left"> Bottom left corner. </param>
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+    /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
     LINAVG_API void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
@@ -217,11 +218,6 @@ namespace LinaVG
     LINAVG_API void DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
-    /// Draws the given set of points. !Rounding options do not apply!
-    /// If you are not going to fill the convex shape (styling options -> m_isFilled), then prefer using DrawLines instead of this so that you can use proper line joints.
-    /// </summary>
-
-    /// <summary>
     /// Draws a convex shape defined by the set of points. All points must be unique.
     /// </summary>
     /// <param name="points">Path to follow while drawing the shape. It's users' responsibility to ensure this is a convex shape.</param>
@@ -232,21 +228,20 @@ namespace LinaVG
     LINAVG_API void DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
-    /// Draws a filled circle with the given radius & center.
+    /// Draws a filled circle with the given radius and center.
     /// You can change the start and end angles to create a filled semi-circle or a filled arc.
-    /// It's recommended to send angles always in the range of 0.0f - 360.0f. This method will try to auto-convert if not.
-    /// Segments are clamped to 6 - 360 (360 being perfect circle, 8 being 6-gon)
-    /// Higher the segment cause more weight on the performance. 18-54 is a good range for balance.
-    /// Always recommended to use segments that leave no remainder when 360 is divided by it.
-    /// !Rounding options have no effect.!    /// </summary>
+    /// It's recommended to send angles always in the range of 0.0f - 360.0f, clock-wise. This method will try to auto-convert if not.
+    /// !Rounding options have no effect.! 
+    /// </summary>
     /// <param name="center">Center of the shape.</param>
     /// <param name="radius">Radius of the shape.</param>
     /// <param name="style">Style options.</param>
-    /// <param name="segments">Defines the smoothness of the circle, default 36.</param>
+    /// <param name="segments">Defines the smoothness of the circle, default 36. Clamped to 6-360, 360 being perfect circle. Higher the segment cause more weight on the performance. 18-54 is a good range for balance. Always recommended to use segments that leave no remainder when 360 is divided by it. </param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-    /// <param name="startAngle">Use start & end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
-    /// <param name="startAngle">Use start & end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
+    /// <param name="startAngle">Use start and end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
+    /// <param name="endAngle">Use start and end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+    /// <returns></returns>
     LINAVG_API void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 
     /// <summary>

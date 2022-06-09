@@ -69,6 +69,11 @@ namespace LinaVG
     namespace Internal
     {
         extern LINAVG_API RendererData g_rendererData;
+
+        /// <summary>
+        /// Erases all vertex & index data on all buffers.
+        /// </summary>
+        LINAVG_API void ClearAllBuffers();
     }
 
     /// <summary>

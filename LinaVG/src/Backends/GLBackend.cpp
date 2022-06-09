@@ -356,6 +356,11 @@ namespace LinaVG::Backend
         SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
         Internal::ShaderData& data = Internal::g_backendData.m_defaultShaderData;
 
+        for (int i = 0; i < buf->m_vertexBuffer.m_size; i++)
+        {
+            Vertex& v = buf->m_vertexBuffer[i];
+            int a  = v.m_pos.x;
+        }
         glUseProgram(data.m_handle);
         glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 

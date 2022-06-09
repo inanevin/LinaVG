@@ -242,6 +242,12 @@ namespace LinaVG
             m_size = newSize;
         }
 
+        inline void shrink(int size)
+        {
+            _ASSERT(size <= m_size);
+            m_size = size;
+        }
+
         inline void reserve(int newCapacity)
         {
             if (newCapacity < m_capacity)
@@ -772,10 +778,10 @@ namespace LinaVG
             m_indexBuffer.clear();
         }
 
-        inline void ResizeZero()
+        inline void ShrinkZero()
         {
-            m_vertexBuffer.resize(0);
-            m_indexBuffer.resize(0);
+            m_vertexBuffer.shrink(0);
+            m_indexBuffer.shrink(0);
         }
 
         inline void PushVertex(const Vertex& v)
