@@ -72,7 +72,6 @@ namespace LinaVG::Backend
                                                        "uniform int isAABuffer;\n"
                                                        "void main()\n"
                                                        "{\n"
-                                                       "   vec2 tiled = vec2(fUV.x * tiling.x, fUV.y * tiling.y);\n"
                                                        "   vec4 col = texture(diffuse, fUV * tiling + offset);\n"
                                                        "   fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
                                                        "}\0";

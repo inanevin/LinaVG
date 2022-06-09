@@ -42,6 +42,9 @@ namespace LinaVG
             m_defaultFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 18);
             m_titleFont   = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 65);
             m_descFont    = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 20);
+            m_screenDescriptions.push_back("Shows out of the box shape types that can be drawn with LinaVG. Shapes can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
+            m_screenDescriptions.push_back("Shows the coloring options LinaVG supports. You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
+            m_screenDescriptions.push_back("Shows different outline options that can be used with LinaVG. Including inner, outer and double outlines. Outlines also support all previous coloring objects, both filled & non-filled objects.");
         }
 
         /// <summary>
@@ -106,20 +109,20 @@ namespace LinaVG
             // Draw title text.
             SDFTextOptions sdfStyle;
             sdfStyle.m_font           = m_titleFont;
-            const Vec2 size           = LinaVG::CalculateTextSize(m_screenTitles[m_currentScreen], sdfStyle);
+            const Vec2 size           = LinaVG::CalculateTextSize(m_screenTitles[ExampleApp::Get()->GetCurrentScreen()], sdfStyle);
             const Vec2 titlePos       = Vec2(rectMin.x + 20, rectMin.y + rectHeight / 2.0f - size.y / 2.0f);
             sdfStyle.m_newLineSpacing = 10.0f;
             sdfStyle.m_color          = Utility::HexToVec4(0xFCAA67);
             sdfStyle.m_sdfThickness   = 0.62f;
             sdfStyle.m_sdfSoftness    = 0.05f;
-            LinaVG::DrawTextSDF(m_screenTitles[m_currentScreen], titlePos, sdfStyle, 0, 2);
+            LinaVG::DrawTextSDF(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1], titlePos, sdfStyle, 0, 2);
 
             // Current screen description.
             TextOptions descText;
             descText.m_font           = m_descFont;
             descText.m_wrapWidth      = rectWidth * 0.45f;
             descText.m_newLineSpacing = 8.0f;
-            LinaVG::DrawTextNormal(m_screenDescriptions[m_currentScreen], Vec2(rectWidth * 0.25f, rectMin.y + 20), descText, 0, 2);
+            LinaVG::DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1], Vec2(rectWidth * 0.25f, rectMin.y + 20), descText, 0, 2);
 
             // Draw controls info
             TextOptions controlsText;
@@ -133,13 +136,14 @@ namespace LinaVG
 
         void DemoScreens::ShowDemoScreen1_Shapes()
         {
-            m_currentScreen = 0;
-            const Vec2   screenSize = LinaVG::Config.m_displaySize;
+            const Vec2 screenSize = LinaVG::Config.m_displaySize;
 
             StyleOptions defaultStyle;
             defaultStyle.m_isFilled = true;
-            Vec2 startPos = Vec2(screenSize.x *0.05f, screenSize.y * 0.05f);
+            Vec2 startPos           = Vec2(screenSize.x * 0.05f, screenSize.y * 0.05f);
 
+            //*************************** ROW 1 ***************************/
+           
             // Rect - filled
             LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
 
@@ -162,6 +166,8 @@ namespace LinaVG
             defaultStyle.m_isFilled = true;
             LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
 
+            //*************************** ROW 2 ***************************/
+
             // Triangle filled
             startPos.x = screenSize.x * 0.05f;
             startPos.y += 200;
@@ -171,10 +177,10 @@ namespace LinaVG
 
             // Triangle non filled
             startPos.x += 200;
-            defaultStyle.m_isFilled = false;
+            defaultStyle.m_isFilled  = false;
             defaultStyle.m_thickness = 5.0f;
             LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
-          
+
             // Triangle non filled partially rounded
             startPos.x += 200;
             defaultStyle.m_rounding = 0.2f;
@@ -187,12 +193,14 @@ namespace LinaVG
             defaultStyle.m_rounding = 0.4f;
             defaultStyle.m_isFilled = true;
             LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
-        
+
+            //*************************** ROW 3 ***************************/
+
             // Full circle filled
             startPos.x = screenSize.x * 0.05f;
             startPos.y += 200;
             LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 360.0f, 2);
-        
+
             // Half circle non filled
             startPos.x += 200;
             defaultStyle.m_isFilled = false;
@@ -207,6 +215,8 @@ namespace LinaVG
             startPos.x += 200;
             defaultStyle.m_isFilled = true;
             LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 300.0f, 330.0f, 2);
+
+            //*************************** ROW 4 ***************************/
 
             // Ngon - 6
             startPos.x = screenSize.x * 0.05f;
@@ -239,34 +249,252 @@ namespace LinaVG
             LinaVG::DrawConvex(&points[0], 4, defaultStyle, m_rotateAngle, 2);
             points.clear();
         }
-        void DemoScreens::ShowDemoScreen2_Outlines()
+        void DemoScreens::ShowDemoScreen2_Colors()
         {
-            m_currentScreen = 1;
+            const Vec2 screenSize = LinaVG::Config.m_displaySize;
+            Vec2       startPos   = Vec2(screenSize.x * 0.05f, screenSize.y * 0.05f);
+
+            StyleOptions defaultStyle;
+            defaultStyle.m_isFilled = true;
+
+            //*************************** ROW 1 ***************************/
+
+            // Single color
+            defaultStyle.m_color = LinaVG::Utility::HexToVec4(0x212738);
+            LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Single color
+            startPos.x += 200;
+            defaultStyle.m_color    = LinaVG::Utility::HexToVec4(0x06A77D);
+            defaultStyle.m_rounding = 0.5f;
+            LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Single color
+            startPos.x += 200;
+            defaultStyle.m_color    = LinaVG::Utility::HexToVec4(0xF1A208);
+            defaultStyle.m_rounding = 0.5f;
+            LinaVG::DrawNGon(Vec2(startPos.x + 75, startPos.y + 75), 75, 7, defaultStyle, m_rotateAngle, 1);
+
+            // Single color
+            startPos.x += 200;
+            defaultStyle.m_color = LinaVG::Utility::HexToVec4(0xFEFAE0);
+            LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 360.0f, 1);
+
+            //*************************** ROW 2 ***************************/
+
+            // Horizontal gradient
+            startPos.x = screenSize.x * 0.05f;
+            startPos.y += 200;
+            defaultStyle.m_rounding      = 0.0f;
+            defaultStyle.m_color.m_start = Vec4(1.0f, 0.2f, 0.2f, 1.0f);
+            defaultStyle.m_color.m_end   = Vec4(0.2f, 0.2f, 1.0f, 1.0f);
+            LinaVG::DrawNGon(Vec2(startPos.x + 75, startPos.y + 75), 75, 8, defaultStyle, m_rotateAngle, 1);
+
+            // Horizontal gradient.
+            startPos.x += 200;
+            defaultStyle.m_rounding      = 0.0f;
+            defaultStyle.m_color.m_start = Vec4(0.2f, 0.2f, 1.0f, 1.0f);
+            defaultStyle.m_color.m_end   = Vec4(1.0f, 0.2f, 0.2f, 1.0f);
+            LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Vertical gradient
+            startPos.x += 200;
+            defaultStyle.m_color.m_gradientType = GradientType::Vertical;
+            defaultStyle.m_color.m_start        = Vec4(1.0f, 1.0f, 0.0f, 1.0f);
+            defaultStyle.m_color.m_end          = Vec4(0.0f, 1.0f, 1.0f, 1.0f);
+            LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Vertical gradient.
+            startPos.x += 200;
+            defaultStyle.m_color.m_gradientType = GradientType::Vertical;
+            defaultStyle.m_color.m_start        = Vec4(1.0f, 1.0f, 0.0f, 1.0f);
+            defaultStyle.m_color.m_end          = Vec4(0.0f, 1.0f, 1.0f, 1.0f);
+            LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 360.0f, 1);
+
+            //*************************** ROW 3 ***************************/
+
+            // Radial
+            startPos.x = screenSize.x * 0.05f;
+            startPos.y += 200;
+            defaultStyle.m_color.m_start        = Vec4(0.2f, 0.2f, 0.9f, 1.0f);
+            defaultStyle.m_color.m_end          = Vec4(0.9f, 0.2f, 0.9f, 1.0f);
+            defaultStyle.m_color.m_gradientType = GradientType::Radial;
+            defaultStyle.m_color.m_radialSize   = 1.4f;
+            LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 360.0f, 1);
+
+            // Radial
+            startPos.x += 200;
+            defaultStyle.m_color.m_start        = Vec4(0.2f, 0.2f, 0.9f, 1.0f);
+            defaultStyle.m_color.m_end          = Vec4(0.9f, 0.2f, 0.9f, 1.0f);
+            defaultStyle.m_color.m_gradientType = GradientType::Radial;
+            defaultStyle.m_color.m_radialSize   = 1.4f;
+            LinaVG::DrawNGon(Vec2(startPos.x + 75, startPos.y + 75), 75, 7, defaultStyle, m_rotateAngle, 1);
+
+            // Radial Corner
+            startPos.x += 200;
+            defaultStyle.m_color.m_start        = Vec4(0.2f, 0.2f, 1.0f, 1.0f);
+            defaultStyle.m_color.m_end          = Vec4(1.0f, 0.2f, 0.2f, 1.0f);
+            defaultStyle.m_color.m_gradientType = GradientType::RadialCorner;
+            LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Radial corner
+            startPos.x += 200;
+            defaultStyle.m_color.m_start        = Vec4(0.2f, 0.2f, 1.0f, 1.0f);
+            defaultStyle.m_color.m_end          = Vec4(1.0f, 0.2f, 0.2f, 1.0f);
+            defaultStyle.m_color.m_gradientType = GradientType::RadialCorner;
+            LinaVG::DrawNGon(Vec2(startPos.x + 75, startPos.y + 75), 75, 7, defaultStyle, m_rotateAngle, 1);
+
+            //*************************** ROW 4 ***************************/
+
+            // Textured rect
+            startPos.x = screenSize.x * 0.05f;
+            startPos.y += 200;
+            defaultStyle.m_textureHandle = ExampleApp::Get()->GetCheckeredTexture();
+            LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+
+            // Tiling
+            startPos.x += 200;
+            defaultStyle.m_textureUVTiling = Vec2(2, 2);
+            LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 360.0f, 1);
+
+            // Lina Logo
+            startPos.x += 200;
+            defaultStyle.m_textureUVTiling = Vec2(1, 1);
+            defaultStyle.m_textureHandle   = ExampleApp::Get()->GetLinaLogoTexture();
+            LinaVG::DrawImage(ExampleApp::Get()->GetLinaLogoTexture(), Vec2(startPos.x + 75, startPos.y + 75), Vec2(150, 150), m_rotateAngle, 1);
+
+            // Lina Logo
+            startPos.x += 200;
+            LinaVG::DrawImage(ExampleApp::Get()->GetLinaLogoTexture(), Vec2(startPos.x + 75, startPos.y + 75), Vec2(150, 150), m_rotateAngle, 1, Vec2(2, 2));
         }
-        void DemoScreens::ShowDemoScreen3_Colors()
+        void DemoScreens::ShowDemoScreen3_Outlines()
         {
-            m_currentScreen = 2;
+            const Vec2 screenSize = LinaVG::Config.m_displaySize;
+            Vec2       startPos   = Vec2(screenSize.x * 0.05f, screenSize.y * 0.05f);
+
+            StyleOptions defaultStyle;
+            defaultStyle.m_isFilled = true;
+            defaultStyle.m_outlineOptions.m_thickness = 3.0f;
+            //*************************** ROW 1 ***************************/
+
+            // Filled
+     //      defaultStyle.m_thickness = 5.0f;
+     //      defaultStyle.m_outlineOptions.m_color     = Vec4(0, 0, 0, 1);
+     //      LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+     //
+     //      // Non filled outer
+     //      startPos.x += 200;
+     //      defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+     //      defaultStyle.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
+     //      defaultStyle.m_isFilled                       = false;
+     //      LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+     //
+     //      // Non filled inner
+     //      startPos.x += 200;
+     //      defaultStyle.m_outlineOptions.m_color         = Vec4(0, 0.5f, 0, 1);
+     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
+     //      defaultStyle.m_isFilled                       = false;
+     //      LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+     //
+     //      // Both
+     //      startPos.x += 200;
+     //      defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+     //      defaultStyle.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
+     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Both;
+     //      defaultStyle.m_isFilled                       = false;
+     //      LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+     //
+     //      //*************************** ROW 2 ***************************/
+     //
+     //      // Filled
+     //      startPos.x = screenSize.x * 0.05f;
+     //      startPos.y += 200;
+     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
+     //      defaultStyle.m_rounding = 0.4f;
+     //      defaultStyle.m_isFilled = true;
+     //      defaultStyle.m_thickness = 8.0f;
+     //      defaultStyle.m_outlineOptions.m_color = Vec4(0, 0, 0, 1);
+     //      defaultStyle.m_outlineOptions.m_thickness = 5.0f;
+     //      LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+     //
+     //      // Non filled outer
+     //      startPos.x += 200;
+     //      defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+     //      defaultStyle.m_outlineOptions.m_color.m_end = Vec4(0, 0, 1, 1);
+     //      defaultStyle.m_isFilled = false;
+     //      LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+     //
+     //      // Non filled inner
+     //      startPos.x += 200;
+     //      defaultStyle.m_outlineOptions.m_color = Vec4(0, 0.5f, 0, 1);
+     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
+     //      defaultStyle.m_isFilled = false;
+     //      LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+     //
+     //      // Both
+     //      startPos.x += 200;
+     //      defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+     //      defaultStyle.m_outlineOptions.m_color.m_end = Vec4(0, 0, 1, 1);
+     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Both;
+     //      defaultStyle.m_isFilled = false;
+     //      LinaVG::DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
+     //
+     //      //*************************** ROW 3 ***************************/
+     //
+     //      // Filled
+     //      startPos.x = screenSize.x * 0.05f;
+     //      startPos.y += 200;
+     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
+     //      defaultStyle.m_rounding = 0.4f;
+     //      defaultStyle.m_isFilled = true;
+     //      defaultStyle.m_thickness = 8.0f;
+     //      defaultStyle.m_outlineOptions.m_color = Vec4(0, 0, 0, 1);
+     //      defaultStyle.m_outlineOptions.m_thickness = 5.0f;
+     //      LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 360.0f, 1);
+     //
+     //      // outer
+       startPos.x += 200;
+       defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+       defaultStyle.m_outlineOptions.m_color.m_end = Vec4(0, 0, 1, 1);
+       defaultStyle.m_isFilled = true;
+       defaultStyle.m_outlineOptions.m_thickness = 0.0f;
+       LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 360.0f, 1);
+     //
+     //      // Non filled inner
+     //      startPos.x += 200;
+     //      defaultStyle.m_outlineOptions.m_color = Vec4(0, 0.5f, 0, 1);
+     //      defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
+     //      defaultStyle.m_isFilled = false;
+     //      LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 90.0f, 360.0f, 1);
+     //
+     //      // Both
+    //   startPos.x += 200;
+    //   defaultStyle.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+    //   defaultStyle.m_outlineOptions.m_color.m_end = Vec4(0, 0, 1, 1);
+    //   defaultStyle.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Both;
+    //   defaultStyle.m_isFilled = false;
+    //   LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 180.0f, 360.0f, 1);
+
+            //*************************** ROW 4 ***************************/
+
+
         }
         void DemoScreens::ShowDemoScreen4_Lines()
         {
-            m_currentScreen = 3;
         }
         void DemoScreens::ShowDemoScreen5_Texts()
         {
-            m_currentScreen = 4;
         }
         void DemoScreens::ShowDemoScreen6_DrawOrder()
         {
-            m_currentScreen = 5;
         }
         void DemoScreens::ShowDemoScreen7_Clipping()
         {
-            m_currentScreen = 6;
         }
 
         void DemoScreens::PreEndFrame()
         {
-            if(m_rotate)
+            if (m_rotate)
                 m_rotateAngle += ExampleApp::Get()->GetFrameTime() * 20;
 
             m_drawCount     = Config.m_debugCurrentDrawCalls;

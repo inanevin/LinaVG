@@ -31,6 +31,7 @@ set(EXAMPLES_HEADERS
 include/Main.hpp
 include/DemoScreens.hpp
 include/Backends/OpenGLGLFW.hpp
+include/Utility/stb_image.h
 )
 
 #--------------------------------------------------------------------

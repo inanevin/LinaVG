@@ -79,11 +79,11 @@ namespace LinaVG
             LinaVG::Config.m_clipPosX = LinaVG::Config.m_clipPosY = 0;
             LinaVG::Config.m_clipSizeX                            = sizeX;
             LinaVG::Config.m_clipSizeY                            = sizeY;
-
-            // LinaVG::Config.m_aaMultiplier = 3;
+            LinaVG::Config.m_flipTextureUVs                       = false;
             LinaVG::Config.m_framebufferScale.x = LinaVG::Config.m_framebufferScale.y = exampleBackend.GetFramebufferScale();
-            Config.m_flipTextureUVs                                                   = true;
-            LinaVG::Config.m_errorCallback                                            = [](const std::string& err) {
+            // LinaVG::Config.m_aaMultiplier = 3;
+
+            LinaVG::Config.m_errorCallback = [](const std::string& err) {
                 std::cerr << err.c_str() << std::endl;
             };
 
@@ -91,6 +91,8 @@ namespace LinaVG
                 std::cout << log.c_str() << std::endl;
             };
 
+            m_checkeredTexture = exampleBackend.CreateTexture("Resources/Textures/Checkered.png");
+            m_linaTexture      = exampleBackend.CreateTexture("Resources/Textures/Lina.png");
 
             // Init LinaVG
             LinaVG::Initialize();
@@ -124,15 +126,15 @@ namespace LinaVG
 
                 m_demoScreens.ShowBackground();
 
-                if (m_currentDemoScreen == 0)
+                if (m_currentDemoScreen == 1)
                     m_demoScreens.ShowDemoScreen1_Shapes();
-                else if (m_currentDemoScreen == 1)
-                    m_demoScreens.ShowDemoScreen2_Outlines();
                 else if (m_currentDemoScreen == 2)
-                    m_demoScreens.ShowDemoScreen3_Colors();
+                    m_demoScreens.ShowDemoScreen2_Colors();
                 else if (m_currentDemoScreen == 3)
-                    m_demoScreens.ShowDemoScreen4_Lines();
+                    m_demoScreens.ShowDemoScreen3_Outlines();
                 else if (m_currentDemoScreen == 4)
+                    m_demoScreens.ShowDemoScreen4_Lines();
+                else if (m_currentDemoScreen == 5)
                     m_demoScreens.ShowDemoScreen5_Texts();
 
                 LinaVG::Render();

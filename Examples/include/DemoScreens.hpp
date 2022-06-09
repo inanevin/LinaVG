@@ -43,27 +43,25 @@ namespace LinaVG
 
             void ShowBackground();
             void ShowDemoScreen1_Shapes();
-            void ShowDemoScreen2_Outlines();
-            void ShowDemoScreen3_Colors();
+            void ShowDemoScreen2_Colors();
+            void ShowDemoScreen3_Outlines();
             void ShowDemoScreen4_Lines();
             void ShowDemoScreen5_Texts();
             void ShowDemoScreen6_DrawOrder();
             void ShowDemoScreen7_Clipping();
             void PreEndFrame();
 
-            bool                     m_statsWindowOn      = true;
-            bool                     m_rotate             = false;
-            float                    m_rotateAngle        = 0.0f;
-            FontHandle               m_defaultFont        = 0;
-            FontHandle               m_titleFont          = 0;
-            FontHandle               m_descFont           = 0;
-            int                      m_drawCount          = 0;
-            int                      m_triangleCount      = 0;
-            int                      m_vertexCount        = 0;
-            int                      m_currentScreen      = 0;
-            std::vector<std::string> m_screenTitles       = {"SHAPES", "COLORS", "OUTLINE", "LINES", "TEXTS", "Z-ORDER", "CLIPPING"};
-            std::vector<std::string> m_screenDescriptions = {
-                "Shows out of the box shape types that can be drawn with LinaVG. Shapes can be partially or fully rounded, and all shapes also support filled & non-filled versions. "};
+            bool                     m_statsWindowOn = true;
+            bool                     m_rotate        = false;
+            float                    m_rotateAngle   = 0.0f;
+            FontHandle               m_defaultFont   = 0;
+            FontHandle               m_titleFont     = 0;
+            FontHandle               m_descFont      = 0;
+            int                      m_drawCount     = 0;
+            int                      m_triangleCount = 0;
+            int                      m_vertexCount   = 0;
+            std::vector<std::string> m_screenTitles  = {"SHAPES", "COLORS", "OUTLINES", "LINES", "TEXTS", "Z-ORDER", "CLIPPING"};
+            std::vector<std::string> m_screenDescriptions;
         };
     } // namespace Examples
 } // namespace LinaVG

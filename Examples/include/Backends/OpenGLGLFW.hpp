@@ -54,6 +54,8 @@ namespace LinaVG
                 return m_frameBufferScaleX;
             }
 
+            unsigned int CreateTexture(const char* file);
+
         private:
             GLFWwindow*            m_window            = nullptr;
             float                  m_frameBufferScaleX = 0.0f;

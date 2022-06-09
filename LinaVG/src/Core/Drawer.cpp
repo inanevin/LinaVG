@@ -2819,7 +2819,7 @@ namespace LinaVG
                 {
                     TextPart* w = new TextPart();
                     w->m_size   = size;
-                    w->m_str   = word;
+                    w->m_str    = word;
                     arr.push_back(w);
                 }
                 added = false;
@@ -2838,7 +2838,7 @@ namespace LinaVG
 
         TextPart* w = new TextPart();
         w->m_size   = size;
-        w->m_str   = word;
+        w->m_str    = word;
         arr.push_back(w);
     }
 
@@ -2848,8 +2848,8 @@ namespace LinaVG
         float         maxHeight    = 0.0f;
         float         totalWidth   = 0.0f;
         LINAVG_STRING append       = "";
-        float remap = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f) : 0.0f;
-        const Vec2 offset = Internal::CalcMaxCharOffset(words[0]->m_str.c_str(), font, scale);
+        float         remap        = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f) : 0.0f;
+        const Vec2    offset       = Internal::CalcMaxCharOffset(words[0]->m_str.c_str(), font, scale);
 
         for (int i = 0; i < words.m_size; i++)
         {
@@ -2865,7 +2865,7 @@ namespace LinaVG
                 TextPart* newLine = new TextPart();
                 newLine->m_size.x = totalWidth - words[i]->m_size.x - spaceAdvance;
                 newLine->m_size.y = maxHeight;
-                newLine->m_str   = append;
+                newLine->m_str    = append;
                 lines.push_back(newLine);
                 append     = words[i]->m_str + " ";
                 totalWidth = words[i]->m_size.x + spaceAdvance;
@@ -2881,7 +2881,7 @@ namespace LinaVG
         TextPart* newLine = new TextPart();
         newLine->m_size.x = totalWidth;
         newLine->m_size.y = maxHeight;
-        newLine->m_str   = append;
+        newLine->m_str    = append;
         lines.push_back(newLine);
     }
 
@@ -2917,7 +2917,7 @@ namespace LinaVG
 
             for (int i = 0; i < lines.m_size; i++)
             {
-            
+
                 if (alignment == TextAlignment::Center)
                     usedPos.x = pos.x - lines[i]->m_size.x / 2.0f;
                 else if (alignment == TextAlignment::Right)
@@ -3076,8 +3076,8 @@ namespace LinaVG
             std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
             auto                                                        str32 = cv.from_bytes(text);
             std::u32string::iterator                                    it;
-            const int totalSize = str32.size();
-            int counter = 0;
+            const int                                                   totalSize = str32.size();
+            int                                                         counter   = 0;
             for (it = str32.begin(); it < str32.end(); it++)
             {
                 auto& ch = font->m_characterGlyphs[*it];
@@ -3150,7 +3150,7 @@ namespace LinaVG
             return finalSize;
         }
 
-        Vec2       size   = Vec2(0.0f, 0.0f);
+        Vec2 size = Vec2(0.0f, 0.0f);
 
         for (int i = 0; i < lines.m_size; i++)
         {
@@ -3158,7 +3158,7 @@ namespace LinaVG
             size.x              = Math::Max(calcSize.x, size.x);
             size.y += calcSize.y;
 
-            if(i < lines.m_size - 1)
+            if (i < lines.m_size - 1)
                 size.y += newLineSpacing;
 
             delete lines[i];

@@ -71,9 +71,26 @@ namespace LinaVG
                 return m_deltaTimeRead;
             }
 
+            inline unsigned int GetLinaLogoTexture()
+            {
+                return m_linaTexture;
+            }
+
+            inline unsigned int GetCheckeredTexture()
+            {
+                return m_checkeredTexture;
+            }
+
+            inline int GetCurrentScreen()
+            {
+                return m_currentDemoScreen;
+            }
+
         private:
             DemoScreens        m_demoScreens;
-            int                m_currentDemoScreen = 0;
+            unsigned int       m_linaTexture       = 0;
+            unsigned int       m_checkeredTexture  = 0;
+            int                m_currentDemoScreen = 1;
             float              m_deltaTime         = 0.0f;
             float              m_deltaTimeRead     = 0.0f;
             int                m_fps               = 0;
