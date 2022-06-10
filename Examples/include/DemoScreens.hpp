@@ -49,6 +49,7 @@ namespace LinaVG
             void ShowDemoScreen5_Texts();
             void ShowDemoScreen6_DrawOrder();
             void ShowDemoScreen7_Clipping();
+            void ShowDemoScreen8_Final();
             void PreEndFrame();
 
             bool                     m_clippingEnabled = true;
@@ -63,7 +64,7 @@ namespace LinaVG
             int                      m_drawCount       = 0;
             int                      m_triangleCount   = 0;
             int                      m_vertexCount     = 0;
-            std::vector<std::string> m_screenTitles    = {"SHAPES", "COLORS", "OUTLINES", "LINES", "TEXTS", "Z-ORDER", "CLIPPING"};
+            std::vector<std::string> m_screenTitles    = {"SHAPES", "COLORS", "OUTLINES", "LINES", "TEXTS", "Z-ORDER", "CLIPPING", "FINAL"};
             std::vector<std::string> m_screenDescriptions;
         };
     } // namespace Examples

@@ -126,6 +126,7 @@ namespace LinaVG
         // Calculate the line points.
         Array<Line*>     lines;
         LineCapDirection usedCapDir = LineCapDirection::None;
+
         for (int i = 0; i < count - 1; i++)
         {
             if (i == 0 && (cap == LineCapDirection::Left || cap == LineCapDirection::Both))
@@ -135,8 +136,13 @@ namespace LinaVG
             else
                 usedCapDir = LineCapDirection::None;
 
+            const float t             = static_cast<float>(i) / static_cast<float>(count-1);
+            const float t2            = static_cast<float>(i + 1) / static_cast<float>(count-1);
+            style.m_thickness.m_start = Math::Lerp(opts.m_thickness.m_start, opts.m_thickness.m_end, t);
+            style.m_thickness.m_end   = Math::Lerp(opts.m_thickness.m_start, opts.m_thickness.m_end, t2);
+
             Line* line = new Line();
-            Internal::CalculateLine(*line, points[i], points[i + 1], opts, usedCapDir);
+            Internal::CalculateLine(*line, points[i], points[i + 1], style, usedCapDir);
             lines.push_back(line);
         }
 
@@ -172,7 +178,7 @@ namespace LinaVG
                     }
                 }
 
-                Internal::JoinLines(*curr, *next, opts, usedJointType, angle < 0.0f);
+                Internal::JoinLines(*curr, *next, style, usedJointType, angle < 0.0f);
             }
             else
             {

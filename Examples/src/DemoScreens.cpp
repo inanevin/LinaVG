@@ -569,7 +569,9 @@ namespace LinaVG
             jointType = LineJointType::Miter;
             startPos.y += 120;
             defaultStyle.m_outlineOptions.m_thickness = 0.0f;
-            defaultStyle.m_textureHandle              = ExampleApp::Get()->GetCheckeredTexture();
+            defaultStyle.m_textureHandle              = 0;
+            defaultStyle.m_thickness.m_start = 2.0f;
+            defaultStyle.m_thickness.m_end = 16.0f;
             LinaVG::DrawBezier(startPos, Vec2(startPos.x + 200, startPos.y + 200), Vec2(startPos.x + 500, startPos.y - 200), Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, jointType, 1, true, 100);
 
             startPos.y += 120;
@@ -577,6 +579,8 @@ namespace LinaVG
             defaultStyle.m_outlineOptions.m_textureHandle = ExampleApp::Get()->GetCheckeredTexture();
             defaultStyle.m_textureHandle                  = 0;
             defaultStyle.m_outlineOptions.m_thickness     = 7.0f;
+            defaultStyle.m_thickness = 15.0f;
+
             std::vector<Vec2> points;
             points.push_back(startPos);
             points.push_back(Vec2(startPos.x + 200, startPos.y));
@@ -763,6 +767,10 @@ namespace LinaVG
             Config.m_clipPosY  = 0;
             Config.m_clipSizeX = 0;
             Config.m_clipSizeY = 0;
+        }
+
+        void DemoScreens::ShowDemoScreen8_Final()
+        {
         }
 
         void DemoScreens::PreEndFrame()

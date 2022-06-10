@@ -81,7 +81,7 @@ namespace LinaVG
             LinaVG::Config.m_clipSizeY                            = sizeY;
             LinaVG::Config.m_flipTextureUVs                       = false;
             LinaVG::Config.m_framebufferScale.x = LinaVG::Config.m_framebufferScale.y = exampleBackend.GetFramebufferScale();
-            // LinaVG::Config.m_aaMultiplier = 3;
+            LinaVG::Config.m_aaMultiplier                                             = 1.5f;
 
             LinaVG::Config.m_errorCallback = [](const std::string& err) {
                 std::cerr << err.c_str() << std::endl;
@@ -140,6 +140,9 @@ namespace LinaVG
                     m_demoScreens.ShowDemoScreen6_DrawOrder();
                 else if (m_currentDemoScreen == 7)
                     m_demoScreens.ShowDemoScreen7_Clipping();
+                else if (m_currentDemoScreen == 8)
+                    m_demoScreens.ShowDemoScreen8_Final();
+
                 LinaVG::Render();
 
                 m_demoScreens.PreEndFrame();
@@ -167,7 +170,7 @@ namespace LinaVG
 
         void ExampleApp::OnNumKeyCallback(int key)
         {
-            if (key > 0 && key < 8)
+            if (key > 0 && key < 9)
                 m_currentDemoScreen = key;
 
             if (key == 7)
