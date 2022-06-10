@@ -571,8 +571,8 @@ namespace LinaVG
             startPos.y += 120;
             defaultStyle.m_outlineOptions.m_thickness = 0.0f;
             defaultStyle.m_textureHandle              = 0;
-            defaultStyle.m_thickness.m_start = 2.0f;
-            defaultStyle.m_thickness.m_end = 16.0f;
+            defaultStyle.m_thickness.m_start          = 2.0f;
+            defaultStyle.m_thickness.m_end            = 16.0f;
             LinaVG::DrawBezier(startPos, Vec2(startPos.x + 200, startPos.y + 200), Vec2(startPos.x + 500, startPos.y - 200), Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, jointType, 1, true, 100);
 
             startPos.y += 120;
@@ -580,7 +580,7 @@ namespace LinaVG
             defaultStyle.m_outlineOptions.m_textureHandle = ExampleApp::Get()->GetCheckeredTexture();
             defaultStyle.m_textureHandle                  = 0;
             defaultStyle.m_outlineOptions.m_thickness     = 7.0f;
-            defaultStyle.m_thickness = 15.0f;
+            defaultStyle.m_thickness                      = 15.0f;
 
             std::vector<Vec2> points;
             points.push_back(startPos);
@@ -778,20 +778,24 @@ namespace LinaVG
 
             // Ground plane
             StyleOptions groundPlaneStyle;
-            groundPlaneStyle.m_isFilled = true;
+            Vec2         gridStart                  = Vec2(0.0f, screenSize.y * 0.5f);
+            groundPlaneStyle.m_isFilled             = true;
             groundPlaneStyle.m_color.m_gradientType = GradientType::Vertical;
-            groundPlaneStyle.m_color.m_start = Utility::HexToVec4(0x302b63);
-            groundPlaneStyle.m_color.m_end = Utility::HexToVec4(0x24243e);
-            LinaVG::DrawRect(Vec2(0.0f, screenSize.y * 0.6f), Vec2(screenSize.x, screenSize.y), groundPlaneStyle, 0.0f, 1);
-            
+            groundPlaneStyle.m_color.m_start        = Utility::HexToVec4(0x302b63);
+            groundPlaneStyle.m_color.m_end          = Vec4(0.05f, 0.05f, 0.12f, 1.0f);
+            LinaVG::DrawRect(gridStart, Vec2(screenSize.x, screenSize.y), groundPlaneStyle, 0.0f, 1);
+
             // Ground plane grid
-            Vec2 gridStart = Vec2(0.0f, screenSize.y * 0.8f);
-            for (int i = 0; i < 1; i++)
+            const int   lineCountY     = 10;
+            const float gridLeftY      = screenSize.y - gridStart.y;
+            const float gridYIncrement = gridLeftY / static_cast<float>(lineCountY);
+            for (int i = 0; i < lineCountY; i++)
             {
                 StyleOptions gridLine;
+                gridLine.m_color     = Vec4(1.0f, 1.0f, 1.0f, 0.2f);
                 gridLine.m_thickness = 2.0f;
-                LinaVG::DrawLine(gridStart, Vec2(screenSize.x, gridStart.y), gridLine, LineCapDirection::None, 0.0f, 2);
-                gridStart.y += 20;
+                LinaVG::DrawLine(gridStart, Vec2(screenSize.x, gridStart.y + 10), gridLine, LineCapDirection::None, 0.0f, 2);
+                gridStart.y += gridYIncrement;
             }
         }
 

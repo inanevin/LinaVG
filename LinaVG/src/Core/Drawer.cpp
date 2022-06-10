@@ -2552,8 +2552,8 @@ namespace LinaVG
             v.m_pos = sourceBuffer->m_vertexBuffer[indicesOrder[i]].m_pos;
             v.m_uv  = sourceBuffer->m_vertexBuffer[indicesOrder[i]].m_uv;
 
-            if (isAAOutline)
-                v.m_col.w = 1.0f;
+           // if (isAAOutline)
+           //     v.m_col.w = 1.0f;
 
             if (Config.m_enableAA && !isAAOutline)
                 copiedVerticesOrder.push_back(destBuf->m_vertexBuffer.m_size);
@@ -2716,7 +2716,7 @@ namespace LinaVG
                 if (isAAOutline)
                 {
                     v.m_col   = sourceBuffer->m_vertexBuffer[i].m_col;
-                    v.m_col.w = 1.0f;
+                    // v.m_col.w = 1.0f;
                 }
                 else
                     v.m_col = opts.m_outlineOptions.m_color.m_start;
