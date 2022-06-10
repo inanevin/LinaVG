@@ -30,7 +30,6 @@ SOFTWARE.
 #include "Core/Renderer.hpp"
 #include "Core/Backend.hpp"
 #include "Core/Math.hpp"
-#define MAX_WIDTH 600
 #include <iostream>
 #include <glad/glad.h>
 
@@ -143,7 +142,7 @@ namespace LinaVG
                 const unsigned int glyphWidth = slot->bitmap.width;
                 const unsigned int glyphRows  = slot->bitmap.rows;
 
-                if (roww + glyphWidth + bufferCharSpacing >= MAX_WIDTH)
+                if (roww + glyphWidth + bufferCharSpacing >= Config.m_maxFontAtlasSize)
                 {
                     w = Math::Max(w, roww);
                     h += rowh + bufferCharSpacing;
@@ -199,13 +198,46 @@ namespace LinaVG
 
             w = Math::Max(w, roww);
             h += rowh;
-         
-            // Generate atlas
-            BackendHandle tex   = Backend::CreateFontTexture(w, h);
-            font->m_textureSize = Vec2(static_cast<float>(w), static_cast<float>(h));
-            font->m_texture     = tex;
-            int offsetX         = bufferCharSpacing;
-            int offsetY         = bufferCharSpacing;
+
+            int availableAtlasIndex = -1;
+            for (int i = 0; i < g_textData.m_createdAtlases.m_size; i++)
+            {
+                FontAtlas& atlas = g_textData.m_createdAtlases[i];
+                const int totalSize = Config.m_maxFontAtlasSize - atlas.m_currentOffsetX + Config.m_maxFontAtlasSize - atlas.m_currentOffsetY;
+                if (w + h < totalSize)
+                {
+                    availableAtlasIndex = i;
+                    glBindTexture(GL_TEXTURE_2D, atlas.m_texture);
+                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                    break;
+                }
+            }
+
+            int offsetX = bufferCharSpacing;
+            int offsetY = bufferCharSpacing;
+
+            int usedAtlasIndex = -1;
+            w = h = Config.m_maxFontAtlasSize;
+
+            if (availableAtlasIndex != -1)
+            {
+                offsetX = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetX;
+                offsetY = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetY;
+                font->m_textureSize = Vec2(Config.m_maxFontAtlasSize, Config.m_maxFontAtlasSize);
+                font->m_texture = g_textData.m_createdAtlases[availableAtlasIndex].m_texture;
+                usedAtlasIndex = availableAtlasIndex;
+            }
+            else
+            {
+                FontAtlas atlas;
+                atlas.m_texture = Backend::CreateFontTexture(w, h);
+                font->m_textureSize = Vec2(static_cast<float>(w), static_cast<float>(h));
+                font->m_texture = atlas.m_texture;
+                usedAtlasIndex = g_textData.m_createdAtlases.m_size;
+                g_textData.m_createdAtlases.push_back(atlas);
+            }
+
+            // TODO: figure out width as height issue
             rowh                = 0;
 
             for (auto& ch : characterMap)
@@ -213,7 +245,7 @@ namespace LinaVG
                 const unsigned int glyphWidth = static_cast<unsigned int>(ch.second.m_size.x);
                 const unsigned int glyphRows  = static_cast<unsigned int>(ch.second.m_size.y);
 
-                if (offsetX + glyphWidth + bufferCharSpacing >= MAX_WIDTH)
+                if (offsetX + glyphWidth + bufferCharSpacing >= Config.m_maxFontAtlasSize)
                 {
                     offsetY += rowh + bufferCharSpacing;
                     rowh    = 0;
@@ -254,6 +286,11 @@ namespace LinaVG
                 offsetX += glyphWidth + bufferCharSpacing;
             }
 
+            if (usedAtlasIndex != -1)
+            {
+                g_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetX = offsetX;
+                g_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetY = offsetY;
+            }
             font->m_spaceAdvance = characterMap[' '].m_advance.x;
             FT_Done_Face(face);
             Backend::RestoreAPIState();

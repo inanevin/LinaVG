@@ -647,13 +647,13 @@ namespace LinaVG::Backend
         if (data == nullptr)
             return 0;
 
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
         // Generate texture
         unsigned int texture;
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, static_cast<GLvoid*>(data));
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         // Options
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

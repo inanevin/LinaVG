@@ -44,7 +44,7 @@ namespace LinaVG
             m_titleFont       = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 65);
             m_descFont        = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 20);
             m_textDemoFont    = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 30);
-            m_textDemoSDFFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 40);
+           m_textDemoSDFFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 40);
 
             m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
             m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
@@ -637,10 +637,6 @@ namespace LinaVG
             textOpts.m_color     = Vec4(1, 1, 1, 1);
             LinaVG::DrawTextNormal("And this is a normal text with higher spacing.", startPos, textOpts, m_rotateAngle, 1);
 
-            startPos.y += 100;
-            LinaVG::Internal::DrawDebugFontAtlas(startPos, textOpts.m_font);
-
-            return;
             startPos.y += 90;
             startPos.x                       = screenSize.x * 0.05f;
             const float    beforeSDFStartPos = startPos.y;

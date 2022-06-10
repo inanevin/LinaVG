@@ -279,7 +279,6 @@ namespace LinaVG
             return last();
         }
 
-
         inline T* erase(const T* it)
         {
             _ASSERT(it >= m_data && it < m_data + m_size);
@@ -645,6 +644,13 @@ namespace LinaVG
         /// Do not forget to send your text with in utf8-format, e.g. c++11 > u8"my string"
         /// </summary>
         bool m_useUnicodeEncoding = false;
+
+        /// <summary>
+        /// Maximum size a font texture atlas can have, all atlasses are square, so this is used for both width & height.
+        /// Increase if you are loading a lot of characters or fonts with big sizes (e.g. 100)
+        /// You can use Internal::DrawDebugFontAtlas to visualize the atlas target font belongs to.
+        /// </summary>
+        int m_maxFontAtlasSize = 768;
 
         /// <summary>
         /// Every interval ticks system will garbage collect all vertex & index buffers, meaning that will clear all the arrays.

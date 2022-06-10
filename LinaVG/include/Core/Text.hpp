@@ -55,7 +55,7 @@ namespace LinaVG
         Vec2 m_advance = Vec2(0.0f, 0.0f);
 
         /// Cleaned after load.
-        unsigned char* m_buffer    = nullptr;
+        unsigned char* m_buffer = nullptr;
     };
 
     class LinaVGFont
@@ -70,6 +70,12 @@ namespace LinaVG
         LINAVG_MAP<GlyphEncoding, TextCharacter> m_characterGlyphs;
     };
 
+    struct FontAtlas
+    {
+        BackendHandle m_texture        = 0;
+        int           m_currentOffsetX = 0;
+        int           m_currentOffsetY = 0;
+    };
     /// <summary>
     /// Management for text rendering.
     /// </summary>
@@ -82,6 +88,8 @@ namespace LinaVG
         /// !OFFSETTED BY 1! always access m_loadedFonts[myFontHandle - 1];
         /// </summary>
         Array<LinaVGFont*> m_loadedFonts;
+
+        Array<FontAtlas> m_createdAtlases;
     };
 
     namespace Text
