@@ -207,8 +207,7 @@ namespace LinaVG
                 if (w + h < totalSize)
                 {
                     availableAtlasIndex = i;
-                    glBindTexture(GL_TEXTURE_2D, atlas.m_texture);
-                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                    Backend::BindFontTexture(atlas.m_texture);
                     break;
                 }
             }
@@ -291,6 +290,7 @@ namespace LinaVG
                 g_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetX = offsetX;
                 g_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetY = offsetY;
             }
+
             font->m_spaceAdvance = characterMap[' '].m_advance.x;
             FT_Done_Face(face);
             Backend::RestoreAPIState();

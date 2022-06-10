@@ -41,7 +41,7 @@ namespace LinaVG::Backend
     bool Initialize()
     {
         Internal::g_backendData.m_defaultVtxShader = "#version 330 core\n"
-                                                     "layout (location = 0) in vec2 pos;\n"
+                                                     "layout (location = 0) in vec3 pos;\n"
                                                      "layout (location = 1) in vec2 uv;\n"
                                                      "layout (location = 2) in vec4 col;\n"
                                                      "uniform mat4 proj; \n"
@@ -218,12 +218,15 @@ namespace LinaVG::Backend
         SaveAPIState();
 
         // Apply GL state
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         glDepthMask(GL_FALSE);
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_CULL_FACE);
-        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
         glDisable(GL_STENCIL_TEST);
         glEnable(GL_SCISSOR_TEST);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -642,25 +645,10 @@ namespace LinaVG::Backend
         glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, GL_RED, GL_UNSIGNED_BYTE, data);
     }
 
-    BackendHandle GenerateFontTexture(int width, int height, void* data)
+    void BindFontTexture(BackendHandle texture)
     {
-        if (data == nullptr)
-            return 0;
-
-        // Generate texture
-        unsigned int texture;
-        glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, static_cast<GLvoid*>(data));
-
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-        // Options
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        return static_cast<BackendHandle>(texture);
     }
 
 } // namespace LinaVG::Backend
