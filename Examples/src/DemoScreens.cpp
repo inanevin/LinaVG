@@ -637,6 +637,10 @@ namespace LinaVG
             textOpts.m_color     = Vec4(1, 1, 1, 1);
             LinaVG::DrawTextNormal("And this is a normal text with higher spacing.", startPos, textOpts, m_rotateAngle, 1);
 
+            startPos.y += 100;
+            LinaVG::Internal::DrawDebugFontAtlas(startPos, textOpts.m_font);
+
+            return;
             startPos.y += 90;
             startPos.x                       = screenSize.x * 0.05f;
             const float    beforeSDFStartPos = startPos.y;
