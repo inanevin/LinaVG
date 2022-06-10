@@ -136,7 +136,10 @@ namespace LinaVG
                     m_demoScreens.ShowDemoScreen4_Lines();
                 else if (m_currentDemoScreen == 5)
                     m_demoScreens.ShowDemoScreen5_Texts();
-
+                else if (m_currentDemoScreen == 6)
+                    m_demoScreens.ShowDemoScreen6_DrawOrder();
+                else if (m_currentDemoScreen == 7)
+                    m_demoScreens.ShowDemoScreen7_Clipping();
                 LinaVG::Render();
 
                 m_demoScreens.PreEndFrame();
@@ -162,13 +165,14 @@ namespace LinaVG
             LinaVG::Config.m_debugOrthoOffset.y -= input * m_deltaTime * 1000;
         }
 
-        void ExampleApp::OnSpaceCallback()
-        {
-        }
 
         void ExampleApp::OnNumKeyCallback(int key)
         {
-            m_currentDemoScreen = key;
+            if (key > 0 && key < 8)
+                m_currentDemoScreen = key;
+
+            if (key == 7)
+                m_demoScreens.m_clippingEnabled = true;
         }
 
         void ExampleApp::OnPCallback()
@@ -184,6 +188,19 @@ namespace LinaVG
         void ExampleApp::OnFCallback()
         {
             LinaVG::Config.m_debugWireframeEnabled = !LinaVG::Config.m_debugWireframeEnabled;
+        }
+
+        void ExampleApp::OnCCallback()
+        {
+            if (m_currentDemoScreen == 7)
+            {
+                m_demoScreens.m_clippingEnabled = !m_demoScreens.m_clippingEnabled;
+            }
+        }
+
+        void ExampleApp::OnECallback()
+        {
+            m_demoScreens.m_rotateAngle = 0.0f;
         }
 
         void ExampleApp::OnMouseScrollCallback(float val)

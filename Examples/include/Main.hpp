@@ -47,11 +47,12 @@ namespace LinaVG
 
             void OnHorizontalKeyCallback(float input);
             void OnVerticalKeyCallback(float input);
-            void OnSpaceCallback();
             void OnNumKeyCallback(int key);
             void OnPCallback();
             void OnRCallback();
             void OnFCallback();
+            void OnCCallback();
+            void OnECallback();
             void OnMouseScrollCallback(float val);
             void OnWindowResizeCallback(int width, int height);
             void OnWindowCloseCallback();

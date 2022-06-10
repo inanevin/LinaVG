@@ -51,16 +51,19 @@ namespace LinaVG
             void ShowDemoScreen7_Clipping();
             void PreEndFrame();
 
-            bool                     m_statsWindowOn = true;
-            bool                     m_rotate        = false;
-            float                    m_rotateAngle   = 0.0f;
-            FontHandle               m_defaultFont   = 0;
-            FontHandle               m_titleFont     = 0;
-            FontHandle               m_descFont      = 0;
-            int                      m_drawCount     = 0;
-            int                      m_triangleCount = 0;
-            int                      m_vertexCount   = 0;
-            std::vector<std::string> m_screenTitles  = {"SHAPES", "COLORS", "OUTLINES", "LINES", "TEXTS", "Z-ORDER", "CLIPPING"};
+            bool                     m_clippingEnabled = true;
+            bool                     m_statsWindowOn   = true;
+            bool                     m_rotate          = false;
+            float                    m_rotateAngle     = 0.0f;
+            FontHandle               m_defaultFont     = 0;
+            FontHandle               m_titleFont       = 0;
+            FontHandle               m_descFont        = 0;
+            FontHandle               m_textDemoFont    = 0;
+            FontHandle               m_textDemoSDFFont = 0;
+            int                      m_drawCount       = 0;
+            int                      m_triangleCount   = 0;
+            int                      m_vertexCount     = 0;
+            std::vector<std::string> m_screenTitles    = {"SHAPES", "COLORS", "OUTLINES", "LINES", "TEXTS", "Z-ORDER", "CLIPPING"};
             std::vector<std::string> m_screenDescriptions;
         };
     } // namespace Examples

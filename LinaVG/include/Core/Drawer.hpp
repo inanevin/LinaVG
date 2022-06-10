@@ -53,8 +53,8 @@ namespace LinaVG
 
     struct TextPart
     {
-        LINAVG_STRING m_str = "";
-        Vec2        m_size = Vec2(0.0f, 0.0f);
+        LINAVG_STRING m_str  = "";
+        Vec2          m_size = Vec2(0.0f, 0.0f);
     };
 
     struct Line
@@ -63,7 +63,8 @@ namespace LinaVG
         Array<int>          m_upperIndices;
         Array<int>          m_lowerIndices;
         Array<LineTriangle> m_tris;
-        bool                m_hasMidpoints = false;
+        bool                m_hasMidpoints       = false;
+        int                 m_lineCapVertexCount = 0;
 
         Line& operator=(const Line& t)
         {
@@ -80,6 +81,7 @@ namespace LinaVG
             m_lowerIndices.from(t.m_lowerIndices);
             m_upperIndices.from(t.m_upperIndices);
             m_hasMidpoints = t.m_hasMidpoints;
+            m_lineCapVertexCount = t.m_lineCapVertexCount;
             return *this;
         }
 
@@ -109,7 +111,6 @@ namespace LinaVG
 
     LINAVG_API enum class LineJointType
     {
-        None,
         Miter,
         Bevel,
         BevelRound,
@@ -231,7 +232,7 @@ namespace LinaVG
     /// Draws a filled circle with the given radius and center.
     /// You can change the start and end angles to create a filled semi-circle or a filled arc.
     /// It's recommended to send angles always in the range of 0.0f - 360.0f, clock-wise. This method will try to auto-convert if not.
-    /// !Rounding options have no effect.! 
+    /// !Rounding options have no effect.!
     /// </summary>
     /// <param name="center">Center of the shape.</param>
     /// <param name="radius">Radius of the shape.</param>
@@ -467,7 +468,6 @@ namespace LinaVG
         void DrawDebugFontAtlas(const Vec2& pos, FontHandle handle);
 
     }; // namespace Internal
-
 
 } // namespace LinaVG
 

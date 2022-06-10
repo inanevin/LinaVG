@@ -279,14 +279,6 @@ namespace LinaVG
             return last();
         }
 
-        inline T* push_back_copy(const T& v)
-        {
-            checkGrow();
-            auto s         = sizeof(v);
-            m_data[m_size] = v;
-            m_size++;
-            return last();
-        }
 
         inline T* erase(const T* it)
         {

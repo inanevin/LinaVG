@@ -102,10 +102,11 @@ namespace LinaVG
 
             // Texture alignment changes might be necessary on some APIs such as OpenGL
             Backend::SaveAPIState();
-            
-            LinaVGFont* font = new LinaVGFont();
-            font->m_size     = size;
-            font->m_isSDF    = loadAsSDF;
+
+            LinaVGFont* font             = new LinaVGFont();
+            font->m_size                 = size;
+            font->m_isSDF                = loadAsSDF;
+            font->m_newLineHeight        = static_cast<float>(face->size->metrics.height) / 64.0f;
 
             auto&        characterMap    = font->m_characterGlyphs;
             int          maxHeight       = 0;
@@ -242,12 +243,12 @@ namespace LinaVG
                 Vec2        uv3        = Vec2(xx + size.x / fontWidth, yy + size.y / fontHeight);
                 Vec2        uv4        = Vec2(xx, yy + size.y / fontHeight);
 
-                 Vec2       points[] = {uv1, uv2, uv3, uv4};
-                 const Vec2 avg      = Math::GetPolygonCentroidFast(points, 4);
-                 uv1                 = Math::ScalePoint(points[0], avg, 1.1f);
-                 uv2                 = Math::ScalePoint(points[1], avg, 1.1f);
-                 uv3                 = Math::ScalePoint(points[2], avg, 1.1f);
-                 uv4                 = Math::ScalePoint(points[3], avg, 1.1f);
+               // Vec2       points[] = {uv1, uv2, uv3, uv4};
+               // const Vec2 avg      = Math::GetPolygonCentroidFast(points, 4);
+               // uv1                 = Math::ScalePoint(points[0], avg, 1.1f);
+               // uv2                 = Math::ScalePoint(points[1], avg, 1.1f);
+               // uv3                 = Math::ScalePoint(points[2], avg, 1.1f);
+               // uv4                 = Math::ScalePoint(points[3], avg, 1.1f);
 
                 const Vec4 uv12 = Vec4(uv1.x, uv1.y, uv2.x, uv2.y);
                 const Vec4 uv34 = Vec4(uv3.x, uv3.y, uv4.x, uv4.y);

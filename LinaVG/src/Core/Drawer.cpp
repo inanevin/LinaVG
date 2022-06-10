@@ -58,6 +58,8 @@ namespace LinaVG
             points.push_back(Math::SampleBezier(p0, p1, p2, p3, 1.0f));
 
         DrawLines(&points[0], points.m_size, style, cap, jointType, drawOrder, uniformUVs);
+
+        points.clear();
     }
 
     void DrawPoint(const Vec2& p1, const Vec4& col)
@@ -122,7 +124,7 @@ namespace LinaVG
         }
 
         // Calculate the line points.
-        Array<Line>      lines;
+        Array<Line*>     lines;
         LineCapDirection usedCapDir = LineCapDirection::None;
         for (int i = 0; i < count - 1; i++)
         {
@@ -133,52 +135,49 @@ namespace LinaVG
             else
                 usedCapDir = LineCapDirection::None;
 
-            Line line;
-            Internal::CalculateLine(line, points[i], points[i + 1], opts, usedCapDir);
-            lines.push_back_copy(line);
+            Line* line = new Line();
+            Internal::CalculateLine(*line, points[i], points[i + 1], opts, usedCapDir);
+            lines.push_back(line);
         }
 
         // Calculate line joints.
-        if (jointType != LineJointType::None)
+        for (int i = 0; i < lines.m_size - 1; i++)
         {
-            for (int i = 0; i < lines.m_size - 1; i++)
+            Line* curr = lines[i];
+            Line* next = lines[i + 1];
+
+            const Vec2 currDir = Math::Normalized(Vec2(curr->m_vertices[2].m_pos.x - curr->m_vertices[3].m_pos.x, curr->m_vertices[2].m_pos.y - curr->m_vertices[3].m_pos.y));
+            const Vec2 nextDir = Math::Normalized(Vec2(next->m_vertices[2].m_pos.x - next->m_vertices[3].m_pos.x, next->m_vertices[2].m_pos.y - next->m_vertices[3].m_pos.y));
+
+            if (!Math::AreLinesParallel(curr->m_vertices[3].m_pos, curr->m_vertices[2].m_pos, next->m_vertices[3].m_pos, next->m_vertices[2].m_pos))
             {
-                Line& curr = lines[i];
-                Line& next = lines[i + 1];
+                // If next line is going below current one, angle is positive, and we merge lower vertices while joining upper.
+                // Vice versa if angle is negative
+                const float angle = Math::GetAngleBetweenDirs(currDir, nextDir);
 
-                const Vec2 currDir = Math::Normalized(Vec2(curr.m_vertices[2].m_pos.x - curr.m_vertices[3].m_pos.x, curr.m_vertices[2].m_pos.y - curr.m_vertices[3].m_pos.y));
-                const Vec2 nextDir = Math::Normalized(Vec2(next.m_vertices[2].m_pos.x - next.m_vertices[3].m_pos.x, next.m_vertices[2].m_pos.y - next.m_vertices[3].m_pos.y));
+                LineJointType usedJointType = jointType;
 
-                if (!Math::AreLinesParallel(curr.m_vertices[3].m_pos, curr.m_vertices[2].m_pos, next.m_vertices[3].m_pos, next.m_vertices[2].m_pos))
+                if (jointType != LineJointType::VtxAverage)
                 {
-                    // If next line is going below current one, angle is positive, and we merge lower vertices while joining upper.
-                    // Vice versa if angle is negative
-                    const float angle = Math::GetAngleBetweenDirs(currDir, nextDir);
-
-                    LineJointType usedJointType = jointType;
-
-                    if (jointType != LineJointType::VtxAverage)
+                    if (Math::Abs(angle) < 15.0f)
+                        usedJointType = LineJointType::VtxAverage;
+                    else
                     {
-                        if (Math::Abs(angle) < 15.0f)
-                            usedJointType = LineJointType::VtxAverage;
-                        else
-                        {
-                            // Joint type fallbacks.
-                            if (jointType == LineJointType::Miter && Math::Abs(angle) > Config.m_miterLimit)
-                                usedJointType = LineJointType::BevelRound;
+                        // Joint type fallbacks.
+                        if (jointType == LineJointType::Miter && Math::Abs(angle) > Config.m_miterLimit)
+                            usedJointType = LineJointType::BevelRound;
 
-                            if (jointType == LineJointType::BevelRound && style.m_rounding == 0.0f)
-                                usedJointType = LineJointType::Bevel;
-                        }
+                        if (jointType == LineJointType::BevelRound && style.m_rounding == 0.0f)
+                            usedJointType = LineJointType::Bevel;
                     }
+                }
 
-                    Internal::JoinLines(curr, next, opts, usedJointType, angle < 0.0f);
-                }
-                else
-                {
-                    next.m_upperIndices.erase(next.m_upperIndices.findAddr(0));
-                    next.m_lowerIndices.erase(next.m_lowerIndices.findAddr(3));
-                }
+                Internal::JoinLines(*curr, *next, opts, usedJointType, angle < 0.0f);
+            }
+            else
+            {
+                next->m_upperIndices.erase(next->m_upperIndices.findAddr(0));
+                next->m_lowerIndices.erase(next->m_lowerIndices.findAddr(3));
             }
         }
 
@@ -186,7 +185,23 @@ namespace LinaVG
         if (!uniformUVs)
         {
             for (int i = 0; i < lines.m_size; i++)
-                Internal::CalculateLineUVs(lines[i]);
+            {
+                Internal::CalculateLineUVs(*lines[i]);
+
+                // lines[i]->m_vertices[0].m_uv = Vec2(0.0f, 0.0f);
+                // lines[i]->m_vertices[1].m_uv = Vec2(1.0f, 0.0f);
+                // lines[i]->m_vertices[2].m_uv = Vec2(1.0f, 1.0f);
+                // lines[i]->m_vertices[3].m_uv = Vec2(0.0f, 1.0f);
+                //
+                // if (lines[i]->m_hasMidpoints)
+                // {
+                //     lines[i]->m_vertices[4].m_uv = Vec2(0.0f, 0.5f);
+                //     lines[i]->m_vertices[5].m_uv = Vec2(1.0f, 0.5f);
+                // }
+                //
+                // for (int j = 0; j < lines[i]->m_lineCapVertexCount; j++)
+                //     lines[i]->m_vertices[6 + j].m_uv = Vec2(0.0f, 0.5f);
+            }
         }
         else
         {
@@ -194,8 +209,8 @@ namespace LinaVG
 
             for (int i = 0; i < lines.m_size; i++)
             {
-                for (int j = 0; j < lines[i].m_vertices.m_size; j++)
-                    vertices.push_back(lines[i].m_vertices[j]);
+                for (int j = 0; j < lines[i]->m_vertices.m_size; j++)
+                    vertices.push_back(lines[i]->m_vertices[j]);
             }
 
             Vec2 bbMin, bbMax;
@@ -204,10 +219,10 @@ namespace LinaVG
             // Recalculate UVs.
             for (int i = 0; i < lines.m_size; i++)
             {
-                for (int j = 0; j < lines[i].m_vertices.m_size; j++)
+                for (int j = 0; j < lines[i]->m_vertices.m_size; j++)
                 {
-                    lines[i].m_vertices[j].m_uv.x = Math::Remap(lines[i].m_vertices[j].m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-                    lines[i].m_vertices[j].m_uv.y = Math::Remap(lines[i].m_vertices[j].m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+                    lines[i]->m_vertices[j].m_uv.x = Math::Remap(lines[i]->m_vertices[j].m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+                    lines[i]->m_vertices[j].m_uv.y = Math::Remap(lines[i]->m_vertices[j].m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
                 }
             }
         }
@@ -217,45 +232,42 @@ namespace LinaVG
         for (int i = 0; i < lines.m_size; i++)
         {
             int destBufStart = destBuf->m_vertexBuffer.m_size;
-            for (int j = 0; j < lines[i].m_vertices.m_size; j++)
+            for (int j = 0; j < lines[i]->m_vertices.m_size; j++)
             {
-                destBuf->PushVertex(lines[i].m_vertices[j]);
+                destBuf->PushVertex(lines[i]->m_vertices[j]);
             }
 
-            for (int j = 0; j < lines[i].m_tris.m_size; j++)
+            for (int j = 0; j < lines[i]->m_tris.m_size; j++)
             {
-                destBuf->PushIndex(destBufStart + lines[i].m_tris[j].m_indices[0]);
-                destBuf->PushIndex(destBufStart + lines[i].m_tris[j].m_indices[1]);
-                destBuf->PushIndex(destBufStart + lines[i].m_tris[j].m_indices[2]);
+                destBuf->PushIndex(destBufStart + lines[i]->m_tris[j].m_indices[0]);
+                destBuf->PushIndex(destBufStart + lines[i]->m_tris[j].m_indices[1]);
+                destBuf->PushIndex(destBufStart + lines[i]->m_tris[j].m_indices[2]);
             }
         }
 
         if (style.m_outlineOptions.m_thickness == 0.0f && !Config.m_enableAA)
+        {
+            for (int i = 0; i < lines.m_size; i++)
+                delete lines[i];
+
+            lines.clear();
             return;
+        }
 
         int drawBufferStartForOutlines = drawBufferStartBeforeLines;
-        // Draw AA && outline.
-        if (jointType == LineJointType::None)
-        {
-            for (int i = 1; i < lines.m_size; i++)
-            {
-                lines[i].m_upperIndices.erase(lines[i].m_upperIndices.findAddr(0));
-                lines[i].m_lowerIndices.erase(lines[i].m_lowerIndices.findAddr(3));
-            }
-        }
 
         Array<int> totalUpperIndices;
         Array<int> totalLowerIndices;
 
         for (int i = 0; i < lines.m_size; i++)
         {
-            for (int j = 0; j < lines[i].m_upperIndices.m_size; j++)
-                totalUpperIndices.push_back(drawBufferStartForOutlines + lines[i].m_upperIndices[j]);
+            for (int j = 0; j < lines[i]->m_upperIndices.m_size; j++)
+                totalUpperIndices.push_back(drawBufferStartForOutlines + lines[i]->m_upperIndices[j]);
 
-            for (int j = 0; j < lines[i].m_lowerIndices.m_size; j++)
-                totalLowerIndices.push_back(drawBufferStartForOutlines + lines[i].m_lowerIndices[j]);
+            for (int j = 0; j < lines[i]->m_lowerIndices.m_size; j++)
+                totalLowerIndices.push_back(drawBufferStartForOutlines + lines[i]->m_lowerIndices[j]);
 
-            drawBufferStartForOutlines += lines[i].m_vertices.m_size;
+            drawBufferStartForOutlines += lines[i]->m_vertices.m_size;
         }
 
         if (style.m_outlineOptions.m_thickness != 0.0f)
@@ -283,6 +295,11 @@ namespace LinaVG
 
             Internal::DrawOutlineAroundShape(destBuf, opts2, &indicesOrder[0], indicesOrder.m_size, opts2.m_outlineOptions.m_thickness, false, drawOrder, Internal::OutlineCallType::AA);
         }
+
+        for (int i = 0; i < lines.m_size; i++)
+            delete lines[i];
+
+        lines.clear();
     }
 
     void DrawImage(BackendHandle textureHandle, const Vec2& pos, const Vec2& size, float rotateAngle, int drawOrder, Vec2 uvTiling, Vec2 uvOffset, Vec2 uvTL, Vec2 uvBR)
@@ -2154,7 +2171,9 @@ namespace LinaVG
                 Vertex     v;
                 v.m_col = lineCapToAdd == LineCapDirection::Left ? style.m_color.m_start : style.m_color.m_end;
                 v.m_pos = p;
+
                 line.m_vertices.push_back(v);
+                line.m_lineCapVertexCount++;
 
                 const float distToUp   = Math::Mag(Vec2(upVtx->m_pos.x - p.x, upVtx->m_pos.y - p.y));
                 const float distToDown = Math::Mag(Vec2(downVtx->m_pos.x - p.x, downVtx->m_pos.y - p.y));
@@ -2586,7 +2605,7 @@ namespace LinaVG
         if (Config.m_enableAA && !isAAOutline)
         {
             StyleOptions opts2 = StyleOptions(opts);
-            destBuf = DrawOutlineAroundShape(destBuf, opts2, &extrudedVerticesOrder[0], extrudedVerticesOrder.m_size, defThickness, ccw, drawOrder, OutlineCallType::OutlineAA);
+            destBuf            = DrawOutlineAroundShape(destBuf, opts2, &extrudedVerticesOrder[0], extrudedVerticesOrder.m_size, defThickness, ccw, drawOrder, OutlineCallType::OutlineAA);
             DrawOutlineAroundShape(destBuf, opts2, &copiedVerticesOrder[0], copiedVerticesOrder.m_size, -defThickness, !ccw, drawOrder, OutlineCallType::OutlineAA);
         }
 
@@ -2636,7 +2655,14 @@ namespace LinaVG
                 sourceBuffer = &Internal::g_rendererData.m_gradientBuffers[sourceIndex];
         }
         else
+        {
+            const int sourceIndex = Internal::g_rendererData.GetBufferIndexInDefaultArray(sourceBuffer);
+
             destBuf = &Internal::g_rendererData.GetDefaultBuffer(drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+
+            if (sourceIndex != -1)
+                sourceBuffer = &Internal::g_rendererData.m_defaultBuffers[sourceIndex];
+        }
 
         int startIndex, endIndex;
 
@@ -2765,7 +2791,7 @@ namespace LinaVG
                 StyleOptions opts2                     = StyleOptions(opts);
                 opts2.m_isFilled                       = false;
                 opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
+                destBuf                                = DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
 
                 opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
                 DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
@@ -2791,7 +2817,7 @@ namespace LinaVG
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
+                    destBuf                                = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
 
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
@@ -2804,7 +2830,7 @@ namespace LinaVG
                     // // AA outline to the shape we are drawing
                     StyleOptions opts3     = StyleOptions(opts);
                     opts3.m_outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Outwards);
-                    DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
+                    destBuf                = DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
                 }
 
                 copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, -thickness, recalcUvs);
@@ -2814,7 +2840,7 @@ namespace LinaVG
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
+                    destBuf                                = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
 
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
@@ -2829,7 +2855,7 @@ namespace LinaVG
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
+                    destBuf                                = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
 
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
@@ -2842,7 +2868,7 @@ namespace LinaVG
                     // AA outline to the current outline we are drawing
                     StyleOptions opts2                     = StyleOptions(opts);
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Outwards;
-                    DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
+                    destBuf                                = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
 
                     opts2.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
@@ -2926,7 +2952,7 @@ namespace LinaVG
         }
 
         TextPart* newLine = new TextPart();
-        newLine->m_size.x = totalWidth;
+        newLine->m_size.x = totalWidth - spaceAdvance;
         newLine->m_size.y = maxHeight;
         newLine->m_str    = append;
         lines.push_back(newLine);
@@ -2943,7 +2969,8 @@ namespace LinaVG
         const Vec2 off = Internal::CalcMaxCharOffset(text.c_str(), font, scale);
         usedPos.y -= off.y * remap;
         usedPos.x += Math::Abs(off.x) * remap;
-        usedPos.y += size.y;
+        //  usedPos.y += size.y;
+
         if (wrapWidth == 0.0f || size.x < wrapWidth)
         {
             if (alignment == TextAlignment::Center)
@@ -2971,7 +2998,7 @@ namespace LinaVG
                     usedPos.x = pos.x - lines[i]->m_size.x;
 
                 Internal::DrawText(buf, font, lines[i]->m_str.c_str(), usedPos, offset, color, spacing, isGradient, scale);
-                usedPos.y += lines[i]->m_size.y + newLineSpacing;
+                usedPos.y += font->m_newLineHeight + newLineSpacing;
                 delete lines[i];
             }
 
@@ -3206,7 +3233,7 @@ namespace LinaVG
             size.y += calcSize.y;
 
             if (i < lines.m_size - 1)
-                size.y += newLineSpacing;
+                size.y += newLineSpacing + font->m_newLineHeight;
 
             delete lines[i];
         }

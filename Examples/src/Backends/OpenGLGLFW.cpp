@@ -109,12 +109,14 @@ namespace LinaVG
                 {
                     if (key == GLFW_KEY_F)
                         ExampleApp::Get()->OnFCallback();
-                    else if (key == GLFW_KEY_SPACE)
-                        ExampleApp::Get()->OnSpaceCallback();
                     else if (key == GLFW_KEY_P)
                         ExampleApp::Get()->OnPCallback();
                     else if (key == GLFW_KEY_R)
                         ExampleApp::Get()->OnRCallback();
+                    else if (key == GLFW_KEY_C)
+                        ExampleApp::Get()->OnCCallback();
+                    else if (key == GLFW_KEY_E)
+                        ExampleApp::Get()->OnECallback();
 
                     else if (key == GLFW_KEY_0)
                         ExampleApp::Get()->OnNumKeyCallback(0);
@@ -180,6 +182,7 @@ namespace LinaVG
                 ExampleApp::Get()->OnHorizontalKeyCallback(1.0f);
             else if (glfwGetKey(m_window, GLFW_KEY_A))
                 ExampleApp::Get()->OnHorizontalKeyCallback(-1.0f);
+
         }
 
         void ExampleBackend::Render()
