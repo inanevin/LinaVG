@@ -32,11 +32,26 @@ SOFTWARE.
 #include "Core/Math.hpp"
 #include "Utility/Utility.hpp"
 #include <string>
+#include <iostream>
+#include <ctime>
+#include <cstdlib>
 
 namespace LinaVG
 {
     namespace Examples
     {
+
+        struct StarData
+        {
+            Vec2  m_pos        = Vec2(0.0f, 0.0f);
+            Vec4  m_startCol   = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+            Vec4  m_endCol     = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+            float m_haloRadius = 0.0f;
+            float m_radialSize = 0.0f;
+        };
+
+        std::vector<StarData> stars;
+
         void DemoScreens::Initialize()
         {
             m_defaultFont     = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 18);
@@ -53,11 +68,31 @@ namespace LinaVG
             m_screenDescriptions.push_back("You can suply varying draw order to DrawXXX commands in order to support z-ordering.");
             m_screenDescriptions.push_back("You can use global clipping variables to create clipping rectangles for any shape you are drawing. Press C to toggle clipping.");
             m_screenDescriptions.push_back("Heh.");
+
+            // This is for Demo Screen 8, which is basically some basic retro art.
+            std::srand(std::time(0));
+
+            const int  starCount  = 5 + (std::rand() % 50);
+            const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
+            const Vec2 skyEnd     = Vec2(screenSize.x, screenSize.y * 0.45f);
+
+            for (int i = 0; i < starCount; i++)
+            {
+                StarData star;
+                star.m_pos        = Vec2(0 + (std::rand() % static_cast<int>(skyEnd.x)), 0 + (std::rand() % static_cast<int>(skyEnd.y)));
+                star.m_radialSize = static_cast<float>((15 + (std::rand() % 35))) / 10.0f;
+                star.m_haloRadius = static_cast<float>((5 + (std::rand() % 12)));
+
+                const float redFactor  = static_cast<float>(5 + (std::rand() % 90)) / 255.0f;
+                const float redFactor2 = static_cast<float>(5 + (std::rand() % 90)) / 255.0f;
+                star.m_startCol        = Vec4(0.6f + redFactor, 0.6f, 0.6f, 0.9f);
+                star.m_endCol          = Vec4(0.6f + redFactor2, 0.6f, 0.6f, 0.0f);
+                stars.push_back(star);
+            }
         }
 
         void DemoScreens::ShowBackground()
         {
-            return;
             const Vec2   screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
             StyleOptions style;
 
@@ -102,15 +137,15 @@ namespace LinaVG
             style.m_color      = Vec4(0, 0, 0, 0.5f);
             style.m_rounding   = 0.0f;
             const Vec2 rectMin = Vec2(0.0f, screenSize.y - screenSize.y * 0.12f);
-            LinaVG::DrawRect(rectMin, screenSize, style, 0.0f, 1);
+            LinaVG::DrawRect(rectMin, screenSize, style, 0.0f, 3);
 
             //  // Draw a vertical dividers.
             const float  rectHeight = screenSize.y - rectMin.y;
             const float  rectWidth  = screenSize.x - rectMin.x;
             StyleOptions vertDivider;
             vertDivider.m_color = Vec4(1, 1, 1, 1);
-            LinaVG::DrawLine(Vec2(rectWidth * 0.225f, rectMin.y), Vec2(rectWidth * 0.225f, screenSize.y), vertDivider, LineCapDirection::None, 0.0f, 2);
-            LinaVG::DrawLine(Vec2(rectWidth * 0.725f, rectMin.y), Vec2(rectWidth * 0.725f, screenSize.y), vertDivider, LineCapDirection::None, 0.0f, 2);
+            LinaVG::DrawLine(Vec2(rectWidth * 0.225f, rectMin.y), Vec2(rectWidth * 0.225f, screenSize.y), vertDivider, LineCapDirection::None, 0.0f, 4);
+            LinaVG::DrawLine(Vec2(rectWidth * 0.725f, rectMin.y), Vec2(rectWidth * 0.725f, screenSize.y), vertDivider, LineCapDirection::None, 0.0f, 4);
 
             // Draw title text.
             SDFTextOptions sdfStyle;
@@ -121,23 +156,23 @@ namespace LinaVG
             sdfStyle.m_color          = Utility::HexToVec4(0xFCAA67);
             sdfStyle.m_sdfThickness   = 0.62f;
             sdfStyle.m_sdfSoftness    = 0.05f;
-            LinaVG::DrawTextSDF(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1], titlePos, sdfStyle, 0, 2);
+            LinaVG::DrawTextSDF(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1], titlePos, sdfStyle, 0, 4);
 
             // Current screen description.
             TextOptions descText;
             descText.m_font      = m_descFont;
             descText.m_wrapWidth = rectWidth * 0.45f;
-            LinaVG::DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1], Vec2(rectWidth * 0.25f, rectMin.y + 30), descText, 0, 2);
+            LinaVG::DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1], Vec2(rectWidth * 0.25f, rectMin.y + 30), descText, 0, 4);
 
             // Draw controls info
             TextOptions controlsText;
             controlsText.m_font      = m_descFont;
             controlsText.m_textScale = 0.8f;
-            LinaVG::DrawTextNormal("Press num keys [0-9] to switch between demo screens.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 20), controlsText, 0, 2);
-            LinaVG::DrawTextNormal("Press P to toggle performance stats.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 40), controlsText, 0, 2);
-            LinaVG::DrawTextNormal("Press F to toggle wireframe rendering.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 60), controlsText, 0, 2);
-            LinaVG::DrawTextNormal("Press R to start/stop rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 80), controlsText, 0, 2);
-            LinaVG::DrawTextNormal("Press E to reset rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 100), controlsText, 0, 2);
+            LinaVG::DrawTextNormal("Press num keys [0-9] to switch between demo screens.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 20), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Press P to toggle performance stats.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 40), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Press F to toggle wireframe rendering.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 60), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Press R to start/stop rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 80), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Press E to reset rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 100), controlsText, 0, 4);
         }
 
         void DemoScreens::ShowDemoScreen1_Shapes()
@@ -776,26 +811,175 @@ namespace LinaVG
         {
             const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
 
+            // Sky
+            StyleOptions sky;
+            const Vec2   skyEnd        = Vec2(screenSize.x, screenSize.y * 0.65f);
+            sky.m_color.m_start        = Utility::HexToVec4(0x41295a);
+            sky.m_color.m_end          = Vec4(0.44f, 0.1f, 0.16f, 1.0f);
+            sky.m_color.m_gradientType = GradientType::Vertical;
+            LinaVG::DrawRect(Vec2(0.0f, 0.0f), skyEnd, sky, 0.0f, 1);
+
+            // Sun
+            static float sunRotation = 0.0f;
+            sunRotation += ExampleApp::Get()->GetFrameTime() * 5.0f;
+
+            StyleOptions sun;
+            const Vec2   sunCenter     = Vec2(screenSize.x / 2.0f, screenSize.y * 0.4f);
+            sun.m_color.m_start        = Utility::HexToVec4(0xfeb47b);
+            sun.m_color.m_end          = Vec4(0.84f, 0.35f, 0.26f, 1.0f);
+            sun.m_color.m_gradientType = GradientType::RadialCorner;
+            sun.m_color.m_radialSize   = 0.9f;
+            LinaVG::DrawCircle(sunCenter, 200, sun, 72, sunRotation, 0.0f, 360.0f, 3);
+
+            // Horizon line
+            StyleOptions horizon;
+            horizon.m_thickness = 4.0f;
+            horizon.m_color     = Vec4(0.08f, 0.08f, 0.08f, 1.0f);
+            LinaVG::DrawLine(Vec2(0.0f, skyEnd.y), Vec2(screenSize.x, skyEnd.y), horizon, LineCapDirection::None, 0.0f, 30);
+
             // Ground plane
             StyleOptions groundPlaneStyle;
-            Vec2         gridStart                  = Vec2(0.0f, screenSize.y * 0.5f);
+            const Vec2   gridStart                  = Vec2(0.0f, skyEnd.y);
             groundPlaneStyle.m_isFilled             = true;
             groundPlaneStyle.m_color.m_gradientType = GradientType::Vertical;
-            groundPlaneStyle.m_color.m_start        = Utility::HexToVec4(0x302b63);
+            groundPlaneStyle.m_color.m_start        = Vec4(0.122f, 0.112, 0.28f, 1.0f);
             groundPlaneStyle.m_color.m_end          = Vec4(0.05f, 0.05f, 0.12f, 1.0f);
             LinaVG::DrawRect(gridStart, Vec2(screenSize.x, screenSize.y), groundPlaneStyle, 0.0f, 1);
 
-            // Ground plane grid
-            const int   lineCountY     = 10;
+
+            static float sa = 0.0f;
+
+            sa += ExampleApp::Get()->GetFrameTime() * 10;
+
+            // Ground plane grid Y
+            Vec2        currentGrid    = gridStart;
+            const int   lineCountY     = 8;
             const float gridLeftY      = screenSize.y - gridStart.y;
             const float gridYIncrement = gridLeftY / static_cast<float>(lineCountY);
             for (int i = 0; i < lineCountY; i++)
             {
                 StyleOptions gridLine;
-                gridLine.m_color     = Vec4(1.0f, 1.0f, 1.0f, 0.2f);
+                gridLine.m_color     = Vec4(1.0f, 1.0f, 1.0f, 0.35f);
                 gridLine.m_thickness = 2.0f;
-                LinaVG::DrawLine(gridStart, Vec2(screenSize.x, gridStart.y + 10), gridLine, LineCapDirection::None, 0.0f, 2);
-                gridStart.y += gridYIncrement;
+                LinaVG::DrawLine(currentGrid, Vec2(screenSize.x, currentGrid.y), gridLine, LineCapDirection::None, 0.0f, 2);
+                currentGrid.y += gridYIncrement;
+            }
+
+            // Ground plane grid X
+            const int   lineCountX     = 20;
+            const float gridLeftX      = screenSize.x;
+            const float gridXIncrement = gridLeftX / static_cast<float>(lineCountX);
+            currentGrid                = gridStart;
+
+
+            const int   center       = lineCountX / 2;
+            const float skewMax      = 1600.0f;
+            const float tLimitMax    = static_cast<float>(lineCountX);
+            const float tLimitCenter = static_cast<float>(center);
+            for (int i = 0; i < lineCountX; i++)
+            {
+                StyleOptions gridLine;
+                float        a = 0.0f;
+
+                if (i < center)
+                    a = Math::Remap(static_cast<float>(i), 0.0f, tLimitCenter, 0.2f, 0.5f);
+                else
+                    a = Math::Remap(static_cast<float>(i), tLimitCenter, tLimitMax, 0.5f, 0.2f);
+
+                gridLine.m_color     = Vec4(1.0f, 1.0f, 1.0f, a);
+                gridLine.m_thickness = 2.0f;
+
+                const float skew = Math::Remap(static_cast<float>(i), 0.0f, tLimitMax, -skewMax, skewMax);
+                LinaVG::DrawLine(currentGrid, Vec2(currentGrid.x + skew, screenSize.y + sa), gridLine, LineCapDirection::None, 0.0f, 2);
+                currentGrid.x += gridXIncrement;
+            }
+
+            StyleOptions bgMounts;
+            bgMounts.m_color.m_start = Vec4(0, 0, 0, 1);
+            bgMounts.m_color.m_end   = Vec4(0.04f, 0.04f, 0.12f, 1.0f);
+            Vec2 triLeft             = Vec2(-screenSize.x * 0.1f, gridStart.y);
+            Vec2 triRight            = Vec2(screenSize.x * 0.24f, gridStart.y);
+            Vec2 triTop              = Vec2(screenSize.x * 0.12f, gridStart.y - screenSize.y * 0.18f);
+            LinaVG::DrawTriangle(triTop, triRight, triLeft, bgMounts, 0.0f, 3);
+
+            triLeft.x += screenSize.x * 0.2f;
+            triRight.x += screenSize.x * 0.12f;
+            triTop.x += screenSize.x * 0.1f;
+            triTop.y += screenSize.y * 0.02f;
+            LinaVG::DrawTriangle(triTop, triRight, triLeft, bgMounts, 0.0f, 4);
+
+            triRight.x += screenSize.x * 0.12f;
+            triTop.x += screenSize.x * 0.1f;
+            triTop.y += screenSize.y * 0.02f;
+            LinaVG::DrawTriangle(triTop, triRight, triLeft, bgMounts, 0.0f, 5);
+
+            // Right
+            triRight = Vec2(screenSize.x + screenSize.x * 0.1f, gridStart.y);
+            triLeft  = Vec2(screenSize.x - screenSize.x * 0.29f, gridStart.y);
+            triTop   = Vec2(screenSize.x - screenSize.x * 0.16f, gridStart.y - screenSize.y * 0.18f);
+            LinaVG::DrawTriangle(triTop, triRight, triLeft, bgMounts, 0.0f, 3);
+
+            triLeft.x -= screenSize.x * 0.2f;
+            triTop.x += screenSize.x * 0.1f;
+            triTop.y += screenSize.y * 0.02f;
+            LinaVG::DrawTriangle(triTop, triRight, triLeft, bgMounts, 0.0f, 4);
+
+            triLeft.x  = screenSize.x * 0.6f;
+            triRight.x = screenSize.x * 0.9f;
+            triTop.x   = screenSize.x * 0.7f;
+            triTop.y += screenSize.y * 0.02f;
+            LinaVG::DrawTriangle(triTop, triRight, triLeft, bgMounts, 0.0f, 5);
+
+            StyleOptions fgMounts;
+            fgMounts.m_color.m_start = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
+            fgMounts.m_color.m_end   = Vec4(0.1f, 0.1f, 0.2f, 1.0f);
+            triLeft                  = Vec2(-screenSize.x * 0.1f, gridStart.y);
+            triRight                 = Vec2(screenSize.x * 0.24f, gridStart.y);
+            triTop                   = Vec2(screenSize.x * 0.12f, gridStart.y - screenSize.y * 0.1f);
+            LinaVG::DrawTriangle(triTop, triRight, triLeft, fgMounts, 0.0f, 6);
+
+            triLeft.x += screenSize.x * 0.2f;
+            triTop.x += screenSize.x * 0.1f;
+            triRight.x += screenSize.x * 0.05f;
+            LinaVG::DrawTriangle(triTop, triRight, triLeft, fgMounts, 0.0f, 7);
+
+            fgMounts.m_color.m_start = Vec4(0.05f, 0.05f, 0.05f, 1);
+            fgMounts.m_color.m_end   = Vec4(0.1f, 0.01f, 0.13f, 1.0f);
+            triLeft                  = triRight;
+            triRight.x += screenSize.x * 0.05f;
+            LinaVG::DrawTriangle(triTop, triRight, triLeft, fgMounts, 0.0f, 8);
+
+            // Right
+            fgMounts.m_color.m_start = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
+            fgMounts.m_color.m_end   = Vec4(0.1f, 0.1f, 0.2f, 1.0f);
+            triLeft                  = Vec2(screenSize.x - screenSize.x * 0.1f, gridStart.y);
+            triRight                 = Vec2(screenSize.x, gridStart.y);
+            triTop                   = Vec2(screenSize.x - screenSize.x * 0.12f, gridStart.y - screenSize.y * 0.1f);
+            LinaVG::DrawTriangle(triTop, triRight, triLeft, fgMounts, 0.0f, 7);
+
+            fgMounts.m_color.m_start = Vec4(0, 0, 0, 1);
+            fgMounts.m_color.m_end   = Vec4(0.09f, 0.04f, 0.12f, 1.0f);
+            triRight                 = triLeft;
+            triLeft.x -= screenSize.x * 0.1f;
+            LinaVG::DrawTriangle(triTop, triRight, triLeft, fgMounts, 0.0f, 7);
+
+            // Stars
+            const Vec2 starsMax = Vec2(skyEnd.x, skyEnd.y * 0.8f);
+
+            for (int i = 0; i < stars.size(); i++)
+            {
+                StyleOptions star;
+                star.m_color.m_start        = stars[i].m_startCol;
+                star.m_color.m_end          = stars[i].m_endCol;
+                star.m_color.m_radialSize   = stars[i].m_radialSize;
+                star.m_color.m_gradientType = GradientType::Radial;
+
+                const float sin = std::sin(ExampleApp::Get()->GetElapsed() * 2.0f);
+                const float haloSize = stars[i].m_haloRadius + sin + static_cast<float>((std::rand() % 100)) / 100.0f;
+                LinaVG::DrawCircle(stars[i].m_pos, haloSize, star, 36, 0.0f, 0.0f, 360.0f, 2);
+
+                // star.m_color = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                // LinaVG::DrawCircle(starPos, starRadius, star, 36, 0.0f, 0.0f, 360.0f, 4);
             }
         }
 

@@ -136,8 +136,8 @@ namespace LinaVG
             else
                 usedCapDir = LineCapDirection::None;
 
-            const float t             = static_cast<float>(i) / static_cast<float>(count-1);
-            const float t2            = static_cast<float>(i + 1) / static_cast<float>(count-1);
+            const float t             = static_cast<float>(i) / static_cast<float>(count - 1);
+            const float t2            = static_cast<float>(i + 1) / static_cast<float>(count - 1);
             style.m_thickness.m_start = Math::Lerp(opts.m_thickness.m_start, opts.m_thickness.m_end, t);
             style.m_thickness.m_end   = Math::Lerp(opts.m_thickness.m_start, opts.m_thickness.m_end, t2);
 
@@ -1596,6 +1596,10 @@ namespace LinaVG
 
         for (int i = 0; i < v.m_size; i++)
         {
+            if (i == 0)
+                v[i].m_col = opts.m_color.m_start;
+            else
+                v[i].m_col = opts.m_color.m_end;
             buf->PushVertex(v[i]);
         }
 
@@ -1713,9 +1717,10 @@ namespace LinaVG
         for (float i = startAngle; i < end; i += angleIncrease)
         {
             Vertex v;
-            v.m_pos  = Math::GetPointOnCircle(center, radius, i);
-            v.m_uv.x = Math::Remap(v.m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-            v.m_uv.y = Math::Remap(v.m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+            v.m_pos   = Math::GetPointOnCircle(center, radius, i);
+            v.m_uv.x  = Math::Remap(v.m_pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+            v.m_uv.y  = Math::Remap(v.m_pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+            v.m_col.w = 1.0f;
             vertices.push_back(v);
         }
     }
@@ -2552,8 +2557,8 @@ namespace LinaVG
             v.m_pos = sourceBuffer->m_vertexBuffer[indicesOrder[i]].m_pos;
             v.m_uv  = sourceBuffer->m_vertexBuffer[indicesOrder[i]].m_uv;
 
-           // if (isAAOutline)
-           //     v.m_col.w = 1.0f;
+            // if (isAAOutline)
+            //     v.m_col.w = 1.0f;
 
             if (Config.m_enableAA && !isAAOutline)
                 copiedVerticesOrder.push_back(destBuf->m_vertexBuffer.m_size);
@@ -2715,7 +2720,7 @@ namespace LinaVG
 
                 if (isAAOutline)
                 {
-                    v.m_col   = sourceBuffer->m_vertexBuffer[i].m_col;
+                    v.m_col = sourceBuffer->m_vertexBuffer[i].m_col;
                     // v.m_col.w = 1.0f;
                 }
                 else

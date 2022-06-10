@@ -108,6 +108,7 @@ namespace LinaVG
                 float now   = exampleBackend.GetTime();
                 m_deltaTime = now - prevTime;
                 prevTime    = now;
+                m_elapsedTime += m_deltaTime;
 
                 if (now > lastFPSTime + 1.0f)
                 {

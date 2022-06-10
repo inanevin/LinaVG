@@ -72,6 +72,11 @@ namespace LinaVG
                 return m_deltaTimeRead;
             }
 
+            inline float GetElapsed()
+            {
+                return m_elapsedTime;
+            }
+
             inline unsigned int GetLinaLogoTexture()
             {
                 return m_linaTexture;
@@ -94,6 +99,7 @@ namespace LinaVG
             int                m_currentDemoScreen = 1;
             float              m_deltaTime         = 0.0f;
             float              m_deltaTimeRead     = 0.0f;
+            float              m_elapsedTime       = 0.0f;
             int                m_fps               = 0;
             bool               m_shouldClose       = false;
             static ExampleApp* s_exampleApp;
