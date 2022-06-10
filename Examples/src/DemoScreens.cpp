@@ -110,7 +110,7 @@ namespace LinaVG
                 style.m_rounding         = 0.2f;
                 style.m_onlyRoundTheseCorners.push_back(0);
                 style.m_onlyRoundTheseCorners.push_back(3);
-                LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.17f), style, 0.0f, 1);
+                LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.17f), style, 0.0f, 3);
                 style.m_onlyRoundTheseCorners.clear();
 
                 // Draw stats texts.
@@ -124,13 +124,13 @@ namespace LinaVG
                 SDFTextOptions textStyle;
                 textStyle.m_textScale = 0.82f;
                 textStyle.m_font      = m_defaultFont;
-                LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+                LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
                 textPosition.y += 25;
-                LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+                LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
                 textPosition.y += 25;
-                LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 2);
+                LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
                 textPosition.y += 25;
-                LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 2);
+                LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 4);
             }
 
             // Draw semi-transparent black rectangle on the bottom of the screen.
