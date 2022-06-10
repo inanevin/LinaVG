@@ -584,7 +584,7 @@ namespace LinaVG
         /// <summary>
         /// Fills inside the target shape, e.g. rect, tris, convex, circles, ngons, has no effect on lines.
         /// </summary>
-        bool m_isFilled = false;
+        bool m_isFilled = true;
     };
 
     struct Vertex

@@ -91,7 +91,7 @@ namespace LinaVG
             s.m_rounding = 1.0f;
         }
 
-        Internal::DrawSimpleLine(l, s, rotateAngle);
+        Internal::DrawSimpleLine(l, s, rotateAngle, drawOrder);
     }
 
     void DrawLines(Vec2* points, int count, StyleOptions& opts, LineCapDirection cap, LineJointType jointType, int drawOrder, bool uniformUVs)
@@ -2469,14 +2469,14 @@ namespace LinaVG
         }
     }
 
-    void Internal::DrawSimpleLine(SimpleLine& line, StyleOptions& opts, float rotateAngle)
+    void Internal::DrawSimpleLine(SimpleLine& line, StyleOptions& opts, float rotateAngle, int drawOrder)
     {
         g_rectOverrideData.m_p1                  = line.m_points[0];
         g_rectOverrideData.m_p4                  = line.m_points[3];
         g_rectOverrideData.m_p2                  = line.m_points[1];
         g_rectOverrideData.m_p3                  = line.m_points[2];
         g_rectOverrideData.overrideRectPositions = true;
-        DrawRect(g_rectOverrideData.m_p1, g_rectOverrideData.m_p3, opts, rotateAngle);
+        DrawRect(g_rectOverrideData.m_p1, g_rectOverrideData.m_p3, opts, rotateAngle, drawOrder);
         g_rectOverrideData.overrideRectPositions = false;
     }
 

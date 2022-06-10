@@ -52,13 +52,12 @@ namespace LinaVG
             m_screenDescriptions.push_back("Texts support drop shadows, flat colors & vertical/horizontal gradients. SDF texts also support outlines, individual thickness as well as softness factors. LinaVG also provides alignment, wrapping & spacing options.");
             m_screenDescriptions.push_back("You can suply varying draw order to DrawXXX commands in order to support z-ordering.");
             m_screenDescriptions.push_back("You can use global clipping variables to create clipping rectangles for any shape you are drawing. Press C to toggle clipping.");
+            m_screenDescriptions.push_back("Heh.");
         }
 
-        /// <summary>
-        /// Draw background rect, stats and info rect.
-        /// </summary>
         void DemoScreens::ShowBackground()
         {
+            return;
             const Vec2   screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
             StyleOptions style;
 
@@ -256,6 +255,7 @@ namespace LinaVG
             LinaVG::DrawConvex(&points[0], 4, defaultStyle, m_rotateAngle, 2);
             points.clear();
         }
+
         void DemoScreens::ShowDemoScreen2_Colors()
         {
             const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
@@ -374,6 +374,7 @@ namespace LinaVG
             startPos.x += 200;
             LinaVG::DrawImage(ExampleApp::Get()->GetLinaLogoTexture(), Vec2(startPos.x + 75, startPos.y + 75), Vec2(150, 150), m_rotateAngle, 1, Vec2(2, 2));
         }
+
         void DemoScreens::ShowDemoScreen3_Outlines()
         {
             const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
@@ -698,6 +699,7 @@ namespace LinaVG
             sdfOpts.m_newLineSpacing = 15;
             LinaVG::DrawTextSDF("Same, but a higher new line spacing.", startPos, sdfOpts, m_rotateAngle, 1);
         }
+
         void DemoScreens::ShowDemoScreen6_DrawOrder()
         {
             const Vec2   screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
@@ -728,6 +730,7 @@ namespace LinaVG
                 startPos.y += 20;
             }
         }
+
         void DemoScreens::ShowDemoScreen7_Clipping()
         {
             const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
@@ -771,6 +774,25 @@ namespace LinaVG
 
         void DemoScreens::ShowDemoScreen8_Final()
         {
+            const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
+
+            // Ground plane
+            StyleOptions groundPlaneStyle;
+            groundPlaneStyle.m_isFilled = true;
+            groundPlaneStyle.m_color.m_gradientType = GradientType::Vertical;
+            groundPlaneStyle.m_color.m_start = Utility::HexToVec4(0x302b63);
+            groundPlaneStyle.m_color.m_end = Utility::HexToVec4(0x24243e);
+            LinaVG::DrawRect(Vec2(0.0f, screenSize.y * 0.6f), Vec2(screenSize.x, screenSize.y), groundPlaneStyle, 0.0f, 1);
+            
+            // Ground plane grid
+            Vec2 gridStart = Vec2(0.0f, screenSize.y * 0.8f);
+            for (int i = 0; i < 1; i++)
+            {
+                StyleOptions gridLine;
+                gridLine.m_thickness = 2.0f;
+                LinaVG::DrawLine(gridStart, Vec2(screenSize.x, gridStart.y), gridLine, LineCapDirection::None, 0.0f, 2);
+                gridStart.y += 20;
+            }
         }
 
         void DemoScreens::PreEndFrame()

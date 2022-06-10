@@ -407,7 +407,7 @@ namespace LinaVG
         /// Line calculation methods.
         void       CalculateLine(Line& line, const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection lineCapToAdd);
         void       JoinLines(Line& line1, Line& line2, StyleOptions& opts, LineJointType joinType, bool mergeUpperVertices);
-        void       DrawSimpleLine(SimpleLine& line, StyleOptions& style, float rotateAngle);
+        void       DrawSimpleLine(SimpleLine& line, StyleOptions& style, float rotateAngle, int drawOrder);
         void       CalculateLineUVs(Line& line);
         SimpleLine CalculateSimpleLine(const Vec2& p1, const Vec2& p2, StyleOptions& style);
 
