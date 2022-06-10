@@ -41,7 +41,7 @@ namespace LinaVG::Backend
     bool Initialize()
     {
         Internal::g_backendData.m_defaultVtxShader = "#version 330 core\n"
-                                                     "layout (location = 0) in vec3 pos;\n"
+                                                     "layout (location = 0) in vec2 pos;\n"
                                                      "layout (location = 1) in vec2 uv;\n"
                                                      "layout (location = 2) in vec4 col;\n"
                                                      "uniform mat4 proj; \n"
@@ -218,15 +218,14 @@ namespace LinaVG::Backend
         SaveAPIState();
 
         // Apply GL state
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         glDepthMask(GL_FALSE);
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_CULL_FACE);
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
+        glDisable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
         glEnable(GL_SCISSOR_TEST);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -236,11 +235,11 @@ namespace LinaVG::Backend
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        glViewport(0, 0, (GLsizei)Config.m_displaySize.x, (GLsizei)Config.m_displaySize.y);
+        glViewport(0, 0, (GLsizei)Config.m_displayWidth, (GLsizei)Config.m_displayHeight);
 
         // Ortho projection matrix.
-        int fb_width  = (int)(Config.m_displaySize.x * Config.m_framebufferScale.x);
-        int fb_height = (int)(Config.m_displaySize.y * Config.m_framebufferScale.y);
+        int fb_width  = (int)(Config.m_displayWidth * Config.m_framebufferScale.x);
+        int fb_height = (int)(Config.m_displayHeight * Config.m_framebufferScale.y);
         if (fb_width <= 0 || fb_height <= 0)
         {
             Internal::g_backendData.m_skipDraw = true;
@@ -249,10 +248,10 @@ namespace LinaVG::Backend
 
         Internal::g_backendData.m_skipDraw = false;
 
-        float       L    = Config.m_displayPos.x;
-        float       R    = Config.m_displayPos.x + Config.m_displaySize.x;
-        float       T    = Config.m_displayPos.y;
-        float       B    = Config.m_displayPos.y + Config.m_displaySize.y;
+        float       L    = static_cast<float>(Config.m_displayPosX);
+        float       R    = static_cast<float>(Config.m_displayPosX + Config.m_displayWidth);
+        float       T    = static_cast<float>(Config.m_displayPosY);
+        float       B    = static_cast<float>(Config.m_displayPosY + Config.m_displayHeight);
         const float zoom = Config.m_debugOrthoProjectionZoom;
 
         L *= zoom;
@@ -442,13 +441,13 @@ namespace LinaVG::Backend
     {
         if (width == 0 || height == 0)
         {
-            x      = static_cast<BackendHandle>(Config.m_displayPos.x);
-            y      = static_cast<BackendHandle>(Config.m_displayPos.y);
-            width  = static_cast<BackendHandle>(Config.m_displaySize.x);
-            height = static_cast<BackendHandle>(Config.m_displaySize.y);
+            x      = static_cast<BackendHandle>(Config.m_displayPosX);
+            y      = static_cast<BackendHandle>(Config.m_displayPosY);
+            width  = static_cast<BackendHandle>(Config.m_displayWidth);
+            height = static_cast<BackendHandle>(Config.m_displayHeight);
         }
 
-        glScissor(x, static_cast<GLint>(Config.m_displaySize.y - (y + height)), static_cast<GLint>(width), static_cast<GLint>(height));
+        glScissor(x, static_cast<GLint>(Config.m_displayHeight - (y + height)), static_cast<GLint>(width), static_cast<GLint>(height));
     }
 
     void SaveAPIState()

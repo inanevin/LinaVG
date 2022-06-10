@@ -65,17 +65,17 @@ namespace LinaVG
             s_exampleApp = this;
             ExampleBackend exampleBackend;
 
-            const float sizeX = 1440.0f;
-            const float sizeY = 960.0f;
+            const unsigned int sizeX = 1440;
+            const unsigned int sizeY = 960;
 
             // Initialize example exampleBackend.
             exampleBackend.InitWindow(static_cast<int>(sizeX), static_cast<int>(sizeY));
 
             // Setup Lina VG config.
-            LinaVG::Config.m_displayPos.x  = 0.0f;
-            LinaVG::Config.m_displayPos.y  = 0.0f;
-            LinaVG::Config.m_displaySize.x = sizeX;
-            LinaVG::Config.m_displaySize.y = sizeY;
+            LinaVG::Config.m_displayPosX   = 0;
+            LinaVG::Config.m_displayPosY   = 0;
+            LinaVG::Config.m_displayWidth  = sizeX;
+            LinaVG::Config.m_displayHeight = sizeY;
             LinaVG::Config.m_clipPosX = LinaVG::Config.m_clipPosY = 0;
             LinaVG::Config.m_clipSizeX                            = sizeX;
             LinaVG::Config.m_clipSizeY                            = sizeY;
@@ -165,7 +165,6 @@ namespace LinaVG
             LinaVG::Config.m_debugOrthoOffset.y -= input * m_deltaTime * 1000;
         }
 
-
         void ExampleApp::OnNumKeyCallback(int key)
         {
             if (key > 0 && key < 8)
@@ -210,10 +209,10 @@ namespace LinaVG
 
         void ExampleApp::OnWindowResizeCallback(int width, int height)
         {
-            LinaVG::Config.m_displaySize.x = static_cast<float>(width);
-            LinaVG::Config.m_displaySize.y = static_cast<float>(height);
-            LinaVG::Config.m_clipSizeX     = static_cast<float>(width);
-            LinaVG::Config.m_clipSizeY     = static_cast<float>(height);
+            LinaVG::Config.m_displayWidth  = static_cast<BackendHandle>(width);
+            LinaVG::Config.m_displayHeight = static_cast<BackendHandle>(height);
+            LinaVG::Config.m_clipSizeX     = static_cast<BackendHandle>(width);
+            LinaVG::Config.m_clipSizeY     = static_cast<BackendHandle>(height);
         }
         void ExampleApp::OnWindowCloseCallback()
         {

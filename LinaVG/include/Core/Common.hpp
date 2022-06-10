@@ -596,20 +596,45 @@ namespace LinaVG
 
     LINAVG_API struct Configuration
     {
-        BackendHandle m_clipPosX  = 0;
-        BackendHandle m_clipPosY  = 0;
+        /// <summary>
+        /// X position of the clip rectangle. 0,0 = Top-left
+        /// </summary>
+        BackendHandle m_clipPosX = 0;
+
+        /// <summary>
+        /// Y position of the clip rectangle. 0,0 = Top-left
+        /// </summary>
+        BackendHandle m_clipPosY = 0;
+
+        /// <summary>
+        /// Clip rectangle width.
+        /// </summary>
         BackendHandle m_clipSizeX = 0;
+
+        /// <summary>
+        /// Clip rectangle height.
+        /// </summary>
         BackendHandle m_clipSizeY = 0;
 
         /// <summary>
-        /// Set this to your application's display pos (viewport pos).
+        /// Set this to your application's display pos X (viewport pos).
         /// </summary>
-        Vec2 m_displayPos = Vec2(0, 0);
+        unsigned int m_displayPosX = 0;
 
         /// <summary>
-        /// Set this to your application's display size.
+        /// Set this to your application's display pos Y (viewport pos).
         /// </summary>
-        Vec2 m_displaySize = Vec2(0, 0);
+        unsigned int m_displayPosY = 0;
+
+        /// <summary>
+        /// Set this to your application's display width.
+        /// </summary>
+        unsigned int m_displayWidth = 0;
+
+        /// <summary>
+        /// Set this to your application's display height.
+        /// </summary>
+        unsigned int m_displayHeight = 0;
 
         /// <summary>
         /// Set this to your application's framebuffer scale, e.g. OS scaling factor for high-dpi screens.
@@ -650,7 +675,7 @@ namespace LinaVG
         /// Increase if you are loading a lot of characters or fonts with big sizes (e.g. 100)
         /// You can use Internal::DrawDebugFontAtlas to visualize the atlas target font belongs to.
         /// </summary>
-        int m_maxFontAtlasSize = 768;
+        unsigned int m_maxFontAtlasSize = 768;
 
         /// <summary>
         /// Every interval ticks system will garbage collect all vertex & index buffers, meaning that will clear all the arrays.

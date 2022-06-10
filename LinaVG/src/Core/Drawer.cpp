@@ -3047,9 +3047,9 @@ namespace LinaVG
         const int   startIndex = buf->m_vertexBuffer.m_size;
         Vertex      v0, v1, v2, v3;
         v0.m_pos = Vec2(pos.x, pos.y);
-        v1.m_pos = Vec2(pos.x + font->m_textureSize.x, pos.y);
-        v2.m_pos = Vec2(pos.x + font->m_textureSize.x, pos.y + font->m_textureSize.y);
-        v3.m_pos = Vec2(pos.x, pos.y + font->m_textureSize.y);
+        v1.m_pos = Vec2(pos.x + static_cast<float>(Config.m_maxFontAtlasSize), pos.y);
+        v2.m_pos = Vec2(pos.x + static_cast<float>(Config.m_maxFontAtlasSize), pos.y + static_cast<float>(Config.m_maxFontAtlasSize));
+        v3.m_pos = Vec2(pos.x, pos.y + static_cast<float>(Config.m_maxFontAtlasSize));
         v0.m_uv  = Vec2(0.0f, 0.0f);
         v1.m_uv  = Vec2(1.0f, 0.0f);
         v2.m_uv  = Vec2(1.0f, 1.0f);

@@ -202,9 +202,9 @@ namespace LinaVG
             int availableAtlasIndex = -1;
             for (int i = 0; i < g_textData.m_createdAtlases.m_size; i++)
             {
-                FontAtlas& atlas = g_textData.m_createdAtlases[i];
-                const int totalSize = Config.m_maxFontAtlasSize - atlas.m_currentOffsetX + Config.m_maxFontAtlasSize - atlas.m_currentOffsetY;
-                if (w + h < totalSize)
+                FontAtlas& atlas     = g_textData.m_createdAtlases[i];
+                const int  totalSize = Config.m_maxFontAtlasSize - atlas.m_currentOffsetX + Config.m_maxFontAtlasSize - atlas.m_currentOffsetY;
+                if (w + h < static_cast<unsigned int>(totalSize))
                 {
                     availableAtlasIndex = i;
                     Backend::BindFontTexture(atlas.m_texture);
@@ -220,24 +220,22 @@ namespace LinaVG
 
             if (availableAtlasIndex != -1)
             {
-                offsetX = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetX;
-                offsetY = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetY;
-                font->m_textureSize = Vec2(Config.m_maxFontAtlasSize, Config.m_maxFontAtlasSize);
-                font->m_texture = g_textData.m_createdAtlases[availableAtlasIndex].m_texture;
-                usedAtlasIndex = availableAtlasIndex;
+                offsetX             = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetX;
+                offsetY             = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetY;
+                font->m_texture     = g_textData.m_createdAtlases[availableAtlasIndex].m_texture;
+                usedAtlasIndex      = availableAtlasIndex;
             }
             else
             {
                 FontAtlas atlas;
-                atlas.m_texture = Backend::CreateFontTexture(w, h);
-                font->m_textureSize = Vec2(static_cast<float>(w), static_cast<float>(h));
-                font->m_texture = atlas.m_texture;
-                usedAtlasIndex = g_textData.m_createdAtlases.m_size;
+                atlas.m_texture     = Backend::CreateFontTexture(w, h);
+                font->m_texture     = atlas.m_texture;
+                usedAtlasIndex      = g_textData.m_createdAtlases.m_size;
                 g_textData.m_createdAtlases.push_back(atlas);
             }
 
             // TODO: figure out width as height issue
-            rowh                = 0;
+            rowh = 0;
 
             for (auto& ch : characterMap)
             {

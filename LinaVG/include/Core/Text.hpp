@@ -65,7 +65,6 @@ namespace LinaVG
         int                                      m_size          = 0;
         float                                    m_newLineHeight = 0.0f;
         bool                                     m_isSDF         = false;
-        Vec2                                     m_textureSize   = Vec2(0.0f, 0.0f);
         float                                    m_spaceAdvance  = 0.0f;
         LINAVG_MAP<GlyphEncoding, TextCharacter> m_characterGlyphs;
     };
@@ -73,8 +72,8 @@ namespace LinaVG
     struct FontAtlas
     {
         BackendHandle m_texture        = 0;
-        int           m_currentOffsetX = 0;
-        int           m_currentOffsetY = 0;
+        unsigned int  m_currentOffsetX = 0;
+        unsigned int  m_currentOffsetY = 0;
     };
     /// <summary>
     /// Management for text rendering.
