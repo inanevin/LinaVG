@@ -355,11 +355,6 @@ namespace LinaVG::Backend
         SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
         Internal::ShaderData& data = Internal::g_backendData.m_defaultShaderData;
 
-        for (int i = 0; i < buf->m_vertexBuffer.m_size; i++)
-        {
-            Vertex& v = buf->m_vertexBuffer[i];
-            int a  = v.m_pos.x;
-        }
         glUseProgram(data.m_handle);
         glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 
@@ -626,7 +621,6 @@ namespace LinaVG::Backend
 
     BackendHandle CreateFontTexture(int width, int height)
     {
-
         GLuint tex;
         glActiveTexture(GL_TEXTURE0);
         glGenTextures(1, &tex);
@@ -643,7 +637,7 @@ namespace LinaVG::Backend
         return tex;
     }
 
-    void BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, void* data)
+    void BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data)
     {
         glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, GL_RED, GL_UNSIGNED_BYTE, data);
     }

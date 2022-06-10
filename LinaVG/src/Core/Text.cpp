@@ -32,6 +32,7 @@ SOFTWARE.
 #include "Core/Math.hpp"
 #define MAX_WIDTH 600
 #include <iostream>
+#include <glad/glad.h>
 
 namespace LinaVG
 {
@@ -108,14 +109,14 @@ namespace LinaVG
             font->m_isSDF         = loadAsSDF;
             font->m_newLineHeight = static_cast<float>(face->size->metrics.height) / 64.0f;
 
-            auto&        characterMap    = font->m_characterGlyphs;
-            int          maxHeight       = 0;
-            unsigned int roww            = 0;
-            unsigned int rowh            = 0;
-            unsigned int w               = 3;
-            unsigned int h               = 3;
-            FT_GlyphSlot slot            = face->glyph;
-            int          textureXAdvance = 3;
+            auto&        characterMap      = font->m_characterGlyphs;
+            int          maxHeight         = 0;
+            unsigned int roww              = 0;
+            unsigned int rowh              = 0;
+            int          bufferCharSpacing = 5;
+            unsigned int w                 = bufferCharSpacing;
+            unsigned int h                 = bufferCharSpacing;
+            FT_GlyphSlot slot              = face->glyph;
 
             auto setSizes = [&](FT_ULong c) {
                 auto           i     = FT_Get_Char_Index(face, c);
@@ -142,11 +143,11 @@ namespace LinaVG
                 const unsigned int glyphWidth = slot->bitmap.width;
                 const unsigned int glyphRows  = slot->bitmap.rows;
 
-                if (roww + glyphWidth + textureXAdvance >= MAX_WIDTH)
+                if (roww + glyphWidth + bufferCharSpacing >= MAX_WIDTH)
                 {
                     w = Math::Max(w, roww);
-                    h += rowh + 3;
-                    roww = 3;
+                    h += rowh + bufferCharSpacing;
+                    roww = bufferCharSpacing;
                     rowh = 0;
                 }
 
@@ -164,29 +165,7 @@ namespace LinaVG
                 ch.m_bearing = Vec2(static_cast<float>(slot->bitmap_left), static_cast<float>(slot->bitmap_top));
                 ch.m_advance = Vec2(static_cast<float>(slot->advance.x >> 6), static_cast<float>(slot->advance.y >> 6));
 
-                // Below for manually copying - needs byte fix if gonna be used.
-                
-                // if (ch.m_buffer != nullptr && slot->bitmap.buffer != nullptr)
-                // {
-                //     for (unsigned int row = 0; row < glyphRows; ++row)
-                //     {
-                //         for (unsigned int col = 0; col < glyphWidth; ++col)
-                //         {
-                //             const int index = row * glyphWidth + col;
-                //
-                //             if (index < bufSize)
-                //                 ch.m_buffer[index] = slot->bitmap.buffer[index];
-                //             else
-                //             {
-                //                 Config.m_errorCallback("LinaVG: Can't write to char buffer as index surpasses buffer size!");
-                //                 continue;
-                //             }
-                //             // ch.m_buffer[row * glyphWidth + col] = slot->bitmap.buffer[row * slot->bitmap.pitch + col];
-                //         }
-                //     }
-                // }
-
-                roww += glyphWidth + textureXAdvance;
+                roww += glyphWidth + bufferCharSpacing;
                 rowh = Math::Max(rowh, glyphRows);
                 return true;
             };
@@ -220,13 +199,13 @@ namespace LinaVG
 
             w = Math::Max(w, roww);
             h += rowh;
-
+         
             // Generate atlas
             BackendHandle tex   = Backend::CreateFontTexture(w, h);
             font->m_textureSize = Vec2(static_cast<float>(w), static_cast<float>(h));
             font->m_texture     = tex;
-            int offsetX         = 3;
-            int offsetY         = 3;
+            int offsetX         = bufferCharSpacing;
+            int offsetY         = bufferCharSpacing;
             rowh                = 0;
 
             for (auto& ch : characterMap)
@@ -234,11 +213,11 @@ namespace LinaVG
                 const unsigned int glyphWidth = static_cast<unsigned int>(ch.second.m_size.x);
                 const unsigned int glyphRows  = static_cast<unsigned int>(ch.second.m_size.y);
 
-                if (offsetX + glyphWidth + textureXAdvance >= MAX_WIDTH)
+                if (offsetX + glyphWidth + bufferCharSpacing >= MAX_WIDTH)
                 {
-                    offsetY += rowh + 3;
+                    offsetY += rowh + bufferCharSpacing;
                     rowh    = 0;
-                    offsetX = 3;
+                    offsetX = bufferCharSpacing;
                 }
 
                 const Vec2  size       = Vec2(static_cast<float>(glyphWidth), static_cast<float>(glyphRows));
@@ -251,28 +230,28 @@ namespace LinaVG
                 Vec2        uv3        = Vec2(xx + size.x / fontWidth, yy + size.y / fontHeight);
                 Vec2        uv4        = Vec2(xx, yy + size.y / fontHeight);
 
-                Vec2       points[] = {uv1, uv2, uv3, uv4};
-                const Vec2 avg      = Math::GetPolygonCentroidFast(points, 4);
-                uv1                 = Math::ScalePoint(points[0], avg, 1.1f);
-                uv2                 = Math::ScalePoint(points[1], avg, 1.1f);
-                uv3                 = Math::ScalePoint(points[2], avg, 1.1f);
-                uv4                 = Math::ScalePoint(points[3], avg, 1.1f);
+                // Vec2       points[] = {uv1, uv2, uv3, uv4};
+                // const Vec2 avg      = Math::GetPolygonCentroidFast(points, 4);
+                // uv1                 = Math::ScalePoint(points[0], avg, 1.1f);
+                // uv2                 = Math::ScalePoint(points[1], avg, 1.1f);
+                // uv3                 = Math::ScalePoint(points[2], avg, 1.1f);
+                // uv4                 = Math::ScalePoint(points[3], avg, 1.1f);
 
                 const Vec4 uv12 = Vec4(uv1.x, uv1.y, uv2.x, uv2.y);
                 const Vec4 uv34 = Vec4(uv3.x, uv3.y, uv4.x, uv4.y);
 
                 if (ch.second.m_buffer != nullptr)
                 {
-                    Backend::BufferFontTextureAtlas(glyphWidth, glyphRows, offsetX, offsetY, static_cast<void*>(ch.second.m_buffer));
+                    Backend::BufferFontTextureAtlas(glyphWidth, glyphRows, offsetX, offsetY, ch.second.m_buffer);
                     LINAVG_FREE(ch.second.m_buffer);
                 }
-       
+
                 ch.second.m_buffer = nullptr;
                 ch.second.m_uv12   = uv12;
                 ch.second.m_uv34   = uv34;
 
                 rowh = Math::Max(rowh, glyphRows);
-                offsetX += glyphWidth + textureXAdvance;
+                offsetX += glyphWidth + bufferCharSpacing;
             }
 
             font->m_spaceAdvance = characterMap[' '].m_advance.x;

@@ -3150,8 +3150,7 @@ namespace LinaVG
             std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
             auto                                                        str32 = cv.from_bytes(text);
             std::u32string::iterator                                    it;
-            const int                                                   totalSize = str32.size();
-            int                                                         counter   = 0;
+            int                                                         counter = 0;
             for (it = str32.begin(); it < str32.end(); it++)
             {
                 auto& ch = font->m_characterGlyphs[*it];
