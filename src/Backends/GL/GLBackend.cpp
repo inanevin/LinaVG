@@ -26,7 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <glad/glad.h>
+#include "glad/glad.h"
 #include "Core/Backend.hpp"
 #include "Core/Renderer.hpp"
 #include "Core/Drawer.hpp"

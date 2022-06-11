@@ -30,7 +30,7 @@ SOFTWARE.
 #include "Main.hpp"
 #include <iostream>
 
-#include "Backends/GL/glad.h"
+#include "glad/glad.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "Utility/stb_image.h"
