@@ -89,7 +89,7 @@ namespace LinaVG
     LINAVG_API void Terminate();
 
     /// <summary>
-    /// Any Draw commands via LinaVG must take place between StartFrame & EndFrame.
+    /// Any Draw commands via LinaVG must take place between StartFrame and EndFrame.
     /// </summary>
     /// <returns></returns>
     LINAVG_API void StartFrame();
@@ -101,7 +101,7 @@ namespace LinaVG
     LINAVG_API void Render();
 
     /// <summary>
-    /// Any Draw commands via LinaVG must take place between StartFrame & EndFrame.
+    /// Any Draw commands via LinaVG must take place between StartFrame and EndFrame.
     /// </summary>
     /// <returns></returns>
     LINAVG_API void EndFrame();

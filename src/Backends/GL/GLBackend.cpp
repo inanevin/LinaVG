@@ -156,8 +156,11 @@ namespace LinaVG::Backend
         }
         catch (const std::runtime_error& err)
         {
-            Config.m_errorCallback("LinaVG: Backend shader creation failed!");
-            Config.m_errorCallback(err.what());
+            if (Config.m_errorCallback)
+            {
+                Config.m_errorCallback("LinaVG: Backend shader creation failed!");
+                Config.m_errorCallback(err.what());
+            }
             return false;
         }
 
@@ -559,8 +562,13 @@ namespace LinaVG::Backend
         if (!success)
         {
             glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-            Config.m_errorCallback("LinaVG: Backend Error -> Shader vertex compilation failed!");
-            Config.m_errorCallback(infoLog);
+
+            if (Config.m_errorCallback)
+            {
+                Config.m_errorCallback("LinaVG: Backend Error -> Shader vertex compilation failed!");
+                Config.m_errorCallback(infoLog);
+            }
+         
             throw std::runtime_error("");
         }
 
@@ -573,8 +581,13 @@ namespace LinaVG::Backend
         if (!success)
         {
             glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-            Config.m_errorCallback("LinaVG: Backend Error -> Shader fragment compilation failed!");
-            Config.m_errorCallback(infoLog);
+
+            if (Config.m_errorCallback)
+            {
+                Config.m_errorCallback("LinaVG: Backend Error -> Shader fragment compilation failed!");
+                Config.m_errorCallback(infoLog);
+            }
+         
             throw std::runtime_error("");
         }
 

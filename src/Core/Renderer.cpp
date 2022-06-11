@@ -32,10 +32,9 @@ SOFTWARE.
 #include <crtdbg.h>
 
 #ifdef _DEBUG
-#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#define DEBUG_NEW new (_NORMAL_BLOCK, __FILE__, __LINE__)
 #define new DEBUG_NEW
 #endif
-
 
 #include "Core/Renderer.hpp"
 #include "Core/Backend.hpp"
@@ -49,7 +48,7 @@ namespace LinaVG
 {
     namespace Internal
     {
-        RendererData g_rendererData;
+        RendererData    g_rendererData;
         LINAVG_API void ClearAllBuffers()
         {
 
@@ -78,7 +77,7 @@ namespace LinaVG
 
             Internal::g_rendererData.m_sdfTextBuffers.clear();
         }
-    }
+    } // namespace Internal
 
     bool Initialize()
     {
@@ -90,18 +89,21 @@ namespace LinaVG
 
         if (!Backend::Initialize())
         {
-            Config.m_logCallback("LinaVG: Could not initialize! Error initializing backend.");
+            if (Config.m_errorCallback)
+                Config.m_errorCallback("LinaVG: Could not initialize! Error initializing backend.");
             return false;
         }
 
         if (!Text::Initialize())
         {
-            Config.m_logCallback("LinaVG: Could not initialize! Error initializing text API.");
+            if (Config.m_errorCallback)
+                Config.m_errorCallback("LinaVG: Could not initialize! Error initializing text API.");
             return false;
         }
 
         // TODO - error check
-        Config.m_logCallback("LinaVG: Renderer and Backend initialized successfuly.");
+        if (Config.m_logCallback)
+            Config.m_logCallback("LinaVG: Renderer and Backend initialized successfuly.");
         return true;
     }
 
@@ -112,14 +114,16 @@ namespace LinaVG
         Internal::ClearAllBuffers();
 
         // TODO - error check
-        Config.m_logCallback("LinaVG: Renderer and Backend terminated successfuly.");
+        if (Config.m_logCallback)
+            Config.m_logCallback("LinaVG: Renderer and Backend terminated successfuly.");
     }
 
     void StartFrame()
     {
         if (Internal::g_rendererData.m_frameStarted)
         {
-            Config.m_errorCallback("LinaVG: StartFrame was called, but EndFrame was skipped! Make sure you always call EndFrame() after calling StartFrame() for the second time!");
+            if (Config.m_errorCallback)
+                Config.m_errorCallback("LinaVG: StartFrame was called, but EndFrame was skipped! Make sure you always call EndFrame() after calling StartFrame() for the second time!");
             _ASSERT(false);
         }
 
@@ -214,7 +218,6 @@ namespace LinaVG
 
             for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
                 Internal::g_rendererData.m_sdfTextBuffers[i].ShrinkZero();
-
         }
     }
 

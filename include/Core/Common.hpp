@@ -639,7 +639,7 @@ namespace LinaVG
         /// <summary>
         /// Set this to your application's framebuffer scale, e.g. OS scaling factor for high-dpi screens.
         /// </summary>
-        Vec2 m_framebufferScale = Vec2(0, 0);
+        Vec2 m_framebufferScale = Vec2(1.0f, 1.0f);
 
         /// <summary>
         /// Enable-disable anti-aliasing.

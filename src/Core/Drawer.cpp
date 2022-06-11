@@ -119,7 +119,8 @@ namespace LinaVG
 
         if (count < 3)
         {
-            Config.m_errorCallback("LinaVG: Can't draw lines as the point array count is smaller than 3!");
+            if (Config.m_errorCallback)
+                Config.m_errorCallback("LinaVG: Can't draw lines as the point array count is smaller than 3!");
             return;
         }
 
@@ -574,7 +575,8 @@ namespace LinaVG
     {
         if (size < 3)
         {
-            Config.m_errorCallback("LinaVG: Can draw a convex shape that has less than 3 corners!");
+            if (Config.m_errorCallback)
+                Config.m_errorCallback("LinaVG: Can draw a convex shape that has less than 3 corners!");
             return;
         }
 
@@ -698,7 +700,8 @@ namespace LinaVG
 
         if (!font->m_isSDF)
         {
-            Config.m_errorCallback("LinaVG: The font you are trying to draw is not loaded as an SDF font, but DrawTextSDF was called! Please use DrawTextNormal().");
+            if (Config.m_errorCallback)
+                Config.m_errorCallback("LinaVG: The font you are trying to draw is not loaded as an SDF font, but DrawTextSDF was called! Please use DrawTextNormal().");
             return;
         }
 
@@ -728,7 +731,8 @@ namespace LinaVG
 
         if (font->m_isSDF)
         {
-            Config.m_errorCallback("LinaVG: The font you are trying to draw with is loaded SDF font, but DrawTextNormal was called! Please use DrawTextSDF().");
+            if (Config.m_errorCallback)
+                Config.m_errorCallback("LinaVG: The font you are trying to draw with is loaded SDF font, but DrawTextNormal was called! Please use DrawTextSDF().");
             return;
         }
 

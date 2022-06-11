@@ -40,7 +40,8 @@ namespace LinaVG
         {
             if (FT_Init_FreeType(&Internal::g_textData.m_ftlib))
             {
-                Config.m_logCallback("LinaVG: Error initializing FreeType Library");
+                if (Config.m_errorCallback)
+                    Config.m_errorCallback("LinaVG: Error initializing FreeType Library");
                 return false;
             }
 
@@ -63,7 +64,8 @@ namespace LinaVG
         FT_Face face;
         if (FT_New_Face(Internal::g_textData.m_ftlib, file, 0, &face))
         {
-            Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
+            if (Config.m_errorCallback)
+                Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
             return -1;
         }
 
@@ -75,7 +77,8 @@ namespace LinaVG
         FT_Face face;
         if (FT_New_Memory_Face(Internal::g_textData.m_ftlib, static_cast<FT_Byte*>(data), static_cast<FT_Long>(dataSize), 0, &face))
         {
-            Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
+            if (Config.m_errorCallback)
+                Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
             return -1;
         }
 
@@ -123,7 +126,8 @@ namespace LinaVG
 
                 if (error)
                 {
-                    Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load character!");
+                    if (Config.m_errorCallback)
+                        Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load character!");
                     return false;
                 }
 
@@ -134,7 +138,8 @@ namespace LinaVG
 
                 if (error)
                 {
-                    Config.m_errorCallback("LinaVG: Freetype Error -> Failed to render character!");
+                    if (Config.m_errorCallback)
+                        Config.m_errorCallback("LinaVG: Freetype Error -> Failed to render character!");
                     return false;
                 }
 
@@ -175,7 +180,8 @@ namespace LinaVG
             if (customRangesSize % 2 == 1)
             {
                 useCustomRanges = false;
-                Config.m_errorCallback("LinaVG: Custom ranges given to font loading must have a size multiple of 2!");
+                if (Config.m_errorCallback)
+                    Config.m_errorCallback("LinaVG: Custom ranges given to font loading must have a size multiple of 2!");
             }
 
             if (useCustomRanges)
@@ -219,17 +225,17 @@ namespace LinaVG
 
             if (availableAtlasIndex != -1)
             {
-                offsetX             = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetX;
-                offsetY             = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetY;
-                font->m_texture     = g_textData.m_createdAtlases[availableAtlasIndex].m_texture;
-                usedAtlasIndex      = availableAtlasIndex;
+                offsetX         = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetX;
+                offsetY         = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetY;
+                font->m_texture = g_textData.m_createdAtlases[availableAtlasIndex].m_texture;
+                usedAtlasIndex  = availableAtlasIndex;
             }
             else
             {
                 FontAtlas atlas;
-                atlas.m_texture     = Backend::CreateFontTexture(w, h);
-                font->m_texture     = atlas.m_texture;
-                usedAtlasIndex      = g_textData.m_createdAtlases.m_size;
+                atlas.m_texture = Backend::CreateFontTexture(w, h);
+                font->m_texture = atlas.m_texture;
+                usedAtlasIndex  = g_textData.m_createdAtlases.m_size;
                 g_textData.m_createdAtlases.push_back(atlas);
             }
 
