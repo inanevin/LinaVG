@@ -39,7 +39,9 @@ Timestamp: 12/29/2018 10:43:46 PM
 #include "Common.hpp"
 #include <unordered_map>
 #include <functional>
-#include <ft2build.h>
+
+
+#include <FreeType/ft2build.h>
 #include FT_FREETYPE_H
 
 namespace LinaVG

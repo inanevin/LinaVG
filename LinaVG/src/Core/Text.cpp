@@ -31,7 +31,6 @@ SOFTWARE.
 #include "Core/Backend.hpp"
 #include "Core/Math.hpp"
 #include <iostream>
-#include <glad/glad.h>
 
 namespace LinaVG
 {
