@@ -67,7 +67,7 @@ namespace LinaVG
             m_screenDescriptions.push_back("Texts support drop shadows, flat colors & vertical/horizontal gradients. SDF texts also support outlines, individual thickness as well as softness factors. LinaVG also provides alignment, wrapping & spacing options.");
             m_screenDescriptions.push_back("You can suply varying draw order to DrawXXX commands in order to support z-ordering.");
             m_screenDescriptions.push_back("You can use global clipping variables to create clipping rectangles for any shape you are drawing. Press C to toggle clipping.");
-            m_screenDescriptions.push_back("Heh.");
+            m_screenDescriptions.push_back("And since we have all that functionality, why not draw a simple retro grid.");
 
             // This is for Demo Screen 8, which is basically some basic retro art.
             std::srand(std::time(0));
@@ -168,7 +168,7 @@ namespace LinaVG
             TextOptions controlsText;
             controlsText.m_font      = m_descFont;
             controlsText.m_textScale = 0.8f;
-            LinaVG::DrawTextNormal("Press num keys [0-9] to switch between demo screens.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 20), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Press num keys [1-8] to switch between demo screens.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 20), controlsText, 0, 4);
             LinaVG::DrawTextNormal("Press P to toggle performance stats.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 40), controlsText, 0, 4);
             LinaVG::DrawTextNormal("Press F to toggle wireframe rendering.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 60), controlsText, 0, 4);
             LinaVG::DrawTextNormal("Press R to start/stop rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 80), controlsText, 0, 4);
@@ -846,11 +846,6 @@ namespace LinaVG
             groundPlaneStyle.m_color.m_end          = Vec4(0.05f, 0.05f, 0.12f, 1.0f);
             LinaVG::DrawRect(gridStart, Vec2(screenSize.x, screenSize.y), groundPlaneStyle, 0.0f, 1);
 
-
-            static float sa = 0.0f;
-
-            sa += ExampleApp::Get()->GetFrameTime() * 10;
-
             // Ground plane grid Y
             Vec2        currentGrid    = gridStart;
             const int   lineCountY     = 8;
@@ -890,7 +885,7 @@ namespace LinaVG
                 gridLine.m_thickness = 2.0f;
 
                 const float skew = Math::Remap(static_cast<float>(i), 0.0f, tLimitMax, -skewMax, skewMax);
-                LinaVG::DrawLine(currentGrid, Vec2(currentGrid.x + skew, screenSize.y + sa), gridLine, LineCapDirection::None, 0.0f, 2);
+                LinaVG::DrawLine(currentGrid, Vec2(currentGrid.x + skew, screenSize.y), gridLine, LineCapDirection::None, 0.0f, 2);
                 currentGrid.x += gridXIncrement;
             }
 

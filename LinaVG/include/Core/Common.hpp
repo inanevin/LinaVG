@@ -671,14 +671,14 @@ namespace LinaVG
         bool m_useUnicodeEncoding = false;
 
         /// <summary>
-        /// Maximum size a font texture atlas can have, all atlasses are square, so this is used for both width & height.
+        /// Maximum size a font texture atlas can have, all atlasses are square, so this is used for both width and height.
         /// Increase if you are loading a lot of characters or fonts with big sizes (e.g. 100)
         /// You can use Internal::DrawDebugFontAtlas to visualize the atlas target font belongs to.
         /// </summary>
         unsigned int m_maxFontAtlasSize = 768;
 
         /// <summary>
-        /// Every interval ticks system will garbage collect all vertex & index buffers, meaning that will clear all the arrays.
+        /// Every interval ticks system will garbage collect all vertex and index buffers, meaning that will clear all the arrays.
         /// On other ticks, arrays are simply resized to 0, avoiding re-allocations on the next frame.
         /// Set to 0 for instant flush on buffers at the end of every frame.
         /// </summary>
