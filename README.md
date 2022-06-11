@@ -12,4 +12,4 @@ LinaVG is a 2D vector graphics library providing low-level functionality to draw
 
 LinaVG does not provide any window management or input functionality. It's not a GUI library, but rather focused on lower-level shape rendering. It assumes your application already has a graphics rendering backend and an application loop setup. With that in mind, you can use LinaVG to build both retained and immediate mode GUI applications/libraries. Currently only OpenGL backend is supported, however actual rendering API code is rather minimal, so feel free to contribute by implementing low-level drawing functionalities on other backends!
 
-LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/LinaEngine), however this library is completely decoupled it. You can use LinaVG in your own projects with minimal dependencies. 
+LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/LinaEngine), however this library is completely decoupled from it. You can use LinaVG in your own projects with minimal dependencies. 
