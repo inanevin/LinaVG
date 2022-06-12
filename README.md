@@ -8,7 +8,7 @@
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/inanevin/LinaVG/issues) 
 ![GitHub issues](https://img.shields.io/github/issues/inanevin/LinaEngine.svg)
 
-LinaVG is a 2D vector graphics library providing low-level functionality to draw variety of anti-aliased convex shapes, along with traditional and Signed-Distance-Field (SDF) text rendering. LinaVG also provides rich styling options including gradients, outlines, drop shadows, varying thickness, filled & non-filled shapes, text alignment/spacing and many more!
+LinaVG is a 2D vector graphics library providing low-level functionality to draw variety of anti-aliased convex shapes & lines, along with traditional and Signed-Distance-Field (SDF) text rendering. LinaVG also provides rich styling options including gradients, outlines, drop shadows, varying thickness, filled & non-filled shapes, text alignment/spacing and many more!
 
 LinaVG does not provide any window management or input functionality. It's not a GUI library, but rather focused on lower-level shape rendering. It assumes your application already has a graphics rendering backend and an application loop setup. With that in mind, you can use LinaVG to build both retained and immediate mode GUI applications/libraries. Currently only OpenGL backend is supported, however actual rendering API code is rather minimal, so feel free to contribute by implementing low-level drawing functionalities on other backends!
 
