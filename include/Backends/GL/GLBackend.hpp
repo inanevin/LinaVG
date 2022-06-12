@@ -67,24 +67,26 @@ namespace LinaVG::Backend
         int  m_unpackAlignment    = 0;
     };
 
-    bool Initialize();
-    void Terminate();
-    void StartFrame();
-    void DrawGradient(GradientDrawBuffer* buf);
-    void DrawTextured(TextureDrawBuffer* buf);
-    void DrawDefault(DrawBuffer* buf);
-    void DrawSimpleText(SimpleTextDrawBuffer* buf);
-    void DrawSDFText(SDFTextDrawBuffer* buf);
-    void SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height);
-    void EndFrame();
+    // Public API, if you want to implement your own backend, it needs to define these exact signatures.
+    bool          Initialize();
+    void          Terminate();
+    void          StartFrame();
+    void          DrawGradient(GradientDrawBuffer* buf);
+    void          DrawTextured(TextureDrawBuffer* buf);
+    void          DrawDefault(DrawBuffer* buf);
+    void          DrawSimpleText(SimpleTextDrawBuffer* buf);
+    void          DrawSDFText(SDFTextDrawBuffer* buf);
+    void          EndFrame();
+    void          BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data);
+    void          BindFontTexture(BackendHandle texture);
+    void          SaveAPIState();
+    void          RestoreAPIState();
+    BackendHandle CreateFontTexture(int width, int height);
 
-    void                      SaveAPIState();
-    void                      RestoreAPIState();
-    void                      AddShaderUniforms(Internal::ShaderData& data);
-    BackendHandle             CreateFontTexture(int width, int height);
-    void                      BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data);
-    void                      CreateShader(Internal::ShaderData& data, const char* vert, const char* frag);
-    void                      BindFontTexture(BackendHandle texture);
+    // Private functionality.
+    void SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height);
+    void AddShaderUniforms(Internal::ShaderData& data);
+    void CreateShader(Internal::ShaderData& data, const char* vert, const char* frag);
 
     extern LINAVG_API GLState g_glState;
 } // namespace LinaVG::Backend

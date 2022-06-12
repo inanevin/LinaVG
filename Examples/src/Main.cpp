@@ -113,36 +113,38 @@ namespace LinaVG
                 // Lina VG start frame.
                 LinaVG::StartFrame();
 
-                // Setup style, give a gradient color from red to blue.
+                // Setup style.
                 StyleOptions style;
-                style.m_isFilled = true;
-                style.m_color.m_start = Vec4(1, 0, 0, 1);
-                style.m_color.m_end = Vec4(0, 0, 1, 1);
+                style.m_outlineOptions.m_thickness     = 2.0f;
+                style.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
 
-                // Draw a 200x200 rectangle starting from 300, 300.
-                const Vec2 min = Vec2(300, 300);
-                const Vec2 max = Vec2(500, 500);
-                LinaVG::DrawRect(min, max, style);
+                // Same options as style.m_color
+                style.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
+                style.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
 
-              // 
-              // m_demoScreens.ShowBackground();
-              // 
-              // if (m_currentDemoScreen == 1)
-              //     m_demoScreens.ShowDemoScreen1_Shapes();
-              // else if (m_currentDemoScreen == 2)
-              //     m_demoScreens.ShowDemoScreen2_Colors();
-              // else if (m_currentDemoScreen == 3)
-              //     m_demoScreens.ShowDemoScreen3_Outlines();
-              // else if (m_currentDemoScreen == 4)
-              //     m_demoScreens.ShowDemoScreen4_Lines();
-              // else if (m_currentDemoScreen == 5)
-              //     m_demoScreens.ShowDemoScreen5_Texts();
-              // else if (m_currentDemoScreen == 6)
-              //     m_demoScreens.ShowDemoScreen6_DrawOrder();
-              // else if (m_currentDemoScreen == 7)
-              //     m_demoScreens.ShowDemoScreen7_Clipping();
-              // else if (m_currentDemoScreen == 8)
-              //     m_demoScreens.ShowDemoScreen8_Final();
+                // Same options as style.m_textureXXX
+                style.m_outlineOptions.m_textureHandle   = ExampleApp::Get()->GetCheckeredTexture();
+                style.m_outlineOptions.m_textureUVOffset = Vec2(0.0f, 0.0f);
+                style.m_outlineOptions.m_textureUVTiling = Vec2(1.0f, 1.0f);
+
+                m_demoScreens.ShowBackground();
+
+                if (m_currentDemoScreen == 1)
+                    m_demoScreens.ShowDemoScreen1_Shapes();
+                else if (m_currentDemoScreen == 2)
+                    m_demoScreens.ShowDemoScreen2_Colors();
+                else if (m_currentDemoScreen == 3)
+                    m_demoScreens.ShowDemoScreen3_Outlines();
+                else if (m_currentDemoScreen == 4)
+                    m_demoScreens.ShowDemoScreen4_Lines();
+                else if (m_currentDemoScreen == 5)
+                    m_demoScreens.ShowDemoScreen5_Texts();
+                else if (m_currentDemoScreen == 6)
+                    m_demoScreens.ShowDemoScreen6_DrawOrder();
+                else if (m_currentDemoScreen == 7)
+                    m_demoScreens.ShowDemoScreen7_Clipping();
+                else if (m_currentDemoScreen == 8)
+                    m_demoScreens.ShowDemoScreen8_Final();
 
                 // Flush everything we've drawn so far to the screen.
                 LinaVG::Render();
@@ -204,45 +206,6 @@ namespace LinaVG
                 m_demoScreens.m_clippingEnabled = !m_demoScreens.m_clippingEnabled;
             }
         }
-
-      // void Test()
-      // {
-      //     // Configure display properties based on your application window
-      //     LinaVG::Config.m_displayPosX   = 0;
-      //     LinaVG::Config.m_displayPosY   = 0;
-      //     LinaVG::Config.m_displayWidth  = myDisplayWidth;
-      //     LinaVG::Config.m_displayHeight = myDisplayHeight;
-      //
-      //     // Initialize LinaVG
-      //     LinaVG::Initialize();
-      //
-      //     while (true)
-      //     {
-      //
-      //         // Let LinaVG know that we are starting to render.
-      //         LinaVG::StartFrame();
-      //
-      //         // Setup style, give a gradient color from red to blue.
-      //         StyleOptions style;
-      //         style.m_isFilled      = true;
-      //         style.m_color.m_start = Vec4(1, 0, 0, 1);
-      //         style.m_color.m_end   = Vec4(0, 0, 1, 1);
-      //
-      //         // Draw a 200x200 rectangle starting from 300, 300.
-      //         const Vec2 min = Vec2(300, 300);
-      //         const Vec2 max = Vec2(500, 500);
-      //         LinaVG::DrawRect(min, max, style);
-      //
-      //         // Finally, flush all the buffers and render to screen.
-      //         LinaVG::Render();
-      //
-      //         // Let LinaVG know that we are finishing this frame
-      //         LinaVG::EndFrame();
-      //     }
-      //
-      //     // Terminate LinaVG before exiting your application.
-      //     LinaVG::Terminate();
-      // }
 
         void ExampleApp::OnECallback()
         {

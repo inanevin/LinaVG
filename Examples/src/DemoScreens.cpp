@@ -155,7 +155,7 @@ namespace LinaVG
             sdfStyle.m_newLineSpacing = 10.0f;
             sdfStyle.m_color          = Utility::HexToVec4(0xFCAA67);
             sdfStyle.m_sdfThickness   = 0.62f;
-            sdfStyle.m_sdfSoftness    = 0.05f;
+            sdfStyle.m_sdfSoftness    = 0.5f;
             LinaVG::DrawTextSDF(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1], titlePos, sdfStyle, 0, 4);
 
             // Current screen description.
@@ -507,7 +507,7 @@ namespace LinaVG
             defaultStyle.m_color.m_gradientType           = GradientType::Radial;
             defaultStyle.m_color.m_start                  = Vec4(0.5f, 1.0f, 0.5f, 1.0f);
             defaultStyle.m_isFilled                       = true;
-            LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.45f, 245.0f, 1);
+            LinaVG::DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 245.0f, 1);
 
             // Non filled inner
             startPos.x += 200;
@@ -573,6 +573,7 @@ namespace LinaVG
             LineCapDirection lineCap   = LineCapDirection::None;
             LineJointType    jointType = LineJointType::Miter;
 
+      
             defaultStyle.m_thickness = 15.0f;
             defaultStyle.m_color     = Vec4(1, 1, 1, 1);
             LinaVG::DrawLine(startPos, Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, m_rotateAngle, 1);
@@ -600,7 +601,7 @@ namespace LinaVG
             defaultStyle.m_color.m_gradientType       = GradientType::Horizontal;
             defaultStyle.m_outlineOptions.m_thickness = 2.0f;
             defaultStyle.m_outlineOptions.m_color     = Vec4(0, 0, 0, 1);
-            LinaVG::DrawBezier(startPos, Vec2(startPos.x + 200, startPos.y + 200), Vec2(startPos.x + 500, startPos.y - 200), Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, jointType, 1, false);
+            LinaVG::DrawBezier(startPos, Vec2(startPos.x + 200, startPos.y + 200), Vec2(startPos.x + 500, startPos.y - 200), Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, jointType, 1);
 
             jointType = LineJointType::Miter;
             startPos.y += 120;
@@ -608,8 +609,10 @@ namespace LinaVG
             defaultStyle.m_textureHandle              = 0;
             defaultStyle.m_thickness.m_start          = 2.0f;
             defaultStyle.m_thickness.m_end            = 16.0f;
-            LinaVG::DrawBezier(startPos, Vec2(startPos.x + 200, startPos.y + 200), Vec2(startPos.x + 500, startPos.y - 200), Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, jointType, 1, true, 100);
+            LinaVG::DrawBezier(startPos, Vec2(startPos.x + 200, startPos.y + 200), Vec2(startPos.x + 500, startPos.y - 200), Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, jointType, 1);
 
+            TextOptions t;
+            
             startPos.y += 120;
             lineCap                                       = LineCapDirection::None;
             defaultStyle.m_outlineOptions.m_textureHandle = ExampleApp::Get()->GetCheckeredTexture();
@@ -623,7 +626,7 @@ namespace LinaVG
             points.push_back(Vec2(startPos.x + 200, startPos.y + 300));
             points.push_back(Vec2(startPos.x + 600, startPos.y + 300));
             points.push_back(Vec2(startPos.x + 700, startPos.y));
-            LinaVG::DrawLines(&points[0], static_cast<int>(points.size()), defaultStyle, lineCap, jointType, 1, true);
+            LinaVG::DrawLines(&points[0], static_cast<int>(points.size()), defaultStyle, lineCap, jointType, 1);
         }
 
         void DemoScreens::ShowDemoScreen5_Texts()
@@ -692,21 +695,21 @@ namespace LinaVG
 
             startPos.y += 50;
             sdfOpts.m_sdfThickness = 0.7f;
-            sdfOpts.m_sdfSoftness  = 0.2f;
+            sdfOpts.m_sdfSoftness  = 2.0f;
             sdfOpts.m_color        = Vec4(0.1f, 0.8f, 0.1f, 1.0f);
             LinaVG::DrawTextSDF("Smoother text", startPos, sdfOpts, m_rotateAngle, 1);
 
             startPos.y += 50;
             sdfOpts.m_color               = Vec4(1, 1, 1, 1);
             sdfOpts.m_sdfThickness        = 0.6f;
-            sdfOpts.m_sdfSoftness         = 0.05f;
+            sdfOpts.m_sdfSoftness         = 0.5f;
             sdfOpts.m_sdfOutlineThickness = 0.1f;
             sdfOpts.m_sdfOutlineColor     = Vec4(0, 0, 0, 1);
             LinaVG::DrawTextSDF("Outlined SDF text", startPos, sdfOpts, m_rotateAngle, 1);
 
             startPos.y += 50;
             sdfOpts.m_sdfThickness        = 0.8f;
-            sdfOpts.m_sdfSoftness         = 0.05f;
+            sdfOpts.m_sdfSoftness         = 0.5f;
             sdfOpts.m_sdfOutlineThickness = 0.3f;
             sdfOpts.m_sdfOutlineColor     = Vec4(0, 0, 0, 1);
             LinaVG::DrawTextSDF("Thicker outline.", startPos, sdfOpts, m_rotateAngle, 1);
@@ -866,7 +869,6 @@ namespace LinaVG
             const float gridXIncrement = gridLeftX / static_cast<float>(lineCountX);
             currentGrid                = gridStart;
 
-
             const int   center       = lineCountX / 2;
             const float skewMax      = 1600.0f;
             const float tLimitMax    = static_cast<float>(lineCountX);
@@ -969,7 +971,7 @@ namespace LinaVG
                 star.m_color.m_radialSize   = stars[i].m_radialSize;
                 star.m_color.m_gradientType = GradientType::Radial;
 
-                const float sin = std::sin(ExampleApp::Get()->GetElapsed() * 2.0f);
+                const float sin      = std::sin(ExampleApp::Get()->GetElapsed() * 2.0f);
                 const float haloSize = stars[i].m_haloRadius + sin + static_cast<float>((std::rand() % 100)) / 100.0f;
                 LinaVG::DrawCircle(stars[i].m_pos, haloSize, star, 36, 0.0f, 0.0f, 360.0f, 2);
 

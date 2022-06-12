@@ -56,7 +56,8 @@ namespace LinaVG::Internal
     };
 
     /// <summary>
-    /// Rendering data for various backends.
+    /// Rendering data for various backends. If you are implementing your own backend, you can use this, or choose to create your own structs.
+    /// This is only used within the backend.
     /// </summary>
     struct BackendData
     {

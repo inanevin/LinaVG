@@ -139,9 +139,8 @@ namespace LinaVG
     /// <param name="cap">Puts a line cap to either first, last or both ends.</param>
     /// <param name="jointType">Determines how to join the lines.</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-    /// <param name="uniformUVs">Either treats whole bezier curve as a single shape to calculate UVs, or individually calculates the UVs of each line within.</param>
     /// <param name="segments"> Determines the smoothness of the curve. 0-100 range, 100 smoothest. </param>
-    LINAVG_API void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true, int segments = 50);
+    LINAVG_API void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, int segments = 50);
 
     /// <summary>
     /// Draws a single point.
@@ -168,8 +167,7 @@ namespace LinaVG
     /// <param name="cap">Puts a line cap to either first, last or both ends.</param>
     /// <param name="jointType">Determines how to join the lines.</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-    /// <param name="uniformUVs">Either treats whole bezier curve as a single shape to calculate UVs, or individually calculates the UVs of each line within.</param>
-    LINAVG_API void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, bool uniformUVs = true);
+    LINAVG_API void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0);
 
     /// <summary>
     /// Draws a texture in the given pos.

@@ -485,9 +485,9 @@ namespace LinaVG
         float m_sdfThickness = 0.5f;
 
         /// <summary>
-        /// Defines text blurring/smoothing. 0.0f - 1.0f range
+        /// Defines text blurring/smoothing. Usually 0.0f - 1.0f is a good range.
         /// </summary>
-        float m_sdfSoftness = 0.02f;
+        float m_sdfSoftness = 0.2f;
 
         /// <summary>
         /// 0.0f - 1.0f range, defines how strongly the outline is extruded.
@@ -549,6 +549,7 @@ namespace LinaVG
         ThicknessGrad m_thickness = ThicknessGrad(1.0f);
 
         /// <summary>
+        /// Always pass between 0.0f and 1.0f
         /// Used for:
         /// - Rounding the corners of the shapes, e.g. rect, triangle
         /// - Line caps rounding
@@ -644,7 +645,7 @@ namespace LinaVG
         /// <summary>
         /// Enable-disable anti-aliasing.
         /// </summary>
-        bool m_enableAA = true;
+        bool m_aaEnabled = true;
 
         /// <summary>
         /// Size multiplier for AA vertices.

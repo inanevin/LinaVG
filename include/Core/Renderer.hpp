@@ -90,6 +90,7 @@ namespace LinaVG
 
     /// <summary>
     /// Any Draw commands via LinaVG must take place between StartFrame and EndFrame.
+    /// You may need to Clear your color buffer bits before calling StartFrame. LinaVG doesn't do any clearing.
     /// </summary>
     /// <returns></returns>
     LINAVG_API void StartFrame();

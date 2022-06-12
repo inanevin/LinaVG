@@ -220,9 +220,6 @@ namespace LinaVG::Backend
         // Save GL state
         SaveAPIState();
 
-        // Apply GL state
-        glClear(GL_COLOR_BUFFER_BIT);
-
         glDepthMask(GL_FALSE);
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
@@ -231,7 +228,6 @@ namespace LinaVG::Backend
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
         glEnable(GL_SCISSOR_TEST);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         if (Config.m_debugWireframeEnabled)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -415,7 +411,7 @@ namespace LinaVG::Backend
         glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
 
         const float thickness        = 1.0f - Math::Clamp(buf->m_thickness, 0.0f, 1.0f);
-        const float softness         = Math::Clamp(buf->m_softness, 0.0f, 1.0f);
+        const float softness         = Math::Clamp(buf->m_softness, 0.0f, 10.0f) * 0.1f;
         const float outlineThickness = Math::Clamp(buf->m_outlineThickness, 0.0f, 1.0f);
         glUniform1i(data.m_uniformMap["diffuse"], 0);
         glUniform1f(data.m_uniformMap["thickness"], thickness);
