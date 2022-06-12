@@ -1,4 +1,4 @@
-![Lina](Docs/Images/linalogofull_medium.png)
+![LinaVGText-White](https://user-images.githubusercontent.com/3519379/173247639-2fda42bc-94cf-4437-b319-df6d6cac50e7.png)
 
 ## Lina VG
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) 
