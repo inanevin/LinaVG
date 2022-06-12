@@ -113,3 +113,17 @@ And that's basically it! Now you should have this on your screen, easy peasy.
 ![1](https://user-images.githubusercontent.com/3519379/173247621-4f38cbe2-308f-4cd7-aa9f-8da150d83780.png)
 
 There are a lot more to LinaVG in regards to usage, configuration, other shapes/lines/texts and styling. Check out the rest of the Wiki or the example application to learn about them all.
+
+# License
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) 
+[LICENSE.MD](https://github.com/inanevin/LinaVG/blob/master/LICENSE)
+
+# Contributing
+
+Any contributions and PR are welcome.
+
+# Support
+
+You can join [Lina Engine's Discord channel](https://discord.gg/QYeTkEtRMB) to talk about the Lina Project.
+[![Lina Discord](https://badgen.net/discord/members/QYeTkEtRMB)](https://discord.gg/QYeTkEtRMB)
