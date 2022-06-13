@@ -144,7 +144,9 @@ namespace LinaVG
                 else if (m_currentDemoScreen == 7)
                     m_demoScreens.ShowDemoScreen7_Clipping();
                 else if (m_currentDemoScreen == 8)
-                    m_demoScreens.ShowDemoScreen8_Final();
+                    m_demoScreens.ShowDemoScreen8_Animated();
+                else if (m_currentDemoScreen == 9)
+                    m_demoScreens.ShowDemoScreen9_Final();
 
                 // Flush everything we've drawn so far to the screen.
                 LinaVG::Render();
@@ -177,7 +179,7 @@ namespace LinaVG
 
         void ExampleApp::OnNumKeyCallback(int key)
         {
-            if (key > 0 && key < 9)
+            if (key > 0 && key < 10)
                 m_currentDemoScreen = key;
 
             if (key == 7)

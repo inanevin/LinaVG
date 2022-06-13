@@ -196,7 +196,7 @@ namespace LinaVG
     LINAVG_API void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
     /// <summary>
-    /// Draws a filled rectangle between min & max with the given style options & rotation angle.
+    /// Draws a filled rectangle between min and max with the given style options and rotation angle.
     /// </summary>
     /// <param name="min">Top left corner of the rectangle.</param>
     /// <param name="max">Bottom right corner of the rectangle.</param>

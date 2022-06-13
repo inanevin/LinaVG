@@ -60,13 +60,17 @@ namespace LinaVG
             m_textDemoFont    = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 30);
             m_textDemoSDFFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 40);
 
-            m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
-            m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
+           //m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
+           //m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
+            m_screenDescriptions.push_back("TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST");
+            m_screenDescriptions.push_back("TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST");
+            
             m_screenDescriptions.push_back("LinaVG supports inner as well as outer outlines. Outlines also support all previous coloring and texturing options, as well as both filled & non-filled objects.");
             m_screenDescriptions.push_back("LinaVG supports single lines, multi-lines as well as bezier curves. Lines can have left/right or both caps, multi-lines can have 4 different types of joints. All lines also support outlines, coloring & texturing.");
             m_screenDescriptions.push_back("Texts support drop shadows, flat colors & vertical/horizontal gradients. SDF texts also support outlines, individual thickness as well as softness factors. LinaVG also provides alignment, wrapping & spacing options.");
             m_screenDescriptions.push_back("You can suply varying draw order to DrawXXX commands in order to support z-ordering.");
             m_screenDescriptions.push_back("You can use global clipping variables to create clipping rectangles for any shape you are drawing. Press C to toggle clipping.");
+            m_screenDescriptions.push_back("Here are some examples of GUIs you can draw with LinaVG.");
             m_screenDescriptions.push_back("And since we have all that functionality, why not draw a simple retro grid.");
 
             // This is for Demo Screen 8, which is basically some basic retro art.
@@ -573,7 +577,6 @@ namespace LinaVG
             LineCapDirection lineCap   = LineCapDirection::None;
             LineJointType    jointType = LineJointType::Miter;
 
-      
             defaultStyle.m_thickness = 15.0f;
             defaultStyle.m_color     = Vec4(1, 1, 1, 1);
             LinaVG::DrawLine(startPos, Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, m_rotateAngle, 1);
@@ -596,23 +599,24 @@ namespace LinaVG
 
             jointType = LineJointType::Miter;
             startPos.y += 120;
-            defaultStyle.m_color.m_start              = Vec4(0.5f, 1.0f, 1.0f, 1.0f);
-            defaultStyle.m_color.m_end                = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            defaultStyle.m_color                      = Vec4(0.5f, 0.75f, 0.33f, 1.0f);
             defaultStyle.m_color.m_gradientType       = GradientType::Horizontal;
             defaultStyle.m_outlineOptions.m_thickness = 2.0f;
             defaultStyle.m_outlineOptions.m_color     = Vec4(0, 0, 0, 1);
-            LinaVG::DrawBezier(startPos, Vec2(startPos.x + 200, startPos.y + 200), Vec2(startPos.x + 500, startPos.y - 200), Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, jointType, 1);
+            LinaVG::DrawBezier(startPos, Vec2(startPos.x + 200, startPos.y + 200), Vec2(startPos.x + 500, startPos.y - 200), Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, jointType, 1, 100);
 
             jointType = LineJointType::Miter;
             startPos.y += 120;
+            defaultStyle.m_color.m_start              = Vec4(0.5f, 1.0f, 1.0f, 1.0f);
+            defaultStyle.m_color.m_end                = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
             defaultStyle.m_outlineOptions.m_thickness = 0.0f;
             defaultStyle.m_textureHandle              = 0;
             defaultStyle.m_thickness.m_start          = 2.0f;
             defaultStyle.m_thickness.m_end            = 16.0f;
-            LinaVG::DrawBezier(startPos, Vec2(startPos.x + 200, startPos.y + 200), Vec2(startPos.x + 500, startPos.y - 200), Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, jointType, 1);
+            LinaVG::DrawBezier(startPos, Vec2(startPos.x + 200, startPos.y + 200), Vec2(startPos.x + 500, startPos.y - 200), Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, jointType, 1, 100);
 
             TextOptions t;
-            
+
             startPos.y += 120;
             lineCap                                       = LineCapDirection::None;
             defaultStyle.m_outlineOptions.m_textureHandle = ExampleApp::Get()->GetCheckeredTexture();
@@ -810,7 +814,63 @@ namespace LinaVG
             Config.m_clipSizeY = 0;
         }
 
-        void DemoScreens::ShowDemoScreen8_Final()
+        void DemoScreens::ShowDemoScreen8_Animated()
+        {
+            const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
+
+            auto drawSinBezier = [](const Vec2& pos) {
+                StyleOptions     defaultStyle;
+                LineJointType    jointType;
+                LineCapDirection lineCap = LineCapDirection::None;
+
+                static float controlPos1Y = 140;
+                static float controlPos2Y = -140;
+
+                controlPos1Y = std::sin(ExampleApp::Get()->GetElapsed() * 2) * 200;
+                controlPos2Y = std::cos(ExampleApp::Get()->GetElapsed() * 2) * 200;
+
+                jointType                        = LineJointType::Miter;
+                defaultStyle.m_color.m_start     = Vec4(0.5f, 1.0f, 1.0f, 1.0f);
+                defaultStyle.m_color.m_end       = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                defaultStyle.m_textureHandle     = 0;
+                defaultStyle.m_thickness.m_start = 2.0f;
+                defaultStyle.m_thickness.m_end   = 16.0f;
+                LinaVG::DrawBezier(pos, Vec2(pos.x + 200, pos.y + controlPos1Y), Vec2(pos.x + 400, pos.y + controlPos2Y), Vec2(pos.x + 600, pos.y), defaultStyle, lineCap, jointType, 1, 100);
+            };
+
+            auto drawLoadingBar1 = [&](const Vec2& pos) {
+                StyleOptions background;
+                background.m_outlineOptions.m_color     = Vec4(0, 0, 0, 1);
+                background.m_outlineOptions.m_thickness = 0.5f;
+                background.m_rounding                   = 0.2f;
+                background.m_color                      = Vec4(0.2f, 0.2f, 0.2f, 0.2f);
+                LinaVG::DrawRect(pos, Vec2(pos.x + 600, pos.y + 25), background, 0.0f, 1);
+
+                StyleOptions fill;
+                fill.m_color = Vec4(0.6f, 0.2f, 0.35f, 1.0f);
+
+                static float fillX = 0.0f;
+
+                if (fillX < 595)
+                {
+                    fillX += ExampleApp::Get()->GetFrameTime() * 80;
+                }
+                else
+                    fillX = 0.0f;
+                LinaVG::DrawRect(Vec2(pos.x + 1, pos.y + 1), Vec2(pos.x + fillX, pos.y + 24), fill, 0.0f, 2);
+
+                TextOptions textOpts;
+                textOpts.m_font = m_defaultFont;
+                std::string loadingStr = "Loading " + std::to_string(fillX / 600.0f);
+                LinaVG::DrawTextNormal(loadingStr, Vec2(pos.x, pos.y + 26), textOpts, 0.0f, 1);
+
+            };
+
+            drawSinBezier(Vec2(screenSize.x * 0.05f, screenSize.y * 0.15f));
+            drawLoadingBar1(Vec2(screenSize.x * 0.05f, screenSize.y * 0.35f));
+        }
+
+        void DemoScreens::ShowDemoScreen9_Final()
         {
             const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
 

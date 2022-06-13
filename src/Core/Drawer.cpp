@@ -2965,7 +2965,7 @@ namespace LinaVG
         const Vec2 off = Internal::CalcMaxCharOffset(text.c_str(), font, scale);
         usedPos.y -= off.y * remap;
         usedPos.x += Math::Abs(off.x) * remap;
-        //  usedPos.y += size.y;
+       // usedPos.y += size.y;
 
         if (wrapWidth == 0.0f || size.x < wrapWidth)
         {
