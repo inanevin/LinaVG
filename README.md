@@ -1,7 +1,6 @@
-![image](https://user-images.githubusercontent.com/3519379/173690417-be2e171d-3f08-4afc-bb48-252b2316f140.png)
 
 <p align="center">
-  <img width="600" height="235" src="http://www.fillmurray.com/460/300">
+  <img width="600" height="235" src="https://user-images.githubusercontent.com/3519379/173690417-be2e171d-3f08-4afc-bb48-252b2316f140.png">
 </p>
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) 
