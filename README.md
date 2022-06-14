@@ -1,6 +1,5 @@
-![image](https://user-images.githubusercontent.com/3519379/173689928-672b1cc7-5fb7-497b-87a2-a663e2e1eb6c.png)
+![image](https://user-images.githubusercontent.com/3519379/173690236-49197b6e-ebeb-42c6-a506-b70a39ccba77.png)
 
-## Lina VG
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/inanevin) 
 [![Lina Discord](https://badgen.net/discord/members/QYeTkEtRMB)](https://discord.gg/QYeTkEtRMB)
