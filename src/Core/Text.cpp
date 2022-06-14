@@ -109,8 +109,9 @@ namespace LinaVG
             font->m_size          = size;
             font->m_isSDF         = loadAsSDF;
             font->m_newLineHeight = static_cast<float>(face->size->metrics.height) / 64.0f;
-            font->ascent = static_cast<float>(face->size->metrics.ascender) / 64.0f;
-            font->descent = static_cast<float>(face->size->metrics.descender) / 64.0f;
+            font->m_ascent = static_cast<float>(face->size->metrics.ascender) / 64.0f;
+            font->m_descent = static_cast<float>(face->size->metrics.descender) / 64.0f;
+
             auto&        characterMap      = font->m_characterGlyphs;
             int          maxHeight         = 0;
             unsigned int roww              = 0;

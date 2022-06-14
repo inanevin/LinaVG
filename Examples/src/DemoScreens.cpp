@@ -54,11 +54,11 @@ namespace LinaVG
 
         void DemoScreens::Initialize()
         {
-            m_defaultFont     = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 18);
-            m_titleFont       = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 65);
-            m_descFont        = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 20);
-            m_textDemoFont    = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 30);
-            m_textDemoSDFFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 40);
+            m_defaultFont     = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 18);
+            m_titleFont       = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 52);
+            m_descFont        = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
+            m_textDemoFont    = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
+            m_textDemoSDFFont = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
 
             m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
             m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
@@ -67,7 +67,7 @@ namespace LinaVG
             m_screenDescriptions.push_back("Texts support drop shadows, flat colors & vertical/horizontal gradients. SDF texts also support outlines, individual thickness as well as softness factors. LinaVG also provides alignment, wrapping & spacing options.");
             m_screenDescriptions.push_back("You can suply varying draw order to DrawXXX commands in order to support z-ordering.");
             m_screenDescriptions.push_back("You can use global clipping variables to create clipping rectangles for any shape you are drawing. Press C to toggle clipping.");
-            m_screenDescriptions.push_back("Here are some examples of GUIs you can draw with LinaVG.");
+            m_screenDescriptions.push_back("Here are some examples of animated shapes you can draw with LinaVG.");
             m_screenDescriptions.push_back("And since we have all that functionality, why not draw a simple retro grid.");
 
             // This is for Demo Screen 8, which is basically some basic retro art.
@@ -121,7 +121,7 @@ namespace LinaVG
                 const std::string frameTimeStr     = "Frame: " + std::to_string(ExampleApp::Get()->GetFrameTimeRead()) + " ms";
                 const std::string fpsStr           = "FPS: " + std::to_string(ExampleApp::Get()->GetFPS()) + " " + frameTimeStr;
 
-                Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 25);
+                Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 12);
                 SDFTextOptions textStyle;
                 textStyle.m_textScale = 0.82f;
                 textStyle.m_font      = m_defaultFont;
@@ -155,8 +155,9 @@ namespace LinaVG
             const Vec2 titlePos       = Vec2(rectMin.x + 20, rectMin.y + rectHeight / 2.0f - size.y / 2.0f);
             sdfStyle.m_newLineSpacing = 10.0f;
             sdfStyle.m_color          = Utility::HexToVec4(0xFCAA67);
-            sdfStyle.m_sdfThickness   = 0.5f;
+            sdfStyle.m_sdfThickness   = 0.62f;
             sdfStyle.m_sdfSoftness    = 0.5f;
+            sdfStyle.m_spacing        = 3.0f;
             LinaVG::DrawTextSDF(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1], titlePos, sdfStyle, 0, 4);
 
             // Current screen description.
@@ -169,11 +170,11 @@ namespace LinaVG
             TextOptions controlsText;
             controlsText.m_font      = m_descFont;
             controlsText.m_textScale = 0.8f;
-            LinaVG::DrawTextNormal("Press num keys [1-8] to switch between demo screens.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 10), controlsText, 0, 4);
-            LinaVG::DrawTextNormal("Press P to toggle performance stats.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 30), controlsText, 0, 4);
-            LinaVG::DrawTextNormal("Press F to toggle wireframe rendering.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 50), controlsText, 0, 4);
-            LinaVG::DrawTextNormal("Press R to start/stop rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 70), controlsText, 0, 4);
-            LinaVG::DrawTextNormal("Press E to reset rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 90), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Num keys[1-8]: switch screen", Vec2(rectWidth * 0.725f + 20, rectMin.y + 10), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("P: toggle performance stats.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 30), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("F: toggle wireframe rendering.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 50), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("R: start/stop rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 70), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("E: reset rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 90), controlsText, 0, 4);
         }
 
         void DemoScreens::ShowDemoScreen1_Shapes()
@@ -638,11 +639,11 @@ namespace LinaVG
             textOpts.m_font = m_textDemoFont;
             LinaVG::DrawTextNormal("This is a normal text.", startPos, textOpts, m_rotateAngle, 1);
 
-            startPos.x += 300;
+            startPos.x += 350;
             textOpts.m_dropShadowOffset = Vec2(2, 2);
             LinaVG::DrawTextNormal("Drop shadow.", startPos, textOpts, m_rotateAngle, 1);
 
-            startPos.x += 300;
+            startPos.x += 350;
             textOpts.m_color.m_start = Vec4(1, 0, 0, 1);
             textOpts.m_color.m_start = Vec4(0, 0, 1, 1);
             LinaVG::DrawTextNormal("Gradient color.", startPos, textOpts, m_rotateAngle, 1);
@@ -654,7 +655,7 @@ namespace LinaVG
             textOpts.m_color           = Vec4(1, 1, 1, 1);
             LinaVG::DrawTextNormal("This is a wrapped text with a colored drop shadow.", startPos, textOpts, m_rotateAngle, 1);
 
-            startPos.x += 300;
+            startPos.x += 365;
             textOpts.m_wrapWidth            = 100;
             textOpts.m_alignment            = TextAlignment::Center;
             textOpts.m_dropShadowOffset     = Vec2(0.0f, 0.0f);
@@ -665,7 +666,7 @@ namespace LinaVG
             startPos.x += size.x / 2.0f;
             LinaVG::DrawTextNormal("Center alignment and vertical gradient.", startPos, textOpts, m_rotateAngle, 1);
 
-            startPos.x += 300;
+            startPos.x += 335;
             textOpts.m_color     = Vec4(0.8f, 0.1f, 0.1f, 1.0f);
             textOpts.m_alignment = TextAlignment::Right;
             const Vec2 size2     = LinaVG::CalculateTextSize("Same, but it's right alignment", textOpts);
@@ -673,14 +674,14 @@ namespace LinaVG
             LinaVG::DrawTextNormal("Same, but it's right alignment", startPos, textOpts, m_rotateAngle, 1);
 
             startPos.x = screenSize.x * 0.05f;
-            startPos.y += 330;
+            startPos.y += 370;
             textOpts.m_spacing   = 10;
             textOpts.m_wrapWidth = 0.0f;
             textOpts.m_alignment = TextAlignment::Left;
             textOpts.m_color     = Vec4(1, 1, 1, 1);
             LinaVG::DrawTextNormal("And this is a normal text with higher spacing.", startPos, textOpts, m_rotateAngle, 1);
 
-            startPos.y += 90;
+            startPos.y += 70;
             startPos.x                       = screenSize.x * 0.05f;
             const float    beforeSDFStartPos = startPos.y;
             SDFTextOptions sdfOpts;
@@ -723,20 +724,14 @@ namespace LinaVG
             LinaVG::DrawTextSDF("Drop shadow.", startPos, sdfOpts, m_rotateAngle, 1);
 
             startPos.y = beforeSDFStartPos;
-            startPos.x += 550;
+            startPos.x += 930;
             sdfOpts.m_sdfDropShadowThickness = 0.0f;
             sdfOpts.m_sdfOutlineThickness    = 0.0f;
             sdfOpts.m_sdfThickness           = 0.6f;
-            sdfOpts.m_wrapWidth              = 150;
+            sdfOpts.m_wrapWidth              = 450;
+            sdfOpts.m_newLineSpacing         = 10.0f;
             sdfOpts.m_alignment              = TextAlignment::Right;
-            LinaVG::DrawTextSDF("This is an SDF, wrapped and right aligned text.", startPos, sdfOpts, m_rotateAngle, 1);
-
-            startPos.y = beforeSDFStartPos;
-            startPos.x += 300;
-            sdfOpts.m_wrapWidth      = 150;
-            sdfOpts.m_alignment      = TextAlignment::Right;
-            sdfOpts.m_newLineSpacing = 15;
-            LinaVG::DrawTextSDF("Same, but a higher new line spacing.", startPos, sdfOpts, m_rotateAngle, 1);
+            LinaVG::DrawTextSDF("This is an SDF, wrapped and right aligned text, with higher line spacing.", startPos, sdfOpts, m_rotateAngle, 1);
         }
 
         void DemoScreens::ShowDemoScreen6_DrawOrder()
@@ -849,9 +844,7 @@ namespace LinaVG
                 static float fillX = 0.0f;
 
                 if (fillX < 595)
-                {
                     fillX += ExampleApp::Get()->GetFrameTime() * 80;
-                }
                 else
                     fillX = 0.0f;
                 LinaVG::DrawRect(Vec2(pos.x + 1, pos.y + 1), Vec2(pos.x + fillX, pos.y + 24), fill, 0.0f, 2);
@@ -859,13 +852,237 @@ namespace LinaVG
                 TextOptions textOpts;
                 textOpts.m_font        = m_defaultFont;
                 std::string loadingStr = "Loading " + std::to_string(fillX / 600.0f);
-                const Vec2 txtSize = LinaVG::CalculateTextSize(loadingStr, textOpts);
+                const Vec2  txtSize    = LinaVG::CalculateTextSize(loadingStr, textOpts);
 
                 LinaVG::DrawTextNormal(loadingStr, Vec2(pos.x + 300 - txtSize.x / 2.0f, pos.y + 12.5f - txtSize.y / 2.0f), textOpts, 0.0f, 2);
             };
 
+            auto drawLoadingBar2 = [&](const Vec2& pos) {
+                StyleOptions background;
+                background.m_rounding = 0.8f;
+                background.m_color    = Vec4(0.1f, 0.1f, 0.1f, 0.8f);
+                LinaVG::DrawRect(pos, Vec2(pos.x + 600, pos.y + 20), background, 0.0f, 1);
+
+                static float fillX = 0.0f;
+
+                if (fillX < 595)
+                    fillX += ExampleApp::Get()->GetFrameTime() * 80;
+                else
+                    fillX = 0.0f;
+
+                const float  t = fillX / 600.0f;
+                StyleOptions fill;
+                fill.m_rounding      = background.m_rounding;
+                fill.m_color.m_start = Vec4(0.8f, 0.8f, 0.2f, 1.0f);
+                fill.m_color.m_end   = Vec4(0.8f * t, 0.2f, 0.2f, 1.0f);
+                LinaVG::DrawRect(pos, Vec2(pos.x + fillX, pos.y + 20), fill, 0.0f, 2);
+
+                TextOptions textOpts;
+                textOpts.m_font        = m_defaultFont;
+                std::string loadingStr = "Loading " + std::to_string(t);
+                const Vec2  txtSize    = LinaVG::CalculateTextSize(loadingStr, textOpts);
+
+                LinaVG::DrawTextNormal(loadingStr, Vec2(pos.x, pos.y + 30), textOpts, 0.0f, 2);
+            };
+
+            auto drawLoadingCircle1 = [&](const Vec2& pos) {
+                StyleOptions opts;
+                opts.m_isFilled = false;
+
+                static float rotate1 = 0.0f;
+                static float rotate2 = 0.0f;
+                static float rotate3 = 0.0f;
+
+                rotate1 += ExampleApp::Get()->GetFrameTime() * 35.0f;
+                rotate2 = rotate1 * 2.5f + 90.0f;
+                rotate3 = rotate2 * 3.5f + 9.0f;
+                LinaVG::DrawCircle(pos, 50, opts, 60, rotate1, 180.0f, 360.0f, 1);
+                LinaVG::DrawCircle(pos, 40, opts, 60, rotate2, 0.0f, 180.0f, 1);
+                LinaVG::DrawCircle(pos, 30, opts, 60, rotate3, 180.0f, 360.0f, 1);
+
+                TextOptions textOpts;
+                textOpts.m_font = m_defaultFont;
+                LinaVG::DrawTextNormal("Loading", Vec2(pos.x - 28.0f, pos.y + 80), textOpts, 0.0f, 2);
+            };
+
+            auto drawLoadingRect = [&](const Vec2& pos) {
+                const Vec2 totalSize = Vec2(450, 116);
+
+                StyleOptions opts;
+                opts.m_color = Vec4(0.1f, 0.1f, 0.1f, 0.65f);
+
+                LinaVG::DrawRect(pos, Vec2(pos.x + totalSize.x, pos.y + totalSize.y), opts, 0.0f, 1);
+
+                const Vec2 smallRectSize = Vec2(45, 50);
+
+                Vec2 usedPos = pos;
+                usedPos.x += 4.5f;
+                usedPos.y += 4.5f;
+
+                static float t = 0.0f;
+
+                t += ExampleApp::Get()->GetFrameTime() * 10;
+
+                if (t > 18.0f)
+                    t = 0.0f;
+
+                int rectCounter = 0;
+                for (int j = 0; j < 2; j++)
+                {
+                    for (int i = 0; i < 9; i++)
+                    {
+                        const float maxLimit = static_cast<float>(rectCounter + 1);
+                        const float minLimit = static_cast<float>(rectCounter);
+
+                        StyleOptions smallRect;
+
+                        if (t > minLimit && t < maxLimit)
+                            smallRect.m_color = Vec4(0.2f, 0.1f, 0.6f, 0.85f);
+                        else
+                            smallRect.m_color = Vec4(0.1f, 0.1f, 0.1f, 0.55f);
+
+                        LinaVG::DrawRect(usedPos, Vec2(usedPos.x + smallRectSize.x, usedPos.y + smallRectSize.y), smallRect, 0.0f, 2);
+                        usedPos.x += smallRectSize.x + 4.5f;
+                        rectCounter++;
+                    }
+                    usedPos = pos;
+                    usedPos.x += 4.5f;
+                    usedPos.y += smallRectSize.y + 10.0f;
+                }
+
+                TextOptions textOpts;
+                textOpts.m_font = m_defaultFont;
+                LinaVG::DrawTextNormal("Loading", Vec2(pos.x, pos.y + 130), textOpts, 0.0f, 2);
+            };
+
+            auto drawMovingTri = [&](const Vec2& startPos) {
+                static float movingX = 0.0f;
+
+                const float sin = std::sin(ExampleApp::Get()->GetElapsed() * 0.85f) * 250.0f;
+                movingX         = 250.0f + sin;
+
+                const Vec2 top   = Vec2(startPos.x + 60 + movingX, startPos.y - 60);
+                const Vec2 left  = Vec2(startPos.x + movingX, startPos.y + 60);
+                const Vec2 right = Vec2(startPos.x + 120 + movingX, startPos.y + 60);
+
+                StyleOptions style;
+                style.m_outlineOptions.m_color     = Vec4(0.1f, 0.1f, 0.1f, 0.7f);
+                style.m_outlineOptions.m_thickness = 2.0f;
+                style.m_color.m_start              = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                style.m_color.m_end                = Vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+                static float triangleRotate = 0.0f;
+                triangleRotate += ExampleApp::Get()->GetFrameTime() * 45.0f;
+                LinaVG::DrawTriangle(top, right, left, style, triangleRotate, 1);
+            };
+
+            auto drawProperty = [&](const Vec2& pos, int index) {
+                TextOptions textOpts;
+                textOpts.m_font      = m_descFont;
+                textOpts.m_textScale = 0.7f;
+                std::string str      = "Property_" + std::to_string(index);
+                LinaVG::DrawTextNormal(str, pos, textOpts, 0.0f, 3);
+
+                StyleOptions opts;
+                opts.m_color                      = Vec4(0.05f, 0.05f, 0.05f, 0.9f);
+                opts.m_rounding                   = 0.2f;
+                opts.m_outlineOptions.m_color     = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+                opts.m_outlineOptions.m_thickness = 0.1f;
+                LinaVG::DrawRect(Vec2(pos.x + 150, pos.y), Vec2(pos.x + 380, pos.y + 22), opts, 0.0f, 3);
+            };
+            auto propertyWindow = [&](const Vec2& pos) {
+                const Vec2   size = Vec2(400, 180);
+                StyleOptions bg;
+                StyleOptions title;
+                bg.m_color    = Utility::HexToVec4(0x242424);
+                title.m_color = Utility::HexToVec4(0x111111);
+                LinaVG::DrawRect(pos, Vec2(pos.x + size.x, pos.y + size.y), bg, 0.0f, 1);
+                LinaVG::DrawRect(Vec2(pos.x + 1, pos.y + 1), Vec2(pos.x + size.x - 1, pos.y + 25), title, 0.0f, 2);
+
+                TextOptions textOpts;
+                textOpts.m_font      = m_descFont;
+                textOpts.m_textScale = 0.85f;
+                LinaVG::DrawTextNormal("Demo Title", Vec2(pos.x + 10, pos.y + 3.5f), textOpts, 0.0f, 3);
+
+                Vec2 usedPos = Vec2(pos.x + 10, pos.y + 35);
+                drawProperty(usedPos, 0);
+                usedPos.y += 30.0f;
+                drawProperty(usedPos, 1);
+                usedPos.y += 30.0f;
+                drawProperty(usedPos, 2);
+                usedPos.y += 40.0f;
+
+                StyleOptions buttonRect;
+                buttonRect.m_outlineOptions.m_thickness = 1.0f;
+                buttonRect.m_rounding                   = 0.2f;
+                buttonRect.m_color                      = Vec4(0.1f, 0.1f, 0.1f, 1.0f);
+                buttonRect.m_outlineOptions.m_thickness = 0.3f;
+                buttonRect.m_outlineOptions.m_color     = Vec4(0.3f, 0.3f, 0.4f, 1.0f);
+
+                const Vec2 buttonSize = Vec2(200, 25);
+                const Vec2 startPos   = Vec2(pos.x + size.x / 2.0f - buttonSize.x / 2.0f, usedPos.y);
+                LinaVG::DrawRect(startPos, Vec2(startPos.x + buttonSize.x, startPos.y + buttonSize.y), buttonRect, 0.0f, 2);
+                textOpts.m_textScale = 0.7f;
+                const Vec2 textSize  = LinaVG::CalculateTextSize("Button", textOpts);
+                const Vec2 textPos   = Vec2(startPos.x + buttonSize.x / 2.0f - textSize.x / 2.0f, startPos.y + buttonSize.y / 2.0f - textSize.y);
+                LinaVG::DrawTextNormal("Button", textPos, textOpts, 0.0f, 3);
+            };
+
             drawSinBezier(Vec2(screenSize.x * 0.05f, screenSize.y * 0.15f));
             drawLoadingBar1(Vec2(screenSize.x * 0.05f, screenSize.y * 0.35f));
+            drawLoadingBar2(Vec2(screenSize.x * 0.05f, screenSize.y * 0.4f));
+            drawLoadingCircle1(Vec2(screenSize.x * 0.08f, screenSize.y * 0.55f));
+            drawLoadingRect(Vec2(screenSize.x * 0.15f, screenSize.y * 0.495f));
+            drawMovingTri(Vec2(screenSize.x * 0.05f, screenSize.y * 0.75f));
+            propertyWindow(Vec2(screenSize.x * 0.63f, screenSize.y * 0.1f));
+
+            // Checkered rects
+            static float colorLerp = 0.0f;
+            colorLerp              = std::sin(ExampleApp::Get()->GetElapsed() * 2.0f) + 1.0f;
+            StyleOptions opts;
+            opts.m_textureHandle                  = ExampleApp::Get()->GetCheckeredTexture();
+            opts.m_outlineOptions.m_thickness     = 4.0f;
+            opts.m_outlineOptions.m_color.m_start = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            opts.m_outlineOptions.m_color.m_end   = Vec4(1.0f * (1.0f - colorLerp), 0.0f, 1.0f * colorLerp, 1.0f);
+            Vec2 start                            = Vec2(screenSize.x * 0.63f, screenSize.y * 0.35f);
+            LinaVG::DrawRect(start, Vec2(start.x + 150, start.y + 150), opts, 0.0f, 1.0f);
+
+            // Rect 2
+            start.x += 245;
+            static float offSetX = 0.0f;
+            offSetX += ExampleApp::Get()->GetFrameTime() * 0.3f;
+            opts.m_textureUVOffset = Vec2(offSetX, 0.0f);
+            LinaVG::DrawRect(start, Vec2(start.x + 150, start.y + 150), opts, 0.0f, 1.0f);
+
+            // Pulsing ngon
+            static float thickness = 0.0f;
+            thickness              = std::sin(ExampleApp::Get()->GetElapsed() * 3.0f) * 2.0f + 3.0f;
+            float        colT      = LinaVG::Math::Remap(thickness, 1.0f, 5.0f, 1.0f, 0.0f);
+            StyleOptions ngon;
+            ngon.m_outlineOptions.m_thickness = thickness;
+            ngon.m_outlineOptions.m_color     = Vec4(1.0f, 1.0f * colT, 1.0f * (colT / 2.0f), 1.0f);
+            ngon.m_color                      = LinaVG::Utility::HexToVec4(0x212738);
+            start.x                           = screenSize.x * 0.77f;
+            start.y += 250.0f;
+            LinaVG::DrawNGon(start, 70.0f, 7, ngon, 0.0f, 1.0f);
+
+            // SDF Text
+            static float colLerp1 = 0.0f, colLerp2 = 0.0f;
+            colLerp1 = std::sin(ExampleApp::Get()->GetElapsed() * 2.5f) + 1.0f;
+            colLerp2 = std::sin(ExampleApp::Get()->GetElapsed() * 1.25f) + 1.0f;
+
+            SDFTextOptions sdf;
+            sdf.m_font = m_titleFont;
+            start.y += 170.0f;
+            start.x                   = screenSize.x * 0.6f;
+            sdf.m_sdfThickness        = 0.72f;
+            sdf.m_sdfOutlineColor     = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            sdf.m_sdfOutlineThickness = 0.1f;
+            sdf.m_textScale           = 2.0f;
+            sdf.m_spacing             = 9.0f;
+            sdf.m_color.m_start       = Vec4(0.0f, 0.8f * colLerp1, 1.0f * colLerp2, 1.0f);
+            sdf.m_color.m_end         = Vec4(0.1f, 0.1f, 0.85f * colLerp2, 1.0f);
+            LinaVG::DrawTextSDF("SDF TEXT", start, sdf, 0.0f, 1.0f);
         }
 
         void DemoScreens::ShowDemoScreen9_Final()

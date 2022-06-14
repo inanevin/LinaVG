@@ -56,7 +56,6 @@ namespace LinaVG
         Vec2  m_advance = Vec2(0.0f, 0.0f);
         float m_ascent  = 0.0f;
         float m_descent = 0.0f;
-        char c;
 
         /// Cleaned after load.
         unsigned char* m_buffer = nullptr;
@@ -68,10 +67,10 @@ namespace LinaVG
         BackendHandle                            m_texture       = 0;
         int                                      m_size          = 0;
         float                                    m_newLineHeight = 0.0f;
-        float                                    ascent;
-        float                                    descent;
-        bool                                     m_isSDF        = false;
-        float                                    m_spaceAdvance = 0.0f;
+        float                                    m_ascent        = 0.0f;
+        float                                    m_descent       = 0.0f;
+        float                                    m_spaceAdvance  = 0.0f;
+        bool                                     m_isSDF         = false;
         LINAVG_MAP<GlyphEncoding, TextCharacter> m_characterGlyphs;
     };
 
