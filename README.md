@@ -83,23 +83,15 @@ LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/Lina
 * SDF thickness
 * SDF softness
 * SDF outlines
-# Installation
 
 ## Utility
 
 * Custom draw orders, z-sorting
 * Rect clipping
-* 
-Internal workings are exposed to configs, such as:
+* Exposed configs, such as; garbage collection intervals, buffer reserves, AA params, line joint limits, texture flipping, debug functionality
 
-* Garbage collection intervals
-* Buffer reserves
-* AA params
-* Line joint limits
-* Texture flipping
-* Log callbacks
-* Debug functionality
 
+# Installation
 
 [Releases](https://github.com/inanevin/LinaVG/releases) contain pre-built binaries for linking against LinaVG. Your application first needs to link against Glad and FreeType libraries distributed alongside with LinaVG release. Simply link against those two, then against LinaVG and you are good to go. If you plan to use LinaVG within your source-code and compile it along with your application, again you still need to link against those two, then include the header & source files of LinaVG in your application.
 
