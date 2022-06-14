@@ -33,6 +33,9 @@ LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/Lina
 
 # Features
 
+![lina](https://user-images.githubusercontent.com/3519379/173691256-289869b6-7fa9-462b-b2ef-28d6680c7bdd.gif)
+
+
 ## Shapes
 
 * Rectangle, triangle, ngon, circle, half-circle, arcs, user-defined convex shapes
