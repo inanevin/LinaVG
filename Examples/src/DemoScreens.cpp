@@ -60,11 +60,8 @@ namespace LinaVG
             m_textDemoFont    = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", false, 30);
             m_textDemoSDFFont = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 40);
 
-           //m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
-           //m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
-            m_screenDescriptions.push_back("TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST");
-            m_screenDescriptions.push_back("TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST");
-            
+            m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
+            m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
             m_screenDescriptions.push_back("LinaVG supports inner as well as outer outlines. Outlines also support all previous coloring and texturing options, as well as both filled & non-filled objects.");
             m_screenDescriptions.push_back("LinaVG supports single lines, multi-lines as well as bezier curves. Lines can have left/right or both caps, multi-lines can have 4 different types of joints. All lines also support outlines, coloring & texturing.");
             m_screenDescriptions.push_back("Texts support drop shadows, flat colors & vertical/horizontal gradients. SDF texts also support outlines, individual thickness as well as softness factors. LinaVG also provides alignment, wrapping & spacing options.");
@@ -74,7 +71,7 @@ namespace LinaVG
             m_screenDescriptions.push_back("And since we have all that functionality, why not draw a simple retro grid.");
 
             // This is for Demo Screen 8, which is basically some basic retro art.
-            std::srand(std::time(0));
+            std::srand(static_cast<unsigned int>(std::time(0)));
 
             const int  starCount  = 5 + (std::rand() % 50);
             const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.m_displayWidth), static_cast<float>(LinaVG::Config.m_displayHeight));
@@ -83,7 +80,7 @@ namespace LinaVG
             for (int i = 0; i < starCount; i++)
             {
                 StarData star;
-                star.m_pos        = Vec2(0 + (std::rand() % static_cast<int>(skyEnd.x)), 0 + (std::rand() % static_cast<int>(skyEnd.y)));
+                star.m_pos        = Vec2(0.0f + static_cast<float>(std::rand() % static_cast<int>(skyEnd.x)), 0.0f + static_cast<float>(std::rand() % static_cast<int>(skyEnd.y)));
                 star.m_radialSize = static_cast<float>((15 + (std::rand() % 35))) / 10.0f;
                 star.m_haloRadius = static_cast<float>((5 + (std::rand() % 12)));
 
@@ -155,10 +152,10 @@ namespace LinaVG
             SDFTextOptions sdfStyle;
             sdfStyle.m_font           = m_titleFont;
             const Vec2 size           = LinaVG::CalculateTextSize(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1], sdfStyle);
-            const Vec2 titlePos       = Vec2(rectMin.x + 20, rectMin.y + rectHeight / 2.0f + size.y / 2.0f);
+            const Vec2 titlePos       = Vec2(rectMin.x + 20, rectMin.y + rectHeight / 2.0f - size.y / 2.0f);
             sdfStyle.m_newLineSpacing = 10.0f;
             sdfStyle.m_color          = Utility::HexToVec4(0xFCAA67);
-            sdfStyle.m_sdfThickness   = 0.62f;
+            sdfStyle.m_sdfThickness   = 0.5f;
             sdfStyle.m_sdfSoftness    = 0.5f;
             LinaVG::DrawTextSDF(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1], titlePos, sdfStyle, 0, 4);
 
@@ -166,17 +163,17 @@ namespace LinaVG
             TextOptions descText;
             descText.m_font      = m_descFont;
             descText.m_wrapWidth = rectWidth * 0.45f;
-            LinaVG::DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1], Vec2(rectWidth * 0.25f, rectMin.y + 30), descText, 0, 4);
+            LinaVG::DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1], Vec2(rectWidth * 0.25f, rectMin.y + 20), descText, 0, 4);
 
             // Draw controls info
             TextOptions controlsText;
             controlsText.m_font      = m_descFont;
             controlsText.m_textScale = 0.8f;
-            LinaVG::DrawTextNormal("Press num keys [1-8] to switch between demo screens.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 20), controlsText, 0, 4);
-            LinaVG::DrawTextNormal("Press P to toggle performance stats.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 40), controlsText, 0, 4);
-            LinaVG::DrawTextNormal("Press F to toggle wireframe rendering.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 60), controlsText, 0, 4);
-            LinaVG::DrawTextNormal("Press R to start/stop rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 80), controlsText, 0, 4);
-            LinaVG::DrawTextNormal("Press E to reset rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 100), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Press num keys [1-8] to switch between demo screens.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 10), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Press P to toggle performance stats.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 30), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Press F to toggle wireframe rendering.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 50), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Press R to start/stop rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 70), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Press E to reset rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 90), controlsText, 0, 4);
         }
 
         void DemoScreens::ShowDemoScreen1_Shapes()
@@ -860,10 +857,11 @@ namespace LinaVG
                 LinaVG::DrawRect(Vec2(pos.x + 1, pos.y + 1), Vec2(pos.x + fillX, pos.y + 24), fill, 0.0f, 2);
 
                 TextOptions textOpts;
-                textOpts.m_font = m_defaultFont;
+                textOpts.m_font        = m_defaultFont;
                 std::string loadingStr = "Loading " + std::to_string(fillX / 600.0f);
-                LinaVG::DrawTextNormal(loadingStr, Vec2(pos.x, pos.y + 26), textOpts, 0.0f, 1);
+                const Vec2 txtSize = LinaVG::CalculateTextSize(loadingStr, textOpts);
 
+                LinaVG::DrawTextNormal(loadingStr, Vec2(pos.x + 300 - txtSize.x / 2.0f, pos.y + 12.5f - txtSize.y / 2.0f), textOpts, 0.0f, 2);
             };
 
             drawSinBezier(Vec2(screenSize.x * 0.05f, screenSize.y * 0.15f));
@@ -905,7 +903,7 @@ namespace LinaVG
             const Vec2   gridStart                  = Vec2(0.0f, skyEnd.y);
             groundPlaneStyle.m_isFilled             = true;
             groundPlaneStyle.m_color.m_gradientType = GradientType::Vertical;
-            groundPlaneStyle.m_color.m_start        = Vec4(0.122f, 0.112, 0.28f, 1.0f);
+            groundPlaneStyle.m_color.m_start        = Vec4(0.122f, 0.112f, 0.28f, 1.0f);
             groundPlaneStyle.m_color.m_end          = Vec4(0.05f, 0.05f, 0.12f, 1.0f);
             LinaVG::DrawRect(gridStart, Vec2(screenSize.x, screenSize.y), groundPlaneStyle, 0.0f, 1);
 

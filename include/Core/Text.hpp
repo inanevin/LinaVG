@@ -49,11 +49,14 @@ namespace LinaVG
 
     struct TextCharacter
     {
-        Vec4 m_uv12    = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
-        Vec4 m_uv34    = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
-        Vec2 m_size    = Vec2(0.0f, 0.0f);
-        Vec2 m_bearing = Vec2(0.0f, 0.0f);
-        Vec2 m_advance = Vec2(0.0f, 0.0f);
+        Vec4  m_uv12    = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        Vec4  m_uv34    = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        Vec2  m_size    = Vec2(0.0f, 0.0f);
+        Vec2  m_bearing = Vec2(0.0f, 0.0f);
+        Vec2  m_advance = Vec2(0.0f, 0.0f);
+        float m_ascent  = 0.0f;
+        float m_descent = 0.0f;
+        char c;
 
         /// Cleaned after load.
         unsigned char* m_buffer = nullptr;
@@ -65,8 +68,10 @@ namespace LinaVG
         BackendHandle                            m_texture       = 0;
         int                                      m_size          = 0;
         float                                    m_newLineHeight = 0.0f;
-        bool                                     m_isSDF         = false;
-        float                                    m_spaceAdvance  = 0.0f;
+        float                                    ascent;
+        float                                    descent;
+        bool                                     m_isSDF        = false;
+        float                                    m_spaceAdvance = 0.0f;
         LINAVG_MAP<GlyphEncoding, TextCharacter> m_characterGlyphs;
     };
 
