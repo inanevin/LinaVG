@@ -1,7 +1,4 @@
-
-<p align="center">
-  <img width="600" height="236" src="https://user-images.githubusercontent.com/3519379/173689222-520d57ad-c738-48d0-b4f5-f3f85b881d94.png">
-</p>
+![image](https://user-images.githubusercontent.com/3519379/173689928-672b1cc7-5fb7-497b-87a2-a663e2e1eb6c.png)
 
 ## Lina VG
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) 
