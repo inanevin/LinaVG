@@ -1,7 +1,5 @@
 
-<p align="center">
-  <img width="500" height="196" src="https://user-images.githubusercontent.com/3519379/173688819-52f43eb6-e430-4cb8-af56-df8fac74c996.png">
-</p>
+![image](https://user-images.githubusercontent.com/3519379/173689102-64d6d5ce-72cd-43c1-9691-ffe01c1f788d.png)
 
 
 ## Lina VG
