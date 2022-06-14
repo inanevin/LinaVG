@@ -29,7 +29,7 @@ LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/Lina
 * Rectangle, triangle, ngon, circle, half-circle, arcs, user-defined convex shapes
 * All shapes can be filled & non-filled
 * Flat colors, vertical/horizontal/radial gradients
-* Gradient thickness
+* Customizable thickness
 * Textures, custom UV offsets, custom UV tiling
 * Shape rounding, only rounding particular corners if desired
 * Custom rotation
@@ -37,7 +37,7 @@ LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/Lina
 ## Outlines
 
 * Inner outlines, outer outlines & both
-* Varying thickness
+* Customizable outline thickness
 * Flat colors, vertical/horizontal/radial gradients
 * Textures, custom UV offsets, custom UV tiling
 
@@ -84,6 +84,22 @@ LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/Lina
 * SDF softness
 * SDF outlines
 # Installation
+
+## Utility
+
+* Custom draw orders, z-sorting
+* Rect clipping
+* 
+Internal workings are exposed to configs, such as:
+
+* Garbage collection intervals
+* Buffer reserves
+* AA params
+* Line joint limits
+* Texture flipping
+* Log callbacks
+* Debug functionality
+
 
 [Releases](https://github.com/inanevin/LinaVG/releases) contain pre-built binaries for linking against LinaVG. Your application first needs to link against Glad and FreeType libraries distributed alongside with LinaVG release. Simply link against those two, then against LinaVG and you are good to go. If you plan to use LinaVG within your source-code and compile it along with your application, again you still need to link against those two, then include the header & source files of LinaVG in your application.
 
