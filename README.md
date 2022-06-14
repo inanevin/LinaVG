@@ -18,7 +18,7 @@ LinaVG currently only supports OpenGL backend, however the actual rendering API 
 
 LinaVG's purpose is to provide you with an easy way to do low-level anti-aliased shape, line and text rendering. It does not provide any window management or input functionality, and it's not a GUI library. It assumes your application already has a graphics rendering backend and an application loop setup. 
 
-With that in mind, you can use LinaVG to build both retained and immediate mode GUI applications/libraries. C
+With that in mind, you can use LinaVG to build both retained and immediate mode GUI applications/libraries.
 
 LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/LinaEngine), however this library is completely decoupled from it. You can use LinaVG in your own projects with minimal dependencies. 
 
