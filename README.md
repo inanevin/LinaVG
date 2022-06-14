@@ -24,14 +24,65 @@ LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/Lina
 
 # Features
 
-* Shapes: rectangle, triangle, NGon, circle, semi-circle, arcs, user-defined-convex paths. All with filled and non-filled options.
-* Single lines, multi-lines with user-defined paths, bezier curves.
-* All shapes and lines have rich styling features, including flat colors, horizontal & vertical gradients, radial gradients, varying thickness, rounding options, textures, uv customization, outlines which also have the same styling features, e.g. gradient or textured outlines.
-* All shapes, lines and their respective styling outlines have anti-aliased borders calculated on CPU.
-* Traditional texts, font loading via FreeType, flat & gradient colors on texts, drop shadows, character spacing, line spacing, text wrapping and alignment.
-* SDF texts, same styling options as traditional texts, and customizable SDF thickness, softness as well as outlines.
+## Shapes
 
+* Rectangle, triangle, ngon, circle, half-circle, arcs, user-defined convex shapes
+* All shapes can be filled & non-filled
+* Flat colors, vertical/horizontal/radial gradients
+* Gradient thickness
+* Textures, custom UV offsets, custom UV tiling
+* Shape rounding, only rounding particular corners if desired
+* Custom rotation
 
+## Outlines
+
+* Inner outlines, outer outlines & both
+* Varying thickness
+* Flat colors, vertical/horizontal/radial gradients
+* Textures, custom UV offsets, custom UV tiling
+
+## AA
+
+* Vector-based anti-aliasing borders
+* Framebuffer scaled AA thickness
+* User-defined AA multipliers
+
+## Lines
+
+* Single lines
+* Multi lines
+* Bezier curves
+* Line caps: Left, right & both
+* Customizable line cap rounding
+* Line Joints: Vertex Average, Miter, Bevel, Bevel Round
+* All outline options apply to lines as well.
+* Custom rotation only on single lines
+
+## Fonts
+
+* FreeType font loading
+* SDF fonts
+* Font atlases, atlas merging
+* Custom glyph-ranges
+* Unicode support
+
+## Texts
+
+* Traditional anti-aliased bitmap glyph rendering
+* Flat colors, vertical/horizontal gradients
+* Drop shadows, customizable drop shadow color, customizable offsets.
+* Character spacing
+* Line spacing
+* Word-wrapping
+* Text alignment: Left, right & center
+* Custom rotation
+
+## SDF
+
+* All text options apply to SDF texts.
+* SDF thickness
+* SDF softness
+* SDF outlines
 # Installation
 
 [Releases](https://github.com/inanevin/LinaVG/releases) contain pre-built binaries for linking against LinaVG. Your application first needs to link against Glad and FreeType libraries distributed alongside with LinaVG release. Simply link against those two, then against LinaVG and you are good to go. If you plan to use LinaVG within your source-code and compile it along with your application, again you still need to link against those two, then include the header & source files of LinaVG in your application.
