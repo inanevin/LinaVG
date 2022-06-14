@@ -54,7 +54,7 @@ cd build_x64
 # Build the root project
 cmake ../ -G "Visual Studio 17 2022" -A "x64"
 
-# After the project files are built, you can build the project via
+# After the project files are generated, you can build the project via
 cmake --build . --target ALL_BUILD
 
 ```
