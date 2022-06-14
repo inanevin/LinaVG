@@ -84,7 +84,7 @@ namespace LinaVG::Backend
                                                          "void main()\n"
                                                          "{\n"
                                                          "float a = texture(diffuse, fUV).r; \n"
-                                                         "fragColor = vec4(fCol.rgb, a); \n"
+                                                         "fragColor = vec4(fCol.rgb, a * fCol.a); \n"
                                                          "}\0";
 
         Internal::g_backendData.m_sdfTextFragShader = "#version 330 core\n"

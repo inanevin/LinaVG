@@ -140,6 +140,7 @@ namespace LinaVG
             const Vec2 rectMin = Vec2(0.0f, screenSize.y - screenSize.y * 0.12f);
             LinaVG::DrawRect(rectMin, screenSize, style, 0.0f, 3);
 
+
             //  // Draw a vertical dividers.
             const float  rectHeight = screenSize.y - rectMin.y;
             const float  rectWidth  = screenSize.x - rectMin.x;
@@ -165,6 +166,17 @@ namespace LinaVG
             descText.m_font      = m_descFont;
             descText.m_wrapWidth = rectWidth * 0.45f;
             LinaVG::DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1], Vec2(rectWidth * 0.25f, rectMin.y + 20), descText, 0, 4);
+
+
+            // Draw version text.
+            TextOptions versionText;
+            versionText.m_font = m_descFont;
+            versionText.m_color = Vec4(1.0f, 1.0f, 1.0f, 0.55f);
+            versionText.m_textScale = 0.8f;
+            versionText.m_alignment = TextAlignment::Right;
+            std::string versionStr = "Inan Evin, LinaVG v";
+            versionStr += std::to_string(LINAVG_VERSION_MAJOR) + "." + std::to_string(LINAVG_VERSION_MINOR) + "." + std::to_string(LINAVG_VERSION_PATCH);
+            LinaVG::DrawTextNormal(versionStr, Vec2(screenSize.x - 10, rectMin.y - 30), versionText, 0.0f, 1);
 
             // Draw controls info
             TextOptions controlsText;
