@@ -35,11 +35,11 @@ namespace LinaVG
     OutlineOptions OutlineOptions::FromStyle(const StyleOptions& opts, OutlineDrawDirection drawDir)
     {
         OutlineOptions o;
-        o.m_color           = opts.m_color;
-        o.m_textureHandle   = opts.m_textureHandle;
-        o.m_textureUVOffset = opts.m_textureUVOffset;
-        o.m_textureUVTiling = opts.m_textureUVTiling;
-        o.m_drawDirection   = drawDir;
+        o.color           = opts.color;
+        o.textureHandle   = opts.textureHandle;
+        o.textureUVOffset = opts.textureUVOffset;
+        o.textureUVTiling = opts.textureUVTiling;
+        o.drawDirection   = drawDir;
         return o;
     }
 

@@ -156,10 +156,10 @@ namespace LinaVG::Backend
         }
         catch (const std::runtime_error& err)
         {
-            if (Config.m_errorCallback)
+            if (Config.errorCallback)
             {
-                Config.m_errorCallback("LinaVG: Backend shader creation failed!");
-                Config.m_errorCallback(err.what());
+                Config.errorCallback("LinaVG: Backend shader creation failed!");
+                Config.errorCallback(err.what());
             }
             return false;
         }
@@ -213,9 +213,9 @@ namespace LinaVG::Backend
 
     void StartFrame()
     {
-        Config.m_debugCurrentDrawCalls     = 0;
-        Config.m_debugCurrentTriangleCount = 0;
-        Config.m_debugCurrentVertexCount   = 0;
+        Config.debugCurrentDrawCalls     = 0;
+        Config.debugCurrentTriangleCount = 0;
+        Config.debugCurrentVertexCount   = 0;
 
         // Save GL state
         SaveAPIState();
@@ -229,16 +229,16 @@ namespace LinaVG::Backend
         glDisable(GL_STENCIL_TEST);
         glEnable(GL_SCISSOR_TEST);
 
-        if (Config.m_debugWireframeEnabled)
+        if (Config.debugWireframeEnabled)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        glViewport(0, 0, (GLsizei)Config.m_displayWidth, (GLsizei)Config.m_displayHeight);
+        glViewport(0, 0, (GLsizei)Config.displayWidth, (GLsizei)Config.displayHeight);
 
         // Ortho projection matrix.
-        int fb_width  = (int)(Config.m_displayWidth * Config.m_framebufferScale.x);
-        int fb_height = (int)(Config.m_displayHeight * Config.m_framebufferScale.y);
+        int fb_width  = (int)(Config.displayWidth * Config.framebufferScale.x);
+        int fb_height = (int)(Config.displayHeight * Config.framebufferScale.y);
         if (fb_width <= 0 || fb_height <= 0)
         {
             Internal::g_backendData.m_skipDraw = true;
@@ -247,21 +247,21 @@ namespace LinaVG::Backend
 
         Internal::g_backendData.m_skipDraw = false;
 
-        float       L    = static_cast<float>(Config.m_displayPosX);
-        float       R    = static_cast<float>(Config.m_displayPosX + Config.m_displayWidth);
-        float       T    = static_cast<float>(Config.m_displayPosY);
-        float       B    = static_cast<float>(Config.m_displayPosY + Config.m_displayHeight);
-        const float zoom = Config.m_debugOrthoProjectionZoom;
+        float       L    = static_cast<float>(Config.displayPosX);
+        float       R    = static_cast<float>(Config.displayPosX + Config.displayWidth);
+        float       T    = static_cast<float>(Config.displayPosY);
+        float       B    = static_cast<float>(Config.displayPosY + Config.displayHeight);
+        const float zoom = Config.debugOrthoProjectionZoom;
 
         L *= zoom;
         R *= zoom;
         T *= zoom;
         B *= zoom;
 
-        L += Config.m_debugOrthoOffset.x;
-        R += Config.m_debugOrthoOffset.x;
-        T += Config.m_debugOrthoOffset.y;
-        B += Config.m_debugOrthoOffset.y;
+        L += Config.debugOrthoOffset.x;
+        R += Config.debugOrthoOffset.x;
+        T += Config.debugOrthoOffset.y;
+        B += Config.debugOrthoOffset.y;
 
         Internal::g_backendData.m_proj[0][0] = 2.0f / (R - L);
         Internal::g_backendData.m_proj[0][1] = 0.0f;
@@ -291,16 +291,16 @@ namespace LinaVG::Backend
         if (Internal::g_backendData.m_skipDraw)
             return;
 
-        SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
+        SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
 
         Internal::ShaderData& data = Internal::g_backendData.m_gradientShaderData;
         glUseProgram(data.m_handle);
 
         glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
-        glUniform4f(data.m_uniformMap["startColor"], (GLfloat)buf->m_color.m_start.x, (GLfloat)buf->m_color.m_start.y, (GLfloat)buf->m_color.m_start.z, (GLfloat)buf->m_color.m_start.w);
-        glUniform4f(data.m_uniformMap["endColor"], (GLfloat)buf->m_color.m_end.x, (GLfloat)buf->m_color.m_end.y, (GLfloat)buf->m_color.m_end.z, (GLfloat)buf->m_color.m_end.w);
-        glUniform1i(data.m_uniformMap["gradientType"], (GLint)((int)buf->m_color.m_gradientType));
-        glUniform1f(data.m_uniformMap["radialSize"], (GLfloat)buf->m_color.m_radialSize);
+        glUniform4f(data.m_uniformMap["startColor"], (GLfloat)buf->m_color.start.x, (GLfloat)buf->m_color.start.y, (GLfloat)buf->m_color.start.z, (GLfloat)buf->m_color.start.w);
+        glUniform4f(data.m_uniformMap["endColor"], (GLfloat)buf->m_color.end.x, (GLfloat)buf->m_color.end.y, (GLfloat)buf->m_color.end.z, (GLfloat)buf->m_color.end.w);
+        glUniform1i(data.m_uniformMap["gradientType"], (GLint)((int)buf->m_color.gradientType));
+        glUniform1f(data.m_uniformMap["radialSize"], (GLfloat)buf->m_color.radialSize);
         glUniform1i(data.m_uniformMap["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
 
         glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
@@ -311,9 +311,9 @@ namespace LinaVG::Backend
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-        Config.m_debugCurrentDrawCalls++;
-        Config.m_debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-        Config.m_debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
+        Config.debugCurrentDrawCalls++;
+        Config.debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
     void DrawTextured(TextureDrawBuffer* buf)
@@ -321,9 +321,9 @@ namespace LinaVG::Backend
         if (Internal::g_backendData.m_skipDraw)
             return;
 
-        SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
+        SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
 
-        const Vec2            uv   = Config.m_flipTextureUVs ? Vec2(buf->m_textureUVTiling.x, -buf->m_textureUVTiling.y) : buf->m_textureUVTiling;
+        const Vec2            uv   = Config.flipTextureUVs ? Vec2(buf->m_textureUVTiling.x, -buf->m_textureUVTiling.y) : buf->m_textureUVTiling;
         Internal::ShaderData& data = Internal::g_backendData.m_texturedShaderData;
         glUseProgram(data.m_handle);
         glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
@@ -343,9 +343,9 @@ namespace LinaVG::Backend
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-        Config.m_debugCurrentDrawCalls++;
-        Config.m_debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-        Config.m_debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
+        Config.debugCurrentDrawCalls++;
+        Config.debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
     void DrawDefault(DrawBuffer* buf)
@@ -353,7 +353,7 @@ namespace LinaVG::Backend
         if (Internal::g_backendData.m_skipDraw)
             return;
 
-        SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
+        SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
         Internal::ShaderData& data = Internal::g_backendData.m_defaultShaderData;
 
         glUseProgram(data.m_handle);
@@ -367,9 +367,9 @@ namespace LinaVG::Backend
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-        Config.m_debugCurrentDrawCalls++;
-        Config.m_debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-        Config.m_debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
+        Config.debugCurrentDrawCalls++;
+        Config.debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
     void DrawSimpleText(SimpleTextDrawBuffer* buf)
@@ -377,7 +377,7 @@ namespace LinaVG::Backend
         if (Internal::g_backendData.m_skipDraw)
             return;
 
-        SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
+        SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
         Internal::ShaderData& data = Internal::g_backendData.m_simpleTextShaderData;
         glUseProgram(data.m_handle);
 
@@ -395,9 +395,9 @@ namespace LinaVG::Backend
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-        Config.m_debugCurrentDrawCalls++;
-        Config.m_debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-        Config.m_debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
+        Config.debugCurrentDrawCalls++;
+        Config.debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
     void DrawSDFText(SDFTextDrawBuffer* buf)
@@ -405,7 +405,7 @@ namespace LinaVG::Backend
         if (Internal::g_backendData.m_skipDraw)
             return;
 
-        SetScissors(buf->m_clipPosX, buf->m_clipPosY, buf->m_clipSizeX, buf->m_clipSizeY);
+        SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
         Internal::ShaderData& data = Internal::g_backendData.m_sdfTextShaderData;
         glUseProgram(data.m_handle);
         glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
@@ -431,22 +431,22 @@ namespace LinaVG::Backend
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-        Config.m_debugCurrentDrawCalls++;
-        Config.m_debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-        Config.m_debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
+        Config.debugCurrentDrawCalls++;
+        Config.debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
+        Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
     void SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height)
     {
         if (width == 0 || height == 0)
         {
-            x      = static_cast<BackendHandle>(Config.m_displayPosX);
-            y      = static_cast<BackendHandle>(Config.m_displayPosY);
-            width  = static_cast<BackendHandle>(Config.m_displayWidth);
-            height = static_cast<BackendHandle>(Config.m_displayHeight);
+            x      = static_cast<BackendHandle>(Config.displayPosX);
+            y      = static_cast<BackendHandle>(Config.displayPosY);
+            width  = static_cast<BackendHandle>(Config.displayWidth);
+            height = static_cast<BackendHandle>(Config.displayHeight);
         }
 
-        glScissor(x, static_cast<GLint>(Config.m_displayHeight - (y + height)), static_cast<GLint>(width), static_cast<GLint>(height));
+        glScissor(x, static_cast<GLint>(Config.displayHeight - (y + height)), static_cast<GLint>(width), static_cast<GLint>(height));
     }
 
     void SaveAPIState()
@@ -559,10 +559,10 @@ namespace LinaVG::Backend
         {
             glGetShaderInfoLog(vertex, 512, NULL, infoLog);
 
-            if (Config.m_errorCallback)
+            if (Config.errorCallback)
             {
-                Config.m_errorCallback("LinaVG: Backend Error -> Shader vertex compilation failed!");
-                Config.m_errorCallback(infoLog);
+                Config.errorCallback("LinaVG: Backend Error -> Shader vertex compilation failed!");
+                Config.errorCallback(infoLog);
             }
          
             throw std::runtime_error("");
@@ -578,10 +578,10 @@ namespace LinaVG::Backend
         {
             glGetShaderInfoLog(fragment, 512, NULL, infoLog);
 
-            if (Config.m_errorCallback)
+            if (Config.errorCallback)
             {
-                Config.m_errorCallback("LinaVG: Backend Error -> Shader fragment compilation failed!");
-                Config.m_errorCallback(infoLog);
+                Config.errorCallback("LinaVG: Backend Error -> Shader fragment compilation failed!");
+                Config.errorCallback(infoLog);
             }
          
             throw std::runtime_error("");
@@ -596,8 +596,8 @@ namespace LinaVG::Backend
         if (!success)
         {
             glGetProgramInfoLog(handle, 512, NULL, infoLog);
-            Config.m_errorCallback("LinaVG: Backend Error -> Could not link shader program!");
-            Config.m_errorCallback(infoLog);
+            Config.errorCallback("LinaVG: Backend Error -> Could not link shader program!");
+            Config.errorCallback(infoLog);
             throw std::runtime_error("");
         }
 

@@ -60,22 +60,22 @@ namespace LinaVG
             exampleBackend.InitWindow(static_cast<int>(sizeX), static_cast<int>(sizeY));
 
             // Setup Lina VG config.
-            LinaVG::Config.m_displayPosX   = 0;
-            LinaVG::Config.m_displayPosY   = 0;
-            LinaVG::Config.m_displayWidth  = sizeX;
-            LinaVG::Config.m_displayHeight = sizeY;
-            LinaVG::Config.m_clipPosX = LinaVG::Config.m_clipPosY = 0;
-            LinaVG::Config.m_clipSizeX                            = sizeX;
-            LinaVG::Config.m_clipSizeY                            = sizeY;
-            LinaVG::Config.m_flipTextureUVs                       = false;
-            LinaVG::Config.m_framebufferScale.x = LinaVG::Config.m_framebufferScale.y = exampleBackend.GetFramebufferScale();
-            LinaVG::Config.m_aaMultiplier                                             = 1.5f;
+            LinaVG::Config.displayPosX   = 0;
+            LinaVG::Config.displayPosY   = 0;
+            LinaVG::Config.displayWidth  = sizeX;
+            LinaVG::Config.displayHeight = sizeY;
+            LinaVG::Config.clipPosX = LinaVG::Config.clipPosY = 0;
+            LinaVG::Config.clipSizeX                            = sizeX;
+            LinaVG::Config.clipSizeY                            = sizeY;
+            LinaVG::Config.flipTextureUVs                       = false;
+            LinaVG::Config.framebufferScale.x = LinaVG::Config.framebufferScale.y = exampleBackend.GetFramebufferScale();
+            LinaVG::Config.aaMultiplier                                             = 1.5f;
 
-            LinaVG::Config.m_errorCallback = [](const std::string& err) {
+            LinaVG::Config.errorCallback = [](const std::string& err) {
                 std::cerr << err.c_str() << std::endl;
             };
 
-            LinaVG::Config.m_logCallback = [](const std::string& log) {
+            LinaVG::Config.logCallback = [](const std::string& log) {
                 std::cout << log.c_str() << std::endl;
             };
 
@@ -115,17 +115,17 @@ namespace LinaVG
 
                 // Setup style.
                 StyleOptions style;
-                style.m_outlineOptions.m_thickness     = 2.0f;
-                style.m_outlineOptions.m_drawDirection = OutlineDrawDirection::Inwards;
+                style.outlineOptions.thickness     = 2.0f;
+                style.outlineOptions.drawDirection = OutlineDrawDirection::Inwards;
 
                 // Same options as style.m_color
-                style.m_outlineOptions.m_color.m_start = Vec4(1, 0, 0, 1);
-                style.m_outlineOptions.m_color.m_end   = Vec4(0, 0, 1, 1);
+                style.outlineOptions.color.start = Vec4(1, 0, 0, 1);
+                style.outlineOptions.color.end   = Vec4(0, 0, 1, 1);
 
                 // Same options as style.m_textureXXX
-                style.m_outlineOptions.m_textureHandle   = ExampleApp::Get()->GetCheckeredTexture();
-                style.m_outlineOptions.m_textureUVOffset = Vec2(0.0f, 0.0f);
-                style.m_outlineOptions.m_textureUVTiling = Vec2(1.0f, 1.0f);
+                style.outlineOptions.textureHandle   = ExampleApp::Get()->GetCheckeredTexture();
+                style.outlineOptions.textureUVOffset = Vec2(0.0f, 0.0f);
+                style.outlineOptions.textureUVTiling = Vec2(1.0f, 1.0f);
 
                 m_demoScreens.ShowBackground();
 
@@ -169,12 +169,12 @@ namespace LinaVG
 
         void ExampleApp::OnHorizontalKeyCallback(float input)
         {
-            LinaVG::Config.m_debugOrthoOffset.x += input * m_deltaTime * 1000;
+            LinaVG::Config.debugOrthoOffset.x += input * m_deltaTime * 1000;
         }
 
         void ExampleApp::OnVerticalKeyCallback(float input)
         {
-            LinaVG::Config.m_debugOrthoOffset.y -= input * m_deltaTime * 1000;
+            LinaVG::Config.debugOrthoOffset.y -= input * m_deltaTime * 1000;
         }
 
         void ExampleApp::OnNumKeyCallback(int key)
@@ -198,7 +198,7 @@ namespace LinaVG
 
         void ExampleApp::OnFCallback()
         {
-            LinaVG::Config.m_debugWireframeEnabled = !LinaVG::Config.m_debugWireframeEnabled;
+            LinaVG::Config.debugWireframeEnabled = !LinaVG::Config.debugWireframeEnabled;
         }
 
         void ExampleApp::OnCCallback()
@@ -216,15 +216,15 @@ namespace LinaVG
 
         void ExampleApp::OnMouseScrollCallback(float val)
         {
-            LinaVG::Config.m_debugOrthoProjectionZoom -= val * m_deltaTime * 10;
+            LinaVG::Config.debugOrthoProjectionZoom -= val * m_deltaTime * 10;
         }
 
         void ExampleApp::OnWindowResizeCallback(int width, int height)
         {
-            LinaVG::Config.m_displayWidth  = static_cast<BackendHandle>(width);
-            LinaVG::Config.m_displayHeight = static_cast<BackendHandle>(height);
-            LinaVG::Config.m_clipSizeX     = static_cast<BackendHandle>(width);
-            LinaVG::Config.m_clipSizeY     = static_cast<BackendHandle>(height);
+            LinaVG::Config.displayWidth  = static_cast<BackendHandle>(width);
+            LinaVG::Config.displayHeight = static_cast<BackendHandle>(height);
+            LinaVG::Config.clipSizeX     = static_cast<BackendHandle>(width);
+            LinaVG::Config.clipSizeY     = static_cast<BackendHandle>(height);
         }
         void ExampleApp::OnWindowCloseCallback()
         {

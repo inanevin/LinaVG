@@ -180,7 +180,7 @@ namespace LinaVG
             TextOptions controlsText;
             controlsText.font      = m_descFont;
             controlsText.textScale = 0.8f;
-            LinaVG::DrawTextNormal("Num keys[1-8]: switch screen", Vec2(rectWidth * 0.725f + 20, rectMin.y + 10), controlsText, 0, 4);
+            LinaVG::DrawTextNormal("Num keys[1-9]: switch screen", Vec2(rectWidth * 0.725f + 20, rectMin.y + 10), controlsText, 0, 4);
             LinaVG::DrawTextNormal("P: toggle performance stats.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 30), controlsText, 0, 4);
             LinaVG::DrawTextNormal("F: toggle wireframe rendering.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 50), controlsText, 0, 4);
             LinaVG::DrawTextNormal("R: start/stop rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 70), controlsText, 0, 4);

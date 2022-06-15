@@ -81,29 +81,29 @@ namespace LinaVG
 
     bool Initialize()
     {
-        Internal::g_rendererData.m_defaultBuffers.reserve(Config.m_defaultBufferReserve);
-        Internal::g_rendererData.m_gradientBuffers.reserve(Config.m_gradientBufferReserve);
-        Internal::g_rendererData.m_textureBuffers.reserve(Config.m_textureBufferReserve);
-        Internal::g_rendererData.m_simpleTextBuffers.reserve(Config.m_textBuffersReserve);
-        Internal::g_rendererData.m_sdfTextBuffers.reserve(Config.m_textBuffersReserve);
+        Internal::g_rendererData.m_defaultBuffers.reserve(Config.defaultBufferReserve);
+        Internal::g_rendererData.m_gradientBuffers.reserve(Config.gradientBufferReserve);
+        Internal::g_rendererData.m_textureBuffers.reserve(Config.textureBufferReserve);
+        Internal::g_rendererData.m_simpleTextBuffers.reserve(Config.textBuffersReserve);
+        Internal::g_rendererData.m_sdfTextBuffers.reserve(Config.textBuffersReserve);
 
         if (!Backend::Initialize())
         {
-            if (Config.m_errorCallback)
-                Config.m_errorCallback("LinaVG: Could not initialize! Error initializing backend.");
+            if (Config.errorCallback)
+                Config.errorCallback("LinaVG: Could not initialize! Error initializing backend.");
             return false;
         }
 
         if (!Text::Initialize())
         {
-            if (Config.m_errorCallback)
-                Config.m_errorCallback("LinaVG: Could not initialize! Error initializing text API.");
+            if (Config.errorCallback)
+                Config.errorCallback("LinaVG: Could not initialize! Error initializing text API.");
             return false;
         }
 
         // TODO - error check
-        if (Config.m_logCallback)
-            Config.m_logCallback("LinaVG: Renderer and Backend initialized successfuly.");
+        if (Config.logCallback)
+            Config.logCallback("LinaVG: Renderer and Backend initialized successfuly.");
         return true;
     }
 
@@ -114,16 +114,16 @@ namespace LinaVG
         Internal::ClearAllBuffers();
 
         // TODO - error check
-        if (Config.m_logCallback)
-            Config.m_logCallback("LinaVG: Renderer and Backend terminated successfuly.");
+        if (Config.logCallback)
+            Config.logCallback("LinaVG: Renderer and Backend terminated successfuly.");
     }
 
     void StartFrame()
     {
         if (Internal::g_rendererData.m_frameStarted)
         {
-            if (Config.m_errorCallback)
-                Config.m_errorCallback("LinaVG: StartFrame was called, but EndFrame was skipped! Make sure you always call EndFrame() after calling StartFrame() for the second time!");
+            if (Config.errorCallback)
+                Config.errorCallback("LinaVG: StartFrame was called, but EndFrame was skipped! Make sure you always call EndFrame() after calling StartFrame() for the second time!");
             _ASSERT(false);
         }
 
@@ -196,7 +196,7 @@ namespace LinaVG
 
         Internal::g_rendererData.m_gcFrameCounter++;
 
-        if (Internal::g_rendererData.m_gcFrameCounter > Config.m_gcCollectInterval)
+        if (Internal::g_rendererData.m_gcFrameCounter > Config.gcCollectInterval)
         {
             Internal::g_rendererData.m_gcFrameCounter = 0;
             Internal::ClearAllBuffers();
@@ -228,11 +228,11 @@ namespace LinaVG
         for (int i = 0; i < m_gradientBuffers.m_size; i++)
         {
             auto& buf = m_gradientBuffers[i];
-            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.m_start, grad.m_start) && Math::IsEqual(buf.m_color.m_end, grad.m_end) && buf.m_color.m_gradientType == grad.m_gradientType && !buf.IsClipDifferent(Config.m_clipPosX, Config.m_clipPosY, Config.m_clipSizeX, Config.m_clipSizeY))
+            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.start, grad.start) && Math::IsEqual(buf.m_color.end, grad.end) && buf.m_color.gradientType == grad.gradientType && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
             {
-                if (grad.m_gradientType == GradientType::Radial || grad.m_gradientType == GradientType::RadialCorner)
+                if (grad.gradientType == GradientType::Radial || grad.gradientType == GradientType::RadialCorner)
                 {
-                    if (buf.m_color.m_radialSize == grad.m_radialSize && buf.m_isAABuffer == isAABuffer)
+                    if (buf.m_color.radialSize == grad.radialSize && buf.m_isAABuffer == isAABuffer)
                         return m_gradientBuffers[i];
                 }
                 else
@@ -254,7 +254,7 @@ namespace LinaVG
         for (int i = 0; i < m_defaultBuffers.m_size; i++)
         {
             auto& buf = m_defaultBuffers[i];
-            if (m_defaultBuffers[i].m_drawOrder == drawOrder && buf.m_shapeType == shapeType && !buf.IsClipDifferent(Config.m_clipPosX, Config.m_clipPosY, Config.m_clipSizeX, Config.m_clipSizeY))
+            if (m_defaultBuffers[i].m_drawOrder == drawOrder && buf.m_shapeType == shapeType && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
                 return m_defaultBuffers[i];
         }
 
@@ -270,7 +270,7 @@ namespace LinaVG
         for (int i = 0; i < m_textureBuffers.m_size; i++)
         {
             auto& buf = m_textureBuffers[i];
-            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(Config.m_clipPosX, Config.m_clipPosY, Config.m_clipSizeX, Config.m_clipSizeY))
+            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
                 return m_textureBuffers[i];
         }
 
@@ -285,7 +285,7 @@ namespace LinaVG
         for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
         {
             auto& buf = m_simpleTextBuffers[i];
-            if (buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && !buf.IsClipDifferent(Config.m_clipPosX, Config.m_clipPosY, Config.m_clipSizeX, Config.m_clipSizeY))
+            if (buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
                 return m_simpleTextBuffers[i];
         }
 
@@ -300,8 +300,8 @@ namespace LinaVG
         for (int i = 0; i < m_sdfTextBuffers.m_size; i++)
         {
             auto& buf = m_sdfTextBuffers[i];
-            if (buf.m_isDropShadow == isDropShadow && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && buf.m_thickness == opts.m_sdfThickness && buf.m_softness == opts.m_sdfSoftness &&
-                buf.m_outlineThickness == opts.m_sdfOutlineThickness && buf.m_flipAlpha == opts.m_flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.m_sdfOutlineColor) && !buf.IsClipDifferent(Config.m_clipPosX, Config.m_clipPosY, Config.m_clipSizeX, Config.m_clipSizeY))
+            if (buf.m_isDropShadow == isDropShadow && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && buf.m_thickness == opts.sdfThickness && buf.m_softness == opts.sdfSoftness &&
+                buf.m_outlineThickness == opts.sdfOutlineThickness && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
                 return m_sdfTextBuffers[i];
         }
 

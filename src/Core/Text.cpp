@@ -40,8 +40,8 @@ namespace LinaVG
         {
             if (FT_Init_FreeType(&Internal::g_textData.m_ftlib))
             {
-                if (Config.m_errorCallback)
-                    Config.m_errorCallback("LinaVG: Error initializing FreeType Library");
+                if (Config.errorCallback)
+                    Config.errorCallback("LinaVG: Error initializing FreeType Library");
                 return false;
             }
 
@@ -64,8 +64,8 @@ namespace LinaVG
         FT_Face face;
         if (FT_New_Face(Internal::g_textData.m_ftlib, file, 0, &face))
         {
-            if (Config.m_errorCallback)
-                Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
+            if (Config.errorCallback)
+                Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
             return -1;
         }
 
@@ -77,8 +77,8 @@ namespace LinaVG
         FT_Face face;
         if (FT_New_Memory_Face(Internal::g_textData.m_ftlib, static_cast<FT_Byte*>(data), static_cast<FT_Long>(dataSize), 0, &face))
         {
-            if (Config.m_errorCallback)
-                Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
+            if (Config.errorCallback)
+                Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
             return -1;
         }
 
@@ -128,8 +128,8 @@ namespace LinaVG
 
                 if (error)
                 {
-                    if (Config.m_errorCallback)
-                        Config.m_errorCallback("LinaVG: Freetype Error -> Failed to load character!");
+                    if (Config.errorCallback)
+                        Config.errorCallback("LinaVG: Freetype Error -> Failed to load character!");
                     return false;
                 }
 
@@ -140,15 +140,15 @@ namespace LinaVG
 
                 if (error)
                 {
-                    if (Config.m_errorCallback)
-                        Config.m_errorCallback("LinaVG: Freetype Error -> Failed to render character!");
+                    if (Config.errorCallback)
+                        Config.errorCallback("LinaVG: Freetype Error -> Failed to render character!");
                     return false;
                 }
 
                 const unsigned int glyphWidth = slot->bitmap.width;
                 const unsigned int glyphRows  = slot->bitmap.rows;
 
-                if (roww + glyphWidth + bufferCharSpacing >= Config.m_maxFontAtlasSize)
+                if (roww + glyphWidth + bufferCharSpacing >= Config.maxFontAtlasSize)
                 {
                     w = Math::Max(w, roww);
                     h += rowh + bufferCharSpacing;
@@ -182,8 +182,8 @@ namespace LinaVG
             if (customRangesSize % 2 == 1)
             {
                 useCustomRanges = false;
-                if (Config.m_errorCallback)
-                    Config.m_errorCallback("LinaVG: Custom ranges given to font loading must have a size multiple of 2!");
+                if (Config.errorCallback)
+                    Config.errorCallback("LinaVG: Custom ranges given to font loading must have a size multiple of 2!");
             }
 
             if (useCustomRanges)
@@ -210,7 +210,7 @@ namespace LinaVG
             for (int i = 0; i < g_textData.m_createdAtlases.m_size; i++)
             {
                 FontAtlas& atlas     = g_textData.m_createdAtlases[i];
-                const int  totalSize = Config.m_maxFontAtlasSize - atlas.m_currentOffsetX + Config.m_maxFontAtlasSize - atlas.m_currentOffsetY;
+                const int  totalSize = Config.maxFontAtlasSize - atlas.m_currentOffsetX + Config.maxFontAtlasSize - atlas.m_currentOffsetY;
                 if (w + h < static_cast<unsigned int>(totalSize))
                 {
                     availableAtlasIndex = i;
@@ -223,7 +223,7 @@ namespace LinaVG
             int offsetY = bufferCharSpacing;
 
             int usedAtlasIndex = -1;
-            w = h = Config.m_maxFontAtlasSize;
+            w = h = Config.maxFontAtlasSize;
 
             if (availableAtlasIndex != -1)
             {
@@ -249,7 +249,7 @@ namespace LinaVG
                 const unsigned int glyphWidth = static_cast<unsigned int>(ch.second.m_size.x);
                 const unsigned int glyphRows  = static_cast<unsigned int>(ch.second.m_size.y);
 
-                if (offsetX + glyphWidth + bufferCharSpacing >= Config.m_maxFontAtlasSize)
+                if (offsetX + glyphWidth + bufferCharSpacing >= Config.maxFontAtlasSize)
                 {
                     offsetY += rowh + bufferCharSpacing;
                     rowh    = 0;
@@ -300,7 +300,7 @@ namespace LinaVG
             FT_Done_Face(face);
             Backend::RestoreAPIState();
 
-            Config.m_logCallback("LinaVG: Successfuly loaded font!");
+            Config.logCallback("LinaVG: Successfuly loaded font!");
             Internal::g_fontCounter++;
             Internal::g_textData.m_defaultFont = Internal::g_fontCounter;
             Internal::g_textData.m_loadedFonts.push_back(font);
