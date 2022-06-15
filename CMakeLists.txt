@@ -118,12 +118,12 @@ if(MSVC_IDE)
 				source_group("${source_path_msvc}" FILES "${source}")
 	endforeach()
 
-if(BUILD_EXAMPLES)
+if(LINAVG_BUILD_EXAMPLES)
 	add_subdirectory(examples)
 endif()
 
 
-if(BUILD_EXAMPLES)
+if(LINAVG_BUILD_EXAMPLES)
 	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Examples)
 endif()
 
