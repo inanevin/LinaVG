@@ -121,8 +121,8 @@ git clone https://github.com/inanevin/LinaVG
 mkdir build_x64
 cd build_x64
 
-# Build the root project
-cmake ../ -G "Visual Studio 17 2022" -A "x64"
+# Build LinaVG w/ GL backend & examples
+cmake ../ -DLINAVG_BUILD_EXAMPLES=ON -DLINAVG_BACKEND_GL=ON -G "Visual Studio 17 2022" -A "x64"
 
 # After the project files are generated, you can build the project via
 cmake --build . --target ALL_BUILD
