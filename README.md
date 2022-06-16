@@ -108,6 +108,8 @@ LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/Lina
 
 If you choose to compile custom versions of said dependencies, their respective versions are available on [Lina Dependencies](https://github.com/inanevin/LinaDependencies/tree/linavg) repository.
 
+Note: LinaVG requires C++ 17 features.
+
 # Demo Application
 
 You can download this whole repository and generate the project files using CMake to run the example application, demonstrating all capabilities of LinaVG.
