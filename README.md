@@ -142,10 +142,10 @@ Below is a bare-minimum implementation steps for drawing with LinaVG. As said in
 #include "LinaVG.hpp"
 
 // Configure display properties based on your application window
-LinaVG::Config.m_displayPosX   = 0;
-LinaVG::Config.m_displayPosY   = 0;
-LinaVG::Config.m_displayWidth  = myDisplayWidth;
-LinaVG::Config.m_displayHeight = myDisplayHeight;
+LinaVG::Config.displayPosX   = 0;
+LinaVG::Config.displayPosY   = 0;
+LinaVG::Config.displayWidth  = myDisplayWidth;
+LinaVG::Config.displayHeight = myDisplayHeight;
 
 // Initialize LinaVG
 LinaVG::Initialize();
@@ -159,9 +159,9 @@ while (m_applicationRunning)
 
     // Setup style, give a gradient color from red to blue.
     StyleOptions style;
-    style.m_isFilled      = true;
-    style.m_color.m_start = Vec4(1, 0, 0, 1);
-    style.m_color.m_end   = Vec4(0, 0, 1, 1);
+    style.isFilled      = true;
+    style.color.start = Vec4(1, 0, 0, 1);
+    style.color.end   = Vec4(0, 0, 1, 1);
 
     // Draw a 200x200 rectangle starting from 300, 300.
     const Vec2 min = Vec2(300, 300);
