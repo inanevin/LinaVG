@@ -65,8 +65,8 @@ namespace LinaVG
     void DrawPoint(const Vec2& p1, const Vec4& col)
     {
         StyleOptions style;
-        style.color        = col;
-        style.isFilled     = true;
+        style.color          = col;
+        style.isFilled       = true;
         const float distance = Config.framebufferScale.x / 2.0f;
         DrawRect(Vec2(p1.x - distance, p1.y - distance), Vec2(p1.x + distance, p1.y + distance), style);
     }
@@ -75,7 +75,7 @@ namespace LinaVG
     {
         SimpleLine   l = Internal::CalculateSimpleLine(p1, p2, style);
         StyleOptions s = StyleOptions(style);
-        s.isFilled   = true;
+        s.isFilled     = true;
 
         if (cap == LineCapDirection::Left || cap == LineCapDirection::Both)
         {
@@ -106,7 +106,7 @@ namespace LinaVG
         // Generate line structs between each points.
         // Each line struct will contain -> line vertices, upper & below vertices.
         StyleOptions style = StyleOptions(opts);
-        style.isFilled   = true;
+        style.isFilled     = true;
 
         const bool useTextureBuffer = style.textureHandle != 0;
         const bool isGradient       = !Math::IsEqual(style.color.start, style.color.end);
@@ -136,8 +136,8 @@ namespace LinaVG
             else
                 usedCapDir = LineCapDirection::None;
 
-            const float t             = static_cast<float>(i) / static_cast<float>(count - 1);
-            const float t2            = static_cast<float>(i + 1) / static_cast<float>(count - 1);
+            const float t         = static_cast<float>(i) / static_cast<float>(count - 1);
+            const float t2        = static_cast<float>(i + 1) / static_cast<float>(count - 1);
             style.thickness.start = Math::Lerp(opts.thickness.start, opts.thickness.end, t);
             style.thickness.end   = Math::Lerp(opts.thickness.start, opts.thickness.end, t2);
 
@@ -265,7 +265,7 @@ namespace LinaVG
         }
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(style);
+            StyleOptions opts2   = StyleOptions(style);
             opts2.outlineOptions = OutlineOptions::FromStyle(style, OutlineDrawDirection::Both);
 
             Array<int> indicesOrder;
@@ -274,13 +274,13 @@ namespace LinaVG
 
             for (int i = totalUpperIndices.m_size - 1; i > -1; i--)
                 indicesOrder.push_back(totalUpperIndices[i]);
-             
+
             for (int i = 0; i < indicesOrder.m_size; i++)
             {
-                Vertex& v = destBuf->m_vertexBuffer[indicesOrder[i]];
-                Vec4 col = v.col;
-                int a = 5;
-             }
+                Vertex& v   = destBuf->m_vertexBuffer[indicesOrder[i]];
+                Vec4    col = v.col;
+                int     a   = 5;
+            }
             Internal::DrawOutlineAroundShape(destBuf, opts2, &indicesOrder[0], indicesOrder.m_size, opts2.outlineOptions.thickness, false, drawOrder, Internal::OutlineCallType::AA);
         }
 
@@ -297,16 +297,16 @@ namespace LinaVG
         style.textureHandle   = textureHandle;
         style.textureUVOffset = uvOffset;
         style.textureUVTiling = uvTiling;
-        const Vec2 min          = Vec2(pos.x - size.x / 2.0f, pos.y - size.y / 2.0f);
-        const Vec2 max          = Vec2(pos.x + size.x / 2.0f, pos.y + size.y / 2.0f);
+        const Vec2 min        = Vec2(pos.x - size.x / 2.0f, pos.y - size.y / 2.0f);
+        const Vec2 max        = Vec2(pos.x + size.x / 2.0f, pos.y + size.y / 2.0f);
 
         g_uvOverride.m_override = true;
         g_uvOverride.m_uvTL     = uvTL;
         g_uvOverride.m_uvBR     = uvBR;
         const bool currAA       = Config.aaEnabled;
-        Config.aaEnabled      = false;
+        Config.aaEnabled        = false;
         DrawRect(min, max, style, rotateAngle, drawOrder);
-        Config.aaEnabled      = currAA;
+        Config.aaEnabled        = currAA;
         g_uvOverride.m_override = false;
         g_uvOverride.m_uvTL     = Vec2(0, 0);
         g_uvOverride.m_uvBR     = Vec2(1, 1);
@@ -671,6 +671,8 @@ namespace LinaVG
         }
     }
 
+#ifdef LINAVG_TEXT_SUPPORT
+
     LINAVG_API void DrawTextSDF(const LINAVG_STRING& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder)
     {
         if (text.compare("") == 0)
@@ -694,8 +696,8 @@ namespace LinaVG
         if (opts.dropShadowOffset.x != 0.0f || opts.dropShadowOffset.y != 0.0f)
         {
             SDFTextOptions usedOpts = SDFTextOptions(opts);
-            usedOpts.sdfThickness = opts.sdfDropShadowThickness;
-            usedOpts.sdfSoftness  = opts.sdfDropShadowSoftness;
+            usedOpts.sdfThickness   = opts.sdfDropShadowThickness;
+            usedOpts.sdfSoftness    = opts.sdfDropShadowSoftness;
             DrawBuffer* dsBuf       = &Internal::g_rendererData.GetSDFTextBuffer(font->m_texture, drawOrder, usedOpts, true);
             const int   dsStart     = buf->m_vertexBuffer.m_size;
             Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * Config.framebufferScale.x, opts.dropShadowOffset.y * Config.framebufferScale.y), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness);
@@ -752,15 +754,17 @@ namespace LinaVG
             return Internal::CalcTextSizeWrapped(text, font, opts.newLineSpacing, opts.wrapWidth, scale, opts.spacing, opts.sdfThickness);
     }
 
+#endif
+
     void Internal::FillRect_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts, int drawOrder)
     {
         Vertex v[4];
         FillRectData(v, false, min, max);
         const int current = buf->m_vertexBuffer.m_size;
-        v[0].col        = colorTL;
-        v[1].col        = colorTR;
-        v[2].col        = colorBR;
-        v[3].col        = colorBL;
+        v[0].col          = colorTL;
+        v[1].col          = colorTR;
+        v[2].col          = colorBR;
+        v[3].col          = colorBL;
 
         for (int i = 0; i < 4; i++)
             buf->PushVertex(v[i]);
@@ -787,9 +791,9 @@ namespace LinaVG
         }
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -827,9 +831,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -856,9 +860,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -954,9 +958,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? vertexCount : vertexCount * 2, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? vertexCount : vertexCount * 2, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? vertexCount : vertexCount * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1025,9 +1029,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1061,9 +1065,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1091,9 +1095,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1230,9 +1234,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? vertexCount : vertexCount * 2, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? vertexCount : vertexCount * 2, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? vertexCount : vertexCount * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1242,7 +1246,7 @@ namespace LinaVG
         if (hasCenter)
         {
             Vec2 center = Vec2((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f);
-            v[0].pos  = center;
+            v[0].pos    = center;
         }
 
         v[i].pos     = p3;
@@ -1288,9 +1292,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1318,9 +1322,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1347,9 +1351,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1440,7 +1444,7 @@ namespace LinaVG
         }
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
 
             if (opts.isFilled)
@@ -1536,7 +1540,7 @@ namespace LinaVG
         }
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
 
             if (opts.isFilled)
@@ -1633,7 +1637,7 @@ namespace LinaVG
         }
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
 
             if (opts.isFilled)
@@ -1729,11 +1733,11 @@ namespace LinaVG
         for (int i = 0; i < size; i++)
         {
             Vertex v;
-            v.pos             = points[i];
+            v.pos               = points[i];
             const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
-            v.uv.x            = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-            v.uv.y            = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-            v.col             = color;
+            v.uv.x              = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+            v.uv.y              = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+            v.col               = color;
             buf->PushVertex(v);
         }
 
@@ -1748,9 +1752,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1773,11 +1777,11 @@ namespace LinaVG
         for (int i = 0; i < size; i++)
         {
             Vertex v;
-            v.pos             = points[i];
+            v.pos               = points[i];
             const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
-            v.uv.x            = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-            v.uv.y            = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-            v.col             = Math::Lerp(colorStart, colorEnd, isHor ? v.uv.x : v.uv.y);
+            v.uv.x              = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+            v.uv.y              = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+            v.col               = Math::Lerp(colorStart, colorEnd, isHor ? v.uv.x : v.uv.y);
             buf->PushVertex(v);
         }
 
@@ -1792,9 +1796,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1817,10 +1821,10 @@ namespace LinaVG
         for (int i = 0; i < size; i++)
         {
             Vertex v;
-            v.pos             = points[i];
+            v.pos               = points[i];
             const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
-            v.uv.x            = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-            v.uv.y            = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+            v.uv.x              = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+            v.uv.y              = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
             buf->PushVertex(v);
         }
 
@@ -1835,9 +1839,9 @@ namespace LinaVG
             buf = DrawOutline(buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
         else if (Config.aaEnabled)
         {
-            StyleOptions opts2     = StyleOptions(opts);
+            StyleOptions opts2   = StyleOptions(opts);
             opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-            buf                    = DrawOutline(buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, Internal::OutlineCallType::AA);
+            buf                  = DrawOutline(buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, Internal::OutlineCallType::AA);
         }
     }
 
@@ -1877,18 +1881,18 @@ namespace LinaVG
             {
                 const Vec2 toNext  = Math::Normalized(Vec2(buf->m_vertexBuffer[next].pos.x - buf->m_vertexBuffer[i].pos.x, buf->m_vertexBuffer[next].pos.y - buf->m_vertexBuffer[i].pos.y));
                 const Vec2 rotated = Math::Rotate90(toNext, true);
-                v.pos            = Vec2(buf->m_vertexBuffer[i].pos.x + rotated.x * thickness, buf->m_vertexBuffer[i].pos.y + rotated.y * thickness);
+                v.pos              = Vec2(buf->m_vertexBuffer[i].pos.x + rotated.x * thickness, buf->m_vertexBuffer[i].pos.y + rotated.y * thickness);
             }
             else if (skipEndClosing && i == endIndex)
             {
                 const Vec2 fromPrev = Math::Normalized(Vec2(buf->m_vertexBuffer[i].pos.x - buf->m_vertexBuffer[previous].pos.x, buf->m_vertexBuffer[i].pos.y - buf->m_vertexBuffer[previous].pos.y));
                 const Vec2 rotated  = Math::Rotate90(fromPrev, true);
-                v.pos             = Vec2(buf->m_vertexBuffer[i].pos.x + rotated.x * thickness, buf->m_vertexBuffer[i].pos.y + rotated.y * thickness);
+                v.pos               = Vec2(buf->m_vertexBuffer[i].pos.x + rotated.x * thickness, buf->m_vertexBuffer[i].pos.y + rotated.y * thickness);
             }
             else
             {
                 const Vec2 vertexNormalAverage = Math::GetVertexNormal(buf->m_vertexBuffer[i].pos, buf->m_vertexBuffer[previous].pos, buf->m_vertexBuffer[next].pos);
-                v.pos                        = Vec2(buf->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, buf->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+                v.pos                          = Vec2(buf->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, buf->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
             }
 
             buf->PushVertex(v);
@@ -2337,7 +2341,7 @@ namespace LinaVG
                     line2.m_lowerIndices.erase(line2.m_lowerIndices.findAddr(3));
             }
 
-            const Vec2 intersection               = Math::LineIntersection(line1.m_vertices[intersection0].pos, line1.m_vertices[intersection1].pos, line2.m_vertices[intersection0].pos, line2.m_vertices[intersection1].pos);
+            const Vec2 intersection             = Math::LineIntersection(line1.m_vertices[intersection0].pos, line1.m_vertices[intersection1].pos, line2.m_vertices[intersection0].pos, line2.m_vertices[intersection1].pos);
             line1.m_vertices[intersection1].pos = line2.m_vertices[intersection0].pos = intersection;
 
             const int vLowIndex = line1.m_vertices.m_size;
@@ -2572,7 +2576,7 @@ namespace LinaVG
             const Vec2 prevP               = destBuf->m_vertexBuffer[prev].pos;
             const Vec2 nextP               = destBuf->m_vertexBuffer[next].pos;
             const Vec2 vertexNormalAverage = Math::GetVertexNormalFlatCheck(destBuf->m_vertexBuffer[current].pos, prevP, nextP, ccw);
-            v.pos                        = Vec2(destBuf->m_vertexBuffer[current].pos.x + vertexNormalAverage.x * thickness, destBuf->m_vertexBuffer[current].pos.y + vertexNormalAverage.y * thickness);
+            v.pos                          = Vec2(destBuf->m_vertexBuffer[current].pos.x + vertexNormalAverage.x * thickness, destBuf->m_vertexBuffer[current].pos.y + vertexNormalAverage.y * thickness);
 
             if (Config.aaEnabled && !isAAOutline)
                 extrudedVerticesOrder.push_back(destBuf->m_vertexBuffer.m_size);
@@ -2735,20 +2739,20 @@ namespace LinaVG
                 {
                     const Vec2 nextP               = sourceBuffer->m_vertexBuffer[next].pos;
                     const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, Vec2(-1, -1), nextP);
-                    v.pos                        = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+                    v.pos                          = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
                 }
                 else if (skipEnds && i == endIndex)
                 {
                     const Vec2 prevP               = sourceBuffer->m_vertexBuffer[previous].pos;
                     const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, Vec2(-1, -1));
-                    v.pos                        = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+                    v.pos                          = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
                 }
                 else
                 {
                     const Vec2 prevP               = sourceBuffer->m_vertexBuffer[previous].pos;
                     const Vec2 nextP               = sourceBuffer->m_vertexBuffer[next].pos;
                     const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, nextP);
-                    v.pos                        = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+                    v.pos                          = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
                 }
                 destBuf->PushVertex(v);
             }
@@ -2784,10 +2788,10 @@ namespace LinaVG
 
             if (useAA)
             {
-                StyleOptions opts2                     = StyleOptions(opts);
-                opts2.isFilled                       = false;
+                StyleOptions opts2                 = StyleOptions(opts);
+                opts2.isFilled                     = false;
                 opts2.outlineOptions.drawDirection = OutlineDrawDirection::Outwards;
-                destBuf                                = DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
+                destBuf                            = DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
 
                 opts2.outlineOptions.drawDirection = OutlineDrawDirection::Inwards;
                 DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
@@ -2801,7 +2805,7 @@ namespace LinaVG
                 if (useAA)
                 {
                     // AA outline to the shape we are drawing
-                    StyleOptions opts3     = StyleOptions(opts);
+                    StyleOptions opts3   = StyleOptions(opts);
                     opts3.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Inwards);
                     DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
                 }
@@ -2811,9 +2815,9 @@ namespace LinaVG
                 if (useAA)
                 {
                     // AA outline to the current outline we are drawing
-                    StyleOptions opts2                     = StyleOptions(opts);
+                    StyleOptions opts2                 = StyleOptions(opts);
                     opts2.outlineOptions.drawDirection = OutlineDrawDirection::Outwards;
-                    destBuf                                = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
+                    destBuf                            = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
 
                     opts2.outlineOptions.drawDirection = OutlineDrawDirection::Inwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
@@ -2824,7 +2828,7 @@ namespace LinaVG
                 if (useAA)
                 {
                     // // AA outline to the shape we are drawing
-                    StyleOptions opts3     = StyleOptions(opts);
+                    StyleOptions opts3   = StyleOptions(opts);
                     opts3.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Outwards);
                     DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
                 }
@@ -2834,9 +2838,9 @@ namespace LinaVG
                 if (useAA)
                 {
                     // AA outline to the current outline we are drawing
-                    StyleOptions opts2                     = StyleOptions(opts);
+                    StyleOptions opts2                 = StyleOptions(opts);
                     opts2.outlineOptions.drawDirection = OutlineDrawDirection::Outwards;
-                    destBuf                                = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
+                    destBuf                            = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
 
                     opts2.outlineOptions.drawDirection = OutlineDrawDirection::Inwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
@@ -2849,9 +2853,9 @@ namespace LinaVG
                 if (useAA)
                 {
                     // AA outline to the current outline we are drawing
-                    StyleOptions opts2                     = StyleOptions(opts);
+                    StyleOptions opts2                 = StyleOptions(opts);
                     opts2.outlineOptions.drawDirection = OutlineDrawDirection::Outwards;
-                    destBuf                                = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
+                    destBuf                            = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
 
                     opts2.outlineOptions.drawDirection = OutlineDrawDirection::Inwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
@@ -2862,9 +2866,9 @@ namespace LinaVG
                 if (useAA)
                 {
                     // AA outline to the current outline we are drawing
-                    StyleOptions opts2                     = StyleOptions(opts);
+                    StyleOptions opts2                 = StyleOptions(opts);
                     opts2.outlineOptions.drawDirection = OutlineDrawDirection::Outwards;
-                    destBuf                                = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
+                    destBuf                            = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
 
                     opts2.outlineOptions.drawDirection = OutlineDrawDirection::Inwards;
                     DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
@@ -2874,6 +2878,8 @@ namespace LinaVG
 
         return sourceBuffer;
     }
+
+#ifdef LINAVG_TEXT_SUPPORT
 
     void Internal::ParseTextIntoWords(Array<TextPart*>& arr, const LINAVG_STRING& text, LinaVGFont* font, float scale, float spacing)
     {
@@ -3242,4 +3248,5 @@ namespace LinaVG
         return size;
     }
 
+#endif
 } // namespace LinaVG

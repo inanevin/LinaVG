@@ -27,6 +27,7 @@ SOFTWARE.
 */
 
 #include "Core/Math.hpp"
+#include <cmath>
 
 namespace LinaVG
 {

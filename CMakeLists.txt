@@ -25,7 +25,7 @@ if(NOT EXISTS ${CMAKE_SOURCE_DIR}/_Dependencies)
 	git_clone(
         	PROJECT_NAME    _Dependencies
         	GIT_URL         https://github.com/inanevin/LinaDependencies.git
-        	GIT_BRANCH      linavg
+        	GIT_BRANCH      dev_linavg
         	DIRECTORY 	${CMAKE_SOURCE_DIR})
 endif()
 
@@ -35,10 +35,20 @@ endif()
 
 option(LINAVG_BUILD_EXAMPLES "Builds example backend projects." ON)
 option(LINAVG_BACKEND_GL "Enables OpenGL Backend." ON)
+option(LINAVG_TEXT_SUPPORT "Enables FreeType text support. Requires you to link to FreeType library." ON)
 
 if(LINAVG_BACKEND_GL)
 	add_compile_definitions(LINAVG_BACKEND_GL)
 endif()
+
+if(LINAVG_BUILD_EXAMPLES)
+	add_compile_definitions(LINAVG_TEXT_SUPPORT)
+else()
+	if(LINAVG_TEXT_SUPPORT)
+		add_compile_definitions(LINAVG_TEXT_SUPPORT)
+	endif()
+endif()
+
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -93,7 +103,7 @@ add_library(Lina::VG ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MAJOR=1)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MINOR=0)
-target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=1)
+target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=2)
 
 #--------------------------------------------------------------------
 # Subdirectories & linking
@@ -104,8 +114,15 @@ if(LINAVG_BACKEND_GL)
 	link_glad()
 endif()
 
-include(_Dependencies/freetype/link.cmake)
-link_freetype()
+if(LINAVG_BUILD_EXAMPLES)
+	include(_Dependencies/freetype/link.cmake)
+	link_freetype()
+else()
+	if(LINAVG_TEXT_SUPPORT)
+		include(_Dependencies/freetype/link.cmake)
+		link_freetype()
+	endif()
+endif()
 
 #--------------------------------------------------------------------
 # Folder structuring in visual studio

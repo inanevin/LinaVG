@@ -80,7 +80,7 @@ namespace LinaVG
             m_tris.from(t.m_tris);
             m_lowerIndices.from(t.m_lowerIndices);
             m_upperIndices.from(t.m_upperIndices);
-            m_hasMidpoints = t.m_hasMidpoints;
+            m_hasMidpoints       = t.m_hasMidpoints;
             m_lineCapVertexCount = t.m_lineCapVertexCount;
             return *this;
         }
@@ -243,6 +243,8 @@ namespace LinaVG
     /// <returns></returns>
     LINAVG_API void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 
+#ifdef LINAVG_TEXT_SUPPORT
+
     /// <summary>
     /// Draws the given text at position. The font used in Text Options must be loaded as normal font, e.g. non-sdf.
     /// Given position will be upper-left corner of the text. Use CalculateTextSize to offset the text, e.g. center.
@@ -286,6 +288,8 @@ namespace LinaVG
     /// <param name="opts">Style options used to draw the text.</param>
     /// <returns></returns>
     LINAVG_API Vec2 CalculateTextSize(const LINAVG_STRING& text, SDFTextOptions& opts);
+
+#endif
 
     namespace Internal
     {
@@ -426,6 +430,8 @@ namespace LinaVG
         /// <returns></returns>
         DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, int drawOrder = 0, OutlineCallType = OutlineCallType::Normal, bool reverseDrawDir = false);
 
+#ifdef LINAVG_TEXT_SUPPORT
+
         /// <summary>
         /// Break down text into words, with each word having calculated size properties.
         /// </summary>
@@ -464,6 +470,8 @@ namespace LinaVG
         Vec2 CalcTextSizeWrapped(const LINAVG_STRING& text, LinaVGFont*, float newLineSpacing, float wrapping, float scale, float spacing, float sdfThickness);
 
         void DrawDebugFontAtlas(const Vec2& pos, FontHandle handle);
+
+#endif
 
     }; // namespace Internal
 
