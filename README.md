@@ -1,4 +1,4 @@
-![LinaVG](https://user-images.githubusercontent.com/62678643/184497564-a6af48ae-aa1e-4bc4-8dc8-7be1a55bd45e.png)
+![LinaVG](https://user-images.githubusercontent.com/62678643/184518834-72d93134-13a2-43f5-b419-bef7990179fb.svg)
 
 <div align="center">
   
