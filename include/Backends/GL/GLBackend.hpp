@@ -39,8 +39,7 @@ Timestamp: 3/24/2022 11:33:52 PM
 #define LinaVGGLBackend_HPP
 
 // Headers here.
-#include "Core/Common.hpp"
-#include "Backends/BaseBackend.hpp"
+#include "../BaseBackend.hpp"
 
 namespace LinaVG
 {

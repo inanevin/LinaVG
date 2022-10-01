@@ -43,10 +43,10 @@ Timestamp: 3/28/2022 2:55:16 PM
 #include "Common.hpp"
 
 #ifdef LINAVG_BACKEND_GL
-#include "Backends/GL/GLBackend.hpp"
+#include "../Backends/GL/GLBackend.hpp"
 #endif
 
-#include "Backends/BaseBackend.hpp"
+#include "../Backends/BaseBackend.hpp"
 
 namespace LinaVG::Internal
 {

@@ -35,7 +35,7 @@ Timestamp: 3/28/2022 2:38:21 PM
 #ifndef LinaVGUtility_HPP
 #define LinaVGUtility_HPP
 
-#include "Core/Common.hpp"
+#include "../Core/Common.hpp"
 
 namespace LinaVG
 {
