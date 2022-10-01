@@ -46,6 +46,8 @@ SOFTWARE.
 
 namespace LinaVG
 {
+    Backend::BaseBackend* Backend::BaseBackend::s_backend = nullptr;
+
     namespace Internal
     {
         RendererData    g_rendererData;
@@ -87,7 +89,9 @@ namespace LinaVG
         Internal::g_rendererData.m_simpleTextBuffers.reserve(Config.textBuffersReserve);
         Internal::g_rendererData.m_sdfTextBuffers.reserve(Config.textBuffersReserve);
 
-        if (!Backend::Initialize())
+        Backend::BaseBackend::s_backend = Backend::CreateBackend();
+
+        if (!Backend::BaseBackend::Get()->Initialize())
         {
             if (Config.errorCallback)
                 Config.errorCallback("LinaVG: Could not initialize! Error initializing backend.");
@@ -111,7 +115,7 @@ namespace LinaVG
 
     void Terminate()
     {
-        Backend::Terminate();
+        Backend::BaseBackend::Get()->Terminate();
 
 #ifdef LINAVG_TEXT_SUPPORT
         Text::Terminate();
@@ -133,7 +137,7 @@ namespace LinaVG
             _ASSERT(false);
         }
 
-        Backend::StartFrame();
+        Backend::BaseBackend::Get()->StartFrame();
         Internal::g_rendererData.m_frameStarted = true;
     }
 
@@ -146,7 +150,7 @@ namespace LinaVG
                 DrawBuffer& buf = Internal::g_rendererData.m_defaultBuffers[i];
 
                 if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
-                    Backend::DrawDefault(&(buf));
+                    Backend::BaseBackend::Get()->DrawDefault(&(buf));
             }
 
             for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
@@ -154,7 +158,7 @@ namespace LinaVG
                 GradientDrawBuffer& buf = Internal::g_rendererData.m_gradientBuffers[i];
 
                 if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
-                    Backend::DrawGradient(&buf);
+                    Backend::BaseBackend::Get()->DrawGradient(&buf);
             }
 
             for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
@@ -162,7 +166,7 @@ namespace LinaVG
                 TextureDrawBuffer& buf = Internal::g_rendererData.m_textureBuffers[i];
 
                 if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
-                    Backend::DrawTextured(&buf);
+                    Backend::BaseBackend::Get()->DrawTextured(&buf);
             }
 
             for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
@@ -170,7 +174,7 @@ namespace LinaVG
                 SimpleTextDrawBuffer& buf = Internal::g_rendererData.m_simpleTextBuffers[i];
 
                 if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
-                    Backend::DrawSimpleText(&buf);
+                    Backend::BaseBackend::Get()->DrawSimpleText(&buf);
             }
 
             for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
@@ -178,7 +182,7 @@ namespace LinaVG
                 SDFTextDrawBuffer& buf = Internal::g_rendererData.m_sdfTextBuffers[i];
 
                 if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
-                    Backend::DrawSDFText(&buf);
+                    Backend::BaseBackend::Get()->DrawSDFText(&buf);
             }
         };
 
@@ -198,7 +202,7 @@ namespace LinaVG
     {
         Internal::g_rendererData.m_frameStarted = false;
 
-        Backend::EndFrame();
+        Backend::BaseBackend::Get()->EndFrame();
 
         Internal::g_rendererData.m_gcFrameCounter++;
 

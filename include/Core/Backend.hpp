@@ -44,6 +44,8 @@ Timestamp: 3/28/2022 2:55:16 PM
 
 #ifdef LINAVG_BACKEND_GL
 #include "Backends/GL/GLBackend.hpp"
+#else
+#include "Backends/EmptyBackend.hpp"
 #endif
 
 namespace LinaVG::Internal

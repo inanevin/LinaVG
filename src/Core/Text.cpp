@@ -105,7 +105,7 @@ namespace LinaVG
             FT_Select_Charmap(face, ft_encoding_unicode);
 
             // Texture alignment changes might be necessary on some APIs such as OpenGL
-            Backend::SaveAPIState();
+            Backend::BaseBackend::Get()->SaveAPIState();
 
             LinaVGFont* font      = new LinaVGFont();
             font->m_size          = size;
@@ -216,7 +216,7 @@ namespace LinaVG
                 if (w + h < static_cast<unsigned int>(totalSize))
                 {
                     availableAtlasIndex = i;
-                    Backend::BindFontTexture(atlas.m_texture);
+                    Backend::BaseBackend::Get()->BindFontTexture(atlas.m_texture);
                     break;
                 }
             }
@@ -237,7 +237,7 @@ namespace LinaVG
             else
             {
                 FontAtlas atlas;
-                atlas.m_texture = Backend::CreateFontTexture(w, h);
+                atlas.m_texture = Backend::BaseBackend::Get()->CreateFontTexture(w, h);
                 font->m_texture = atlas.m_texture;
                 usedAtlasIndex  = g_textData.m_createdAtlases.m_size;
                 g_textData.m_createdAtlases.push_back(atlas);
@@ -280,7 +280,7 @@ namespace LinaVG
 
                 if (ch.second.m_buffer != nullptr)
                 {
-                    Backend::BufferFontTextureAtlas(glyphWidth, glyphRows, offsetX, offsetY, ch.second.m_buffer);
+                    Backend::BaseBackend::Get()->BufferFontTextureAtlas(glyphWidth, glyphRows, offsetX, offsetY, ch.second.m_buffer);
                     LINAVG_FREE(ch.second.m_buffer);
                 }
 
@@ -300,7 +300,7 @@ namespace LinaVG
 
             font->m_spaceAdvance = characterMap[' '].m_advance.x;
             FT_Done_Face(face);
-            Backend::RestoreAPIState();
+            Backend::BaseBackend::Get()->RestoreAPIState();
 
             Config.logCallback("LinaVG: Successfuly loaded font!");
             Internal::g_fontCounter++;

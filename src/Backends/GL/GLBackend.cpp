@@ -36,9 +36,12 @@ SOFTWARE.
 
 namespace LinaVG::Backend
 {
-    GLState g_glState;
+    BaseBackend* CreateBackend()
+    {
+        return new GLBackend();
+    }
 
-    bool Initialize()
+    bool GLBackend::Initialize()
     {
         Internal::g_backendData.m_defaultVtxShader = "#version 330 core\n"
                                                      "layout (location = 0) in vec2 pos;\n"
@@ -211,7 +214,7 @@ namespace LinaVG::Backend
         return true;
     }
 
-    void StartFrame()
+    void GLBackend::StartFrame()
     {
         Config.debugCurrentDrawCalls     = 0;
         Config.debugCurrentTriangleCount = 0;
@@ -286,7 +289,7 @@ namespace LinaVG::Backend
         glBindVertexArray(Internal::g_backendData.m_vao);
     }
 
-    void DrawGradient(GradientDrawBuffer* buf)
+    void GLBackend::DrawGradient(GradientDrawBuffer* buf)
     {
         if (Internal::g_backendData.m_skipDraw)
             return;
@@ -316,7 +319,7 @@ namespace LinaVG::Backend
         Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void DrawTextured(TextureDrawBuffer* buf)
+    void GLBackend::DrawTextured(TextureDrawBuffer* buf)
     {
         if (Internal::g_backendData.m_skipDraw)
             return;
@@ -348,7 +351,7 @@ namespace LinaVG::Backend
         Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void DrawDefault(DrawBuffer* buf)
+    void GLBackend::DrawDefault(DrawBuffer* buf)
     {
         if (Internal::g_backendData.m_skipDraw)
             return;
@@ -372,7 +375,7 @@ namespace LinaVG::Backend
         Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void DrawSimpleText(SimpleTextDrawBuffer* buf)
+    void GLBackend::DrawSimpleText(SimpleTextDrawBuffer* buf)
     {
         if (Internal::g_backendData.m_skipDraw)
             return;
@@ -400,7 +403,7 @@ namespace LinaVG::Backend
         Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void DrawSDFText(SDFTextDrawBuffer* buf)
+    void GLBackend::DrawSDFText(SDFTextDrawBuffer* buf)
     {
         if (Internal::g_backendData.m_skipDraw)
             return;
@@ -436,7 +439,7 @@ namespace LinaVG::Backend
         Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height)
+    void GLBackend::SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height)
     {
         if (width == 0 || height == 0)
         {
@@ -449,7 +452,7 @@ namespace LinaVG::Backend
         glScissor(x, static_cast<GLint>(Config.displayHeight - (y + height)), static_cast<GLint>(width), static_cast<GLint>(height));
     }
 
-    void SaveAPIState()
+    void GLBackend::SaveAPIState()
     {
         GLboolean blendEnabled;
         GLboolean cullFaceEnabled;
@@ -475,58 +478,58 @@ namespace LinaVG::Backend
         glGetBooleanv(GL_STENCIL_TEST, &stencilTestEnabled);
         glGetBooleanv(GL_SCISSOR_TEST, &scissorTestEnabled);
         glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMaskEnabled);
-        g_glState.m_blendDestAlpha     = static_cast<int>(blendDestAlpha);
-        g_glState.m_blendDestRGB       = static_cast<int>(blendDestRGB);
-        g_glState.m_blendEq            = static_cast<int>(blendEq);
-        g_glState.m_blendSrcAlpha      = static_cast<int>(blendSrcAlpha);
-        g_glState.m_blendSrcRGB        = static_cast<int>(blendSrcRGB);
-        g_glState.m_unpackAlignment    = static_cast<int>(unpackAlignment);
-        g_glState.m_blendEnabled       = static_cast<bool>(blendEnabled);
-        g_glState.m_cullFaceEnabled    = static_cast<bool>(cullFaceEnabled);
-        g_glState.m_depthTestEnabled   = static_cast<bool>(depthTestEnabled);
-        g_glState.m_scissorTestEnabled = static_cast<bool>(scissorTestEnabled);
-        g_glState.m_stencilTestEnabled = static_cast<bool>(stencilTestEnabled);
-        g_glState.m_depthMaskEnabled   = static_cast<bool>(depthMaskEnabled);
+        m_glState.m_blendDestAlpha     = static_cast<int>(blendDestAlpha);
+        m_glState.m_blendDestRGB       = static_cast<int>(blendDestRGB);
+        m_glState.m_blendEq            = static_cast<int>(blendEq);
+        m_glState.m_blendSrcAlpha      = static_cast<int>(blendSrcAlpha);
+        m_glState.m_blendSrcRGB        = static_cast<int>(blendSrcRGB);
+        m_glState.m_unpackAlignment    = static_cast<int>(unpackAlignment);
+        m_glState.m_blendEnabled       = static_cast<bool>(blendEnabled);
+        m_glState.m_cullFaceEnabled    = static_cast<bool>(cullFaceEnabled);
+        m_glState.m_depthTestEnabled   = static_cast<bool>(depthTestEnabled);
+        m_glState.m_scissorTestEnabled = static_cast<bool>(scissorTestEnabled);
+        m_glState.m_stencilTestEnabled = static_cast<bool>(stencilTestEnabled);
+        m_glState.m_depthMaskEnabled   = static_cast<bool>(depthMaskEnabled);
     }
 
-    void RestoreAPIState()
+    void GLBackend::RestoreAPIState()
     {
-        if (g_glState.m_blendEnabled)
+        if (m_glState.m_blendEnabled)
             glEnable(GL_BLEND);
         else
             glDisable(GL_BLEND);
 
-        if (g_glState.m_depthTestEnabled)
+        if (m_glState.m_depthTestEnabled)
             glEnable(GL_DEPTH_TEST);
         else
             glDisable(GL_DEPTH_TEST);
 
-        if (g_glState.m_cullFaceEnabled)
+        if (m_glState.m_cullFaceEnabled)
             glEnable(GL_CULL_FACE);
         else
             glDisable(GL_CULL_FACE);
 
-        if (g_glState.m_stencilTestEnabled)
+        if (m_glState.m_stencilTestEnabled)
             glEnable(GL_STENCIL_TEST);
         else
             glDisable(GL_STENCIL_TEST);
 
-        if (g_glState.m_scissorTestEnabled)
+        if (m_glState.m_scissorTestEnabled)
             glEnable(GL_SCISSOR_TEST);
         else
             glDisable(GL_SCISSOR_TEST);
 
-        if (g_glState.m_depthMaskEnabled)
+        if (m_glState.m_depthMaskEnabled)
             glDepthMask(GL_TRUE);
         else
             glDepthMask(GL_FALSE);
 
-        glBlendEquation(static_cast<GLenum>(g_glState.m_blendEq));
-        glBlendFuncSeparate(static_cast<GLenum>(g_glState.m_blendSrcRGB), static_cast<GLenum>(g_glState.m_blendDestRGB), static_cast<GLenum>(g_glState.m_blendSrcAlpha), static_cast<GLenum>(g_glState.m_blendDestAlpha));
-        glPixelStorei(GL_UNPACK_ALIGNMENT, g_glState.m_unpackAlignment);
+        glBlendEquation(static_cast<GLenum>(m_glState.m_blendEq));
+        glBlendFuncSeparate(static_cast<GLenum>(m_glState.m_blendSrcRGB), static_cast<GLenum>(m_glState.m_blendDestRGB), static_cast<GLenum>(m_glState.m_blendSrcAlpha), static_cast<GLenum>(m_glState.m_blendDestAlpha));
+        glPixelStorei(GL_UNPACK_ALIGNMENT, m_glState.m_unpackAlignment);
     }
 
-    void EndFrame()
+    void GLBackend::EndFrame()
     {
         // Restore state.
         glActiveTexture(GL_TEXTURE0);
@@ -539,11 +542,11 @@ namespace LinaVG::Backend
         RestoreAPIState();
     }
 
-    void Terminate()
+    void GLBackend::Terminate()
     {
     }
 
-    void CreateShader(Internal::ShaderData& data, const char* vert, const char* frag)
+    void GLBackend::CreateShader(Internal::ShaderData& data, const char* vert, const char* frag)
     {
         unsigned int vertex, fragment;
         int          success;
@@ -564,7 +567,7 @@ namespace LinaVG::Backend
                 Config.errorCallback("LinaVG: Backend Error -> Shader vertex compilation failed!");
                 Config.errorCallback(infoLog);
             }
-         
+
             throw std::runtime_error("");
         }
 
@@ -583,7 +586,7 @@ namespace LinaVG::Backend
                 Config.errorCallback("LinaVG: Backend Error -> Shader fragment compilation failed!");
                 Config.errorCallback(infoLog);
             }
-         
+
             throw std::runtime_error("");
         }
 
@@ -608,7 +611,7 @@ namespace LinaVG::Backend
         AddShaderUniforms(data);
     }
 
-    void AddShaderUniforms(Internal::ShaderData& data)
+    void GLBackend::AddShaderUniforms(Internal::ShaderData& data)
     {
         // Load uniforms.
         GLint numUniforms = 0;
@@ -630,7 +633,7 @@ namespace LinaVG::Backend
         }
     }
 
-    BackendHandle CreateFontTexture(int width, int height)
+    BackendHandle GLBackend::CreateFontTexture(int width, int height)
     {
         GLuint tex;
         glActiveTexture(GL_TEXTURE0);
@@ -648,12 +651,12 @@ namespace LinaVG::Backend
         return tex;
     }
 
-    void BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data)
+    void GLBackend::BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data)
     {
         glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, GL_RED, GL_UNSIGNED_BYTE, data);
     }
 
-    void BindFontTexture(BackendHandle texture)
+    void GLBackend::BindFontTexture(BackendHandle texture)
     {
         glBindTexture(GL_TEXTURE_2D, texture);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
