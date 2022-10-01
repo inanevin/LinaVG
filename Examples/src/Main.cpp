@@ -30,10 +30,7 @@ SOFTWARE.
 #include "LinaVG.hpp"
 #include <iostream>
 #include <chrono>
-
-#ifdef LINAVG_BACKEND_GL
 #include "Backends/OpenGLGLFW.hpp"
-#endif
 
 int main(int argc, char* argv[])
 {

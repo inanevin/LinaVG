@@ -36,11 +36,6 @@ SOFTWARE.
 
 namespace LinaVG::Backend
 {
-    BaseBackend* CreateBackend()
-    {
-        return new GLBackend();
-    }
-
     bool GLBackend::Initialize()
     {
         Internal::g_backendData.m_defaultVtxShader = "#version 330 core\n"

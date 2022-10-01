@@ -73,10 +73,16 @@ include/Core/Drawer.hpp
 include/Core/Backend.hpp
 include/Core/Common.hpp
 include/Core/Math.hpp
-include/Backends/GL/GLBackend.hpp
 include/Backends/BaseBackend.hpp
 )
 
+if(LINAVG_BACKEND_GL)
+set(LinaVG_BackendHPP include/Backends/GL/GLBackend.hpp)
+set(LinaVG_BackendCPP src/Backends/GL/GLBackend.cpp)
+else()
+set(LinaVG_BackendHPP)
+set(LinaVG_BackendCPP)
+endif()
 
 set(LinaVG_HEADERS
 
@@ -88,13 +94,13 @@ src/Core/Backend.cpp
 src/Core/Drawer.cpp
 src/Core/Common.cpp
 src/Core/Math.cpp
-src/Backends/GL/GLBackend.cpp
+
 )
 
 #--------------------------------------------------------------------
 # Create executable project
 #--------------------------------------------------------------------
-add_library(${PROJECT_NAME} ${LinaVG_SOURCES} ${LinaVG_HEADERS})
+add_library(${PROJECT_NAME} ${LinaVG_SOURCES} ${LinaVG_HEADERS} ${LinaVG_BackendHPP} ${LinaVG_BackendCPP})
 add_library(Lina::VG ALIAS ${PROJECT_NAME}) 
 
 #--------------------------------------------------------------------
@@ -129,7 +135,7 @@ endif()
 # Folder structuring in visual studio
 #--------------------------------------------------------------------
 if(MSVC_IDE)
-	foreach(source IN LISTS LinaVG_HEADERS LinaVG_SOURCES)
+	foreach(source IN LISTS LinaVG_HEADERS LinaVG_SOURCES LinaVG_BackendHPP LinaVG_BackendCPP)
 		get_filename_component(source_path "${source}" PATH)
 		string(REPLACE "${LinaVG_SOURCE_DIR}" "" relative_source_path "${source_path}")
 		string(REPLACE "/" "\\" source_path_msvc "${relative_source_path}")

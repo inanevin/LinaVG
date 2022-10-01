@@ -89,7 +89,11 @@ namespace LinaVG
         Internal::g_rendererData.m_simpleTextBuffers.reserve(Config.textBuffersReserve);
         Internal::g_rendererData.m_sdfTextBuffers.reserve(Config.textBuffersReserve);
 
-        Backend::BaseBackend::s_backend = Backend::CreateBackend();
+#ifdef LINAVG_BACKEND_GL
+        Backend::BaseBackend::SetBackend(new Backend::GLBackend());
+#endif
+
+        _ASSERT(Backend::BaseBackend::Get() != nullptr);
 
         if (!Backend::BaseBackend::Get()->Initialize())
         {
@@ -116,6 +120,7 @@ namespace LinaVG
     void Terminate()
     {
         Backend::BaseBackend::Get()->Terminate();
+        delete Backend::BaseBackend::s_backend;
 
 #ifdef LINAVG_TEXT_SUPPORT
         Text::Terminate();

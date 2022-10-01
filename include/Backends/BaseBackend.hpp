@@ -62,6 +62,11 @@ namespace LinaVG::Backend
             return s_backend;
         }
 
+        static void SetBackend(BaseBackend* ptr)
+        {
+            s_backend = ptr;
+        }
+
         // Public API, if you want to implement your own backend, it needs to define these exact signatures.
         virtual bool          Initialize()                                                                                 = 0;
         virtual void          Terminate()                                                                                  = 0;
@@ -80,8 +85,6 @@ namespace LinaVG::Backend
 
         static BaseBackend* s_backend;
     };
-
-    extern BaseBackend* CreateBackend();
 
 } // namespace LinaVG::Backend
 
