@@ -158,7 +158,7 @@ namespace LinaVG
                     rowh = 0;
                 }
 
-                const size_t bufSize = static_cast<size_t>(glyphWidth * glyphRows + 1);
+                const size_t bufSize = static_cast<size_t>(glyphWidth * glyphRows);
 
                 if (slot->bitmap.buffer != nullptr)
                 {

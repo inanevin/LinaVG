@@ -111,7 +111,7 @@ namespace LinaVG
     /// <returns>Font handle, store this handle if you like to use multiple fonts. You can pass the handle inside TextOptions to draw with a specific font. </returns>
 
     /// <summary>
-    /// Loads the given font & generates textures based on given size.
+    /// Loads the given font and generates textures based on given size.
     /// You can load the same font with different sizes to achieve varying text scales.
     /// Alternatively, you can use the scale modifier in TextOptions but it's not recommended to upscale.
     /// Best quality would be achieved by loading fonts with bigger sizes and scaling them down using TextOptions.
@@ -125,7 +125,7 @@ namespace LinaVG
     LINAVG_API FontHandle LoadFont(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0);
 
     /// <summary>
-    /// Loads the given font & generates textures based on given size.
+    /// Loads the given font and generates textures based on given size.
     /// You can load the same font with different sizes to achieve varying text scales.
     /// Alternatively, you can use the scale modifier in TextOptions but it's not recommended to upscale.
     /// Best quality would be achieved by loading fonts with bigger sizes and scaling them down using TextOptions.
