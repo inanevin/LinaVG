@@ -673,9 +673,9 @@ namespace LinaVG
 
 #ifdef LINAVG_TEXT_SUPPORT
 
-    LINAVG_API void DrawTextSDF(const LINAVG_STRING& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder, bool skipCache)
+    LINAVG_API void DrawTextSDF(const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder, bool skipCache)
     {
-        if (text.compare("") == 0)
+        if (text == NULL || text[0] == '\0')
             return;
 
         FontHandle  fontHandle = opts.font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.font - 1 ? opts.font : Internal::g_textData.m_defaultFont;
@@ -698,7 +698,7 @@ namespace LinaVG
             Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness);
         else
         {
-            uint32_t sid = Utility::FnvHash(text.c_str());
+            uint32_t sid = Utility::FnvHash(text);
             if (Internal::g_rendererData.CheckSDFTextCache(sid, opts, buf) == nullptr)
             {
                 Internal::ProcessText(buf, font, text, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness);
@@ -725,9 +725,9 @@ namespace LinaVG
         }
     }
 
-    LINAVG_API void DrawTextNormal(const LINAVG_STRING& text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder, bool skipCache)
+    LINAVG_API void DrawTextNormal(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder, bool skipCache)
     {
-        if (text.compare("") == 0)
+        if (text == NULL || text[0] == '\0')
             return;
 
         FontHandle  fontHandle = opts.font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.font - 1 ? opts.font : Internal::g_textData.m_defaultFont;
@@ -750,7 +750,7 @@ namespace LinaVG
             Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f);
         else
         {
-            uint32_t sid = Utility::FnvHash(text.c_str());
+            uint32_t sid = Utility::FnvHash(text);
             if (Internal::g_rendererData.CheckTextCache(sid, opts, buf) == nullptr)
             {
                 Internal::ProcessText(buf, font, text, Vec2(0, 0), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f);
@@ -774,26 +774,26 @@ namespace LinaVG
         }
     }
 
-    LINAVG_API Vec2 CalculateTextSize(const LINAVG_STRING& text, TextOptions& opts)
+    LINAVG_API Vec2 CalculateTextSize(const char* text, TextOptions& opts)
     {
         FontHandle  fontHandle = opts.font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.font - 1 ? opts.font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
         const float scale      = opts.textScale;
 
         if (opts.wrapWidth == 0.0f)
-            return Internal::CalcTextSize(text.c_str(), font, scale, opts.spacing, 0.0f);
+            return Internal::CalcTextSize(text, font, scale, opts.spacing, 0.0f);
         else
             return Internal::CalcTextSizeWrapped(text, font, opts.newLineSpacing, opts.wrapWidth, scale, opts.spacing, 0.0f);
     }
 
-    LINAVG_API Vec2 CalculateTextSize(const LINAVG_STRING& text, SDFTextOptions& opts)
+    LINAVG_API Vec2 CalculateTextSize(const char* text, SDFTextOptions& opts)
     {
         FontHandle  fontHandle = opts.font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.font - 1 ? opts.font : Internal::g_textData.m_defaultFont;
         LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
         const float scale      = opts.textScale;
 
         if (opts.wrapWidth == 0.0f)
-            return Internal::CalcTextSize(text.c_str(), font, scale, opts.spacing, opts.sdfThickness);
+            return Internal::CalcTextSize(text, font, scale, opts.spacing, opts.sdfThickness);
         else
             return Internal::CalcTextSizeWrapped(text, font, opts.newLineSpacing, opts.wrapWidth, scale, opts.spacing, opts.sdfThickness);
     }
@@ -2925,12 +2925,13 @@ namespace LinaVG
 
 #ifdef LINAVG_TEXT_SUPPORT
 
-    void Internal::ParseTextIntoWords(Array<TextPart*>& arr, const LINAVG_STRING& text, LinaVGFont* font, float scale, float spacing)
+    void Internal::ParseTextIntoWords(Array<TextPart*>& arr, const char* text, LinaVGFont* font, float scale, float spacing)
     {
-        bool          added = false;
-        Vec2          size  = Vec2(0.0f, 0.0f);
-        LINAVG_STRING word  = "";
-        for (auto x : text)
+        bool          added  = false;
+        Vec2          size   = Vec2(0.0f, 0.0f);
+        LINAVG_STRING word   = "";
+        LINAVG_STRING strTxt = text;
+        for (auto x : strTxt)
         {
             if (x == ' ')
             {
@@ -3004,15 +3005,15 @@ namespace LinaVG
         lines.push_back(newLine);
     }
 
-    void Internal::ProcessText(DrawBuffer* buf, LinaVGFont* font, const LINAVG_STRING& text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness)
+    void Internal::ProcessText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness)
     {
         const int  bufStart = buf->m_vertexBuffer.m_size;
-        const Vec2 size     = Internal::CalcTextSize(text.c_str(), font, scale, spacing, sdfThickness);
+        const Vec2 size     = Internal::CalcTextSize(text, font, scale, spacing, sdfThickness);
         Vec2       usedPos  = pos;
         float      remap    = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 0.0f, 1.0f) : 0.0f;
         remap               = Math::Clamp(remap, 0.0f, 1.0f);
 
-        const Vec2 off = Internal::CalcMaxCharOffset(text.c_str(), font, scale);
+        const Vec2 off = Internal::CalcMaxCharOffset(text, font, scale);
         usedPos.y -= off.y * remap;
         usedPos.x += Math::Abs(off.x) * remap;
         usedPos.y += font->m_ascent + font->m_descent;
@@ -3023,7 +3024,7 @@ namespace LinaVG
                 usedPos.x -= size.x / 2.0f;
             else if (alignment == TextAlignment::Right)
                 usedPos.x -= size.x;
-            Internal::DrawText(buf, font, text.c_str(), usedPos, offset, color, spacing, isGradient, scale);
+            Internal::DrawText(buf, font, text, usedPos, offset, color, spacing, isGradient, scale);
         }
         else
         {
@@ -3245,7 +3246,7 @@ namespace LinaVG
         return Vec2(totalWidth, maxCharacterHeight);
     }
 
-    Vec2 Internal::CalcTextSizeWrapped(const LINAVG_STRING& text, LinaVGFont* font, float newLineSpacing, float wrapWidth, float scale, float spacing, float sdfThickness)
+    Vec2 Internal::CalcTextSizeWrapped(const char* text, LinaVGFont* font, float newLineSpacing, float wrapWidth, float scale, float spacing, float sdfThickness)
     {
         Array<TextPart*> arr;
         Array<TextPart*> lines;

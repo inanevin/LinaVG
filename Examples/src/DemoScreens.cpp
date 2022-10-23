@@ -151,20 +151,20 @@ namespace LinaVG
             // Draw title text.
             SDFTextOptions sdfStyle;
             sdfStyle.font           = m_titleFont;
-            const Vec2 size         = LinaVG::CalculateTextSize(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1], sdfStyle);
+            const Vec2 size         = LinaVG::CalculateTextSize(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), sdfStyle);
             const Vec2 titlePos     = Vec2(rectMin.x + 20, rectMin.y + rectHeight / 2.0f - size.y / 2.0f);
             sdfStyle.newLineSpacing = 10.0f;
             sdfStyle.color          = Utility::HexToVec4(0xFCAA67);
             sdfStyle.sdfThickness   = 0.62f;
             sdfStyle.sdfSoftness    = 0.5f;
             sdfStyle.spacing        = 3.0f;
-            LinaVG::DrawTextSDF(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1], titlePos, sdfStyle, 0, 4);
+            LinaVG::DrawTextSDF(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), titlePos, sdfStyle, 0, 4);
 
             // Current screen description.
             TextOptions descText;
             descText.font      = m_descFont;
             descText.wrapWidth = rectWidth * 0.45f;
-            LinaVG::DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1], Vec2(rectWidth * 0.25f, rectMin.y + 20), descText, 0, 4);
+            LinaVG::DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), Vec2(rectWidth * 0.25f, rectMin.y + 20), descText, 0, 4);
 
             // Draw version text.
             TextOptions versionText;
@@ -174,7 +174,7 @@ namespace LinaVG
             versionText.alignment  = TextAlignment::Right;
             std::string versionStr = "Inan Evin, LinaVG v";
             versionStr += std::to_string(LINAVG_VERSION_MAJOR) + "." + std::to_string(LINAVG_VERSION_MINOR) + "." + std::to_string(LINAVG_VERSION_PATCH);
-            LinaVG::DrawTextNormal(versionStr, Vec2(screenSize.x - 10, rectMin.y - 30), versionText, 0.0f, 1);
+            LinaVG::DrawTextNormal(versionStr.c_str(), Vec2(screenSize.x - 10, rectMin.y - 30), versionText, 0.0f, 1);
 
             // Draw controls info
             TextOptions controlsText;
@@ -768,7 +768,7 @@ namespace LinaVG
                 LinaVG::DrawRect(startPos, Vec2(startPos.x + 120, startPos.y + 120), opts, 0.0f, i);
 
                 std::string orderStr = std::to_string(i / 2);
-                LinaVG::DrawTextNormal(orderStr, Vec2(startPos.x + 5, startPos.y + 25), textOpts, 0.0f, i + 1);
+                LinaVG::DrawTextNormal(orderStr.c_str(), Vec2(startPos.x + 5, startPos.y + 25), textOpts, 0.0f, i + 1);
 
                 startPos.x += 20;
                 startPos.y += 20;
@@ -862,9 +862,9 @@ namespace LinaVG
                 TextOptions textOpts;
                 textOpts.font          = m_defaultFont;
                 std::string loadingStr = "Loading " + std::to_string(fillX / 600.0f);
-                const Vec2  txtSize    = LinaVG::CalculateTextSize(loadingStr, textOpts);
+                const Vec2  txtSize    = LinaVG::CalculateTextSize(loadingStr.c_str(), textOpts);
 
-                LinaVG::DrawTextNormal(loadingStr, Vec2(pos.x + 300 - txtSize.x / 2.0f, pos.y + 12.5f - txtSize.y / 2.0f), textOpts, 0.0f, 2);
+                LinaVG::DrawTextNormal(loadingStr.c_str(), Vec2(pos.x + 300 - txtSize.x / 2.0f, pos.y + 12.5f - txtSize.y / 2.0f), textOpts, 0.0f, 2);
             };
 
             auto drawLoadingBar2 = [&](const Vec2& pos) {
@@ -890,9 +890,9 @@ namespace LinaVG
                 TextOptions textOpts;
                 textOpts.font          = m_defaultFont;
                 std::string loadingStr = "Loading " + std::to_string(t);
-                const Vec2  txtSize    = LinaVG::CalculateTextSize(loadingStr, textOpts);
+                const Vec2  txtSize    = LinaVG::CalculateTextSize(loadingStr.c_str(), textOpts);
 
-                LinaVG::DrawTextNormal(loadingStr, Vec2(pos.x, pos.y + 30), textOpts, 0.0f, 2);
+                LinaVG::DrawTextNormal(loadingStr.c_str(), Vec2(pos.x, pos.y + 30), textOpts, 0.0f, 2);
             };
 
             auto drawLoadingCircle1 = [&](const Vec2& pos) {
@@ -991,7 +991,7 @@ namespace LinaVG
                 textOpts.font      = m_descFont;
                 textOpts.textScale = 0.7f;
                 std::string str    = "Property_" + std::to_string(index);
-                LinaVG::DrawTextNormal(str, pos, textOpts, 0.0f, 3);
+                LinaVG::DrawTextNormal(str.c_str(), pos, textOpts, 0.0f, 3);
 
                 StyleOptions opts;
                 opts.color                    = Vec4(0.05f, 0.05f, 0.05f, 0.9f);
