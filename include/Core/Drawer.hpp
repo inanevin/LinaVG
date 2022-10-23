@@ -254,8 +254,9 @@ namespace LinaVG
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+    /// <param name="skipCache"">Even if text caching is enabled globally, setting this to true will skip it for this call. Best used for dynamically changing text such as number counters. </param>
     /// <returns></returns>
-    LINAVG_API void DrawTextNormal(const LINAVG_STRING& text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0);
+    LINAVG_API void DrawTextNormal(const LINAVG_STRING& text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false);
 
     /// <summary>
     /// Draws the given text at position as an SDF text, which produces a lot more high-quality results than normal text, regardless
@@ -268,8 +269,9 @@ namespace LinaVG
     /// <param name="style">Style options.</param>
     /// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
     /// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+    /// <param name="skipCache"">Even if text caching is enabled globally, setting this to true will skip it for this call. Best used for dynamically changing text such as number counters. </param>
     /// <returns></returns>
-    LINAVG_API void DrawTextSDF(const LINAVG_STRING& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0);
+    LINAVG_API void DrawTextSDF(const LINAVG_STRING& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false);
 
     /// <summary>
     /// Returns a Vec2 containing max width & height this text will occupy.

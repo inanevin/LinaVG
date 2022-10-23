@@ -408,6 +408,41 @@ namespace LinaVG
             textScale        = opts.textScale;
             dropShadowColor  = opts.dropShadowColor;
             dropShadowOffset = opts.dropShadowOffset;
+            alignment        = opts.alignment;
+            spacing          = opts.spacing;
+            newLineSpacing   = opts.newLineSpacing;
+            wrapWidth        = opts.wrapWidth;
+        }
+
+        bool CheckColors(const Vec4& c1, const Vec4& c2)
+        {
+            return c1.x == c2.x && c1.y == c2.y && c1.z == c2.z && c1.w == c2.w;
+        }
+
+        bool IsSame(const TextOptions& opts)
+        {
+            if (font != opts.font)
+                return false;
+
+            if (color.gradientType != opts.color.gradientType)
+                return false;
+
+            if (color.gradientType == GradientType::Radial || color.gradientType == GradientType::RadialCorner)
+            {
+                if (color.radialSize != opts.color.radialSize)
+                    return false;
+            }
+
+            if (!CheckColors(color.start, color.end))
+                return false;
+
+            if (dropShadowOffset.x != 0.0f || dropShadowOffset.y != 0.0f)
+            {
+                if (!CheckColors(dropShadowColor, opts.dropShadowColor))
+                    return false;
+            }
+
+            return alignment == opts.alignment && textScale == opts.textScale && spacing == opts.spacing && newLineSpacing == opts.newLineSpacing && wrapWidth == opts.wrapWidth;
         }
 
         /// <summary>
@@ -745,6 +780,33 @@ namespace LinaVG
         /// For debugging purposes, offsets the rendering ortho projection.
         /// </summary>
         Vec2 debugOrthoOffset = Vec2(0.0f, 0.0f);
+
+        /// <summary>
+        /// Enabling caching allows faster text rendering in exchange for more memory consumption.
+        /// On average, more than 200-300 DrawTextNormal commands per frame is a valid reason to enable caching.
+        /// </summary>
+        bool textCachingEnabled = false;
+
+        /// <summary>
+        /// Initial reserve for normal text cache, will grow if needed.
+        /// </summary>
+        int textCacheReserve = 300;
+
+        /// <summary>
+        /// Enabling caching allows faster text rendering in exchange for more memory consumption.
+        /// Caching on SDF texts are usually unnecessary since amount of SDF texts rendered shouldn't be too much.
+        /// </summary>
+        bool textCachingSDFEnabled = false;
+
+        /// <summary>
+        /// Initial reserve for SDF text cache, will grow if needed.
+        /// </summary>
+        int textCacheSDFReserve = 20;
+
+        /// <summary>
+        /// Every this amount of ticks the text caches will be cleared up to prevent memory bloating.
+        /// </summary>
+        int textCacheExpireInterval = 3000;
     };
 
     /// <summary>

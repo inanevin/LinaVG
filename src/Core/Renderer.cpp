@@ -89,6 +89,12 @@ namespace LinaVG
         Internal::g_rendererData.m_simpleTextBuffers.reserve(Config.textBuffersReserve);
         Internal::g_rendererData.m_sdfTextBuffers.reserve(Config.textBuffersReserve);
 
+        if (Config.textCachingEnabled)
+            Internal::g_rendererData.m_textCache.reserve(Config.textCacheReserve);
+
+        if (Config.textCachingSDFEnabled)
+            Internal::g_rendererData.m_sdfTextCache.reserve(Config.textCacheSDFReserve);
+
 #ifdef LINAVG_BACKEND_GL
         Backend::BaseBackend::SetBackend(new Backend::GLBackend());
 #endif
@@ -234,6 +240,17 @@ namespace LinaVG
             for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
                 Internal::g_rendererData.m_sdfTextBuffers[i].ShrinkZero();
         }
+
+        // SDF
+        if (Config.textCachingEnabled || Config.textCachingSDFEnabled)
+            Internal::g_rendererData.m_textCacheFrameCounter++;
+
+        if (Internal::g_rendererData.m_textCacheFrameCounter > Config.textCacheExpireInterval)
+        {
+            Internal::g_rendererData.m_textCacheFrameCounter = 0;
+            Internal::g_rendererData.m_textCache.clear();
+            Internal::g_rendererData.m_sdfTextCache.clear();
+        }
     }
 
     GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)
@@ -324,6 +341,72 @@ namespace LinaVG
 
         m_sdfTextBuffers.push_back(SDFTextDrawBuffer(textureHandle, drawOrder, opts, isDropShadow));
         return m_sdfTextBuffers.last_ref();
+    }
+
+    void RendererData::AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
+    {
+        TextCache& newCache = Internal::g_rendererData.m_textCache[sid];
+        newCache.opts       = opts;
+        newCache.indxBuffer.clear();
+        newCache.vtxBuffer.clear();
+
+        for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
+            newCache.vtxBuffer.push_back(buf->m_vertexBuffer[i]);
+
+        for (int i = indexStart; i < buf->m_indexBuffer.m_size; i++)
+            newCache.indxBuffer.push_back(buf->m_indexBuffer[i]);
+    }
+
+    void RendererData::AddSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
+    {
+        SDFTextCache& newCache = Internal::g_rendererData.m_sdfTextCache[sid];
+        newCache.opts          = opts;
+        newCache.indxBuffer.clear();
+        newCache.vtxBuffer.clear();
+
+        for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
+            newCache.vtxBuffer.push_back(buf->m_vertexBuffer[i]);
+
+        for (int i = indexStart; i < buf->m_indexBuffer.m_size; i++)
+            newCache.indxBuffer.push_back(buf->m_indexBuffer[i]);
+    }
+
+    TextCache* RendererData::CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf)
+    {
+        auto& it = m_textCache.find(sid);
+
+        if (it == m_textCache.end())
+            return nullptr;
+
+        if (!it->second.opts.IsSame(opts))
+            return nullptr;
+
+        for (auto& b : it->second.vtxBuffer)
+            buf->PushVertex(b);
+
+        for (auto& i : it->second.indxBuffer)
+            buf->PushIndex(i);
+
+        return &it->second;
+    }
+
+    SDFTextCache* RendererData::CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf)
+    {
+        auto& it = m_sdfTextCache.find(sid);
+
+        if (it == m_sdfTextCache.end())
+            return nullptr;
+
+        if (!it->second.opts.IsSame(opts))
+            return nullptr;
+
+        for (auto& b : it->second.vtxBuffer)
+            buf->PushVertex(b);
+
+        for (auto& i : it->second.indxBuffer)
+            buf->PushIndex(i);
+
+        return &it->second;
     }
 
     int RendererData::GetBufferIndexInDefaultArray(DrawBuffer* buf)

@@ -40,19 +40,37 @@ Timestamp: 12/29/2018 10:43:46 PM
 
 namespace LinaVG
 {
+
+    struct TextCache
+    {
+        TextOptions   opts;
+        Array<Vertex> vtxBuffer;
+        Array<Index>  indxBuffer;
+    };
+
+    struct SDFTextCache
+    {
+        SDFTextOptions opts;
+        Array<Vertex>  vtxBuffer;
+        Array<Index>   indxBuffer;
+    };
+
     /// <summary>
     /// Management for draw buffers.
     /// </summary>
     struct RendererData
     {
-        Array<DrawBuffer>           m_defaultBuffers;
-        Array<GradientDrawBuffer>   m_gradientBuffers;
-        Array<TextureDrawBuffer>    m_textureBuffers;
-        Array<SimpleTextDrawBuffer> m_simpleTextBuffers;
-        Array<SDFTextDrawBuffer>    m_sdfTextBuffers;
-        Array<int>                  m_drawOrders;
-        int                         m_gcFrameCounter = 0;
-        bool                        m_frameStarted   = false;
+        Array<DrawBuffer>                  m_defaultBuffers;
+        Array<GradientDrawBuffer>          m_gradientBuffers;
+        Array<TextureDrawBuffer>           m_textureBuffers;
+        Array<SimpleTextDrawBuffer>        m_simpleTextBuffers;
+        Array<SDFTextDrawBuffer>           m_sdfTextBuffers;
+        Array<int>                         m_drawOrders;
+        LINAVG_MAP<uint32_t, TextCache>    m_textCache;
+        LINAVG_MAP<uint32_t, SDFTextCache> m_sdfTextCache;
+        int                                m_gcFrameCounter        = 0;
+        int                                m_textCacheFrameCounter = 0;
+        bool                               m_frameStarted          = false;
 
         void                  SetDrawOrderLimits(int drawOrder);
         int                   GetBufferIndexInGradientArray(DrawBuffer* buf);
@@ -64,6 +82,10 @@ namespace LinaVG
         TextureDrawBuffer&    GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType);
         SimpleTextDrawBuffer& GetSimpleTextBuffer(BackendHandle glyphHandle, int drawOrder, bool isDropShadow);
         SDFTextDrawBuffer&    GetSDFTextBuffer(BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow);
+        void                  AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart);
+        void                  AddSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart);
+        TextCache*            CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf);
+        SDFTextCache*         CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf);
     };
 
     namespace Internal
@@ -74,7 +96,7 @@ namespace LinaVG
         /// Erases all vertex & index data on all buffers.
         /// </summary>
         LINAVG_API void ClearAllBuffers();
-    }
+    } // namespace Internal
 
     /// <summary>
     /// Initializes LinaVG renderer. Must be called before any other calls to LinaVG API!

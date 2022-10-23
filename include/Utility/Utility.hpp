@@ -39,15 +39,66 @@ Timestamp: 3/28/2022 2:38:21 PM
 
 namespace LinaVG
 {
-	namespace Utility
-	{
-        template<typename T>
+    namespace Utility
+    {
+        // https://gist.github.com/hwei/1950649d523afd03285c
+        class FnvHash
+        {
+            static const unsigned int FNV_PRIME    = 16777619u;
+            static const unsigned int OFFSET_BASIS = 2166136261u;
+            template <unsigned int N>
+            static constexpr unsigned int fnvHashConst(const char (&str)[N], unsigned int I = N)
+            {
+                return I == 1 ? (OFFSET_BASIS ^ str[0]) * FNV_PRIME : (fnvHashConst(str, I - 1) ^ str[I - 1]) * FNV_PRIME;
+            }
+            static uint32_t fnvHash(const char* str)
+            {
+                const size_t length = strlen(str) + 1;
+                uint32_t     hash   = OFFSET_BASIS;
+                for (size_t i = 0; i < length; ++i)
+                {
+                    hash ^= *str++;
+                    hash *= FNV_PRIME;
+                }
+                return hash;
+            }
+            struct Wrapper
+            {
+                Wrapper(const char* str)
+                    : str(str)
+                {
+                }
+                const char* str;
+            };
+            unsigned int hash_value;
+
+        public:
+            // calulate in run-time
+            FnvHash(Wrapper wrapper)
+                : hash_value(fnvHash(wrapper.str))
+            {
+            }
+            // calulate in compile-time
+            template <unsigned int N>
+            constexpr FnvHash(const char (&str)[N])
+                : hash_value(fnvHashConst(str))
+            {
+            }
+            // output result
+            constexpr operator unsigned int() const
+            {
+                return this->hash_value;
+            }
+        };
+
+        template <typename T>
         int QuickSortPartition(Array<T>& arr, int start, int end)
         {
             int pivot = arr[start];
 
             int count = 0;
-            for (int i = start + 1; i <= end; i++) {
+            for (int i = start + 1; i <= end; i++)
+            {
                 if (arr[i] <= pivot)
                     count++;
             }
@@ -59,17 +110,21 @@ namespace LinaVG
             // Sorting left and right parts of the pivot element
             int i = start, j = end;
 
-            while (i < pivotIndex && j > pivotIndex) {
+            while (i < pivotIndex && j > pivotIndex)
+            {
 
-                while (arr[i] <= pivot) {
+                while (arr[i] <= pivot)
+                {
                     i++;
                 }
 
-                while (arr[j] > pivot) {
+                while (arr[j] > pivot)
+                {
                     j--;
                 }
 
-                if (i < pivotIndex && j > pivotIndex) {
+                if (i < pivotIndex && j > pivotIndex)
+                {
                     arr.swap(i++, j--);
                 }
             }
@@ -77,7 +132,7 @@ namespace LinaVG
             return pivotIndex;
         }
 
-        template<typename T>
+        template <typename T>
         void QuickSortArray(Array<T>& arr, int start, int end)
         {
             if (start >= end)
@@ -92,9 +147,9 @@ namespace LinaVG
             QuickSortArray<T>(arr, p + 1, end);
         }
 
-        int GetTextCharacterSize(const char* text);
+        int  GetTextCharacterSize(const char* text);
         Vec4 HexToVec4(int hex);
 
-	}
-}
+    } // namespace Utility
+} // namespace LinaVG
 #endif

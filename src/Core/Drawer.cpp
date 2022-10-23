@@ -673,7 +673,7 @@ namespace LinaVG
 
 #ifdef LINAVG_TEXT_SUPPORT
 
-    LINAVG_API void DrawTextSDF(const LINAVG_STRING& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder)
+    LINAVG_API void DrawTextSDF(const LINAVG_STRING& text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder, bool skipCache)
     {
         if (text.compare("") == 0)
             return;
@@ -691,7 +691,28 @@ namespace LinaVG
         const float scale      = opts.textScale;
         DrawBuffer* buf        = &Internal::g_rendererData.GetSDFTextBuffer(font->m_texture, drawOrder, opts, false);
         const bool  isGradient = !Math::IsEqual(opts.color.start, opts.color.end);
-        Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness);
+        const int   vtxStart   = buf->m_vertexBuffer.m_size;
+        const int   indexStart = buf->m_indexBuffer.m_size;
+
+        if (!Config.textCachingSDFEnabled || skipCache)
+            Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness);
+        else
+        {
+            uint32_t sid = Utility::FnvHash(text.c_str());
+            if (Internal::g_rendererData.CheckSDFTextCache(sid, opts, buf) == nullptr)
+            {
+                Internal::ProcessText(buf, font, text, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness);
+                Internal::g_rendererData.AddSDFTextCache(sid, opts, buf, vtxStart, indexStart);
+            }
+
+            // Update position
+            for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
+            {
+                auto& vtx = buf->m_vertexBuffer[i];
+                vtx.pos.x += position.x;
+                vtx.pos.y += position.y;
+            }
+        }
 
         if (opts.dropShadowOffset.x != 0.0f || opts.dropShadowOffset.y != 0.0f)
         {
@@ -704,7 +725,7 @@ namespace LinaVG
         }
     }
 
-    void DrawTextNormal(const LINAVG_STRING& text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder)
+    LINAVG_API void DrawTextNormal(const LINAVG_STRING& text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder, bool skipCache)
     {
         if (text.compare("") == 0)
             return;
@@ -722,7 +743,30 @@ namespace LinaVG
         const float scale      = opts.textScale;
         DrawBuffer* buf        = &Internal::g_rendererData.GetSimpleTextBuffer(font->m_texture, drawOrder, false);
         const bool  isGradient = !Math::IsEqual(opts.color.start, opts.color.end);
-        Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f);
+        const int   vtxStart   = buf->m_vertexBuffer.m_size;
+        const int   indexStart = buf->m_indexBuffer.m_size;
+
+        if (!Config.textCachingEnabled || skipCache)
+            Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f);
+        else
+        {
+            uint32_t sid = Utility::FnvHash(text.c_str());
+            if (Internal::g_rendererData.CheckTextCache(sid, opts, buf) == nullptr)
+            {
+                Internal::ProcessText(buf, font, text, Vec2(0, 0), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f);
+                Internal::g_rendererData.AddTextCache(sid, opts, buf, vtxStart, indexStart);
+            }
+
+            // Update position
+            for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
+            {
+                auto& vtx = buf->m_vertexBuffer[i];
+                vtx.pos.x += position.x;
+                vtx.pos.y += position.y;
+            }
+        }
+
+        // Drop-shadow texts don't support caching yet.
         if (opts.dropShadowOffset.x != 0.0f || opts.dropShadowOffset.y != 0.0f)
         {
             DrawBuffer* dsBuf = &Internal::g_rendererData.GetSimpleTextBuffer(font->m_texture, drawOrder, true);
