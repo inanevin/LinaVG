@@ -245,7 +245,6 @@ namespace LinaVG
 
 #ifdef LINAVG_TEXT_SUPPORT
 
-    void TestDraw();
     /// <summary>
     /// Draws the given text at position. The font used in Text Options must be loaded as normal font, e.g. non-sdf.
     /// Given position will be upper-left corner of the text. Use CalculateTextSize to offset the text, e.g. center.
