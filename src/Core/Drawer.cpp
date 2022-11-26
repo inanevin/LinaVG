@@ -3123,9 +3123,18 @@ namespace LinaVG
         Vec4           lastMinGrad         = color.start;
         Vec2           pos                 = position;
         int            characterCount      = 0;
+        bool first = true;
 
         auto drawChar = [&](TextCharacter& ch) {
             const int startIndex = buf->m_vertexBuffer.m_size;
+
+            if (first && scale != 1.0f)
+            {
+                const float desiredY = pos.y - ch.m_bearing.y;
+                const float actualY = pos.y - ch.m_bearing.y * scale;
+                pos.y += Math::Abs(actualY - desiredY) * (scale > 1.0f ? 1.0f : -1.0f);
+                first = false;
+            }
 
             float x2 = pos.x + ch.m_bearing.x * scale;
             float y2 = pos.y - ch.m_bearing.y * scale;
