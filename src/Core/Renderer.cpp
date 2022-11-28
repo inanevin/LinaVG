@@ -296,19 +296,19 @@ namespace LinaVG
         return m_defaultBuffers.last_ref();
     }
 
-    TextureDrawBuffer& RendererData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, int drawOrder, DrawBufferShapeType shapeType)
+    TextureDrawBuffer& RendererData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
     {
         const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
         for (int i = 0; i < m_textureBuffers.m_size; i++)
         {
             auto& buf = m_textureBuffers[i];
-            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
+            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_tint, tint) && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
                 return m_textureBuffers[i];
         }
 
         SetDrawOrderLimits(drawOrder);
 
-        m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset, drawOrder, shapeType));
+        m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset, tint, drawOrder, shapeType));
         return m_textureBuffers.last_ref();
     }
 

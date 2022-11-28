@@ -899,14 +899,15 @@ namespace LinaVG
     struct TextureDrawBuffer : public DrawBuffer
     {
         TextureDrawBuffer(){};
-        TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, int drawOrder, DrawBufferShapeType shapeType)
-            : m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset),
+        TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
+            : m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_tint(tint), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset),
               DrawBuffer(drawOrder, DrawBufferType::Textured, shapeType){};
 
         bool          m_isAABuffer      = false;
         BackendHandle m_textureHandle   = 0;
         Vec2          m_textureUVTiling = Vec2(1.0f, 1.0f);
         Vec2          m_textureUVOffset = Vec2(0.0f, 0.0f);
+        Vec4          m_tint            = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
     };
 
     struct SimpleTextDrawBuffer : public DrawBuffer

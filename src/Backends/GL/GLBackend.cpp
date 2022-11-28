@@ -67,11 +67,12 @@ namespace LinaVG::Backend
                                                        "uniform sampler2D diffuse;\n"
                                                        "uniform vec2 tiling;\n"
                                                        "uniform vec2 offset;\n"
+                                                       "uniform vec4 tint;\n"
                                                        "uniform int isAABuffer;\n"
                                                        "void main()\n"
                                                        "{\n"
                                                        "   vec4 col = texture(diffuse, fUV * tiling + offset);\n"
-                                                       "   fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
+                                                       "   fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a) * tint; \n"
                                                        "}\0";
 
         Internal::g_backendData.m_simpleTextFragShader = "#version 330 core\n"
@@ -329,6 +330,7 @@ namespace LinaVG::Backend
         glUniform1i(data.m_uniformMap["diffuse"], 0);
         glUniform2f(data.m_uniformMap["tiling"], (GLfloat)uv.x, (GLfloat)uv.y);
         glUniform2f(data.m_uniformMap["offset"], (GLfloat)buf->m_textureUVOffset.x, (GLfloat)buf->m_textureUVOffset.y);
+        glUniform4f(data.m_uniformMap["tint"], (GLfloat)buf->m_tint.x, (GLfloat)buf->m_tint.y, (GLfloat)buf->m_tint.z, (GLfloat)buf->m_tint.w);
         glUniform1i(data.m_uniformMap["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);

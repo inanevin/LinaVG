@@ -181,7 +181,7 @@ namespace LinaVG
     /// <param name="uvOffset">Texture UV offset.</param>
     /// <param name="uvTL">Top-left UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
     /// <param name="uvBR">Bottom-right UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
-    LINAVG_API void DrawImage(BackendHandle textureHandle, const Vec2& pos, const Vec2& size, float rotateAngle = 0.0f, int drawOrder = 0, Vec2 uvTiling = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
+    LINAVG_API void DrawImage(BackendHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint = Vec4(1, 1, 1, 1), float rotateAngle = 0.0f, int drawOrder = 0, Vec2 uvTiling = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
 
     /// <summary>
     /// Your points for the triangle must follow the given parameter order -- left, right and top edges.

@@ -404,6 +404,7 @@ namespace LinaVG
             startPos.x = screenSize.x * 0.05f;
             startPos.y += 200;
             defaultStyle.textureHandle = ExampleApp::Get()->GetCheckeredTexture();
+            defaultStyle.color         = Vec4(1, 1, 1, 1);
             LinaVG::DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
 
             // Tiling
@@ -415,11 +416,11 @@ namespace LinaVG
             startPos.x += 200;
             defaultStyle.textureUVTiling = Vec2(1, 1);
             defaultStyle.textureHandle   = ExampleApp::Get()->GetLinaLogoTexture();
-            LinaVG::DrawImage(ExampleApp::Get()->GetLinaLogoTexture(), Vec2(startPos.x + 75, startPos.y + 75), Vec2(150, 150), m_rotateAngle, 1);
+            LinaVG::DrawImage(ExampleApp::Get()->GetLinaLogoTexture(), Vec2(startPos.x + 75, startPos.y + 75), Vec2(150, 150), Vec4(1, 1, 1, 1), m_rotateAngle, 1);
 
             // Lina Logo
             startPos.x += 200;
-            LinaVG::DrawImage(ExampleApp::Get()->GetLinaLogoTexture(), Vec2(startPos.x + 75, startPos.y + 75), Vec2(150, 150), m_rotateAngle, 1, Vec2(2, 2));
+            LinaVG::DrawImage(ExampleApp::Get()->GetLinaLogoTexture(), Vec2(startPos.x + 75, startPos.y + 75), Vec2(150, 150), Vec4(1, 1, 1, 1), m_rotateAngle, 1, Vec2(2, 2));
         }
 
         void DemoScreens::ShowDemoScreen3_Outlines()
