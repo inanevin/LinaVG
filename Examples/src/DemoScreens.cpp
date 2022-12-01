@@ -107,15 +107,15 @@ namespace LinaVG
             style.isFilled = true;
             LinaVG::DrawRect(Vec2(0.0f, 0.0f), screenSize, style, 0.0f, 0);
 
-            const char* aq  = "aqBcc DqEWERT";
+            const char* aq  = "aqBcc DXEWERT";
             Vec2        pos = Vec2(500, 500);
 
             TextOptions test;
             test.font      = aqFont;
             test.color     = Vec4(0, 0, 1, 1);
             test.textScale = 2.0f;
-            test.alignment = TextAlignment::Center;
-            test.wrapWidth = 500;
+            //test.alignment = TextAlignment::Center;
+          // test.wrapWidth = 500;
 
             SDFTextOptions test2;
             test2.font         = aq2Font;

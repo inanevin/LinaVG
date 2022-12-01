@@ -93,6 +93,13 @@ namespace LinaVG
         Internal::g_textData.m_defaultFont = activeFont;
     }
 
+    LINAVG_API Vec2 GetKerning(LinaVGFont* font, int previousGlyph, int currentGlyph)
+    {
+        FT_Vector delta;
+
+        return Vec2();
+    }
+
     namespace Internal
     {
         TextData   g_textData;
@@ -107,13 +114,14 @@ namespace LinaVG
             // Texture alignment changes might be necessary on some APIs such as OpenGL
             Backend::BaseBackend::Get()->SaveAPIState();
 
-            LinaVGFont* font      = new LinaVGFont();
-            font->m_size          = size;
-            font->m_isSDF         = loadAsSDF;
-            font->m_newLineHeight = static_cast<float>(face->size->metrics.height) / 64.0f;
-            font->m_ascent = static_cast<float>(face->size->metrics.ascender) / 64.0f;
-            font->m_descent = static_cast<float>(face->size->metrics.descender) / 64.0f;
-            font->m_yScale = face->size->metrics.y_scale;
+            LinaVGFont* font        = new LinaVGFont();
+            font->m_size            = size;
+            font->m_isSDF           = loadAsSDF;
+            font->m_newLineHeight   = static_cast<float>(face->size->metrics.height) / 64.0f;
+            font->m_ascent          = static_cast<float>(face->size->metrics.ascender) / 64.0f;
+            font->m_descent         = static_cast<float>(face->size->metrics.descender) / 64.0f;
+            font->m_yScale          = face->size->metrics.y_scale;
+            font->m_supportsKerning = LinaVG::Config.textKerningEnabled && FT_HAS_KERNING(face) != 0;
 
             auto&        characterMap      = font->m_characterGlyphs;
             int          maxHeight         = 0;
@@ -178,8 +186,25 @@ namespace LinaVG
                 return true;
             };
 
+            auto storeKerning = [&](FT_ULong first, FT_ULong second) {
+                auto firstIndex  = FT_Get_Char_Index(face, first);
+                auto secondIndex = FT_Get_Char_Index(face, second);
+
+                FT_Vector delta;
+                FT_Get_Kerning(face, firstIndex, secondIndex, FT_KERNING_DEFAULT, &delta);
+                font->m_kerningTable[first].xAdvances[second, delta.x];
+            };
+
             for (FT_ULong c = 32; c < 128; c++)
+            {
                 setSizes(c);
+
+                // if (font->m_supportsKerning)
+                // {
+                //     for (FT_ULong a = 32; a < c; a++)
+                //         storeKerning(a, c);
+                // }
+            }
 
             bool useCustomRanges = customRangesSize != 0;
             if (customRangesSize % 2 == 1)

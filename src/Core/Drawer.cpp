@@ -2928,10 +2928,12 @@ namespace LinaVG
 
     void Internal::ParseTextIntoWords(Array<TextPart*>& arr, const char* text, LinaVGFont* font, float scale, float spacing)
     {
-        bool          added  = false;
-        Vec2          size   = Vec2(0.0f, 0.0f);
-        LINAVG_STRING word   = "";
-        LINAVG_STRING strTxt = text;
+        bool          added          = false;
+        Vec2          size           = Vec2(0.0f, 0.0f);
+        LINAVG_STRING word           = "";
+        LINAVG_STRING strTxt         = text;
+        float         maxBearingDiff = 0.0f;
+
         for (auto x : strTxt)
         {
             if (x == ' ')
@@ -2941,34 +2943,39 @@ namespace LinaVG
                     TextPart* w = new TextPart();
                     w->m_size   = size;
                     w->m_str    = word;
+                    w->m_maxBearingYDiff += maxBearingDiff * scale;
                     arr.push_back(w);
                 }
-                added = false;
-                size  = Vec2(0.0f, 0.0f);
-                word  = "";
+                added          = false;
+                size           = Vec2(0.0f, 0.0f);
+                word           = "";
+                maxBearingDiff = 0.0f;
             }
             else
             {
                 auto& ch = font->m_characterGlyphs[x];
-                size.y   = Math::Max(size.y, ch.m_bearing.y * scale);
+                size.y   = Math::Max(size.y, (ch.m_size.y) * scale);
                 size.x += ch.m_advance.x * scale + spacing;
-                word  = word + x;
-                added = true;
+                maxBearingDiff = Math::Max(maxBearingDiff, (ch.m_size.y - ch.m_bearing.y));
+                word           = word + x;
+                added          = true;
             }
         }
 
         TextPart* w = new TextPart();
         w->m_size   = size;
         w->m_str    = word;
+        w->m_maxBearingYDiff += maxBearingDiff * scale;
         arr.push_back(w);
     }
 
     void Internal::ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, LinaVGFont* font, float scale, float spacing, float wrapWidth, float sdfThickness)
     {
-        const float   spaceAdvance = font->m_spaceAdvance * scale + spacing;
-        float         maxHeight    = 0.0f;
-        float         totalWidth   = 0.0f;
-        LINAVG_STRING append       = "";
+        const float   spaceAdvance    = font->m_spaceAdvance * scale + spacing;
+        float         maxHeight       = 0.0f;
+        float         totalWidth      = 0.0f;
+        float         maxBearingDiffY = 0.0f;
+        LINAVG_STRING append          = "";
         // float         remap        = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f) : 0.0f;
         const Vec2 offset = Internal::CalcMaxCharOffset(words[0]->m_str.c_str(), font, scale);
 
@@ -2976,7 +2983,8 @@ namespace LinaVG
         {
             totalWidth += words[i]->m_size.x;
             // maxHeight = Math::Max(words[i]->m_size.y - offset.y * remap, maxHeight);
-            maxHeight = Math::Max(words[i]->m_size.y, maxHeight);
+            maxHeight       = Math::Max(words[i]->m_size.y, maxHeight);
+            maxBearingDiffY = Math::Max(maxBearingDiffY, words[i]->m_maxBearingYDiff);
 
             if (totalWidth > wrapWidth)
             {
@@ -2984,10 +2992,11 @@ namespace LinaVG
                 if (i == 0)
                     break;
 
-                TextPart* newLine = new TextPart();
-                newLine->m_size.x = totalWidth - words[i]->m_size.x - spaceAdvance;
-                newLine->m_size.y = maxHeight;
-                newLine->m_str    = append;
+                TextPart* newLine          = new TextPart();
+                newLine->m_size.x          = totalWidth - words[i]->m_size.x - spaceAdvance;
+                newLine->m_size.y          = maxHeight;
+                newLine->m_str             = append;
+                newLine->m_maxBearingYDiff = maxBearingDiffY;
                 lines.push_back(newLine);
                 append     = words[i]->m_str + " ";
                 totalWidth = words[i]->m_size.x + spaceAdvance;
@@ -3013,8 +3022,8 @@ namespace LinaVG
         const int  bufStart = buf->m_vertexBuffer.m_size;
         const Vec2 size     = Internal::CalcTextSize(text, font, scale, spacing, sdfThickness);
         Vec2       usedPos  = pos;
-        float      remap    = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 0.0f, 1.0f) : 0.0f;
-        remap               = Math::Clamp(remap, 0.0f, 1.0f);
+        // float      remap    = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 0.0f, 1.0f) : 0.0f;
+        // remap               = Math::Clamp(remap, 0.0f, 1.0f);
 
         const Vec2 off = Internal::CalcMaxCharOffset(text, font, scale);
         usedPos.y += size.y;
@@ -3051,8 +3060,7 @@ namespace LinaVG
                     usedPos.x = pos.x - lines[i]->m_size.x;
 
                 Internal::DrawText(buf, font, lines[i]->m_str.c_str(), usedPos, offset, color, spacing, isGradient, scale);
-                const float increase = font->m_newLineHeight + newLineSpacing;
-                usedPos.y += increase;
+                usedPos.y += font->m_newLineHeight + newLineSpacing + lines[i]->m_maxBearingYDiff;
                 delete lines[i];
             }
 
@@ -3305,7 +3313,7 @@ namespace LinaVG
             size.y += calcSize.y;
 
             if (i < lines.m_size - 1)
-                size.y += newLineSpacing;
+                size.y += newLineSpacing + lines[i]->m_maxBearingYDiff;
             // size.y += newLineSpacing + font->m_newLineHeight;
 
             delete lines[i];

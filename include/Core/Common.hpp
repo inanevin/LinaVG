@@ -807,6 +807,11 @@ namespace LinaVG
         /// Every this amount of ticks the text caches will be cleared up to prevent memory bloating.
         /// </summary>
         int textCacheExpireInterval = 3000;
+
+        /// <summary>
+        /// Enable/disable kerning feature. Has a slight performance impact.
+        /// </summary>
+        bool textKerningEnabled = false;
     };
 
     /// <summary>

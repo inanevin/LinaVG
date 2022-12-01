@@ -53,8 +53,9 @@ namespace LinaVG
 
     struct TextPart
     {
-        LINAVG_STRING m_str  = "";
-        Vec2          m_size = Vec2(0.0f, 0.0f);
+        LINAVG_STRING m_str             = "";
+        Vec2          m_size            = Vec2(0.0f, 0.0f);
+        float         m_maxBearingYDiff = 0.0f;
     };
 
     struct Line
