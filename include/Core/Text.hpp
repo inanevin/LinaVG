@@ -38,7 +38,6 @@ Timestamp: 12/29/2018 10:43:46 PM
 #ifndef LinaVGText_HPP
 #define LinaVGText_HPP
 
-
 #include "Common.hpp"
 #include <unordered_map>
 #include <functional>
@@ -73,6 +72,7 @@ namespace LinaVG
         float                                    m_ascent        = 0.0f;
         float                                    m_descent       = 0.0f;
         float                                    m_spaceAdvance  = 0.0f;
+        float                                    m_yScale        = 0.0f;
         bool                                     m_isSDF         = false;
         LINAVG_MAP<GlyphEncoding, TextCharacter> m_characterGlyphs;
     };

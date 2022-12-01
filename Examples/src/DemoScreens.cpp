@@ -52,13 +52,18 @@ namespace LinaVG
 
         std::vector<StarData> stars;
 
+        FontHandle aqFont  = 0;
+        FontHandle aq2Font = 0;
+
         void DemoScreens::Initialize()
         {
-            m_defaultFont     = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 18);
+            m_defaultFont     = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 40);
             m_titleFont       = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 52);
             m_descFont        = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
             m_textDemoFont    = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
             m_textDemoSDFFont = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
+            aqFont            = LinaVG::LoadFont("Resources/Fonts/DefaultFont.ttf", false, 40);
+            aq2Font           = LinaVG::LoadFont("Resources/Fonts/DefaultFont.ttf", true, 40);
 
             m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
             m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
@@ -102,6 +107,43 @@ namespace LinaVG
             style.isFilled = true;
             LinaVG::DrawRect(Vec2(0.0f, 0.0f), screenSize, style, 0.0f, 0);
 
+            const char* aq  = "aqBcc DqEWERT";
+            Vec2        pos = Vec2(500, 500);
+
+            TextOptions test;
+            test.font      = aqFont;
+            test.color     = Vec4(0, 0, 1, 1);
+            test.textScale = 2.0f;
+            test.alignment = TextAlignment::Center;
+            test.wrapWidth = 500;
+
+            SDFTextOptions test2;
+            test2.font         = aq2Font;
+            test2.color        = Vec4(0, 0, 1, 1);
+            test2.sdfThickness = 0.5f;
+            test2.textScale    = 2.0f;
+            // test2.wrapWidth = 500;
+
+            bool drawSDF    = false;
+            bool drawNormal = true;
+
+            if (drawSDF)
+            {
+                Vec2 ts = LinaVG::CalculateTextSize(aq, test2);
+                LinaVG::DrawPoint(pos, Vec4(1, 0, 0, 1));
+                LinaVG::DrawPoint(Vec2(pos.x + ts.x, pos.y + ts.y), Vec4(1, 0, 0, 1));
+                LinaVG::DrawTextSDF(aq, pos, test2, 0, 20);
+            }
+
+            if (drawNormal)
+            {
+                Vec2 ts = LinaVG::CalculateTextSize(aq, test);
+                LinaVG::DrawPoint(pos, Vec4(1, 0, 0, 1));
+                LinaVG::DrawPoint(Vec2(pos.x + ts.x, pos.y + ts.y), Vec4(1, 0, 0, 1));
+                LinaVG::DrawTextNormal(aq, pos, test, 0, 20);
+            }
+
+            return;
             // Draw stats window.
             if (m_statsWindowOn)
             {
@@ -189,6 +231,7 @@ namespace LinaVG
 
         void DemoScreens::ShowDemoScreen1_Shapes()
         {
+            return;
             const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
 
             StyleOptions defaultStyle;

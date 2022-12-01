@@ -2950,7 +2950,7 @@ namespace LinaVG
             else
             {
                 auto& ch = font->m_characterGlyphs[x];
-                size.y   = Math::Max(size.y, ch.m_size.y * scale);
+                size.y   = Math::Max(size.y, ch.m_bearing.y * scale);
                 size.x += ch.m_advance.x * scale + spacing;
                 word  = word + x;
                 added = true;
@@ -2969,13 +2969,14 @@ namespace LinaVG
         float         maxHeight    = 0.0f;
         float         totalWidth   = 0.0f;
         LINAVG_STRING append       = "";
-        float         remap        = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f) : 0.0f;
-        const Vec2    offset       = Internal::CalcMaxCharOffset(words[0]->m_str.c_str(), font, scale);
+        // float         remap        = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f) : 0.0f;
+        const Vec2 offset = Internal::CalcMaxCharOffset(words[0]->m_str.c_str(), font, scale);
 
         for (int i = 0; i < words.m_size; i++)
         {
             totalWidth += words[i]->m_size.x;
-            maxHeight = Math::Max(words[i]->m_size.y - offset.y * remap, maxHeight);
+            // maxHeight = Math::Max(words[i]->m_size.y - offset.y * remap, maxHeight);
+            maxHeight = Math::Max(words[i]->m_size.y, maxHeight);
 
             if (totalWidth > wrapWidth)
             {
@@ -2990,7 +2991,8 @@ namespace LinaVG
                 lines.push_back(newLine);
                 append     = words[i]->m_str + " ";
                 totalWidth = words[i]->m_size.x + spaceAdvance;
-                maxHeight  = words[i]->m_size.y - offset.y * remap;
+                // maxHeight = words[i]->m_size.y - offset.y * remap;
+                maxHeight = words[i]->m_size.y;
             }
             else
             {
@@ -3015,14 +3017,16 @@ namespace LinaVG
         remap               = Math::Clamp(remap, 0.0f, 1.0f);
 
         const Vec2 off = Internal::CalcMaxCharOffset(text, font, scale);
-        usedPos.y -= off.y * remap;
-        usedPos.x += Math::Abs(off.x) * remap;
-        usedPos.y += font->m_ascent + font->m_descent;
+        usedPos.y += size.y;
+        // usedPos.x += Math::Abs(off.x) * remap;
+        // usedPos.y += font->m_ascent + font->m_descent;
 
         if (wrapWidth == 0.0f || size.x < wrapWidth)
         {
             if (alignment == TextAlignment::Center)
+            {
                 usedPos.x -= size.x / 2.0f;
+            }
             else if (alignment == TextAlignment::Right)
                 usedPos.x -= size.x;
             Internal::DrawText(buf, font, text, usedPos, offset, color, spacing, isGradient, scale);
@@ -3039,14 +3043,16 @@ namespace LinaVG
 
             for (int i = 0; i < lines.m_size; i++)
             {
-
                 if (alignment == TextAlignment::Center)
+                {
                     usedPos.x = pos.x - lines[i]->m_size.x / 2.0f;
+                }
                 else if (alignment == TextAlignment::Right)
                     usedPos.x = pos.x - lines[i]->m_size.x;
 
                 Internal::DrawText(buf, font, lines[i]->m_str.c_str(), usedPos, offset, color, spacing, isGradient, scale);
-                usedPos.y += font->m_newLineHeight + newLineSpacing;
+                const float increase = font->m_newLineHeight + newLineSpacing;
+                usedPos.y += increase;
                 delete lines[i];
             }
 
@@ -3129,12 +3135,17 @@ namespace LinaVG
         auto drawChar = [&](TextCharacter& ch) {
             const int startIndex = buf->m_vertexBuffer.m_size;
 
+            if (first)
+            {
+                // pos.y += ch.m_size.y;
+                // first = false;
+            }
             if (first && scale != 1.0f)
             {
-                const float desiredY = pos.y - ch.m_bearing.y;
-                const float actualY  = pos.y - ch.m_bearing.y * scale;
-                pos.y += Math::Abs(actualY - desiredY) * (scale > 1.0f ? 1.0f : -1.0f);
-                first = false;
+                // const float desiredY = pos.y - ch.m_bearing.y;
+                // const float actualY  = pos.y - ch.m_bearing.y * scale;
+                // pos.y += Math::Abs(actualY - desiredY) * (scale > 1.0f ? 1.0f : -1.0f);
+                // first = false;
             }
 
             float x2 = pos.x + ch.m_bearing.x * scale;
@@ -3237,21 +3248,26 @@ namespace LinaVG
         {
             auto& ch = font->m_characterGlyphs[*c];
             float x  = ch.m_advance.x * scale;
-            float y  = ch.m_size.y * scale;
+            float y  = ch.m_bearing.y * scale;
             totalWidth += x + spacing;
             maxCharacterHeight = Math::Max(maxCharacterHeight, y);
         }
 
         if (font->m_isSDF)
         {
-            float remapY   = Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f);
-            float remapX   = Math::Remap(sdfThickness, 0.5f, 1.0f, 0.0f, 1.0f);
-            remapX         = Math::Clamp(remapX, 0.0f, 1.0f);
-            remapY         = Math::Clamp(remapY, 0.0f, 2.0f);
-            const Vec2 off = Internal::CalcMaxCharOffset(text, font, scale);
-            maxCharacterHeight -= off.y * remapY;
-            totalWidth += Math::Abs(off.x) * remapX;
+            maxCharacterHeight += font->m_descent;
         }
+
+        // if (font->m_isSDF)
+        // {
+        //     float remapY   = Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f);
+        //     float remapX   = Math::Remap(sdfThickness, 0.5f, 1.0f, 0.0f, 1.0f);
+        //     remapX         = Math::Clamp(remapX, 0.0f, 1.0f);
+        //     remapY         = Math::Clamp(remapY, 0.0f, 2.0f);
+        //     const Vec2 off = Internal::CalcMaxCharOffset(text, font, scale);
+        //     maxCharacterHeight -= off.y * remapY;
+        //     totalWidth += Math::Abs(off.x) * remapX;
+        // }
 
         return Vec2(totalWidth, maxCharacterHeight);
     }
@@ -3289,7 +3305,8 @@ namespace LinaVG
             size.y += calcSize.y;
 
             if (i < lines.m_size - 1)
-                size.y += newLineSpacing + font->m_newLineHeight;
+                size.y += newLineSpacing;
+            // size.y += newLineSpacing + font->m_newLineHeight;
 
             delete lines[i];
         }
