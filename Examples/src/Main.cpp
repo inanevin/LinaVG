@@ -67,7 +67,6 @@ namespace LinaVG
             LinaVG::Config.flipTextureUVs                       = false;
             LinaVG::Config.framebufferScale.x = LinaVG::Config.framebufferScale.y = exampleBackend.GetFramebufferScale();
             LinaVG::Config.aaMultiplier                                             = 1.5f;
-            LinaVG::Config.textKerningEnabled = true;
 
             LinaVG::Config.errorCallback = [](const std::string& err) {
                 std::cerr << err.c_str() << std::endl;
