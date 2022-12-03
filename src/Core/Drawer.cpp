@@ -2556,7 +2556,7 @@ namespace LinaVG
             const BackendHandle handle      = outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle;
             const Vec2          uvOffset    = outlineType == OutlineCallType::AA ? opts.textureUVOffset : opts.outlineOptions.textureUVOffset;
             const Vec2          uvTiling    = outlineType == OutlineCallType::AA ? opts.textureUVTiling : opts.outlineOptions.textureUVTiling;
-            destBuf                         = &Internal::g_rendererData.GetTextureBuffer(handle, uvTiling, uvOffset, opts.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+            destBuf                         = &Internal::g_rendererData.GetTextureBuffer(handle, uvTiling, uvOffset, opts.outlineOptions.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_textureBuffers[sourceIndex];
@@ -2685,7 +2685,7 @@ namespace LinaVG
             const BackendHandle handle      = outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle;
             const Vec2          uvOffset    = outlineType == OutlineCallType::AA ? opts.textureUVOffset : opts.outlineOptions.textureUVOffset;
             const Vec2          uvTiling    = outlineType == OutlineCallType::AA ? opts.textureUVTiling : opts.outlineOptions.textureUVTiling;
-            destBuf                         = &Internal::g_rendererData.GetTextureBuffer(handle, uvTiling, uvOffset, opts.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+            destBuf                         = &Internal::g_rendererData.GetTextureBuffer(handle, uvTiling, uvOffset, opts.outlineOptions.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
             if (sourceIndex != -1)
                 sourceBuffer = &Internal::g_rendererData.m_textureBuffers[sourceIndex];
@@ -2928,11 +2928,10 @@ namespace LinaVG
 
     void Internal::ParseTextIntoWords(Array<TextPart*>& arr, const char* text, LinaVGFont* font, float scale, float spacing)
     {
-        bool          added          = false;
-        Vec2          size           = Vec2(0.0f, 0.0f);
-        LINAVG_STRING word           = "";
-        LINAVG_STRING strTxt         = text;
-        float         maxBearingDiff = 0.0f;
+        bool          added  = false;
+        Vec2          size   = Vec2(0.0f, 0.0f);
+        LINAVG_STRING word   = "";
+        LINAVG_STRING strTxt = text;
 
         for (auto x : strTxt)
         {
@@ -2943,29 +2942,25 @@ namespace LinaVG
                     TextPart* w = new TextPart();
                     w->m_size   = size;
                     w->m_str    = word;
-                    w->m_maxBearingYDiff += maxBearingDiff * scale;
                     arr.push_back(w);
                 }
-                added          = false;
-                size           = Vec2(0.0f, 0.0f);
-                word           = "";
-                maxBearingDiff = 0.0f;
+                added = false;
+                size  = Vec2(0.0f, 0.0f);
+                word  = "";
             }
             else
             {
                 auto& ch = font->m_characterGlyphs[x];
                 size.y   = Math::Max(size.y, (ch.m_size.y) * scale);
                 size.x += ch.m_advance.x * scale + spacing;
-                maxBearingDiff = Math::Max(maxBearingDiff, (ch.m_size.y - ch.m_bearing.y));
-                word           = word + x;
-                added          = true;
+                word  = word + x;
+                added = true;
             }
         }
 
         TextPart* w = new TextPart();
         w->m_size   = size;
         w->m_str    = word;
-        w->m_maxBearingYDiff += maxBearingDiff * scale;
         arr.push_back(w);
     }
 
@@ -2983,8 +2978,7 @@ namespace LinaVG
         {
             totalWidth += words[i]->m_size.x;
             // maxHeight = Math::Max(words[i]->m_size.y - offset.y * remap, maxHeight);
-            maxHeight       = Math::Max(words[i]->m_size.y, maxHeight);
-            maxBearingDiffY = Math::Max(maxBearingDiffY, words[i]->m_maxBearingYDiff);
+            maxHeight = Math::Max(words[i]->m_size.y, maxHeight);
 
             if (totalWidth > wrapWidth)
             {
@@ -2992,11 +2986,10 @@ namespace LinaVG
                 if (i == 0)
                     break;
 
-                TextPart* newLine          = new TextPart();
-                newLine->m_size.x          = totalWidth - words[i]->m_size.x - spaceAdvance;
-                newLine->m_size.y          = maxHeight;
-                newLine->m_str             = append;
-                newLine->m_maxBearingYDiff = maxBearingDiffY;
+                TextPart* newLine = new TextPart();
+                newLine->m_size.x = totalWidth - words[i]->m_size.x - spaceAdvance;
+                newLine->m_size.y = maxHeight;
+                newLine->m_str    = append;
                 lines.push_back(newLine);
                 append     = words[i]->m_str + " ";
                 totalWidth = words[i]->m_size.x + spaceAdvance;
@@ -3022,11 +3015,11 @@ namespace LinaVG
         const int  bufStart = buf->m_vertexBuffer.m_size;
         const Vec2 size     = Internal::CalcTextSize(text, font, scale, spacing, sdfThickness);
         Vec2       usedPos  = pos;
+        usedPos.y += size.y;
+
         // float      remap    = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 0.0f, 1.0f) : 0.0f;
         // remap               = Math::Clamp(remap, 0.0f, 1.0f);
-
         // const Vec2 off = Internal::CalcMaxCharOffset(text, font, scale);
-        usedPos.y += size.y;
         // usedPos.x += Math::Abs(off.x) * remap;
         // usedPos.y += font->m_ascent + font->m_descent;
 
@@ -3060,8 +3053,7 @@ namespace LinaVG
                     usedPos.x = pos.x - lines[i]->m_size.x;
 
                 Internal::DrawText(buf, font, lines[i]->m_str.c_str(), usedPos, offset, color, spacing, isGradient, scale);
-                const float maxBearing = lines[i]->m_maxBearingYDiff;
-                usedPos.y +=  font->m_newLineHeight * scale;
+                usedPos.y += font->m_newLineHeight * scale + newLineSpacing;
                 delete lines[i];
             }
 
@@ -3264,7 +3256,7 @@ namespace LinaVG
 
         if (font->m_isSDF)
         {
-            maxCharacterHeight += font->m_descent;
+          //  maxCharacterHeight += font->m_descent;
         }
 
         // if (font->m_isSDF)
@@ -3292,7 +3284,7 @@ namespace LinaVG
 
         if (lines.m_size == 1)
         {
-            const Vec2 finalSize = Internal::CalcTextSize(lines[0]->m_str.c_str(), font, scale, spacing, sdfThickness);
+            const Vec2 finalSize = lines[0]->m_size;
 
             for (int i = 0; i < lines.m_size; i++)
                 delete lines[i];
@@ -3311,12 +3303,13 @@ namespace LinaVG
         {
             const Vec2 calcSize = lines[i]->m_size;
             size.x              = Math::Max(calcSize.x, size.x);
-           // size.y += lines[i]->m_maxBearingYDiff;
-            size.y += font->m_newLineHeight + newLineSpacing + lines[i]->m_maxBearingYDiff;
+            if (i < lines.m_size - 1)
+                size.y += font->m_newLineHeight * scale + newLineSpacing;
+            else
+                size.y += calcSize.y;
 
-            //if (i < lines.m_size - 1)
-            //    size.y += font->m_newLineHeight + newLineSpacing + lines[i]->m_maxBearingYDiff;
-
+            // if (i < lines.m_size - 1)
+            //     size.y += font->m_newLineHeight + newLineSpacing + lines[i]->m_maxBearingYDiff;
             // size.y += newLineSpacing + font->m_newLineHeight;
 
             delete lines[i];
