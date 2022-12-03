@@ -3025,7 +3025,7 @@ namespace LinaVG
         // float      remap    = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 0.0f, 1.0f) : 0.0f;
         // remap               = Math::Clamp(remap, 0.0f, 1.0f);
 
-        const Vec2 off = Internal::CalcMaxCharOffset(text, font, scale);
+        // const Vec2 off = Internal::CalcMaxCharOffset(text, font, scale);
         usedPos.y += size.y;
         // usedPos.x += Math::Abs(off.x) * remap;
         // usedPos.y += font->m_ascent + font->m_descent;
@@ -3060,7 +3060,8 @@ namespace LinaVG
                     usedPos.x = pos.x - lines[i]->m_size.x;
 
                 Internal::DrawText(buf, font, lines[i]->m_str.c_str(), usedPos, offset, color, spacing, isGradient, scale);
-                usedPos.y += font->m_newLineHeight + newLineSpacing + lines[i]->m_maxBearingYDiff;
+                const float maxBearing = lines[i]->m_maxBearingYDiff;
+                usedPos.y +=  font->m_newLineHeight * scale;
                 delete lines[i];
             }
 
@@ -3310,10 +3311,12 @@ namespace LinaVG
         {
             const Vec2 calcSize = lines[i]->m_size;
             size.x              = Math::Max(calcSize.x, size.x);
-            size.y += calcSize.y;
+           // size.y += lines[i]->m_maxBearingYDiff;
+            size.y += font->m_newLineHeight + newLineSpacing + lines[i]->m_maxBearingYDiff;
 
-            if (i < lines.m_size - 1)
-                size.y += newLineSpacing + lines[i]->m_maxBearingYDiff;
+            //if (i < lines.m_size - 1)
+            //    size.y += font->m_newLineHeight + newLineSpacing + lines[i]->m_maxBearingYDiff;
+
             // size.y += newLineSpacing + font->m_newLineHeight;
 
             delete lines[i];

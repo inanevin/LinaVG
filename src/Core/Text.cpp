@@ -199,11 +199,11 @@ namespace LinaVG
             {
                 setSizes(c);
 
-                // if (font->m_supportsKerning)
-                // {
-                //     for (FT_ULong a = 32; a < c; a++)
-                //         storeKerning(a, c);
-                // }
+                if (font->m_supportsKerning)
+                {
+                    for (FT_ULong a = 32; a < c; a++)
+                        storeKerning(a, c);
+                }
             }
 
             bool useCustomRanges = customRangesSize != 0;

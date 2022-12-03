@@ -62,7 +62,7 @@ namespace LinaVG
             m_descFont        = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
             m_textDemoFont    = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
             m_textDemoSDFFont = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
-            aqFont            = LinaVG::LoadFont("Resources/Fonts/DefaultFont.ttf", false, 40);
+            aqFont            = LinaVG::LoadFont("Resources/Fonts/Nirmala.ttf", false, 40);
             aq2Font           = LinaVG::LoadFont("Resources/Fonts/DefaultFont.ttf", true, 40);
 
             m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
@@ -107,22 +107,23 @@ namespace LinaVG
             style.isFilled = true;
             LinaVG::DrawRect(Vec2(0.0f, 0.0f), screenSize, style, 0.0f, 0);
 
-            const char* aq  = "aqBcc DXEWERT";
+            const char* aq  = "tHqS is A tesST stR";
             Vec2        pos = Vec2(500, 500);
 
             TextOptions test;
             test.font      = aqFont;
             test.color     = Vec4(0, 0, 1, 1);
             test.textScale = 2.0f;
-            //test.alignment = TextAlignment::Center;
-          // test.wrapWidth = 500;
+            // test.alignment = TextAlignment::Center;
+           test.wrapWidth = 450;
 
             SDFTextOptions test2;
             test2.font         = aq2Font;
             test2.color        = Vec4(0, 0, 1, 1);
             test2.sdfThickness = 0.5f;
-            test2.textScale    = 2.0f;
-            // test2.wrapWidth = 500;
+            test2.textScale    = 1.0f;
+            test2.wrapWidth = 250;
+           // test.alignment = TextAlignment::Center;
 
             bool drawSDF    = false;
             bool drawNormal = true;

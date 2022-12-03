@@ -275,7 +275,7 @@ namespace LinaVG
     LINAVG_API void DrawTextSDF(const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false);
 
     /// <summary>
-    /// Returns a Vec2 containing max width & height this text will occupy.
+    /// Returns a Vec2 containing max width and height this text will occupy.
     /// Takes spacing and wrapping into account.
     /// </summary>
     /// <param name="text">Text, lol.</param>
@@ -284,7 +284,7 @@ namespace LinaVG
     LINAVG_API Vec2 CalculateTextSize(const char* text, TextOptions& opts);
 
     /// <summary>
-    /// Returns a Vec2 containing max width & height this text will occupy.
+    /// Returns a Vec2 containing max width and height this text will occupy.
     /// Takes spacing and wrapping into account.
     /// </summary>
     /// <param name="text">Text, lol.</param>
