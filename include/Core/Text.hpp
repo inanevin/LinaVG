@@ -74,14 +74,11 @@ namespace LinaVG
         BackendHandle                                 m_texture         = 0;
         int                                           m_size            = 0;
         float                                         m_newLineHeight   = 0.0f;
-        float                                         m_ascent          = 0.0f;
-        float                                         m_descent         = 0.0f;
         float                                         m_spaceAdvance    = 0.0f;
-        float                                         m_yScale          = 0.0f;
         bool                                          m_isSDF           = false;
         bool                                          m_supportsKerning = false;
         LINAVG_MAP<GlyphEncoding, TextCharacter>      m_characterGlyphs;
-        LINAVG_MAP<unsigned long, KerningInformation> m_kerningTable;
+        // LINAVG_MAP<unsigned long, KerningInformation> m_kerningTable;
     };
 
     struct FontAtlas
@@ -158,7 +155,7 @@ namespace LinaVG
     /// <summary>
     /// Returns the kerning vector between two given glphys.
     /// </summary>
-    LINAVG_API Vec2 GetKerning(LinaVGFont* font, int previousGlyph, int currentGlyph);
+    // LINAVG_API Vec2 GetKerning(LinaVGFont* font, int previousGlyph, int currentGlyph);
 
     namespace Internal
     {
