@@ -811,7 +811,7 @@ namespace LinaVG
         /// <summary>
         /// Enable/disable kerning feature. Has a slight performance impact.
         /// </summary>
-        bool textKerningEnabled = false;
+        // bool textKerningEnabled = false;
     };
 
     /// <summary>

@@ -114,14 +114,15 @@ namespace LinaVG
             // Texture alignment changes might be necessary on some APIs such as OpenGL
             Backend::BaseBackend::Get()->SaveAPIState();
 
-            LinaVGFont* font        = new LinaVGFont();
-            font->m_size            = size;
-            font->m_isSDF           = loadAsSDF;
-            font->m_newLineHeight   = static_cast<float>(face->size->metrics.height) / 64.0f;
-            font->m_ascent          = static_cast<float>(face->size->metrics.ascender) / 64.0f;
-            font->m_descent         = static_cast<float>(face->size->metrics.descender) / 64.0f;
-            font->m_yScale          = face->size->metrics.y_scale;
-            font->m_supportsKerning = LinaVG::Config.textKerningEnabled && FT_HAS_KERNING(face) != 0;
+            LinaVGFont* font      = new LinaVGFont();
+            font->m_size          = size;
+            font->m_isSDF         = loadAsSDF;
+            font->m_newLineHeight = static_cast<float>(face->size->metrics.height) / 64.0f;
+            font->m_ascent        = static_cast<float>(face->size->metrics.ascender) / 64.0f;
+            font->m_descent       = static_cast<float>(face->size->metrics.descender) / 64.0f;
+            font->m_yScale        = face->size->metrics.y_scale;
+            // font->m_supportsKerning = LinaVG::Config.textKerningEnabled && FT_HAS_KERNING(face) != 0;
+            font->m_supportsKerning = false;
 
             auto&        characterMap      = font->m_characterGlyphs;
             int          maxHeight         = 0;
@@ -201,8 +202,8 @@ namespace LinaVG
 
                 if (font->m_supportsKerning)
                 {
-                    for (FT_ULong a = 32; a < c; a++)
-                        storeKerning(a, c);
+                    // for (FT_ULong a = 32; a < c; a++)
+                    //     storeKerning(a, c);
                 }
             }
 
