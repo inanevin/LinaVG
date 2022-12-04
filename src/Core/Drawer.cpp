@@ -3133,6 +3133,9 @@ namespace LinaVG
         int            characterCount      = 0;
         bool           first               = true;
 
+        pos.x = static_cast<int>(pos.x);
+        pos.y = static_cast<int>(pos.y);
+
         auto drawChar = [&](TextCharacter& ch) {
             const int startIndex = buf->m_vertexBuffer.m_size;
 
@@ -3256,7 +3259,7 @@ namespace LinaVG
 
         if (font->m_isSDF)
         {
-          //  maxCharacterHeight += font->m_descent;
+            //  maxCharacterHeight += font->m_descent;
         }
 
         // if (font->m_isSDF)
