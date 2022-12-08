@@ -71,13 +71,13 @@ namespace LinaVG
     class LinaVGFont
     {
     public:
-        BackendHandle                                 m_texture         = 0;
-        int                                           m_size            = 0;
-        float                                         m_newLineHeight   = 0.0f;
-        float                                         m_spaceAdvance    = 0.0f;
-        bool                                          m_isSDF           = false;
-        bool                                          m_supportsKerning = false;
-        LINAVG_MAP<GlyphEncoding, TextCharacter>      m_characterGlyphs;
+        BackendHandle                            m_texture         = 0;
+        int                                      m_size            = 0;
+        float                                    m_newLineHeight   = 0.0f;
+        float                                    m_spaceAdvance    = 0.0f;
+        bool                                     m_isSDF           = false;
+        bool                                     m_supportsKerning = false;
+        LINAVG_MAP<GlyphEncoding, TextCharacter> m_characterGlyphs;
         // LINAVG_MAP<unsigned long, KerningInformation> m_kerningTable;
     };
 
@@ -86,6 +86,7 @@ namespace LinaVG
         BackendHandle m_texture        = 0;
         unsigned int  m_currentOffsetX = 0;
         unsigned int  m_currentOffsetY = 0;
+        unsigned int  m_rowSizeY       = 0;
     };
     /// <summary>
     /// Management for text rendering.

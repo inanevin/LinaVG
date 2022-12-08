@@ -41,6 +41,7 @@ Timestamp: 3/26/2022 10:36:46 AM
 
 // Headers here.
 #include <functional>
+#include <string>
 
 namespace LinaVG
 {
