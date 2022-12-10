@@ -354,7 +354,7 @@ namespace LinaVG
             newCache.vtxBuffer.push_back(buf->m_vertexBuffer[i]);
 
         for (int i = indexStart; i < buf->m_indexBuffer.m_size; i++)
-            newCache.indxBuffer.push_back(buf->m_indexBuffer[i]);
+            newCache.indxBuffer.push_back(buf->m_indexBuffer[i] - vtxStart);
     }
 
     void RendererData::AddSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
@@ -368,7 +368,7 @@ namespace LinaVG
             newCache.vtxBuffer.push_back(buf->m_vertexBuffer[i]);
 
         for (int i = indexStart; i < buf->m_indexBuffer.m_size; i++)
-            newCache.indxBuffer.push_back(buf->m_indexBuffer[i]);
+            newCache.indxBuffer.push_back(buf->m_indexBuffer[i] - vtxStart);
     }
 
     TextCache* RendererData::CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf)
@@ -381,11 +381,13 @@ namespace LinaVG
         if (!it->second.opts.IsSame(opts))
             return nullptr;
 
+        const int vtxStart = buf->m_vertexBuffer.m_size;
+
         for (auto& b : it->second.vtxBuffer)
             buf->PushVertex(b);
 
         for (auto& i : it->second.indxBuffer)
-            buf->PushIndex(i);
+            buf->PushIndex(i + vtxStart);
 
         return &it->second;
     }
@@ -400,11 +402,13 @@ namespace LinaVG
         if (!it->second.opts.IsSame(opts))
             return nullptr;
 
+        const int vtxStart = buf->m_vertexBuffer.m_size;
+
         for (auto& b : it->second.vtxBuffer)
             buf->PushVertex(b);
 
         for (auto& i : it->second.indxBuffer)
-            buf->PushIndex(i);
+            buf->PushIndex(i + vtxStart);
 
         return &it->second;
     }
