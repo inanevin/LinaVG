@@ -2829,22 +2829,40 @@ namespace LinaVG
 
         if (opts.isFilled)
         {
-            copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, thickness, recalcUvs);
-
-            if (useAA)
+            if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Outwards)
             {
-                StyleOptions opts2                 = StyleOptions(opts);
-                opts2.isFilled                     = false;
-                opts2.outlineOptions.drawDirection = OutlineDrawDirection::Outwards;
-                destBuf                            = DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
+                copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, thickness, recalcUvs);
 
-                opts2.outlineOptions.drawDirection = OutlineDrawDirection::Inwards;
-                DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
+                if (useAA)
+                {
+                    StyleOptions opts2                 = StyleOptions(opts);
+                    opts2.isFilled                     = false;
+                    opts2.outlineOptions.drawDirection = OutlineDrawDirection::Outwards;
+                    destBuf                            = DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
+
+                    opts2.outlineOptions.drawDirection = OutlineDrawDirection::Inwards;
+                    DrawOutline(destBuf, opts2, vertexCount * 2, skipEnds, drawOrder, OutlineCallType::OutlineAA);
+                }
+            }
+            else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Inwards)
+            {
+                copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, -thickness, recalcUvs);
+
+                if (useAA)
+                {
+                   // AA outline to the current outline we are drawing
+                    StyleOptions opts2                 = StyleOptions(opts);
+                    opts2.outlineOptions.drawDirection = OutlineDrawDirection::Outwards;
+                    destBuf                            = DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
+
+                    opts2.outlineOptions.drawDirection = OutlineDrawDirection::Inwards;
+                    opts2.isFilled = false;
+                    DrawOutline(destBuf, opts2, vertexCount *2, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
+                }
             }
         }
         else
         {
-
             if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Outwards)
             {
                 if (useAA)
@@ -2872,7 +2890,7 @@ namespace LinaVG
             {
                 if (useAA)
                 {
-                    // // AA outline to the shape we are drawing
+                    // AA outline to the shape we are drawing
                     StyleOptions opts3   = StyleOptions(opts);
                     opts3.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Outwards);
                     DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
