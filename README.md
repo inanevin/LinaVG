@@ -104,7 +104,7 @@ LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/Lina
 
 # Installation
 
-[Releases](https://github.com/inanevin/LinaVG/releases) contain pre-built binaries for linking against LinaVG. Your application first needs to link against Glad and FreeType libraries distributed alongside with LinaVG release. Simply link against those two, then against LinaVG and you are good to go. If you plan to use LinaVG within your source-code and compile it along with your application, again you still need to link against those two, then include the header & source files of LinaVG in your application.
+[Releases](https://github.com/inanevin/LinaVG/releases) contain pre-built binaries for linking against LinaVG. Your application first needs to link against Glad (only if using the embedded OpenGL renderer) and FreeType libraries (if want to use text rendering) distributed alongside with LinaVG release. Simply link against those two, then against LinaVG and you are good to go. If you plan to use LinaVG within your source-code and compile it along with your application, again you still need to link against those two, then include the header & source files of LinaVG in your application.
 
 If you choose to compile custom versions of said dependencies, their respective versions are available on [Lina Dependencies](https://github.com/inanevin/LinaDependencies/tree/linavg) repository.
 
