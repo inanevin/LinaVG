@@ -645,11 +645,14 @@ namespace LinaVG
         bool isFilled = true;
     };
 
+    // Padded for 16 byte alignment of GPU architectures
     struct Vertex
     {
-        Vec2 pos;
-        Vec2 uv;
-        Vec4 col;
+        Vec2  pos;
+        float pad_1[2];
+        Vec2  uv;
+        float pad_2[2];
+        Vec4  col;
     };
 
     LINAVG_API struct Configuration
