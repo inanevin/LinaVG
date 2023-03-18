@@ -134,7 +134,7 @@ namespace LinaVG
     /// You may need to Clear your color buffer bits before calling StartFrame. LinaVG doesn't do any clearing.
     /// </summary>
     /// <returns></returns>
-    LINAVG_API void StartFrame(int threadCount = 0);
+    LINAVG_API void StartFrame(int threadCount = 1);
 
     /// <summary>
     /// Call after you submit your draw requests to LinaVG, before EndFrame;
