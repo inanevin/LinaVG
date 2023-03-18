@@ -367,7 +367,7 @@ namespace LinaVG
         void ConvexFillVertices(int startIndex, int endIndex, Array<Index>& indices, bool skipLastTriangle = false);
 
         /// Fills convex shapes without the assumption of a center vertex. Used for filling outer areas of non-filled shapes.
-        void ConvexExtrudeVertices(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing = false);
+        void ConvexExtrudeVertices(DrawBuffer* buf, const StyleOptions& style, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing = false);
 
         /// Fill the point array with points to draw an arc with a direction hint.
         void GetArcPoints(Array<Vec2>& points, const Vec2& p1, const Vec2& p2, Vec2 directionHintPoint = Vec2(-1.0f, -1.0f), float radius = 0.0f, float segments = 36, bool flip = false, float angleOffset = 0.0f);

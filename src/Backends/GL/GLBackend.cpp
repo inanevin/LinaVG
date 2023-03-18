@@ -236,8 +236,8 @@ namespace LinaVG::Backend
         glViewport(0, 0, (GLsizei)Config.displayWidth, (GLsizei)Config.displayHeight);
 
         // Ortho projection matrix.
-        int fb_width  = (int)(Config.displayWidth * Config.framebufferScale.x);
-        int fb_height = (int)(Config.displayHeight * Config.framebufferScale.y);
+        int fb_width  = (int)(Config.displayWidth);
+        int fb_height = (int)(Config.displayHeight);
         if (fb_width <= 0 || fb_height <= 0)
         {
             m_backendData.m_skipDraw = true;

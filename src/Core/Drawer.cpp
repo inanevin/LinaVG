@@ -69,7 +69,7 @@ namespace LinaVG
         StyleOptions style;
         style.color          = col;
         style.isFilled       = true;
-        const float distance = Config.framebufferScale.x / 2.0f;
+        const float distance = 0.5f;
         DrawRect(thread, Vec2(p1.x - distance, p1.y - distance), Vec2(p1.x + distance, p1.y + distance), style);
     }
 
@@ -769,7 +769,7 @@ namespace LinaVG
             usedOpts.sdfSoftness    = opts.sdfDropShadowSoftness;
             DrawBuffer* dsBuf       = &Internal::g_rendererData[thread].GetSDFTextBuffer(font->m_texture, drawOrder, usedOpts, true);
             const int   dsStart     = buf->m_vertexBuffer.m_size;
-            Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * Config.framebufferScale.x, opts.dropShadowOffset.y * Config.framebufferScale.y), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness);
+            Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness);
         }
     }
 
@@ -823,7 +823,7 @@ namespace LinaVG
         if (opts.dropShadowOffset.x != 0.0f || opts.dropShadowOffset.y != 0.0f)
         {
             DrawBuffer* dsBuf = &Internal::g_rendererData[thread].GetSimpleTextBuffer(font->m_texture, drawOrder, true);
-            Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * Config.framebufferScale.x, opts.dropShadowOffset.y * Config.framebufferScale.y), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f);
+            Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f);
         }
     }
 
@@ -896,7 +896,7 @@ namespace LinaVG
                 buf->PushIndex(current + 3);
             }
             else
-                ConvexExtrudeVertices(buf, center, current, current + 3, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, current, current + 3, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, current, opts.isFilled ? current + 3 : current + 7, rotateAngle);
 
@@ -938,7 +938,7 @@ namespace LinaVG
                 buf->PushIndex(current + 3);
             }
             else
-                ConvexExtrudeVertices(buf, center, current, current + 3, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, current, current + 3, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, current, opts.isFilled ? current + 3 : current + 7, rotateAngle);
 
@@ -967,7 +967,7 @@ namespace LinaVG
             if (opts.isFilled)
                 ConvexFillVertices(startIndex, startIndex + 4, buf->m_indexBuffer);
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + 3, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + 3, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + 4 : startIndex + 7, rotateAngle);
 
@@ -1065,7 +1065,7 @@ namespace LinaVG
                 ConvexFillVertices(startIndex, startIndex + vertexCount, buf->m_indexBuffer);
             }
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + vertexCount - 1, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + vertexCount - 1, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + vertexCount : startIndex + (vertexCount * 2) - 1, rotateAngle);
 
@@ -1136,7 +1136,7 @@ namespace LinaVG
                 buf->PushIndex(startIndex + 2);
             }
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + 2, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + 2, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, startIndex, opts.isFilled ? startIndex + 2 : startIndex + 5, rotateAngle);
 
@@ -1172,7 +1172,7 @@ namespace LinaVG
                 buf->PushIndex(startIndex + 2);
             }
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + 2, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + 2, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, startIndex, opts.isFilled ? startIndex + 2 : startIndex + 5, rotateAngle);
 
@@ -1202,7 +1202,7 @@ namespace LinaVG
             if (opts.isFilled)
                 ConvexFillVertices(startIndex, startIndex + 3, buf->m_indexBuffer);
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + 2, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + 2, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + 3 : startIndex + 5, rotateAngle);
 
@@ -1341,7 +1341,7 @@ namespace LinaVG
                 ConvexFillVertices(startIndex, startIndex + vertexCount, buf->m_indexBuffer);
             }
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + vertexCount - 1, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + vertexCount - 1, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + vertexCount : startIndex + (vertexCount * 2) - 1, rotateAngle);
 
@@ -1399,7 +1399,7 @@ namespace LinaVG
             if (opts.isFilled)
                 ConvexFillVertices(startIndex, startIndex + n, buf->m_indexBuffer);
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + n - 1, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + n - 1, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + n : startIndex + (n * 2) - 1, rotateAngle);
 
@@ -1429,7 +1429,7 @@ namespace LinaVG
             if (opts.isFilled)
                 ConvexFillVertices(startIndex, startIndex + n, buf->m_indexBuffer);
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + n - 1, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + n - 1, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + n : startIndex + (n * 2) - 1, rotateAngle);
 
@@ -1458,7 +1458,7 @@ namespace LinaVG
             if (opts.isFilled)
                 ConvexFillVertices(startIndex, startIndex + n, buf->m_indexBuffer);
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + n - 1, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + n - 1, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + n : startIndex + (n * 2) - 1, rotateAngle);
 
@@ -1520,7 +1520,7 @@ namespace LinaVG
             if (opts.isFilled)
                 ConvexFillVertices(startIndex, startIndex + totalSize, buf->m_indexBuffer, !isFullCircle);
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + totalSize, opts.thickness.start, !isFullCircle);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + totalSize, opts.thickness.start, !isFullCircle);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + totalSize : startIndex + (totalSize * 2) + 1, rotateAngle);
 
@@ -1616,7 +1616,7 @@ namespace LinaVG
             if (opts.isFilled)
                 ConvexFillVertices(startIndex, startIndex + totalSize, buf->m_indexBuffer, !isFullCircle);
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + totalSize, opts.thickness.start, !isFullCircle);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + totalSize, opts.thickness.start, !isFullCircle);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + totalSize : startIndex + (totalSize * 2) + 1, rotateAngle);
 
@@ -1713,7 +1713,7 @@ namespace LinaVG
             if (opts.isFilled)
                 ConvexFillVertices(startIndex, startIndex + totalSize, buf->m_indexBuffer, !isFullCircle);
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + totalSize, opts.thickness.start, !isFullCircle);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + totalSize, opts.thickness.start, !isFullCircle);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + totalSize : startIndex + (totalSize * 2) + 1, rotateAngle);
 
@@ -1859,7 +1859,7 @@ namespace LinaVG
             if (opts.isFilled)
                 ConvexFillVertices(startIndex, startIndex + size, buf->m_indexBuffer);
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + size - 1, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + size - 1, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + size : startIndex + (size * 2) - 1, rotateAngle);
 
@@ -1903,7 +1903,7 @@ namespace LinaVG
             if (opts.isFilled)
                 ConvexFillVertices(startIndex, startIndex + size, buf->m_indexBuffer);
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + size - 1, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + size - 1, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + size : startIndex + (size * 2) - 1, rotateAngle);
 
@@ -1946,7 +1946,7 @@ namespace LinaVG
             if (opts.isFilled)
                 ConvexFillVertices(startIndex, startIndex + size, buf->m_indexBuffer);
             else
-                ConvexExtrudeVertices(buf, center, startIndex, startIndex + size - 1, opts.thickness.start);
+                ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + size - 1, opts.thickness.start);
 
             RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + size : startIndex + (size * 2) - 1, rotateAngle);
 
@@ -1979,10 +1979,10 @@ namespace LinaVG
             }
         }
 
-        void ConvexExtrudeVertices(DrawBuffer* buf, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing)
+        void ConvexExtrudeVertices(DrawBuffer* buf, const StyleOptions& opts, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing)
         {
             const int totalSize = endIndex - startIndex + 1;
-            thickness *= Config.framebufferScale.x;
+            thickness *= opts.framebufferScale;
 
             // Extrude vertices.
             for (int i = startIndex; i < startIndex + totalSize; i++)
@@ -2604,7 +2604,7 @@ namespace LinaVG
 
         DrawBuffer* DrawOutlineAroundShape(int thread, DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw, int drawOrder, OutlineCallType outlineType)
         {
-            float      thickness   = outlineType != OutlineCallType::Normal ? Config.framebufferScale.x * Config.aaMultiplier : (defThickness * Config.framebufferScale.x);
+            float      thickness   = outlineType != OutlineCallType::Normal ? opts.framebufferScale * opts.aaMultiplier * Config.globalAAMultiplier * Config.globalFramebufferScale : (defThickness * opts.framebufferScale * Config.globalFramebufferScale);
             const bool isAAOutline = outlineType != OutlineCallType::Normal;
 
             bool isGradient = false;
@@ -2730,7 +2730,7 @@ namespace LinaVG
         DrawBuffer* DrawOutline(int thread, DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds, int drawOrder, OutlineCallType outlineType, bool reverseDrawDir)
         {
             const bool isAAOutline = outlineType != OutlineCallType::Normal;
-            float      thickness   = isAAOutline ? Config.framebufferScale.x * Config.aaMultiplier : (opts.outlineOptions.thickness * Config.framebufferScale.x);
+            float      thickness   = isAAOutline ? opts.framebufferScale * opts.aaMultiplier * Config.globalAAMultiplier * Config.globalFramebufferScale : (opts.outlineOptions.thickness * opts.framebufferScale * Config.globalFramebufferScale);
 
             bool isGradient = false;
 

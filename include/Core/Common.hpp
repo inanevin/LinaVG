@@ -413,6 +413,7 @@ namespace LinaVG
             spacing          = opts.spacing;
             newLineSpacing   = opts.newLineSpacing;
             wrapWidth        = opts.wrapWidth;
+            framebufferScale = opts.framebufferScale;
         }
 
         bool CheckColors(const Vec4& c1, const Vec4& c2)
@@ -468,6 +469,12 @@ namespace LinaVG
         float textScale = 1.0f;
 
         /// <summary>
+        /// Used as an additional scale on outline and AA thickness.
+        /// Normally you can set this to whatever your OS' display scale is, e.g. OS scaling factor on high-dpi monitors.
+        /// </summary>
+        float framebufferScale = 1.0f;
+
+        /// <summary>
         /// Defines extra spacing between each letter.
         /// </summary>
         float spacing = 0.0f;
@@ -511,6 +518,7 @@ namespace LinaVG
             sdfSoftness            = opts.sdfSoftness;
             sdfThickness           = opts.sdfThickness;
             sdfDropShadowSoftness  = opts.sdfDropShadowSoftness;
+            framebufferScale       = opts.framebufferScale;
         }
 
         /// <summary>
@@ -560,9 +568,11 @@ namespace LinaVG
         StyleOptions(){};
         StyleOptions(const StyleOptions& opts)
         {
-            color     = opts.color;
-            thickness = opts.thickness;
-            rounding  = opts.rounding;
+            color            = opts.color;
+            thickness        = opts.thickness;
+            rounding         = opts.rounding;
+            aaMultiplier     = opts.aaMultiplier;
+            framebufferScale = opts.framebufferScale;
 
             onlyRoundTheseCorners.from(opts.onlyRoundTheseCorners);
             outlineOptions  = opts.outlineOptions;
@@ -592,6 +602,17 @@ namespace LinaVG
         /// - Line joints rounding
         /// </summary>
         float rounding = 0.0f;
+
+        /// <summary>
+        /// Antialiasing multiplier for the shapes drawn with this style options.
+        /// </summary>
+        float aaMultiplier = 1.0f;
+
+        /// <summary>
+        /// Used as an additional scale on outline and AA thickness.
+        /// Normally you can set this to whatever your OS' display scale is, e.g. OS scaling factor on high-dpi monitors.
+        /// </summary>
+        float framebufferScale = 1.0f;
 
         /// <summary>
         /// If rounding is to be applied, you can fill this array to only apply rounding to specific corners of the shape (only for shapes, not lines).
@@ -674,19 +695,22 @@ namespace LinaVG
         unsigned int displayHeight = 0;
 
         /// <summary>
-        /// Set this to your application's framebuffer scale, e.g. OS scaling factor for high-dpi screens.
-        /// </summary>
-        Vec2 framebufferScale = Vec2(1.0f, 1.0f);
-
-        /// <summary>
         /// Enable-disable anti-aliasing.
         /// </summary>
         bool aaEnabled = true;
 
         /// <summary>
-        /// Size multiplier for AA vertices.
+        /// Used as an additional scale on outline and AA thickness.
+        /// Normally you can set this to whatever your OS' display scale is, e.g. OS scaling factor on high-dpi monitors.
+        /// All Text and Style options also have their own/local framebuffer scale, which is multiplied by this value.
         /// </summary>
-        float aaMultiplier = 1.0f;
+        float globalFramebufferScale = 1.0f;
+
+        /// <summary>
+        /// Used as an additional scale on AA thickness.
+        /// All Style options also have their own/local framebuffer scale, which is multiplied by this value.
+        /// </summary>
+        float globalAAMultiplier = 1.0f;
 
         /// <summary>
         /// If the angle between two lines exceed this limit fall-back to bevel joints from miter joints.

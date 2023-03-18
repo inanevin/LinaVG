@@ -1057,14 +1057,14 @@ namespace LinaVG
             opts.outlineOptions.color.start = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
             opts.outlineOptions.color.end = Vec4(1.0f * (1.0f - colorLerp), 0.0f, 1.0f * colorLerp, 1.0f);
             Vec2 start = Vec2(screenSize.x * 0.63f, screenSize.y * 0.35f);
-            LinaVG::DrawRect(start, Vec2(start.x + 150, start.y + 150), opts, 0.0f, 1.0f);
+            LinaVG::DrawRect(start, Vec2(start.x + 150, start.y + 150), opts, 0.0f, 1);
 
             // Rect 2
             start.x += 245;
             static float offSetX = 0.0f;
             offSetX += ExampleApp::Get()->GetFrameTime() * 0.3f;
             opts.textureUVOffset = Vec2(offSetX, 0.0f);
-            LinaVG::DrawRect(start, Vec2(start.x + 150, start.y + 150), opts, 0.0f, 1.0f);
+            LinaVG::DrawRect(start, Vec2(start.x + 150, start.y + 150), opts, 0.0f, 1);
 
             // Pulsing ngon
             static float thickness = 0.0f;
@@ -1076,7 +1076,7 @@ namespace LinaVG
             ngon.color = LinaVG::Utility::HexToVec4(0x212738);
             start.x = screenSize.x * 0.77f;
             start.y += 250.0f;
-            LinaVG::DrawNGon(start, 70.0f, 7, ngon, 0.0f, 1.0f);
+            LinaVG::DrawNGon(start, 70.0f, 7, ngon, 0.0f, 1);
 
             // SDF Text
             static float colLerp1 = 0.0f, colLerp2 = 0.0f;
@@ -1094,7 +1094,7 @@ namespace LinaVG
             sdf.spacing = 9.0f;
             sdf.color.start = Vec4(0.0f, 0.8f * colLerp1, 1.0f * colLerp2, 1.0f);
             sdf.color.end = Vec4(0.1f, 0.1f, 0.85f * colLerp2, 1.0f);
-            LinaVG::DrawTextSDF("SDF TEXT", start, sdf, 0.0f, 1.0f);
+            LinaVG::DrawTextSDF("SDF TEXT", start, sdf, 0.0f, 1);
         }
 
         void DemoScreens::ShowDemoScreen9_Final()

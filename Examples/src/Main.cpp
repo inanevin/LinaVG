@@ -65,8 +65,6 @@ namespace LinaVG
             LinaVG::Config.clipSizeX                            = sizeX;
             LinaVG::Config.clipSizeY                            = sizeY;
             LinaVG::Config.flipTextureUVs                       = false;
-            LinaVG::Config.framebufferScale.x = LinaVG::Config.framebufferScale.y = exampleBackend.GetFramebufferScale();
-            LinaVG::Config.aaMultiplier                                             = 1.5f;
 
             LinaVG::Config.errorCallback = [](const std::string& err) {
                 std::cerr << err.c_str() << std::endl;
