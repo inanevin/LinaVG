@@ -38,120 +38,120 @@ namespace LinaVG::Backend
 {
     bool GLBackend::Initialize()
     {
-        Internal::g_backendData.m_defaultVtxShader = "#version 330 core\n"
-                                                     "layout (location = 0) in vec2 pos;\n"
-                                                     "layout (location = 1) in vec2 uv;\n"
-                                                     "layout (location = 2) in vec4 col;\n"
-                                                     "uniform mat4 proj; \n"
-                                                     "out vec4 fCol;\n"
-                                                     "out vec2 fUV;\n"
-                                                     "void main()\n"
-                                                     "{\n"
-                                                     "   fCol = col;\n"
-                                                     "   fUV = uv;\n"
-                                                     "   gl_Position = proj * vec4(pos.x, pos.y, 0.0f, 1.0);\n"
-                                                     "}\0";
+        m_backendData.m_defaultVtxShader = "#version 330 core\n"
+                                           "layout (location = 0) in vec2 pos;\n"
+                                           "layout (location = 1) in vec2 uv;\n"
+                                           "layout (location = 2) in vec4 col;\n"
+                                           "uniform mat4 proj; \n"
+                                           "out vec4 fCol;\n"
+                                           "out vec2 fUV;\n"
+                                           "void main()\n"
+                                           "{\n"
+                                           "   fCol = col;\n"
+                                           "   fUV = uv;\n"
+                                           "   gl_Position = proj * vec4(pos.x, pos.y, 0.0f, 1.0);\n"
+                                           "}\0";
 
-        Internal::g_backendData.m_defaultFragShader = "#version 330 core\n"
-                                                      "out vec4 fragColor;\n"
-                                                      "in vec4 fCol;\n"
-                                                      "void main()\n"
-                                                      "{\n"
-                                                      "   fragColor = fCol;\n"
-                                                      "}\0";
+        m_backendData.m_defaultFragShader = "#version 330 core\n"
+                                            "out vec4 fragColor;\n"
+                                            "in vec4 fCol;\n"
+                                            "void main()\n"
+                                            "{\n"
+                                            "   fragColor = fCol;\n"
+                                            "}\0";
 
-        Internal::g_backendData.m_texturedFragShader = "#version 330 core\n"
-                                                       "out vec4 fragColor;\n"
-                                                       "in vec2 fUV;\n"
-                                                       "in vec4 fCol;\n"
-                                                       "uniform sampler2D diffuse;\n"
-                                                       "uniform vec2 tiling;\n"
-                                                       "uniform vec2 offset;\n"
-                                                       "uniform vec4 tint;\n"
-                                                       "uniform int isAABuffer;\n"
-                                                       "void main()\n"
-                                                       "{\n"
-                                                       "   vec4 col = texture(diffuse, fUV * tiling + offset);\n"
-                                                       "   fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a) * tint; \n"
-                                                       "}\0";
+        m_backendData.m_texturedFragShader = "#version 330 core\n"
+                                             "out vec4 fragColor;\n"
+                                             "in vec2 fUV;\n"
+                                             "in vec4 fCol;\n"
+                                             "uniform sampler2D diffuse;\n"
+                                             "uniform vec2 tiling;\n"
+                                             "uniform vec2 offset;\n"
+                                             "uniform vec4 tint;\n"
+                                             "uniform int isAABuffer;\n"
+                                             "void main()\n"
+                                             "{\n"
+                                             "   vec4 col = texture(diffuse, fUV * tiling + offset);\n"
+                                             "   fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a) * tint; \n"
+                                             "}\0";
 
-        Internal::g_backendData.m_simpleTextFragShader = "#version 330 core\n"
-                                                         "out vec4 fragColor;\n"
-                                                         "in vec2 fUV;\n"
-                                                         "in vec4 fCol;\n"
-                                                         "uniform sampler2D diffuse;\n"
-                                                         "void main()\n"
-                                                         "{\n"
-                                                         "float a = texture(diffuse, fUV).r; \n"
-                                                         "fragColor = vec4(fCol.rgb, a * fCol.a); \n"
-                                                         "}\0";
+        m_backendData.m_simpleTextFragShader = "#version 330 core\n"
+                                               "out vec4 fragColor;\n"
+                                               "in vec2 fUV;\n"
+                                               "in vec4 fCol;\n"
+                                               "uniform sampler2D diffuse;\n"
+                                               "void main()\n"
+                                               "{\n"
+                                               "float a = texture(diffuse, fUV).r; \n"
+                                               "fragColor = vec4(fCol.rgb, a * fCol.a); \n"
+                                               "}\0";
 
-        Internal::g_backendData.m_sdfTextFragShader = "#version 330 core\n"
-                                                      "out vec4 fragColor;\n"
-                                                      "in vec2 fUV;\n"
-                                                      "in vec4 fCol;\n"
-                                                      "uniform sampler2D diffuse;\n"
-                                                      "uniform float softness; \n"
-                                                      "uniform float thickness; \n"
-                                                      "uniform int outlineEnabled; \n"
-                                                      "uniform int useOutlineOffset; \n"
-                                                      "uniform vec2 outlineOffset; \n"
-                                                      "uniform float outlineThickness; \n"
-                                                      "uniform vec4 outlineColor; \n"
-                                                      "uniform int flipAlpha; \n"
-                                                      "void main()\n"
-                                                      "{\n"
-                                                      "float distance = texture(diffuse, fUV).r;\n"
-                                                      "float alpha = smoothstep(thickness - softness, thickness + softness, distance);\n"
-                                                      "vec3 baseColor = fCol.rgb;\n"
-                                                      "if(outlineEnabled == 1){\n"
-                                                      " float border = smoothstep(thickness + outlineThickness - softness, thickness + outlineThickness + softness, distance);\n"
-                                                      " baseColor = mix(outlineColor, fCol, border).rgb;\n"
-                                                      "} \n"
-                                                      "fragColor = vec4(baseColor, flipAlpha == 1 ? 1.0f - alpha : alpha);\n"
-                                                      "}\0";
+        m_backendData.m_sdfTextFragShader = "#version 330 core\n"
+                                            "out vec4 fragColor;\n"
+                                            "in vec2 fUV;\n"
+                                            "in vec4 fCol;\n"
+                                            "uniform sampler2D diffuse;\n"
+                                            "uniform float softness; \n"
+                                            "uniform float thickness; \n"
+                                            "uniform int outlineEnabled; \n"
+                                            "uniform int useOutlineOffset; \n"
+                                            "uniform vec2 outlineOffset; \n"
+                                            "uniform float outlineThickness; \n"
+                                            "uniform vec4 outlineColor; \n"
+                                            "uniform int flipAlpha; \n"
+                                            "void main()\n"
+                                            "{\n"
+                                            "float distance = texture(diffuse, fUV).r;\n"
+                                            "float alpha = smoothstep(thickness - softness, thickness + softness, distance);\n"
+                                            "vec3 baseColor = fCol.rgb;\n"
+                                            "if(outlineEnabled == 1){\n"
+                                            " float border = smoothstep(thickness + outlineThickness - softness, thickness + outlineThickness + softness, distance);\n"
+                                            " baseColor = mix(outlineColor, fCol, border).rgb;\n"
+                                            "} \n"
+                                            "fragColor = vec4(baseColor, flipAlpha == 1 ? 1.0f - alpha : alpha);\n"
+                                            "}\0";
 
-        Internal::g_backendData.m_roundedGradientFragShader = "#version 330 core\n"
-                                                              "out vec4 fragColor;\n"
-                                                              "in vec2 fUV;\n"
-                                                              "in vec4 fCol;\n"
-                                                              "uniform vec4 startColor;\n"
-                                                              "uniform vec4 endColor;\n"
-                                                              "uniform int  gradientType;\n"
-                                                              "uniform float radialSize;\n"
-                                                              "uniform int isAABuffer;\n"
-                                                              "void main()\n"
-                                                              "{\n"
-                                                              "   if(gradientType == 0) {\n"
-                                                              "     vec4 col = mix(startColor, endColor, fUV.x);\n"
-                                                              "     fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
-                                                              "}\n"
-                                                              "   else if(gradientType == 1){\n"
-                                                              "     vec4 col = mix(startColor, endColor, fUV.y);\n"
-                                                              "     fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
-                                                              "}\n"
-                                                              "   else if(gradientType == 2) \n"
-                                                              "   {\n"
-                                                              "       vec2 uv = fUV - vec2(0.5, 0.5);\n"
-                                                              "       float dist = length(uv * radialSize);\n"
-                                                              "       vec4 col = mix(startColor, endColor, dist);\n"
-                                                              "       fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
-                                                              "    }\n"
-                                                              "   else if(gradientType == 3) \n"
-                                                              "   {\n"
-                                                              "       float dist = length(fUV * radialSize);\n"
-                                                              "       vec4 col = mix(startColor, endColor, dist);\n"
-                                                              "       fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
-                                                              "    }\n"
-                                                              "}\n\0";
+        m_backendData.m_roundedGradientFragShader = "#version 330 core\n"
+                                                    "out vec4 fragColor;\n"
+                                                    "in vec2 fUV;\n"
+                                                    "in vec4 fCol;\n"
+                                                    "uniform vec4 startColor;\n"
+                                                    "uniform vec4 endColor;\n"
+                                                    "uniform int  gradientType;\n"
+                                                    "uniform float radialSize;\n"
+                                                    "uniform int isAABuffer;\n"
+                                                    "void main()\n"
+                                                    "{\n"
+                                                    "   if(gradientType == 0) {\n"
+                                                    "     vec4 col = mix(startColor, endColor, fUV.x);\n"
+                                                    "     fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
+                                                    "}\n"
+                                                    "   else if(gradientType == 1){\n"
+                                                    "     vec4 col = mix(startColor, endColor, fUV.y);\n"
+                                                    "     fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
+                                                    "}\n"
+                                                    "   else if(gradientType == 2) \n"
+                                                    "   {\n"
+                                                    "       vec2 uv = fUV - vec2(0.5, 0.5);\n"
+                                                    "       float dist = length(uv * radialSize);\n"
+                                                    "       vec4 col = mix(startColor, endColor, dist);\n"
+                                                    "       fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
+                                                    "    }\n"
+                                                    "   else if(gradientType == 3) \n"
+                                                    "   {\n"
+                                                    "       float dist = length(fUV * radialSize);\n"
+                                                    "       vec4 col = mix(startColor, endColor, dist);\n"
+                                                    "       fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
+                                                    "    }\n"
+                                                    "}\n\0";
 
         try
         {
-            CreateShader(Internal::g_backendData.m_defaultShaderData, Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_defaultFragShader);
-            CreateShader(Internal::g_backendData.m_gradientShaderData, Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_roundedGradientFragShader);
-            CreateShader(Internal::g_backendData.m_texturedShaderData, Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_texturedFragShader);
-            CreateShader(Internal::g_backendData.m_simpleTextShaderData, Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_simpleTextFragShader);
-            CreateShader(Internal::g_backendData.m_sdfTextShaderData, Internal::g_backendData.m_defaultVtxShader, Internal::g_backendData.m_sdfTextFragShader);
+            CreateShader(m_backendData.m_defaultShaderData, m_backendData.m_defaultVtxShader, m_backendData.m_defaultFragShader);
+            CreateShader(m_backendData.m_gradientShaderData, m_backendData.m_defaultVtxShader, m_backendData.m_roundedGradientFragShader);
+            CreateShader(m_backendData.m_texturedShaderData, m_backendData.m_defaultVtxShader, m_backendData.m_texturedFragShader);
+            CreateShader(m_backendData.m_simpleTextShaderData, m_backendData.m_defaultVtxShader, m_backendData.m_simpleTextFragShader);
+            CreateShader(m_backendData.m_sdfTextShaderData, m_backendData.m_defaultVtxShader, m_backendData.m_sdfTextFragShader);
         }
         catch (const std::runtime_error& err)
         {
@@ -163,15 +163,15 @@ namespace LinaVG::Backend
             return false;
         }
 
-        glGenVertexArrays(1, &Internal::g_backendData.m_vao);
-        glGenBuffers(1, &Internal::g_backendData.m_vbo);
-        glGenBuffers(1, &Internal::g_backendData.m_ebo);
+        glGenVertexArrays(1, &m_backendData.m_vao);
+        glGenBuffers(1, &m_backendData.m_vbo);
+        glGenBuffers(1, &m_backendData.m_ebo);
 
         // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-        glBindVertexArray(Internal::g_backendData.m_vao);
+        glBindVertexArray(m_backendData.m_vao);
 
-        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
 
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
@@ -182,14 +182,14 @@ namespace LinaVG::Backend
         glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(4 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
-        glGenVertexArrays(1, &Internal::g_backendData.m_vao);
-        glGenBuffers(1, &Internal::g_backendData.m_vbo);
-        glGenBuffers(1, &Internal::g_backendData.m_ebo);
+        glGenVertexArrays(1, &m_backendData.m_vao);
+        glGenBuffers(1, &m_backendData.m_vbo);
+        glGenBuffers(1, &m_backendData.m_ebo);
 
-        glBindVertexArray(Internal::g_backendData.m_vao);
+        glBindVertexArray(m_backendData.m_vao);
 
-        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
 
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
@@ -210,7 +210,7 @@ namespace LinaVG::Backend
         return true;
     }
 
-    void GLBackend::StartFrame()
+    void GLBackend::StartFrame(int threadCount)
     {
         Config.debugCurrentDrawCalls     = 0;
         Config.debugCurrentTriangleCount = 0;
@@ -240,11 +240,11 @@ namespace LinaVG::Backend
         int fb_height = (int)(Config.displayHeight * Config.framebufferScale.y);
         if (fb_width <= 0 || fb_height <= 0)
         {
-            Internal::g_backendData.m_skipDraw = true;
+            m_backendData.m_skipDraw = true;
             return;
         }
 
-        Internal::g_backendData.m_skipDraw = false;
+        m_backendData.m_skipDraw = false;
 
         float       L    = static_cast<float>(Config.displayPosX);
         float       R    = static_cast<float>(Config.displayPosX + Config.displayWidth);
@@ -262,50 +262,50 @@ namespace LinaVG::Backend
         T += Config.debugOrthoOffset.y;
         B += Config.debugOrthoOffset.y;
 
-        Internal::g_backendData.m_proj[0][0] = 2.0f / (R - L);
-        Internal::g_backendData.m_proj[0][1] = 0.0f;
-        Internal::g_backendData.m_proj[0][2] = 0.0f;
-        Internal::g_backendData.m_proj[0][3] = 0.0f;
+        m_backendData.m_proj[0][0] = 2.0f / (R - L);
+        m_backendData.m_proj[0][1] = 0.0f;
+        m_backendData.m_proj[0][2] = 0.0f;
+        m_backendData.m_proj[0][3] = 0.0f;
 
-        Internal::g_backendData.m_proj[1][0] = 0.0f;
-        Internal::g_backendData.m_proj[1][1] = 2.0f / (T - B);
-        Internal::g_backendData.m_proj[1][2] = 0.0f;
-        Internal::g_backendData.m_proj[1][3] = 0.0f;
+        m_backendData.m_proj[1][0] = 0.0f;
+        m_backendData.m_proj[1][1] = 2.0f / (T - B);
+        m_backendData.m_proj[1][2] = 0.0f;
+        m_backendData.m_proj[1][3] = 0.0f;
 
-        Internal::g_backendData.m_proj[2][0] = 0.0f;
-        Internal::g_backendData.m_proj[2][1] = 0.0f;
-        Internal::g_backendData.m_proj[2][2] = -1.0f;
-        Internal::g_backendData.m_proj[2][3] = 0.0f;
+        m_backendData.m_proj[2][0] = 0.0f;
+        m_backendData.m_proj[2][1] = 0.0f;
+        m_backendData.m_proj[2][2] = -1.0f;
+        m_backendData.m_proj[2][3] = 0.0f;
 
-        Internal::g_backendData.m_proj[3][0] = (R + L) / (L - R);
-        Internal::g_backendData.m_proj[3][1] = (T + B) / (B - T);
-        Internal::g_backendData.m_proj[3][2] = 0.0f;
-        Internal::g_backendData.m_proj[3][3] = 1.0f;
+        m_backendData.m_proj[3][0] = (R + L) / (L - R);
+        m_backendData.m_proj[3][1] = (T + B) / (B - T);
+        m_backendData.m_proj[3][2] = 0.0f;
+        m_backendData.m_proj[3][3] = 1.0f;
 
-        glBindVertexArray(Internal::g_backendData.m_vao);
+        glBindVertexArray(m_backendData.m_vao);
     }
 
-    void GLBackend::DrawGradient(GradientDrawBuffer* buf)
+    void GLBackend::DrawGradient(GradientDrawBuffer* buf, int thread)
     {
-        if (Internal::g_backendData.m_skipDraw)
+        if (m_backendData.m_skipDraw)
             return;
 
         SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
 
-        Internal::ShaderData& data = Internal::g_backendData.m_gradientShaderData;
+        ShaderData& data = m_backendData.m_gradientShaderData;
         glUseProgram(data.m_handle);
 
-        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
         glUniform4f(data.m_uniformMap["startColor"], (GLfloat)buf->m_color.start.x, (GLfloat)buf->m_color.start.y, (GLfloat)buf->m_color.start.z, (GLfloat)buf->m_color.start.w);
         glUniform4f(data.m_uniformMap["endColor"], (GLfloat)buf->m_color.end.x, (GLfloat)buf->m_color.end.y, (GLfloat)buf->m_color.end.z, (GLfloat)buf->m_color.end.w);
         glUniform1i(data.m_uniformMap["gradientType"], (GLint)((int)buf->m_color.gradientType));
         glUniform1f(data.m_uniformMap["radialSize"], (GLfloat)buf->m_color.radialSize);
         glUniform1i(data.m_uniformMap["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
 
-        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
         glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -315,17 +315,17 @@ namespace LinaVG::Backend
         Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void GLBackend::DrawTextured(TextureDrawBuffer* buf)
+    void GLBackend::DrawTextured(TextureDrawBuffer* buf, int thread)
     {
-        if (Internal::g_backendData.m_skipDraw)
+        if (m_backendData.m_skipDraw)
             return;
 
         SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
 
-        const Vec2            uv   = Config.flipTextureUVs ? Vec2(buf->m_textureUVTiling.x, -buf->m_textureUVTiling.y) : buf->m_textureUVTiling;
-        Internal::ShaderData& data = Internal::g_backendData.m_texturedShaderData;
+        const Vec2  uv   = Config.flipTextureUVs ? Vec2(buf->m_textureUVTiling.x, -buf->m_textureUVTiling.y) : buf->m_textureUVTiling;
+        ShaderData& data = m_backendData.m_texturedShaderData;
         glUseProgram(data.m_handle);
-        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
 
         glUniform1i(data.m_uniformMap["diffuse"], 0);
         glUniform2f(data.m_uniformMap["tiling"], (GLfloat)uv.x, (GLfloat)uv.y);
@@ -335,10 +335,10 @@ namespace LinaVG::Backend
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
 
-        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
         glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -348,21 +348,21 @@ namespace LinaVG::Backend
         Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void GLBackend::DrawDefault(DrawBuffer* buf)
+    void GLBackend::DrawDefault(DrawBuffer* buf, int thread)
     {
-        if (Internal::g_backendData.m_skipDraw)
+        if (m_backendData.m_skipDraw)
             return;
 
         SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
-        Internal::ShaderData& data = Internal::g_backendData.m_defaultShaderData;
+        ShaderData& data = m_backendData.m_defaultShaderData;
 
         glUseProgram(data.m_handle);
-        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
 
-        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
         glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -372,25 +372,25 @@ namespace LinaVG::Backend
         Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void GLBackend::DrawSimpleText(SimpleTextDrawBuffer* buf)
+    void GLBackend::DrawSimpleText(SimpleTextDrawBuffer* buf, int thread)
     {
-        if (Internal::g_backendData.m_skipDraw)
+        if (m_backendData.m_skipDraw)
             return;
 
         SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
-        Internal::ShaderData& data = Internal::g_backendData.m_simpleTextShaderData;
+        ShaderData& data = m_backendData.m_simpleTextShaderData;
         glUseProgram(data.m_handle);
 
-        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
 
         glUniform1i(data.m_uniformMap["diffuse"], 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
 
-        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
         glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -400,15 +400,15 @@ namespace LinaVG::Backend
         Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
     }
 
-    void GLBackend::DrawSDFText(SDFTextDrawBuffer* buf)
+    void GLBackend::DrawSDFText(SDFTextDrawBuffer* buf, int thread)
     {
-        if (Internal::g_backendData.m_skipDraw)
+        if (m_backendData.m_skipDraw)
             return;
 
         SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
-        Internal::ShaderData& data = Internal::g_backendData.m_sdfTextShaderData;
+        ShaderData& data = m_backendData.m_sdfTextShaderData;
         glUseProgram(data.m_handle);
-        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &Internal::g_backendData.m_proj[0][0]);
+        glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
 
         const float thickness        = 1.0f - Math::Clamp(buf->m_thickness, 0.0f, 1.0f);
         const float softness         = Math::Clamp(buf->m_softness, 0.0f, 10.0f) * 0.1f;
@@ -423,10 +423,10 @@ namespace LinaVG::Backend
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
 
-        glBindBuffer(GL_ARRAY_BUFFER, Internal::g_backendData.m_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
         glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Internal::g_backendData.m_ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -543,7 +543,7 @@ namespace LinaVG::Backend
     {
     }
 
-    void GLBackend::CreateShader(Internal::ShaderData& data, const char* vert, const char* frag)
+    void GLBackend::CreateShader(ShaderData& data, const char* vert, const char* frag)
     {
         unsigned int vertex, fragment;
         int          success;
@@ -608,7 +608,7 @@ namespace LinaVG::Backend
         AddShaderUniforms(data);
     }
 
-    void GLBackend::AddShaderUniforms(Internal::ShaderData& data)
+    void GLBackend::AddShaderUniforms(ShaderData& data)
     {
         // Load uniforms.
         GLint numUniforms = 0;

@@ -41,19 +41,39 @@ Timestamp: 3/24/2022 11:33:52 PM
 // Headers here.
 #include "../BaseBackend.hpp"
 
-namespace LinaVG
-{
-    namespace Internal
-    {
-        class ShaderData;
-    }
-} // namespace LinaVG
 namespace LinaVG::Backend
 {
+    class ShaderData
+    {
+    public:
+        BackendHandle                            m_handle = 0;
+        LINAVG_MAP<LINAVG_STRING, BackendHandle> m_uniformMap;
+    };
+
+    struct BackendData
+    {
+        BackendHandle m_vbo = 0;
+        BackendHandle m_vao = 0;
+        BackendHandle m_ebo = 0;
+        ShaderData    m_defaultShaderData;
+        ShaderData    m_gradientShaderData;
+        ShaderData    m_texturedShaderData;
+        ShaderData    m_sdfTextShaderData;
+        ShaderData    m_simpleTextShaderData;
+        float         m_proj[4][4]                = {0};
+        char*         m_defaultVtxShader          = nullptr;
+        char*         m_defaultFragShader         = nullptr;
+        char*         m_roundedGradientFragShader = nullptr;
+        char*         m_texturedFragShader        = nullptr;
+        char*         m_sdfTextFragShader         = nullptr;
+        char*         m_simpleTextFragShader      = nullptr;
+        bool          m_skipDraw                  = false;
+    };
+
     class GLBackend : public BaseBackend
     {
     public:
-        GLBackend()  = default;
+        GLBackend()          = default;
         virtual ~GLBackend() = default;
 
         struct GLState
@@ -74,12 +94,12 @@ namespace LinaVG::Backend
 
         virtual bool          Initialize() override;
         virtual void          Terminate() override;
-        virtual void          StartFrame() override;
-        virtual void          DrawGradient(GradientDrawBuffer* buf) override;
-        virtual void          DrawTextured(TextureDrawBuffer* buf) override;
-        virtual void          DrawDefault(DrawBuffer* buf) override;
-        virtual void          DrawSimpleText(SimpleTextDrawBuffer* buf) override;
-        virtual void          DrawSDFText(SDFTextDrawBuffer* buf) override;
+        virtual void          StartFrame(int threadCount) override;
+        virtual void          DrawGradient(GradientDrawBuffer* buf, int thread) override;
+        virtual void          DrawTextured(TextureDrawBuffer* buf, int thread) override;
+        virtual void          DrawDefault(DrawBuffer* buf, int thread) override;
+        virtual void          DrawSimpleText(SimpleTextDrawBuffer* buf, int thread) override;
+        virtual void          DrawSDFText(SDFTextDrawBuffer* buf, int thread) override;
         virtual void          EndFrame() override;
         virtual void          BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data) override;
         virtual void          BindFontTexture(BackendHandle texture) override;
@@ -89,11 +109,12 @@ namespace LinaVG::Backend
 
     private:
         void SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height);
-        void AddShaderUniforms(Internal::ShaderData& data);
-        void CreateShader(Internal::ShaderData& data, const char* vert, const char* frag);
+        void AddShaderUniforms(ShaderData& data);
+        void CreateShader(ShaderData& data, const char* vert, const char* frag);
 
     private:
-        GLState m_glState;
+        GLState     m_glState;
+        BackendData m_backendData;
     };
 
 } // namespace LinaVG::Backend

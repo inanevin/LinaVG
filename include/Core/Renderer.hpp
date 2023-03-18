@@ -55,6 +55,22 @@ namespace LinaVG
         Array<Index>   indxBuffer;
     };
 
+    struct RectOverrideData
+    {
+        bool overrideRectPositions = false;
+        Vec2 m_p1                  = Vec2(0, 0);
+        Vec2 m_p2                  = Vec2(0, 0);
+        Vec2 m_p3                  = Vec2(0, 0);
+        Vec2 m_p4                  = Vec2(0, 0);
+    };
+
+    struct UVOverrideData
+    {
+        bool m_override = false;
+        Vec2 m_uvTL     = Vec2(0, 0);
+        Vec2 m_uvBR     = Vec2(1, 1);
+    };
+
     /// <summary>
     /// Management for draw buffers.
     /// </summary>
@@ -70,7 +86,8 @@ namespace LinaVG
         LINAVG_MAP<uint32_t, SDFTextCache> m_sdfTextCache;
         int                                m_gcFrameCounter        = 0;
         int                                m_textCacheFrameCounter = 0;
-        bool                               m_frameStarted          = false;
+        RectOverrideData                   m_rectOverrideData;
+        UVOverrideData                     m_uvOverride;
 
         void                  SetDrawOrderLimits(int drawOrder);
         int                   GetBufferIndexInGradientArray(DrawBuffer* buf);
@@ -90,12 +107,14 @@ namespace LinaVG
 
     namespace Internal
     {
-        extern LINAVG_API RendererData g_rendererData;
+        extern LINAVG_API LINAVG_VEC<RendererData> g_rendererData;
 
         /// <summary>
         /// Erases all vertex & index data on all buffers.
         /// </summary>
         LINAVG_API void ClearAllBuffers();
+
+        LINAVG_API void InitThreadedData();
     } // namespace Internal
 
     /// <summary>
@@ -115,13 +134,13 @@ namespace LinaVG
     /// You may need to Clear your color buffer bits before calling StartFrame. LinaVG doesn't do any clearing.
     /// </summary>
     /// <returns></returns>
-    LINAVG_API void StartFrame();
+    LINAVG_API void StartFrame(int threadCount = 0);
 
     /// <summary>
     /// Call after you submit your draw requests to LinaVG, before EndFrame;
     /// </summary>
     /// <returns></returns>
-    LINAVG_API void Render();
+    LINAVG_API void Render(int thread = 0);
 
     /// <summary>
     /// Any Draw commands via LinaVG must take place between StartFrame and EndFrame.

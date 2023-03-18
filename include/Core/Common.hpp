@@ -42,21 +42,21 @@ Timestamp: 3/26/2022 10:36:46 AM
 // Headers here.
 #include <functional>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace LinaVG
 {
-
-#define LINAVG_STRING std::string
-#include <unordered_map>
+#define LINAVG_STRING  std::string
 #define LINAVG_MAP     std::unordered_map
+#define LINAVG_VEC     std::vector
 #define LINAVG_MEMCPY  std::memcpy
 #define LINAVG_MEMMOVE std::memmove
 #define LINAVG_MALLOC  std::malloc
 #define LINAVG_FREE    std::free
-
-#define LVG_RAD2DEG 57.2957f
-#define LVG_DEG2RAD 0.0174533f
-#define LINAVG_API  // TODO
+#define LVG_RAD2DEG    57.2957f
+#define LVG_DEG2RAD    0.0174533f
+#define LINAVG_API     // TODO
 
     typedef unsigned int Index;
     typedef unsigned int BackendHandle;

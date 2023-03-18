@@ -45,43 +45,10 @@ Timestamp: 3/28/2022 2:55:16 PM
 #ifdef LINAVG_BACKEND_GL
 #include "../Backends/GL/GLBackend.hpp"
 #endif
-
 #include "../Backends/BaseBackend.hpp"
 
 namespace LinaVG::Internal
 {
-    class ShaderData
-    {
-    public:
-        BackendHandle                            m_handle = 0;
-        LINAVG_MAP<LINAVG_STRING, BackendHandle> m_uniformMap;
-    };
-
-    /// <summary>
-    /// Rendering data for various backends. If you are implementing your own backend, you can use this, or choose to create your own structs.
-    /// This is only used within the backend.
-    /// </summary>
-    struct BackendData
-    {
-        BackendHandle m_vbo = 0;
-        BackendHandle m_vao = 0;
-        BackendHandle m_ebo = 0;
-        ShaderData    m_defaultShaderData;
-        ShaderData    m_gradientShaderData;
-        ShaderData    m_texturedShaderData;
-        ShaderData    m_sdfTextShaderData;
-        ShaderData    m_simpleTextShaderData;
-        float         m_proj[4][4]                = {0};
-        char*         m_defaultVtxShader          = nullptr;
-        char*         m_defaultFragShader         = nullptr;
-        char*         m_roundedGradientFragShader = nullptr;
-        char*         m_texturedFragShader        = nullptr;
-        char*         m_sdfTextFragShader         = nullptr;
-        char*         m_simpleTextFragShader      = nullptr;
-        bool          m_skipDraw                  = false;
-    };
-
-    extern LINAVG_API BackendData g_backendData;
 
 } // namespace LinaVG::Internal
 

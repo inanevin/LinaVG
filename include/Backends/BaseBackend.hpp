@@ -70,12 +70,12 @@ namespace LinaVG::Backend
         // Public API, if you want to implement your own backend, it needs to define these exact signatures.
         virtual bool          Initialize()                                                                                 = 0;
         virtual void          Terminate()                                                                                  = 0;
-        virtual void          StartFrame()                                                                                 = 0;
-        virtual void          DrawGradient(GradientDrawBuffer* buf)                                                        = 0;
-        virtual void          DrawTextured(TextureDrawBuffer* buf)                                                         = 0;
-        virtual void          DrawDefault(DrawBuffer* buf)                                                                 = 0;
-        virtual void          DrawSimpleText(SimpleTextDrawBuffer* buf)                                                    = 0;
-        virtual void          DrawSDFText(SDFTextDrawBuffer* buf)                                                          = 0;
+        virtual void          StartFrame(int threadCount)                                                                  = 0;
+        virtual void          DrawGradient(GradientDrawBuffer* buf, int thread)                                            = 0;
+        virtual void          DrawTextured(TextureDrawBuffer* buf, int thread)                                             = 0;
+        virtual void          DrawDefault(DrawBuffer* buf, int thread)                                                     = 0;
+        virtual void          DrawSimpleText(SimpleTextDrawBuffer* buf, int thread)                                        = 0;
+        virtual void          DrawSDFText(SDFTextDrawBuffer* buf, int thread)                                              = 0;
         virtual void          EndFrame()                                                                                   = 0;
         virtual void          BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data) = 0;
         virtual void          BindFontTexture(BackendHandle texture)                                                       = 0;

@@ -30,5 +30,5 @@ SOFTWARE.
 
 namespace LinaVG::Internal
 {
-    BackendData g_backendData;
+  
 }

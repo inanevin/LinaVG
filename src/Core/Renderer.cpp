@@ -33,7 +33,7 @@ SOFTWARE.
 
 #ifdef _DEBUG
 #define DEBUG_NEW new (_NORMAL_BLOCK, __FILE__, __LINE__)
-#define new DEBUG_NEW
+#define new       DEBUG_NEW
 #endif
 
 #include "Core/Renderer.hpp"
@@ -50,50 +50,65 @@ namespace LinaVG
 
     namespace Internal
     {
-        RendererData    g_rendererData;
-        LINAVG_API void ClearAllBuffers()
+        LINAVG_VEC<RendererData> g_rendererData;
+
+        void ClearAllBuffers()
         {
+            const int totalSize = static_cast<int>(Internal::g_rendererData.size());
+            for (int j = 0; j < totalSize; j++)
+            {
+                Internal::g_rendererData[j].m_gcFrameCounter = 0;
 
-            for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
-                Internal::g_rendererData.m_gradientBuffers[i].Clear();
+                for (int i = 0; i < Internal::g_rendererData[j].m_gradientBuffers.m_size; i++)
+                    Internal::g_rendererData[j].m_gradientBuffers[i].Clear();
 
-            Internal::g_rendererData.m_gradientBuffers.clear();
+                Internal::g_rendererData[j].m_gradientBuffers.clear();
 
-            for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
-                Internal::g_rendererData.m_textureBuffers[i].Clear();
+                for (int i = 0; i < Internal::g_rendererData[j].m_textureBuffers.m_size; i++)
+                    Internal::g_rendererData[j].m_textureBuffers[i].Clear();
 
-            Internal::g_rendererData.m_textureBuffers.clear();
+                Internal::g_rendererData[j].m_textureBuffers.clear();
 
-            for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
-                Internal::g_rendererData.m_defaultBuffers[i].Clear();
+                for (int i = 0; i < Internal::g_rendererData[j].m_defaultBuffers.m_size; i++)
+                    Internal::g_rendererData[j].m_defaultBuffers[i].Clear();
 
-            Internal::g_rendererData.m_defaultBuffers.clear();
+                Internal::g_rendererData[j].m_defaultBuffers.clear();
 
-            for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
-                Internal::g_rendererData.m_simpleTextBuffers[i].Clear();
+                for (int i = 0; i < Internal::g_rendererData[j].m_simpleTextBuffers.m_size; i++)
+                    Internal::g_rendererData[j].m_simpleTextBuffers[i].Clear();
 
-            Internal::g_rendererData.m_simpleTextBuffers.clear();
+                Internal::g_rendererData[j].m_simpleTextBuffers.clear();
 
-            for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
-                Internal::g_rendererData.m_sdfTextBuffers[i].Clear();
+                for (int i = 0; i < Internal::g_rendererData[j].m_sdfTextBuffers.m_size; i++)
+                    Internal::g_rendererData[j].m_sdfTextBuffers[i].Clear();
 
-            Internal::g_rendererData.m_sdfTextBuffers.clear();
+                Internal::g_rendererData[j].m_sdfTextBuffers.clear();
+                Internal::g_rendererData[j].m_drawOrders.clear();
+            }
+        }
+
+        void InitThreadedData()
+        {
+            const int index = static_cast<int>(Internal::g_rendererData.size());
+            Internal::g_rendererData.push_back(RendererData());
+
+            Internal::g_rendererData[index].m_defaultBuffers.reserve(Config.defaultBufferReserve);
+            Internal::g_rendererData[index].m_gradientBuffers.reserve(Config.gradientBufferReserve);
+            Internal::g_rendererData[index].m_textureBuffers.reserve(Config.textureBufferReserve);
+            Internal::g_rendererData[index].m_simpleTextBuffers.reserve(Config.textBuffersReserve);
+            Internal::g_rendererData[index].m_sdfTextBuffers.reserve(Config.textBuffersReserve);
+
+            if (Config.textCachingEnabled)
+                Internal::g_rendererData[index].m_textCache.reserve(Config.textCacheReserve);
+
+            if (Config.textCachingSDFEnabled)
+                Internal::g_rendererData[index].m_sdfTextCache.reserve(Config.textCacheSDFReserve);
         }
     } // namespace Internal
 
     bool Initialize()
     {
-        Internal::g_rendererData.m_defaultBuffers.reserve(Config.defaultBufferReserve);
-        Internal::g_rendererData.m_gradientBuffers.reserve(Config.gradientBufferReserve);
-        Internal::g_rendererData.m_textureBuffers.reserve(Config.textureBufferReserve);
-        Internal::g_rendererData.m_simpleTextBuffers.reserve(Config.textBuffersReserve);
-        Internal::g_rendererData.m_sdfTextBuffers.reserve(Config.textBuffersReserve);
-
-        if (Config.textCachingEnabled)
-            Internal::g_rendererData.m_textCache.reserve(Config.textCacheReserve);
-
-        if (Config.textCachingSDFEnabled)
-            Internal::g_rendererData.m_sdfTextCache.reserve(Config.textCacheSDFReserve);
+        Internal::InitThreadedData();
 
 #ifdef LINAVG_BACKEND_GL
         Backend::BaseBackend::SetBackend(new Backend::GLBackend());
@@ -139,65 +154,66 @@ namespace LinaVG
             Config.logCallback("LinaVG: Renderer and Backend terminated successfuly.");
     }
 
-    void StartFrame()
+    void StartFrame(int threadCount)
     {
-        if (Internal::g_rendererData.m_frameStarted)
+        bool added = false;
+        while (static_cast<int>(Internal::g_rendererData.size()) < threadCount)
         {
-            if (Config.errorCallback)
-                Config.errorCallback("LinaVG: StartFrame was called, but EndFrame was skipped! Make sure you always call EndFrame() after calling StartFrame() for the second time!");
-            _ASSERT(false);
+            added = true;
+            Internal::InitThreadedData();
         }
 
-        Backend::BaseBackend::Get()->StartFrame();
-        Internal::g_rendererData.m_frameStarted = true;
+        if (added)
+            Internal::ClearAllBuffers();
+
+        Backend::BaseBackend::Get()->StartFrame(threadCount);
     }
 
-    void Render()
+    void Render(int thread)
     {
-
-        auto& renderBuffs = [](int drawOrder, DrawBufferShapeType shapeType) {
-            for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
+        auto& renderBuffs = [thread](int drawOrder, DrawBufferShapeType shapeType) {
+            for (int i = 0; i < Internal::g_rendererData[thread].m_defaultBuffers.m_size; i++)
             {
-                DrawBuffer& buf = Internal::g_rendererData.m_defaultBuffers[i];
+                DrawBuffer& buf = Internal::g_rendererData[thread].m_defaultBuffers[i];
 
                 if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
-                    Backend::BaseBackend::Get()->DrawDefault(&(buf));
+                    Backend::BaseBackend::Get()->DrawDefault(&(buf), thread);
             }
 
-            for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
+            for (int i = 0; i < Internal::g_rendererData[thread].m_gradientBuffers.m_size; i++)
             {
-                GradientDrawBuffer& buf = Internal::g_rendererData.m_gradientBuffers[i];
+                GradientDrawBuffer& buf = Internal::g_rendererData[thread].m_gradientBuffers[i];
 
                 if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
-                    Backend::BaseBackend::Get()->DrawGradient(&buf);
+                    Backend::BaseBackend::Get()->DrawGradient(&buf, thread);
             }
 
-            for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
+            for (int i = 0; i < Internal::g_rendererData[thread].m_textureBuffers.m_size; i++)
             {
-                TextureDrawBuffer& buf = Internal::g_rendererData.m_textureBuffers[i];
+                TextureDrawBuffer& buf = Internal::g_rendererData[thread].m_textureBuffers[i];
 
                 if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
-                    Backend::BaseBackend::Get()->DrawTextured(&buf);
+                    Backend::BaseBackend::Get()->DrawTextured(&buf, thread);
             }
 
-            for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
+            for (int i = 0; i < Internal::g_rendererData[thread].m_simpleTextBuffers.m_size; i++)
             {
-                SimpleTextDrawBuffer& buf = Internal::g_rendererData.m_simpleTextBuffers[i];
+                SimpleTextDrawBuffer& buf = Internal::g_rendererData[thread].m_simpleTextBuffers[i];
 
                 if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
-                    Backend::BaseBackend::Get()->DrawSimpleText(&buf);
+                    Backend::BaseBackend::Get()->DrawSimpleText(&buf, thread);
             }
 
-            for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
+            for (int i = 0; i < Internal::g_rendererData[thread].m_sdfTextBuffers.m_size; i++)
             {
-                SDFTextDrawBuffer& buf = Internal::g_rendererData.m_sdfTextBuffers[i];
+                SDFTextDrawBuffer& buf = Internal::g_rendererData[thread].m_sdfTextBuffers[i];
 
                 if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
-                    Backend::BaseBackend::Get()->DrawSDFText(&buf);
+                    Backend::BaseBackend::Get()->DrawSDFText(&buf, thread);
             }
         };
 
-        auto& arr = Internal::g_rendererData.m_drawOrders;
+        auto& arr = Internal::g_rendererData[thread].m_drawOrders;
 
         for (int i = 0; i < arr.m_size; i++)
         {
@@ -211,45 +227,45 @@ namespace LinaVG
 
     void EndFrame()
     {
-        Internal::g_rendererData.m_frameStarted = false;
-
         Backend::BaseBackend::Get()->EndFrame();
+        const int totalSize = static_cast<int>(Internal::g_rendererData.size());
 
-        Internal::g_rendererData.m_gcFrameCounter++;
-
-        if (Internal::g_rendererData.m_gcFrameCounter > Config.gcCollectInterval)
+        for (int j = 0; j < totalSize; j++)
         {
-            Internal::g_rendererData.m_gcFrameCounter = 0;
-            Internal::ClearAllBuffers();
-            Internal::g_rendererData.m_drawOrders.clear();
-        }
-        else
-        {
-            for (int i = 0; i < Internal::g_rendererData.m_gradientBuffers.m_size; i++)
-                Internal::g_rendererData.m_gradientBuffers[i].ShrinkZero();
+            Internal::g_rendererData[j].m_gcFrameCounter++;
 
-            for (int i = 0; i < Internal::g_rendererData.m_textureBuffers.m_size; i++)
-                Internal::g_rendererData.m_textureBuffers[i].ShrinkZero();
+            if (Internal::g_rendererData[j].m_gcFrameCounter > Config.gcCollectInterval)
+            {
+                Internal::ClearAllBuffers();
+            }
+            else
+            {
+                for (int i = 0; i < Internal::g_rendererData[j].m_gradientBuffers.m_size; i++)
+                    Internal::g_rendererData[j].m_gradientBuffers[i].ShrinkZero();
 
-            for (int i = 0; i < Internal::g_rendererData.m_defaultBuffers.m_size; i++)
-                Internal::g_rendererData.m_defaultBuffers[i].ShrinkZero();
+                for (int i = 0; i < Internal::g_rendererData[j].m_textureBuffers.m_size; i++)
+                    Internal::g_rendererData[j].m_textureBuffers[i].ShrinkZero();
 
-            for (int i = 0; i < Internal::g_rendererData.m_simpleTextBuffers.m_size; i++)
-                Internal::g_rendererData.m_simpleTextBuffers[i].ShrinkZero();
+                for (int i = 0; i < Internal::g_rendererData[j].m_defaultBuffers.m_size; i++)
+                    Internal::g_rendererData[j].m_defaultBuffers[i].ShrinkZero();
 
-            for (int i = 0; i < Internal::g_rendererData.m_sdfTextBuffers.m_size; i++)
-                Internal::g_rendererData.m_sdfTextBuffers[i].ShrinkZero();
-        }
+                for (int i = 0; i < Internal::g_rendererData[j].m_simpleTextBuffers.m_size; i++)
+                    Internal::g_rendererData[j].m_simpleTextBuffers[i].ShrinkZero();
 
-        // SDF
-        if (Config.textCachingEnabled || Config.textCachingSDFEnabled)
-            Internal::g_rendererData.m_textCacheFrameCounter++;
+                for (int i = 0; i < Internal::g_rendererData[j].m_sdfTextBuffers.m_size; i++)
+                    Internal::g_rendererData[j].m_sdfTextBuffers[i].ShrinkZero();
+            }
 
-        if (Internal::g_rendererData.m_textCacheFrameCounter > Config.textCacheExpireInterval)
-        {
-            Internal::g_rendererData.m_textCacheFrameCounter = 0;
-            Internal::g_rendererData.m_textCache.clear();
-            Internal::g_rendererData.m_sdfTextCache.clear();
+            // SDF
+            if (Config.textCachingEnabled || Config.textCachingSDFEnabled)
+                Internal::g_rendererData[j].m_textCacheFrameCounter++;
+
+            if (Internal::g_rendererData[j].m_textCacheFrameCounter > Config.textCacheExpireInterval)
+            {
+                Internal::g_rendererData[j].m_textCacheFrameCounter = 0;
+                Internal::g_rendererData[j].m_textCache.clear();
+                Internal::g_rendererData[j].m_sdfTextCache.clear();
+            }
         }
     }
 
@@ -345,7 +361,7 @@ namespace LinaVG
 
     void RendererData::AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
     {
-        TextCache& newCache = Internal::g_rendererData.m_textCache[sid];
+        TextCache& newCache = m_textCache[sid];
         newCache.opts       = opts;
         newCache.indxBuffer.clear();
         newCache.vtxBuffer.clear();
@@ -359,7 +375,7 @@ namespace LinaVG
 
     void RendererData::AddSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
     {
-        SDFTextCache& newCache = Internal::g_rendererData.m_sdfTextCache[sid];
+        SDFTextCache& newCache = m_sdfTextCache[sid];
         newCache.opts          = opts;
         newCache.indxBuffer.clear();
         newCache.vtxBuffer.clear();
