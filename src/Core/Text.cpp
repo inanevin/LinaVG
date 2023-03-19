@@ -74,7 +74,7 @@ namespace LinaVG
         Internal::SetupFont(face, loadAsSDF, uniqueID, size, customRanges, customRangesSize);
     }
 
-    void LoadFontFromMemory(void* data, size_t dataSize, BackendHandle uniqueID, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize)
+    void LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, BackendHandle uniqueID, int size, GlyphEncoding* customRanges, int customRangesSize)
     {
         FT_Face face;
         if (FT_New_Memory_Face(Internal::g_textData.m_ftlib, static_cast<FT_Byte*>(data), static_cast<FT_Long>(dataSize), 0, &face))
@@ -89,7 +89,7 @@ namespace LinaVG
 
     namespace Internal
     {
-        TextData   g_textData;
+        TextData g_textData;
 
         void SetupFont(FT_Face& face, bool loadAsSDF, BackendHandle uniqueID, int size, GlyphEncoding* customRanges, int customRangesSize)
         {
