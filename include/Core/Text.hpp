@@ -72,6 +72,7 @@ namespace LinaVG
     {
     public:
         BackendHandle                            m_texture         = 0;
+        BackendHandle                            m_uniqueID        = 0;
         int                                      m_size            = 0;
         float                                    m_newLineHeight   = 0.0f;
         float                                    m_spaceAdvance    = 0.0f;
@@ -93,15 +94,9 @@ namespace LinaVG
     /// </summary>
     struct TextData
     {
-        FT_Library m_ftlib       = nullptr;
-        int        m_defaultFont = 0;
-
-        /// <summary>
-        /// !OFFSETTED BY 1! always access m_loadedFonts[myFontHandle - 1];
-        /// </summary>
+        FT_Library         m_ftlib = nullptr;
         Array<LinaVGFont*> m_loadedFonts;
-
-        Array<FontAtlas> m_createdAtlases;
+        Array<FontAtlas>   m_createdAtlases;
     };
 
     namespace Text
@@ -123,11 +118,12 @@ namespace LinaVG
     /// </summary>
     /// <param name="file">TTF or OTF file.</param>
     /// <param name="loadAsSDF">Creates an SDF font.</param>
+    /// <param name="uniqueID">UniqueID you will pass into TextOptions and SDFTextOptions structs while drawing texts with this font.</param>
     /// <param name="size">Font height, width will automatically adjust.</param>
     /// <param name="customRanges">Send custom ranges in UTF32 encoding, e.g. 0x1F028, to load specific characters or sets.</param>
     /// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
     /// <returns></returns>
-    LINAVG_API FontHandle LoadFont(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0);
+    LINAVG_API void LoadFont(const char* file, bool loadAsSDF, BackendHandle uniqueID, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0);
 
     /// <summary>
     /// Loads the given font and generates textures based on given size.
@@ -138,20 +134,12 @@ namespace LinaVG
     /// <param name="data">Binary font data.</param>
     /// <param name="size">Binary font data size.</param>
     /// <param name="loadAsSDF">Creates an SDF font.</param>
+    ///     /// <param name="uniqueID">UniqueID you will pass into TextOptions and SDFTextOptions structs while drawing texts with this font.</param>
     /// <param name="size">Font height, width will automatically adjust.</param>
     /// <param name="customRanges">Send custom ranges in UTF32 encoding, e.g. 0x1F028, to load specific characters or sets.</param>
     /// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
     /// <returns></returns>
-    LINAVG_API FontHandle LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0);
-
-    /// <summary>
-    /// While drawing texts, the system will try to use the font passed inside TextOptions.
-    /// If its 0 or doesn't exists, it will fall-back to the default font.
-    /// Set the default font handle using this method.
-    /// !NOTE!: When you load a font, it's always set as Default font. So only use this method after you are done loading all your fonts.
-    /// </summary>
-    /// <returns></returns>
-    LINAVG_API void SetDefaultFont(FontHandle font);
+    LINAVG_API void LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, BackendHandle uniqueID, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0);
 
     /// <summary>
     /// Returns the kerning vector between two given glphys.
@@ -163,14 +151,9 @@ namespace LinaVG
         extern LINAVG_API TextData g_textData;
 
         /// <summary>
-        /// !Internal! Do not modify.
-        /// </summary>
-        extern LINAVG_API FontHandle g_fontCounter;
-
-        /// <summary>
         /// Uses loaded face (from file or mem) to setup rest of the font data.
         /// </summary>
-        int SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize);
+        void SetupFont(FT_Face& face, bool loadAsSDF, BackendHandle uniqueID, int size, GlyphEncoding* customRanges, int customRangesSize);
     } // namespace Internal
 
 }; // namespace LinaVG

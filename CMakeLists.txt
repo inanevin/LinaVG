@@ -110,7 +110,7 @@ add_library(Lina::VG ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MAJOR=1)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MINOR=2)
-target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=4)
+target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=5)
 
 #--------------------------------------------------------------------
 # Subdirectories & linking

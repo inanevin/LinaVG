@@ -57,11 +57,6 @@ namespace LinaVG
             bool                     m_statsWindowOn   = true;
             bool                     m_rotate          = false;
             float                    m_rotateAngle     = 0.0f;
-            FontHandle               m_defaultFont     = 0;
-            FontHandle               m_titleFont       = 0;
-            FontHandle               m_descFont        = 0;
-            FontHandle               m_textDemoFont    = 0;
-            FontHandle               m_textDemoSDFFont = 0;
             int                      m_drawCount       = 0;
             int                      m_triangleCount   = 0;
             int                      m_vertexCount     = 0;

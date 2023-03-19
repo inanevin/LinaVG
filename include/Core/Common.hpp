@@ -719,11 +719,6 @@ namespace LinaVG
         float miterLimit = 150;
 
         /// <summary>
-        /// Flips the Y coordinate of texture UVs.
-        /// </summary>
-        bool flipTextureUVs = false;
-
-        /// <summary>
         /// If true, texts will be drawn by interpreting each character w/ 32 bit encoding.
         /// Set this to true if you want to draw unicode characters.
         /// Also you need to load the glyph ranges using customRanges in LoadFont.

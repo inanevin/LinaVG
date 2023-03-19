@@ -61,44 +61,37 @@ namespace LinaVG
         }
     } // namespace Text
 
-    FontHandle LoadFont(const char* file, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize)
+    void LoadFont(const char* file, bool loadAsSDF, BackendHandle uniqueID, int size, GlyphEncoding* customRanges, int customRangesSize)
     {
         FT_Face face;
         if (FT_New_Face(Internal::g_textData.m_ftlib, file, 0, &face))
         {
             if (Config.errorCallback)
                 Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
-            return -1;
+            return;
         }
 
-        return Internal::SetupFont(face, loadAsSDF, size, customRanges, customRangesSize);
+        Internal::SetupFont(face, loadAsSDF, uniqueID, size, customRanges, customRangesSize);
     }
 
-    LINAVG_API FontHandle LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize)
+    void LoadFontFromMemory(void* data, size_t dataSize, BackendHandle uniqueID, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize)
     {
         FT_Face face;
         if (FT_New_Memory_Face(Internal::g_textData.m_ftlib, static_cast<FT_Byte*>(data), static_cast<FT_Long>(dataSize), 0, &face))
         {
             if (Config.errorCallback)
                 Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
-            return -1;
+            return;
         }
 
-        return Internal::SetupFont(face, loadAsSDF, size, customRanges, customRangesSize);
-    }
-
-    LINAVG_API void SetDefaultFont(FontHandle activeFont)
-    {
-        _ASSERT(activeFont < Internal::g_textData.m_loadedFonts.m_size && activeFont > -1);
-        Internal::g_textData.m_defaultFont = activeFont;
+        Internal::SetupFont(face, loadAsSDF, uniqueID, size, customRanges, customRangesSize);
     }
 
     namespace Internal
     {
         TextData   g_textData;
-        FontHandle g_fontCounter = 0;
 
-        int SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize)
+        void SetupFont(FT_Face& face, bool loadAsSDF, BackendHandle uniqueID, int size, GlyphEncoding* customRanges, int customRangesSize)
         {
 
             FT_Set_Pixel_Sizes(face, 0, size);
@@ -111,6 +104,7 @@ namespace LinaVG
             font->m_size          = size;
             font->m_isSDF         = loadAsSDF;
             font->m_newLineHeight = static_cast<float>(face->size->metrics.height) / 64.0f;
+            font->m_uniqueID      = uniqueID;
             // font->m_supportsKerning = LinaVG::Config.textKerningEnabled && FT_HAS_KERNING(face) != 0;
             font->m_supportsKerning = false;
 
@@ -282,8 +276,8 @@ namespace LinaVG
                     else
                         offsetY += rowh + bufferCharSpacing;
 
-                    rowh                                                   = 0;
-                    offsetX                                                = bufferCharSpacing;
+                    rowh    = 0;
+                    offsetX = bufferCharSpacing;
                 }
 
                 const Vec2  size       = Vec2(static_cast<float>(glyphWidth), static_cast<float>(glyphRows));
@@ -316,7 +310,7 @@ namespace LinaVG
                 ch.second.m_uv12   = uv12;
                 ch.second.m_uv34   = uv34;
 
-                rowh = Math::Max(rowh, glyphRows);
+                rowh                                                   = Math::Max(rowh, glyphRows);
                 g_textData.m_createdAtlases[usedAtlasIndex].m_rowSizeY = rowh;
                 offsetX += glyphWidth + bufferCharSpacing;
             }
@@ -332,10 +326,7 @@ namespace LinaVG
             Backend::BaseBackend::Get()->RestoreAPIState();
 
             Config.logCallback("LinaVG: Successfuly loaded font!");
-            Internal::g_fontCounter++;
-            Internal::g_textData.m_defaultFont = Internal::g_fontCounter;
             Internal::g_textData.m_loadedFonts.push_back(font);
-            return Internal::g_fontCounter;
         }
     } // namespace Internal
 

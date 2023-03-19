@@ -726,8 +726,7 @@ namespace LinaVG
         if (text == NULL || text[0] == '\0')
             return;
 
-        FontHandle  fontHandle = opts.font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.font - 1 ? opts.font : Internal::g_textData.m_defaultFont;
-        LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
+        LinaVGFont* font = Internal::FindFont(opts.font);
 
         if (!font->m_isSDF)
         {
@@ -783,8 +782,7 @@ namespace LinaVG
         if (text == NULL || text[0] == '\0')
             return;
 
-        FontHandle  fontHandle = opts.font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.font - 1 ? opts.font : Internal::g_textData.m_defaultFont;
-        LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
+        LinaVGFont* font = Internal::FindFont(opts.font);
 
         if (font->m_isSDF)
         {
@@ -834,9 +832,8 @@ namespace LinaVG
 
     LINAVG_API Vec2 CalculateTextSize(int thread, const char* text, TextOptions& opts)
     {
-        FontHandle  fontHandle = opts.font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.font - 1 ? opts.font : Internal::g_textData.m_defaultFont;
-        LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
-        const float scale      = opts.textScale;
+        LinaVGFont* font  = Internal::FindFont(opts.font);
+        const float scale = opts.textScale;
 
         if (opts.wrapWidth == 0.0f)
             return Internal::CalcTextSize(text, font, scale, opts.spacing, 0.0f);
@@ -851,9 +848,8 @@ namespace LinaVG
 
     LINAVG_API Vec2 CalculateTextSize(int thread, const char* text, SDFTextOptions& opts)
     {
-        FontHandle  fontHandle = opts.font > 0 && Internal::g_textData.m_loadedFonts.m_size > opts.font - 1 ? opts.font : Internal::g_textData.m_defaultFont;
-        LinaVGFont* font       = Internal::g_textData.m_loadedFonts[static_cast<int>(fontHandle) - 1];
-        const float scale      = opts.textScale;
+        LinaVGFont* font  = Internal::FindFont(opts.font);
+        const float scale = opts.textScale;
 
         if (opts.wrapWidth == 0.0f)
             return Internal::CalcTextSize(text, font, scale, opts.spacing, opts.sdfThickness);
@@ -3384,6 +3380,22 @@ namespace LinaVG
             lines.clear();
             // size.y -= offset.y * remap;
             return size;
+        }
+
+        LinaVGFont* FindFont(BackendHandle handle)
+        {
+            const int sz = Internal::g_textData.m_loadedFonts.m_size;
+            for (int i = 0; i < sz; i++)
+            {
+                LinaVGFont* fd = Internal::g_textData.m_loadedFonts[i];
+                if (fd->m_uniqueID == handle)
+                    return fd;
+            }
+
+            if (LinaVG::Config.errorCallback)
+                LinaVG::Config.errorCallback("LinaVG -> Could not find font handle! Are you sure you pass the correct value?");
+
+            return nullptr;
         }
     }
 

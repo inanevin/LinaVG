@@ -322,7 +322,7 @@ namespace LinaVG::Backend
 
         SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
 
-        const Vec2  uv   = Config.flipTextureUVs ? Vec2(buf->m_textureUVTiling.x, -buf->m_textureUVTiling.y) : buf->m_textureUVTiling;
+        const Vec2  uv   = buf->m_textureUVTiling;
         ShaderData& data = m_backendData.m_texturedShaderData;
         glUseProgram(data.m_handle);
         glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);

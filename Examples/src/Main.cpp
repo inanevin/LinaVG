@@ -64,7 +64,6 @@ namespace LinaVG
             LinaVG::Config.clipPosX = LinaVG::Config.clipPosY = 0;
             LinaVG::Config.clipSizeX                            = sizeX;
             LinaVG::Config.clipSizeY                            = sizeY;
-            LinaVG::Config.flipTextureUVs                       = false;
 
             LinaVG::Config.errorCallback = [](const std::string& err) {
                 std::cerr << err.c_str() << std::endl;
