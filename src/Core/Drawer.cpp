@@ -3099,7 +3099,7 @@ namespace LinaVG
             const int  bufStart = buf->m_vertexBuffer.m_size;
             const Vec2 size     = CalcTextSize(text, font, scale, spacing, sdfThickness);
             Vec2       usedPos  = pos;
-            usedPos.y += size.y;
+            // usedPos.y += size.y;
 
             // float      remap    = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 0.0f, 1.0f) : 0.0f;
             // remap               = Math::Clamp(remap, 0.0f, 1.0f);
@@ -3115,6 +3115,7 @@ namespace LinaVG
                 }
                 else if (alignment == TextAlignment::Right)
                     usedPos.x -= size.x;
+
                 DrawText(buf, font, text, usedPos, offset, color, spacing, isGradient, scale);
             }
             else
@@ -3191,28 +3192,29 @@ namespace LinaVG
             pos.x = static_cast<float>(static_cast<int>(pos.x));
             pos.y = static_cast<float>(static_cast<int>(pos.y));
 
-            auto drawChar = [&](TextCharacter& ch) {
+            GlyphEncoding previousCharacter = 0;
+
+            auto drawChar = [&](TextCharacter& ch, GlyphEncoding c) {
                 const int startIndex = buf->m_vertexBuffer.m_size;
 
-                if (first)
+                unsigned long kerning = 0;
+                if (font->m_supportsKerning && previousCharacter != 0)
                 {
-                    // pos.y += ch.m_size.y;
-                    // first = false;
-                }
-                if (first && scale != 1.0f)
-                {
-                    // const float desiredY = pos.y - ch.m_bearing.y;
-                    // const float actualY  = pos.y - ch.m_bearing.y * scale;
-                    // pos.y += Math::Abs(actualY - desiredY) * (scale > 1.0f ? 1.0f : -1.0f);
-                    // first = false;
+                    auto& table = font->m_kerningTable[previousCharacter];
+                    auto  it    = table.xAdvances.find(c);
+                    if (it != table.xAdvances.end())
+                        kerning = it->second / 64.0f;
                 }
 
-                float x2 = pos.x + ch.m_bearing.x * scale;
-                float y2 = pos.y - ch.m_bearing.y * scale;
+                previousCharacter = c;
+                float ytop        = pos.y - ch.m_bearing.y * scale;
+                float ybot        = pos.y + (ch.m_size.y - ch.m_bearing.y) * scale;
+
+                float x2 = pos.x + (kerning + ch.m_bearing.x) * scale;
                 float w  = ch.m_size.x * scale;
                 float h  = ch.m_size.y * scale;
 
-                pos.x += ch.m_advance.x * scale + spacing;
+                pos.x += (kerning + ch.m_advance.x) * scale + spacing;
                 pos.y += ch.m_advance.y * scale;
 
                 if (w == 0.0f || h == 0.0f)
@@ -3245,10 +3247,10 @@ namespace LinaVG
                 else
                     v0.col = v1.col = v2.col = v3.col = color.start;
 
-                v0.pos = Vec2(x2 + offset.x, y2 + offset.y);
-                v1.pos = Vec2(x2 + offset.x + w, y2 + offset.y);
-                v2.pos = Vec2(x2 + offset.x + w, y2 + h + offset.y);
-                v3.pos = Vec2(x2 + offset.x, y2 + h + offset.y);
+                v0.pos = Vec2(x2 + offset.x, ytop + offset.y);
+                v1.pos = Vec2(x2 + offset.x + w, ytop + offset.y);
+                v2.pos = Vec2(x2 + offset.x + w, ybot + offset.y);
+                v3.pos = Vec2(x2 + offset.x, ybot + offset.y);
 
                 v0.uv = Vec2(ch.m_uv12.x, ch.m_uv12.y);
                 v1.uv = Vec2(ch.m_uv12.z, ch.m_uv12.w);
@@ -3280,8 +3282,9 @@ namespace LinaVG
                 int                                                         counter = 0;
                 for (it = str32.begin(); it < str32.end(); it++)
                 {
-                    auto& ch = font->m_characterGlyphs[*it];
-                    drawChar(ch);
+                    auto character = *it;
+                    auto ch        = font->m_characterGlyphs[character];
+                    drawChar(ch, character);
                     counter++;
                 }
             }
@@ -3289,8 +3292,9 @@ namespace LinaVG
             {
                 for (c = (uint8_t*)text; *c; c++)
                 {
-                    auto& ch = font->m_characterGlyphs[*c];
-                    drawChar(ch);
+                    auto character = *c;
+                    auto ch        = font->m_characterGlyphs[character];
+                    drawChar(ch, character);
                 }
             }
         }
