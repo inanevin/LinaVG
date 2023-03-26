@@ -58,6 +58,7 @@ namespace LinaVG
                 delete Internal::g_textData.m_loadedFonts[i];
 
             Internal::g_textData.m_loadedFonts.clear();
+            Internal::g_textData.m_createdAtlases.clear();
         }
     } // namespace Text
 

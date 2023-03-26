@@ -3203,7 +3203,7 @@ namespace LinaVG
                     auto& table = font->m_kerningTable[previousCharacter];
                     auto  it    = table.xAdvances.find(c);
                     if (it != table.xAdvances.end())
-                        kerning = it->second / 64.0f;
+                        kerning = it->second / 64;
                 }
 
                 previousCharacter = c;
