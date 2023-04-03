@@ -53,29 +53,24 @@ namespace LinaVG
         void Terminate()
         {
             FT_Done_FreeType(Internal::g_textData.m_ftlib);
-
-            for (int i = 0; i < Internal::g_textData.m_loadedFonts.m_size; i++)
-                delete Internal::g_textData.m_loadedFonts[i];
-
-            Internal::g_textData.m_loadedFonts.clear();
             Internal::g_textData.m_createdAtlases.clear();
         }
     } // namespace Text
 
-    void LoadFont(const char* file, bool loadAsSDF, BackendHandle uniqueID, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
+    LinaVGFont* LoadFont(const char* file, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
     {
         FT_Face face;
         if (FT_New_Face(Internal::g_textData.m_ftlib, file, 0, &face))
         {
             if (Config.errorCallback)
                 Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
-            return;
+            return nullptr;
         }
 
-        Internal::SetupFont(face, loadAsSDF, uniqueID, size, customRanges, customRangesSize, useKerningIfAvailable);
+        return Internal::SetupFont(face, loadAsSDF, size, customRanges, customRangesSize, useKerningIfAvailable);
     }
 
-    LINAVG_API void LoadFontThreadSafe(const char* file, bool loadAsSDF, BackendHandle uniqueID, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
+    LINAVG_API LinaVGFont* LoadFontThreadSafe(const char* file, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
     {
         std::lock_guard<std::mutex> grd(Internal::g_loadingMutex);
 
@@ -84,26 +79,26 @@ namespace LinaVG
         {
             if (Config.errorCallback)
                 Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
-            return;
+            return nullptr;
         }
 
-        Internal::SetupFont(face, loadAsSDF, uniqueID, size, customRanges, customRangesSize, useKerningIfAvailable);
+        return Internal::SetupFont(face, loadAsSDF, size, customRanges, customRangesSize, useKerningIfAvailable);
     }
 
-    void LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, BackendHandle uniqueID, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
+    LinaVGFont* LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
     {
         FT_Face face;
         if (FT_New_Memory_Face(Internal::g_textData.m_ftlib, static_cast<FT_Byte*>(data), static_cast<FT_Long>(dataSize), 0, &face))
         {
             if (Config.errorCallback)
                 Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
-            return;
+            return nullptr;
         }
 
-        Internal::SetupFont(face, loadAsSDF, uniqueID, size, customRanges, customRangesSize, useKerningIfAvailable);
+        return Internal::SetupFont(face, loadAsSDF, size, customRanges, customRangesSize, useKerningIfAvailable);
     }
 
-    LINAVG_API void LoadFontFromMemoryThreadSafe(void* data, size_t dataSize, bool loadAsSDF, BackendHandle uniqueID, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
+    LINAVG_API LinaVGFont* LoadFontFromMemoryThreadSafe(void* data, size_t dataSize, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
     {
         std::lock_guard<std::mutex> grd(Internal::g_loadingMutex);
 
@@ -112,10 +107,10 @@ namespace LinaVG
         {
             if (Config.errorCallback)
                 Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
-            return;
+            return nullptr;
         }
 
-        Internal::SetupFont(face, loadAsSDF, uniqueID, size, customRanges, customRangesSize, useKerningIfAvailable);
+        return Internal::SetupFont(face, loadAsSDF, size, customRanges, customRangesSize, useKerningIfAvailable);
     }
 
     namespace Internal
@@ -123,7 +118,7 @@ namespace LinaVG
         TextData   g_textData;
         std::mutex g_loadingMutex;
 
-        void SetupFont(FT_Face& face, bool loadAsSDF, BackendHandle uniqueID, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
+        LinaVGFont* SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
         {
 
             FT_Set_Pixel_Sizes(face, 0, size);
@@ -136,7 +131,6 @@ namespace LinaVG
             font->m_size            = size;
             font->m_isSDF           = loadAsSDF;
             font->m_newLineHeight   = static_cast<float>(face->size->metrics.height) / 64.0f;
-            font->m_uniqueID        = uniqueID;
             font->m_supportsKerning = useKerningIfAvailable && FT_HAS_KERNING(face) != 0;
 
             auto&        characterMap      = font->m_characterGlyphs;
@@ -355,9 +349,8 @@ namespace LinaVG
             font->m_spaceAdvance = characterMap[' '].m_advance.x;
             FT_Done_Face(face);
             Backend::BaseBackend::Get()->RestoreAPIState();
-
             Config.logCallback("LinaVG: Successfuly loaded font!");
-            Internal::g_textData.m_loadedFonts.push_back(font);
+            return font;
         }
     } // namespace Internal
 

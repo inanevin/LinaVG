@@ -726,7 +726,7 @@ namespace LinaVG
         if (text == NULL || text[0] == '\0')
             return;
 
-        LinaVGFont* font = Internal::FindFont(opts.font);
+        LinaVGFont* font = opts.font;
 
         if (!font->m_isSDF)
         {
@@ -782,7 +782,7 @@ namespace LinaVG
         if (text == NULL || text[0] == '\0')
             return;
 
-        LinaVGFont* font = Internal::FindFont(opts.font);
+        LinaVGFont* font = opts.font;
 
         if (font->m_isSDF)
         {
@@ -832,7 +832,7 @@ namespace LinaVG
 
     LINAVG_API Vec2 CalculateTextSize(int thread, const char* text, TextOptions& opts)
     {
-        LinaVGFont* font  = Internal::FindFont(opts.font);
+        LinaVGFont* font = opts.font;
         const float scale = opts.textScale;
 
         if (opts.wrapWidth == 0.0f)
@@ -848,7 +848,7 @@ namespace LinaVG
 
     LINAVG_API Vec2 CalculateTextSize(int thread, const char* text, SDFTextOptions& opts)
     {
-        LinaVGFont* font  = Internal::FindFont(opts.font);
+        LinaVGFont* font = opts.font;
         const float scale = opts.textScale;
 
         if (opts.wrapWidth == 0.0f)
@@ -3384,22 +3384,6 @@ namespace LinaVG
             lines.clear();
             // size.y -= offset.y * remap;
             return size;
-        }
-
-        LinaVGFont* FindFont(BackendHandle handle)
-        {
-            const int sz = Internal::g_textData.m_loadedFonts.m_size;
-            for (int i = 0; i < sz; i++)
-            {
-                LinaVGFont* fd = Internal::g_textData.m_loadedFonts[i];
-                if (fd->m_uniqueID == handle)
-                    return fd;
-            }
-
-            if (LinaVG::Config.errorCallback)
-                LinaVG::Config.errorCallback("LinaVG -> Could not find font handle! Are you sure you pass the correct value?");
-
-            return nullptr;
         }
     }
 

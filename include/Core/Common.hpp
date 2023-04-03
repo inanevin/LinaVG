@@ -60,6 +60,7 @@ namespace LinaVG
 
     typedef unsigned int Index;
     typedef unsigned int BackendHandle;
+    class LinaVGFont;
 
     /// <summary>
     /// Color vector, range 0.0f - 1.0f
@@ -449,7 +450,7 @@ namespace LinaVG
         /// <summary>
         /// Font to use while drawing this text. Handles are achieved through LoadFont() method.
         /// </summary>
-        BackendHandle font = 0;
+        LinaVGFont* font = nullptr;
 
         /// <summary>
         /// Text m_color, only flat m_color, horizontal or vertical gradients are supported.

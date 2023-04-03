@@ -40,6 +40,7 @@ namespace LinaVG
         {
         public:
             void Initialize();
+            void Terminate();
 
             void ShowBackground();
             void ShowDemoScreen1_Shapes();

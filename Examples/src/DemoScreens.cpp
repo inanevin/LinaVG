@@ -52,19 +52,19 @@ namespace LinaVG
 
         std::vector<StarData> stars;
 
-#define FONT_ID_DEFAULT 0
-#define FONT_ID_TITLE   1
-#define FONT_ID_DESC    2
-#define FONT_ID_DEMO    3
-#define FONT_ID_SDF     4
+        LinaVGFont* fontDefault = nullptr;
+        LinaVGFont* fontTitle   = nullptr;
+        LinaVGFont* fontDesc    = nullptr;
+        LinaVGFont* fontDemo    = nullptr;
+        LinaVGFont* fontSDF     = nullptr;
 
         void DemoScreens::Initialize()
         {
-            LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, FONT_ID_DEFAULT, 18);
-            LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, FONT_ID_TITLE, 52);
-            LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, FONT_ID_DESC, 20);
-            LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, FONT_ID_DEMO, 30);
-            LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, FONT_ID_SDF, 40);
+            fontDefault = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 18);
+            fontTitle   = LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 52);
+            fontDesc    = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
+            fontDemo    = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
+            fontSDF     = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
 
             m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
             m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
@@ -96,6 +96,15 @@ namespace LinaVG
                 star.endCol            = Vec4(0.6f + redFactor2, 0.6f, 0.6f, 0.0f);
                 stars.push_back(star);
             }
+        }
+
+        void DemoScreens::Terminate()
+        {
+            delete fontDefault;
+            delete fontTitle;
+            delete fontDemo;
+            delete fontDesc;
+            delete fontSDF;
         }
 
         void DemoScreens::ShowBackground()
@@ -130,7 +139,7 @@ namespace LinaVG
                 Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 22);
                 SDFTextOptions textStyle;
                 textStyle.textScale = 0.82f;
-                textStyle.font      = FONT_ID_DEFAULT;
+                textStyle.font      = fontDefault;
                 LinaVG::DrawTextNormal(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
                 textPosition.y += 25;
                 LinaVG::DrawTextNormal(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
@@ -146,7 +155,7 @@ namespace LinaVG
             const Vec2 rectMin = Vec2(0.0f, screenSize.y - screenSize.y * 0.12f);
             LinaVG::DrawRect(rectMin, screenSize, style, 0.0f, 3);
 
-             // Draw a vertical dividers.
+            // Draw a vertical dividers.
             const float  rectHeight = screenSize.y - rectMin.y;
             const float  rectWidth  = screenSize.x - rectMin.x;
             StyleOptions vertDivider;
@@ -156,7 +165,7 @@ namespace LinaVG
 
             // Draw title text.
             SDFTextOptions sdfStyle;
-            sdfStyle.font           = FONT_ID_TITLE;
+            sdfStyle.font           = fontTitle;
             const Vec2 size         = LinaVG::CalculateTextSize(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), sdfStyle);
             const Vec2 titlePos     = Vec2(rectMin.x + 20, rectMin.y + rectHeight / 2.0f + size.y / 2.0f);
             sdfStyle.newLineSpacing = 10.0f;
@@ -168,13 +177,13 @@ namespace LinaVG
 
             // Current screen description.
             TextOptions descText;
-            descText.font      = FONT_ID_DESC;
+            descText.font      = fontDesc;
             descText.wrapWidth = rectWidth * 0.45f;
             LinaVG::DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), Vec2(rectWidth * 0.25f, rectMin.y + 30), descText, 0, 4);
 
             // Draw version text.
             TextOptions versionText;
-            versionText.font       = FONT_ID_DESC;
+            versionText.font       = fontDesc;
             versionText.color      = Vec4(1.0f, 1.0f, 1.0f, 0.55f);
             versionText.textScale  = 0.8f;
             versionText.alignment  = TextAlignment::Right;
@@ -184,7 +193,7 @@ namespace LinaVG
 
             // Draw controls info
             TextOptions controlsText;
-            controlsText.font      = FONT_ID_DESC;
+            controlsText.font      = fontDesc;
             controlsText.textScale = 0.8f;
             LinaVG::DrawTextNormal("Num keys[1-9]: switch screen", Vec2(rectWidth * 0.725f + 20, rectMin.y + 20), controlsText, 0, 4);
             LinaVG::DrawTextNormal("P: toggle performance stats.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 40), controlsText, 0, 4);
@@ -654,7 +663,7 @@ namespace LinaVG
             const Vec2  screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
             Vec2        startPos   = Vec2(screenSize.x * 0.05f, screenSize.y * 0.05f);
             TextOptions textOpts;
-            textOpts.font = FONT_ID_DEMO;
+            textOpts.font = fontDemo;
             LinaVG::DrawTextNormal("This is a normal text.", startPos, textOpts, m_rotateAngle, 1);
 
             startPos.x += 350;
@@ -703,7 +712,7 @@ namespace LinaVG
             startPos.x                       = screenSize.x * 0.05f;
             const float    beforeSDFStartPos = startPos.y;
             SDFTextOptions sdfOpts;
-            sdfOpts.font         = FONT_ID_SDF;
+            sdfOpts.font         = fontSDF;
             sdfOpts.sdfThickness = 0.55f;
             LinaVG::DrawTextSDF("An SDF text.", startPos, sdfOpts, m_rotateAngle, 1);
 
@@ -764,7 +773,7 @@ namespace LinaVG
 
             TextOptions textOpts;
             textOpts.textScale = 1.5f;
-            textOpts.font      = FONT_ID_DEFAULT;
+            textOpts.font      = fontDefault;
 
             const Vec4 minCol = Vec4(0.7f, 0.1f, 0.1f, 1.0f);
             const Vec4 maxCol = Vec4(0.1f, 0.1f, 0.8f, 1.0f);
@@ -815,7 +824,7 @@ namespace LinaVG
             LinaVG::DrawCircle(max, 75, opts, 36, 0.0f, 0.0f, 360.0f, 2);
 
             TextOptions textOpts;
-            textOpts.font = FONT_ID_DEFAULT;
+            textOpts.font = fontDefault;
             LinaVG::DrawTextNormal("This text is clipped by the black rectangle.", Vec2(min.x - 50, min.y + 250), textOpts, 0.0f, 2);
 
             Config.clipPosX  = 0;
@@ -868,7 +877,7 @@ namespace LinaVG
                 LinaVG::DrawRect(Vec2(pos.x + 1, pos.y + 1), Vec2(pos.x + fillX, pos.y + 24), fill, 0.0f, 2);
 
                 TextOptions textOpts;
-                textOpts.font          = FONT_ID_DEFAULT;
+                textOpts.font          = fontDefault;
                 std::string loadingStr = "Loading " + std::to_string(fillX / 600.0f);
                 const Vec2  txtSize    = LinaVG::CalculateTextSize(loadingStr.c_str(), textOpts);
 
@@ -896,7 +905,7 @@ namespace LinaVG
                 LinaVG::DrawRect(pos, Vec2(pos.x + fillX, pos.y + 20), fill, 0.0f, 2);
 
                 TextOptions textOpts;
-                textOpts.font          = FONT_ID_DEFAULT;
+                textOpts.font          = fontDefault;
                 std::string loadingStr = "Loading " + std::to_string(t);
                 const Vec2  txtSize    = LinaVG::CalculateTextSize(loadingStr.c_str(), textOpts);
 
@@ -919,7 +928,7 @@ namespace LinaVG
                 LinaVG::DrawCircle(pos, 30, opts, 60, rotate3, 180.0f, 360.0f, 1);
 
                 TextOptions textOpts;
-                textOpts.font = FONT_ID_DEFAULT;
+                textOpts.font = fontDefault;
                 LinaVG::DrawTextNormal("Loading", Vec2(pos.x - 28.0f, pos.y + 80), textOpts, 0.0f, 2);
             };
 
@@ -969,7 +978,7 @@ namespace LinaVG
                 }
 
                 TextOptions textOpts;
-                textOpts.font = FONT_ID_DEFAULT;
+                textOpts.font = fontDefault;
                 LinaVG::DrawTextNormal("Loading", Vec2(pos.x, pos.y + 150), textOpts, 0.0f, 2);
             };
 
@@ -996,7 +1005,7 @@ namespace LinaVG
 
             auto drawProperty = [&](const Vec2& pos, int index) {
                 TextOptions textOpts;
-                textOpts.font      = FONT_ID_DESC;
+                textOpts.font      = fontDesc;
                 textOpts.textScale = 0.7f;
                 std::string str    = "Property_" + std::to_string(index);
                 LinaVG::DrawTextNormal(str.c_str(), pos, textOpts, 0.0f, 3);
@@ -1018,7 +1027,7 @@ namespace LinaVG
                 LinaVG::DrawRect(Vec2(pos.x + 1, pos.y + 1), Vec2(pos.x + size.x - 1, pos.y + 25), title, 0.0f, 2);
 
                 TextOptions textOpts;
-                textOpts.font      = FONT_ID_DESC;
+                textOpts.font      = fontDesc;
                 textOpts.textScale = 0.85f;
                 LinaVG::DrawTextNormal("Demo Title", Vec2(pos.x + 10, pos.y + 18.5f), textOpts, 0.0f, 3);
 
@@ -1090,7 +1099,7 @@ namespace LinaVG
             colLerp2 = std::sin(ExampleApp::Get()->GetElapsed() * 1.25f) + 1.0f;
 
             SDFTextOptions sdf;
-            sdf.font = FONT_ID_TITLE;
+            sdf.font = fontTitle;
             start.y += 170.0f;
             start.x                 = screenSize.x * 0.6f;
             sdf.sdfThickness        = 0.72f;

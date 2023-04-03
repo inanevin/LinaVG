@@ -157,6 +157,7 @@ namespace LinaVG
             }
 
             // Terminate Lina VG & example exampleBackend.
+            m_demoScreens.Terminate();
             LinaVG::Terminate();
             exampleBackend.Terminate();
         }
