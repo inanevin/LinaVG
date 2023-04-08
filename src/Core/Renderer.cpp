@@ -176,7 +176,7 @@ namespace LinaVG
             {
                 DrawBuffer& buf = Internal::g_rendererData[thread].m_defaultBuffers[i];
 
-                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
+                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
                     Backend::BaseBackend::Get()->DrawDefault(&(buf), thread);
             }
 
@@ -184,7 +184,7 @@ namespace LinaVG
             {
                 GradientDrawBuffer& buf = Internal::g_rendererData[thread].m_gradientBuffers[i];
 
-                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
+                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
                     Backend::BaseBackend::Get()->DrawGradient(&buf, thread);
             }
 
@@ -192,7 +192,7 @@ namespace LinaVG
             {
                 TextureDrawBuffer& buf = Internal::g_rendererData[thread].m_textureBuffers[i];
 
-                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
+                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
                     Backend::BaseBackend::Get()->DrawTextured(&buf, thread);
             }
 
@@ -200,7 +200,7 @@ namespace LinaVG
             {
                 SimpleTextDrawBuffer& buf = Internal::g_rendererData[thread].m_simpleTextBuffers[i];
 
-                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
+                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
                     Backend::BaseBackend::Get()->DrawSimpleText(&buf, thread);
             }
 
@@ -208,7 +208,7 @@ namespace LinaVG
             {
                 SDFTextDrawBuffer& buf = Internal::g_rendererData[thread].m_sdfTextBuffers[i];
 
-                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType)
+                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
                     Backend::BaseBackend::Get()->DrawSDFText(&buf, thread);
             }
         };
