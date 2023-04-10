@@ -580,6 +580,7 @@ namespace LinaVG
             textureUVTiling = opts.textureUVTiling;
             textureUVOffset = opts.textureUVOffset;
             isFilled        = opts.isFilled;
+            aaEnabled       = opts.aaEnabled;
         }
 
         /// <summary>
@@ -602,6 +603,11 @@ namespace LinaVG
         /// - Line joints rounding
         /// </summary>
         float rounding = 0.0f;
+
+        /// <summary>
+        /// Enable/disable AA outlines for this shape.
+        /// </summary>
+        bool aaEnabled = false;
 
         /// <summary>
         /// Antialiasing multiplier for the shapes drawn with this style options.
@@ -693,11 +699,6 @@ namespace LinaVG
         /// Set this to your application's display height.
         /// </summary>
         unsigned int displayHeight = 0;
-
-        /// <summary>
-        /// Enable-disable anti-aliasing.
-        /// </summary>
-        bool aaEnabled = true;
 
         /// <summary>
         /// Used as an additional scale on outline and AA thickness.

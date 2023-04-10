@@ -239,7 +239,7 @@ namespace LinaVG
             }
         }
 
-        if (style.outlineOptions.thickness == 0.0f && !Config.aaEnabled)
+        if (style.outlineOptions.thickness == 0.0f && !style.aaEnabled)
         {
             for (int i = 0; i < lines.m_size; i++)
                 delete lines[i];
@@ -275,7 +275,7 @@ namespace LinaVG
 
             Internal::DrawOutlineAroundShape(thread, destBuf, style, &indicesOrder[0], indicesOrder.m_size, style.outlineOptions.thickness, false, drawOrder, Internal::OutlineCallType::Normal);
         }
-        else if (Config.aaEnabled)
+        else if (style.aaEnabled)
         {
             StyleOptions opts2   = StyleOptions(style);
             opts2.outlineOptions = OutlineOptions::FromStyle(style, OutlineDrawDirection::Both);
@@ -310,6 +310,7 @@ namespace LinaVG
     void DrawImage(int thread, BackendHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint, float rotateAngle, int drawOrder, Vec2 uvTiling, Vec2 uvOffset, Vec2 uvTL, Vec2 uvBR)
     {
         StyleOptions style;
+        style.aaEnabled       = false;
         style.color           = tint;
         style.isFilled        = true;
         style.textureHandle   = textureHandle;
@@ -321,10 +322,7 @@ namespace LinaVG
         Internal::g_rendererData[thread].m_uvOverride.m_override = true;
         Internal::g_rendererData[thread].m_uvOverride.m_uvTL     = uvTL;
         Internal::g_rendererData[thread].m_uvOverride.m_uvBR     = uvBR;
-        const bool currAA                                        = Config.aaEnabled;
-        Config.aaEnabled                                         = false;
         DrawRect(thread, min, max, style, rotateAngle, drawOrder);
-        Config.aaEnabled                                         = currAA;
         Internal::g_rendererData[thread].m_uvOverride.m_override = false;
         Internal::g_rendererData[thread].m_uvOverride.m_uvTL     = Vec2(0, 0);
         Internal::g_rendererData[thread].m_uvOverride.m_uvBR     = Vec2(1, 1);
@@ -832,7 +830,7 @@ namespace LinaVG
 
     LINAVG_API Vec2 CalculateTextSize(int thread, const char* text, TextOptions& opts)
     {
-        LinaVGFont* font = opts.font;
+        LinaVGFont* font  = opts.font;
         const float scale = opts.textScale;
 
         if (opts.wrapWidth == 0.0f)
@@ -848,7 +846,7 @@ namespace LinaVG
 
     LINAVG_API Vec2 CalculateTextSize(int thread, const char* text, SDFTextOptions& opts)
     {
-        LinaVGFont* font = opts.font;
+        LinaVGFont* font  = opts.font;
         const float scale = opts.textScale;
 
         if (opts.wrapWidth == 0.0f)
@@ -900,7 +898,7 @@ namespace LinaVG
             {
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
             }
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -940,7 +938,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -969,7 +967,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1067,7 +1065,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? vertexCount : vertexCount * 2, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1138,7 +1136,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1174,7 +1172,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1204,7 +1202,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1343,7 +1341,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? vertexCount : vertexCount * 2, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1401,7 +1399,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1431,7 +1429,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1460,7 +1458,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1553,7 +1551,7 @@ namespace LinaVG
                         buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
                 }
             }
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1649,7 +1647,7 @@ namespace LinaVG
                         buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
                 }
             }
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1746,7 +1744,7 @@ namespace LinaVG
                         buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
                 }
             }
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1861,7 +1859,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1905,7 +1903,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -1948,7 +1946,7 @@ namespace LinaVG
 
             if (opts.outlineOptions.thickness != 0.0f)
                 buf = DrawOutline(thread, buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
-            else if (Config.aaEnabled)
+            else if (opts.aaEnabled)
             {
                 StyleOptions opts2   = StyleOptions(opts);
                 opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
@@ -2409,7 +2407,7 @@ namespace LinaVG
 
         void JoinLines(Line& line1, Line& line2, StyleOptions& opts, LineJointType jointType, bool mergeUpperVertices)
         {
-            const bool addUpperLowerIndices = Config.aaEnabled || opts.outlineOptions.thickness != 0.0;
+            const bool addUpperLowerIndices = opts.aaEnabled || opts.outlineOptions.thickness != 0.0;
 
             if (jointType == LineJointType::VtxAverage)
             {
@@ -2660,7 +2658,7 @@ namespace LinaVG
                 // if (isAAOutline)
                 //     v.col.w = 1.0f;
 
-                if (Config.aaEnabled && !isAAOutline)
+                if (opts.aaEnabled && !isAAOutline)
                     copiedVerticesOrder.push_back(destBuf->m_vertexBuffer.m_size);
 
                 destBuf->PushVertex(v);
@@ -2689,7 +2687,7 @@ namespace LinaVG
                 const Vec2 vertexNormalAverage = Math::GetVertexNormalFlatCheck(destBuf->m_vertexBuffer[current].pos, prevP, nextP, ccw);
                 v.pos                          = Vec2(destBuf->m_vertexBuffer[current].pos.x + vertexNormalAverage.x * thickness, destBuf->m_vertexBuffer[current].pos.y + vertexNormalAverage.y * thickness);
 
-                if (Config.aaEnabled && !isAAOutline)
+                if (opts.aaEnabled && !isAAOutline)
                     extrudedVerticesOrder.push_back(destBuf->m_vertexBuffer.m_size);
 
                 destBuf->PushVertex(v);
@@ -2713,7 +2711,7 @@ namespace LinaVG
                 destBuf->PushIndex(current + vertexCount);
             }
 
-            if (Config.aaEnabled && !isAAOutline)
+            if (opts.aaEnabled && !isAAOutline)
             {
                 StyleOptions opts2 = StyleOptions(opts);
                 destBuf            = DrawOutlineAroundShape(thread, destBuf, opts2, &extrudedVerticesOrder[0], extrudedVerticesOrder.m_size, defThickness, ccw, drawOrder, OutlineCallType::OutlineAA);
@@ -2891,7 +2889,7 @@ namespace LinaVG
             };
 
             const bool recalcUvs = useTextureBuffer || useGradBuffer;
-            const bool useAA     = Config.aaEnabled && !isAAOutline;
+            const bool useAA     = opts.aaEnabled && !isAAOutline;
 
             if (opts.isFilled)
             {
