@@ -129,7 +129,7 @@ cmake --build . --target ALL_BUILD
 
 ```
 
-CMake build process downloads the pre-built dependencies during configuration. If you choose to build & run the demo application using another method, remember to get the required dependency binaries from [Lina Dependencies](https://github.com/inanevin/LinaDependencies/tree/linavg) repository.
+CMake build process downloads the pre-built dependencies during configuration. If you choose to build & run the demo application using another method, remember to get the required dependency binaries from [Lina Dependencies](https://github.com/inanevin/LinaDependencies/tree/dev_linavg) repository.
 
 # Quick Demonstration
 
