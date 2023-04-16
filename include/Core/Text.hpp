@@ -119,7 +119,6 @@ namespace LinaVG
     /// <param name="useKerningIfAvailable">If the font face contains a kern table this font will be drawn using kerning information. </param>
     /// <returns></returns>
     LINAVG_API LinaVGFont* LoadFont(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
-    LINAVG_API LinaVGFont* LoadFontThreadSafe(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
 
     /// <summary>
     /// Loads the given font and generates textures based on given size.
@@ -137,7 +136,6 @@ namespace LinaVG
     /// <param name="useKerningIfAvailable">If the font face contains a kern table this font will be drawn using kerning information. </param>
     /// <returns></returns>
     LINAVG_API LinaVGFont* LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
-    LINAVG_API LinaVGFont* LoadFontFromMemoryThreadSafe(void* data, size_t dataSize, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
 
     /// <summary>
     /// Returns the kerning vector between two given glphys.
@@ -147,7 +145,6 @@ namespace LinaVG
     namespace Internal
     {
         extern LINAVG_API TextData g_textData;
-        extern std::mutex          g_loadingMutex;
 
         /// <summary>
         /// Uses loaded face (from file or mem) to setup rest of the font data.

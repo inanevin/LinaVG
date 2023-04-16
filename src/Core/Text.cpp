@@ -70,38 +70,8 @@ namespace LinaVG
         return Internal::SetupFont(face, loadAsSDF, size, customRanges, customRangesSize, useKerningIfAvailable);
     }
 
-    LINAVG_API LinaVGFont* LoadFontThreadSafe(const char* file, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
-    {
-        std::lock_guard<std::mutex> grd(Internal::g_loadingMutex);
-
-        FT_Face face;
-        if (FT_New_Face(Internal::g_textData.m_ftlib, file, 0, &face))
-        {
-            if (Config.errorCallback)
-                Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
-            return nullptr;
-        }
-
-        return Internal::SetupFont(face, loadAsSDF, size, customRanges, customRangesSize, useKerningIfAvailable);
-    }
-
     LinaVGFont* LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
     {
-        FT_Face face;
-        if (FT_New_Memory_Face(Internal::g_textData.m_ftlib, static_cast<FT_Byte*>(data), static_cast<FT_Long>(dataSize), 0, &face))
-        {
-            if (Config.errorCallback)
-                Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
-            return nullptr;
-        }
-
-        return Internal::SetupFont(face, loadAsSDF, size, customRanges, customRangesSize, useKerningIfAvailable);
-    }
-
-    LINAVG_API LinaVGFont* LoadFontFromMemoryThreadSafe(void* data, size_t dataSize, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
-    {
-        std::lock_guard<std::mutex> grd(Internal::g_loadingMutex);
-
         FT_Face face;
         if (FT_New_Memory_Face(Internal::g_textData.m_ftlib, static_cast<FT_Byte*>(data), static_cast<FT_Long>(dataSize), 0, &face))
         {
@@ -121,8 +91,15 @@ namespace LinaVG
         LinaVGFont* SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
         {
 
-            FT_Set_Pixel_Sizes(face, 0, size);
-            FT_Select_Charmap(face, ft_encoding_unicode);
+            FT_Error err = FT_Set_Pixel_Sizes(face, 0, size);
+
+            if (err)
+                Config.errorCallback("LinaVG: Error on FT_Set_Pixel_Sizes!");
+
+            err = FT_Select_Charmap(face, ft_encoding_unicode);
+
+            if (err)
+                Config.errorCallback("LinaVG: Error on FT_Select_Charmap!");
 
             // Texture alignment changes might be necessary on some APIs such as OpenGL
             Backend::BaseBackend::Get()->SaveAPIState();
@@ -143,11 +120,11 @@ namespace LinaVG
             FT_GlyphSlot slot              = face->glyph;
 
             auto setSizes = [&](FT_ULong c) {
-                auto           i     = FT_Get_Char_Index(face, c);
-                int            error = FT_Load_Glyph(face, i, FT_LOAD_DEFAULT);
-                TextCharacter& ch    = characterMap[c];
+                auto i            = FT_Get_Char_Index(face, c);
+                err               = FT_Load_Glyph(face, i, FT_LOAD_DEFAULT);
+                TextCharacter& ch = characterMap[c];
 
-                if (error)
+                if (err)
                 {
                     if (Config.errorCallback)
                         Config.errorCallback("LinaVG: Freetype Error -> Failed to load character!");
@@ -155,11 +132,11 @@ namespace LinaVG
                 }
 
                 if (loadAsSDF)
-                    error = FT_Render_Glyph(slot, FT_RENDER_MODE_SDF);
+                    err = FT_Render_Glyph(slot, FT_RENDER_MODE_SDF);
                 else
-                    error = FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL);
+                    err = FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL);
 
-                if (error)
+                if (err)
                 {
                     if (Config.errorCallback)
                         Config.errorCallback("LinaVG: Freetype Error -> Failed to render character!");
@@ -201,7 +178,11 @@ namespace LinaVG
                 auto secondIndex = FT_Get_Char_Index(face, second);
 
                 FT_Vector delta;
-                FT_Get_Kerning(face, firstIndex, secondIndex, FT_KERNING_DEFAULT, &delta);
+                err = FT_Get_Kerning(face, firstIndex, secondIndex, FT_KERNING_DEFAULT, &delta);
+
+                if (err)
+                    Config.errorCallback("LinaVG: Error on FT_Get_Kerning!");
+
                 font->m_kerningTable[first].xAdvances[second] = delta.x;
             };
 
@@ -347,7 +328,11 @@ namespace LinaVG
             }
 
             font->m_spaceAdvance = characterMap[' '].m_advance.x;
-            FT_Done_Face(face);
+            err                  = FT_Done_Face(face);
+
+            if (err)
+                Config.errorCallback("LinaVG: Error on FT_Done_Face!");
+
             Backend::BaseBackend::Get()->RestoreAPIState();
             Config.logCallback("LinaVG: Successfuly loaded font!");
             return font;
