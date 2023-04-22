@@ -26,7 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "Backends/OpenGLGLFW.hpp"
+#include "Backends/GLFWWindow.hpp"
 #include "Main.hpp"
 #include <iostream>
 
@@ -47,7 +47,7 @@ namespace LinaVG
             std::cerr << "LinaVG: GLFW Error: " << error << " Description: " << desc << std::endl;
         }
 
-        bool ExampleBackend::InitWindow(int width, int height)
+        bool GLFWWindow::InitWindow(int width, int height)
         {
             int init = glfwInit();
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -170,7 +170,7 @@ namespace LinaVG
             return true;
         }
 
-        void ExampleBackend::Poll()
+        void GLFWWindow::Poll()
         {
             glfwPollEvents();
 
@@ -185,30 +185,30 @@ namespace LinaVG
 
         }
 
-        void ExampleBackend::Render()
+        void GLFWWindow::Clear()
         {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClearColor((GLfloat)0.8f, (GLfloat)0.8f, (GLfloat)0.8f, (GLfloat)1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
         }
 
-        void ExampleBackend::SwapBuffers()
+        void GLFWWindow::SwapBuffers()
         {
             glfwSwapBuffers(m_window);
         }
 
-        void ExampleBackend::Terminate()
+        void GLFWWindow::Terminate()
         {
             glfwTerminate();
             std::cout << "LinaVG: Example backend terminated successfully." << std::endl;
         }
 
-        float ExampleBackend::GetTime()
+        float GLFWWindow::GetTime()
         {
             return static_cast<float>(glfwGetTime());
         }
 
-        unsigned int ExampleBackend::CreateTexture(const char* file)
+        unsigned int GLFWWindow::CreateTexture(const char* file)
         {
             unsigned int texture;
             glGenTextures(1, &texture);

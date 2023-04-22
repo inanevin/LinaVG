@@ -27,7 +27,7 @@ SOFTWARE.
 */
 
 #include "glad/glad.h"
-#include "Core/Backend.hpp"
+#include "Backends/GL/GLBackend.hpp"
 #include "Core/Renderer.hpp"
 #include "Core/Drawer.hpp"
 #include "Core/Math.hpp"
@@ -36,6 +36,12 @@ SOFTWARE.
 
 namespace LinaVG::Backend
 {
+
+    unsigned int GLBackend::s_displayPosX   = 0;
+    unsigned int GLBackend::s_displayPosY   = 0;
+    unsigned int GLBackend::s_displayWidth  = 0;
+    unsigned int GLBackend::s_displayHeight = 0;
+
     bool GLBackend::Initialize()
     {
         m_backendData.m_defaultVtxShader = "#version 330 core\n"
@@ -233,11 +239,11 @@ namespace LinaVG::Backend
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        glViewport(0, 0, (GLsizei)Config.displayWidth, (GLsizei)Config.displayHeight);
+        glViewport(0, 0, (GLsizei)s_displayWidth, (GLsizei)s_displayHeight);
 
         // Ortho projection matrix.
-        int fb_width  = (int)(Config.displayWidth);
-        int fb_height = (int)(Config.displayHeight);
+        int fb_width  = (int)(s_displayWidth);
+        int fb_height = (int)(s_displayHeight);
         if (fb_width <= 0 || fb_height <= 0)
         {
             m_backendData.m_skipDraw = true;
@@ -246,10 +252,10 @@ namespace LinaVG::Backend
 
         m_backendData.m_skipDraw = false;
 
-        float       L    = static_cast<float>(Config.displayPosX);
-        float       R    = static_cast<float>(Config.displayPosX + Config.displayWidth);
-        float       T    = static_cast<float>(Config.displayPosY);
-        float       B    = static_cast<float>(Config.displayPosY + Config.displayHeight);
+        float       L    = static_cast<float>(s_displayPosX);
+        float       R    = static_cast<float>(s_displayPosX + s_displayWidth);
+        float       T    = static_cast<float>(s_displayPosY);
+        float       B    = static_cast<float>(s_displayPosY + s_displayHeight);
         const float zoom = Config.debugOrthoProjectionZoom;
 
         L *= zoom;
@@ -440,13 +446,13 @@ namespace LinaVG::Backend
     {
         if (width == 0 || height == 0)
         {
-            x      = static_cast<BackendHandle>(Config.displayPosX);
-            y      = static_cast<BackendHandle>(Config.displayPosY);
-            width  = static_cast<BackendHandle>(Config.displayWidth);
-            height = static_cast<BackendHandle>(Config.displayHeight);
+            x      = static_cast<BackendHandle>(s_displayPosX);
+            y      = static_cast<BackendHandle>(s_displayPosY);
+            width  = static_cast<BackendHandle>(s_displayWidth);
+            height = static_cast<BackendHandle>(s_displayHeight);
         }
 
-        glScissor(x, static_cast<GLint>(Config.displayHeight - (y + height)), static_cast<GLint>(width), static_cast<GLint>(height));
+        glScissor(x, static_cast<GLint>(s_displayHeight - (y + height)), static_cast<GLint>(width), static_cast<GLint>(height));
     }
 
     void GLBackend::SaveAPIState()

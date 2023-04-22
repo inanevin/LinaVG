@@ -31,6 +31,7 @@ SOFTWARE.
 #include "LinaVG.hpp"
 #include "Core/Math.hpp"
 #include "Utility/Utility.hpp"
+#include "Backends/GL/GLBackend.hpp"
 #include <string>
 #include <iostream>
 #include <ctime>
@@ -80,7 +81,7 @@ namespace LinaVG
             std::srand(static_cast<unsigned int>(std::time(0)));
 
             const int  starCount  = 5 + (std::rand() % 50);
-            const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
+            const Vec2 screenSize = Vec2(static_cast<float>(Backend::GLBackend::s_displayWidth), static_cast<float>(Backend::GLBackend::s_displayHeight));
             const Vec2 skyEnd     = Vec2(screenSize.x, screenSize.y * 0.45f);
 
             for (int i = 0; i < starCount; i++)
@@ -109,7 +110,7 @@ namespace LinaVG
 
         void DemoScreens::ShowBackground()
         {
-            const Vec2   screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
+            const Vec2   screenSize = Vec2(static_cast<float>(Backend::GLBackend::s_displayWidth), static_cast<float>(Backend::GLBackend::s_displayHeight));
             StyleOptions style;
 
             // Draw background gradient.
@@ -204,7 +205,7 @@ namespace LinaVG
 
         void DemoScreens::ShowDemoScreen1_Shapes()
         {
-            const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
+            const Vec2 screenSize = Vec2(static_cast<float>(Backend::GLBackend::s_displayWidth), static_cast<float>(Backend::GLBackend::s_displayHeight));
 
             StyleOptions defaultStyle;
             defaultStyle.isFilled = true;
@@ -320,7 +321,7 @@ namespace LinaVG
 
         void DemoScreens::ShowDemoScreen2_Colors()
         {
-            const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
+            const Vec2 screenSize = Vec2(static_cast<float>(Backend::GLBackend::s_displayWidth), static_cast<float>(Backend::GLBackend::s_displayHeight));
             Vec2       startPos   = Vec2(screenSize.x * 0.05f, screenSize.y * 0.05f);
 
             StyleOptions defaultStyle;
@@ -440,7 +441,7 @@ namespace LinaVG
 
         void DemoScreens::ShowDemoScreen3_Outlines()
         {
-            const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
+            const Vec2 screenSize = Vec2(static_cast<float>(Backend::GLBackend::s_displayWidth), static_cast<float>(Backend::GLBackend::s_displayHeight));
             Vec2       startPos   = Vec2(screenSize.x * 0.05f, screenSize.y * 0.05f);
 
             StyleOptions defaultStyle;
@@ -595,7 +596,7 @@ namespace LinaVG
 
         void DemoScreens::ShowDemoScreen4_Lines()
         {
-            const Vec2       screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
+            const Vec2       screenSize = Vec2(static_cast<float>(Backend::GLBackend::s_displayWidth), static_cast<float>(Backend::GLBackend::s_displayHeight));
             Vec2             startPos   = Vec2(screenSize.x * 0.05f, screenSize.y * 0.05f);
             StyleOptions     defaultStyle;
             LineCapDirection lineCap   = LineCapDirection::None;
@@ -660,7 +661,7 @@ namespace LinaVG
 
         void DemoScreens::ShowDemoScreen5_Texts()
         {
-            const Vec2  screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
+            const Vec2  screenSize = Vec2(static_cast<float>(Backend::GLBackend::s_displayWidth), static_cast<float>(Backend::GLBackend::s_displayHeight));
             Vec2        startPos   = Vec2(screenSize.x * 0.05f, screenSize.y * 0.05f);
             TextOptions textOpts;
             textOpts.font = fontDemo;
@@ -763,7 +764,7 @@ namespace LinaVG
 
         void DemoScreens::ShowDemoScreen6_DrawOrder()
         {
-            const Vec2   screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
+            const Vec2   screenSize = Vec2(static_cast<float>(Backend::GLBackend::s_displayWidth), static_cast<float>(Backend::GLBackend::s_displayHeight));
             Vec2         startPos   = Vec2(screenSize.x * 0.05f, screenSize.y * 0.05f);
             StyleOptions opts;
             opts.color                    = Vec4(0, 0, 0, 1);
@@ -794,7 +795,7 @@ namespace LinaVG
 
         void DemoScreens::ShowDemoScreen7_Clipping()
         {
-            const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
+            const Vec2 screenSize = Vec2(static_cast<float>(Backend::GLBackend::s_displayWidth), static_cast<float>(Backend::GLBackend::s_displayHeight));
             Vec2       startPos   = Vec2(screenSize.x * 0.5f, screenSize.y * 0.5f);
             const Vec2 size       = Vec2(500, 500);
 
@@ -806,10 +807,10 @@ namespace LinaVG
 
             if (m_clippingEnabled)
             {
-                Config.clipPosX  = static_cast<BackendHandle>(min.x);
-                Config.clipPosY  = static_cast<BackendHandle>(min.y);
-                Config.clipSizeX = static_cast<BackendHandle>(size.x);
-                Config.clipSizeY = static_cast<BackendHandle>(size.y);
+                LinaVG::SetClipPosX(static_cast<BackendHandle>(min.x));
+                LinaVG::SetClipPosY(static_cast<BackendHandle>(min.y));
+                LinaVG::SetClipSizeX(static_cast<BackendHandle>(size.x));
+                LinaVG::SetClipSizeY(static_cast<BackendHandle>(size.y));
             }
 
             // Main rect.
@@ -827,15 +828,15 @@ namespace LinaVG
             textOpts.font = fontDefault;
             LinaVG::DrawTextNormal("This text is clipped by the black rectangle.", Vec2(min.x - 50, min.y + 250), textOpts, 0.0f, 2);
 
-            Config.clipPosX  = 0;
-            Config.clipPosY  = 0;
-            Config.clipSizeX = 0;
-            Config.clipSizeY = 0;
+            LinaVG::SetClipPosX(0);
+            LinaVG::SetClipPosY(0);
+            LinaVG::SetClipSizeX(0);
+            LinaVG::SetClipSizeY(0);
         }
 
         void DemoScreens::ShowDemoScreen8_Animated()
         {
-            const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
+            const Vec2 screenSize = Vec2(static_cast<float>(Backend::GLBackend::s_displayWidth), static_cast<float>(Backend::GLBackend::s_displayHeight));
 
             auto drawSinBezier = [](const Vec2& pos) {
                 StyleOptions     defaultStyle;
@@ -1114,7 +1115,7 @@ namespace LinaVG
 
         void DemoScreens::ShowDemoScreen9_Final()
         {
-            const Vec2 screenSize = Vec2(static_cast<float>(LinaVG::Config.displayWidth), static_cast<float>(LinaVG::Config.displayHeight));
+            const Vec2 screenSize = Vec2(static_cast<float>(Backend::GLBackend::s_displayWidth), static_cast<float>(Backend::GLBackend::s_displayHeight));
 
             // Sky
             StyleOptions sky;

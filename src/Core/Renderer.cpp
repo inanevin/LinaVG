@@ -37,7 +37,7 @@ SOFTWARE.
 #endif
 
 #include "Core/Renderer.hpp"
-#include "Core/Backend.hpp"
+#include "Core/BaseBackend.hpp"
 #include "Core/Drawer.hpp"
 #include "Core/Math.hpp"
 #include "Core/Text.hpp"
@@ -225,6 +225,26 @@ namespace LinaVG
         }
     }
 
+    LINAVG_API void SetClipPosX(BackendHandle posX, int thread)
+    {
+        Internal::g_rendererData[thread].m_clipPosX = posX;
+    }
+
+    LINAVG_API void SetClipPosY(BackendHandle posY, int thread)
+    {
+        Internal::g_rendererData[thread].m_clipPosY = posY;
+    }
+
+    LINAVG_API void SetClipSizeX(BackendHandle sizeX, int thread)
+    {
+        Internal::g_rendererData[thread].m_clipSizeX = sizeX;
+    }
+
+    LINAVG_API void SetClipSizeY(BackendHandle sizeY, int thread)
+    {
+        Internal::g_rendererData[thread].m_clipSizeY = sizeY;
+    }
+
     void EndFrame()
     {
         Backend::BaseBackend::Get()->EndFrame();
@@ -276,7 +296,7 @@ namespace LinaVG
         for (int i = 0; i < m_gradientBuffers.m_size; i++)
         {
             auto& buf = m_gradientBuffers[i];
-            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.start, grad.start) && Math::IsEqual(buf.m_color.end, grad.end) && buf.m_color.gradientType == grad.gradientType && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
+            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.start, grad.start) && Math::IsEqual(buf.m_color.end, grad.end) && buf.m_color.gradientType == grad.gradientType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
             {
                 if (grad.gradientType == GradientType::Radial || grad.gradientType == GradientType::RadialCorner)
                 {
@@ -293,7 +313,7 @@ namespace LinaVG
 
         SetDrawOrderLimits(drawOrder);
 
-        m_gradientBuffers.push_back(GradientDrawBuffer(grad, drawOrder, shapeType));
+        m_gradientBuffers.push_back(GradientDrawBuffer(grad, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
         return m_gradientBuffers.last_ref();
     }
 
@@ -302,13 +322,13 @@ namespace LinaVG
         for (int i = 0; i < m_defaultBuffers.m_size; i++)
         {
             auto& buf = m_defaultBuffers[i];
-            if (m_defaultBuffers[i].m_drawOrder == drawOrder && buf.m_shapeType == shapeType && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
+            if (m_defaultBuffers[i].m_drawOrder == drawOrder && buf.m_shapeType == shapeType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
                 return m_defaultBuffers[i];
         }
 
         SetDrawOrderLimits(drawOrder);
 
-        m_defaultBuffers.push_back(DrawBuffer(drawOrder, DrawBufferType::Default, shapeType));
+        m_defaultBuffers.push_back(DrawBuffer(drawOrder, DrawBufferType::Default, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
         return m_defaultBuffers.last_ref();
     }
 
@@ -318,13 +338,13 @@ namespace LinaVG
         for (int i = 0; i < m_textureBuffers.m_size; i++)
         {
             auto& buf = m_textureBuffers[i];
-            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_tint, tint) && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
+            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_tint, tint) && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
                 return m_textureBuffers[i];
         }
 
         SetDrawOrderLimits(drawOrder);
 
-        m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset, tint, drawOrder, shapeType));
+        m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset, tint, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
         return m_textureBuffers.last_ref();
     }
 
@@ -333,13 +353,13 @@ namespace LinaVG
         for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
         {
             auto& buf = m_simpleTextBuffers[i];
-            if (buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
+            if (buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
                 return m_simpleTextBuffers[i];
         }
 
         SetDrawOrderLimits(drawOrder);
 
-        m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(textureHandle, drawOrder, isDropShadow));
+        m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(textureHandle, drawOrder, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
         return m_simpleTextBuffers.last_ref();
     }
 
@@ -349,13 +369,13 @@ namespace LinaVG
         {
             auto& buf = m_sdfTextBuffers[i];
             if (buf.m_isDropShadow == isDropShadow && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && buf.m_thickness == opts.sdfThickness && buf.m_softness == opts.sdfSoftness &&
-                buf.m_outlineThickness == opts.sdfOutlineThickness && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(Config.clipPosX, Config.clipPosY, Config.clipSizeX, Config.clipSizeY))
+                buf.m_outlineThickness == opts.sdfOutlineThickness && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
                 return m_sdfTextBuffers[i];
         }
 
         SetDrawOrderLimits(drawOrder);
 
-        m_sdfTextBuffers.push_back(SDFTextDrawBuffer(textureHandle, drawOrder, opts, isDropShadow));
+        m_sdfTextBuffers.push_back(SDFTextDrawBuffer(textureHandle, drawOrder, opts, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
         return m_sdfTextBuffers.last_ref();
     }
 

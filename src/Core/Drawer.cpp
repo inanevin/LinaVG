@@ -29,7 +29,6 @@ SOFTWARE.
 #include "Core/Drawer.hpp"
 #include "Core/Math.hpp"
 #include "Core/Renderer.hpp"
-#include "Core/Backend.hpp"
 #include "Core/Text.hpp"
 #include "Utility/Utility.hpp"
 #include <codecvt> // for std::codecvt_utf8

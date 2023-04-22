@@ -661,46 +661,6 @@ namespace LinaVG
     LINAVG_API struct Configuration
     {
         /// <summary>
-        /// X position of the clip rectangle. 0,0 = Top-left
-        /// </summary>
-        BackendHandle clipPosX = 0;
-
-        /// <summary>
-        /// Y position of the clip rectangle. 0,0 = Top-left
-        /// </summary>
-        BackendHandle clipPosY = 0;
-
-        /// <summary>
-        /// Clip rectangle width.
-        /// </summary>
-        BackendHandle clipSizeX = 0;
-
-        /// <summary>
-        /// Clip rectangle height.
-        /// </summary>
-        BackendHandle clipSizeY = 0;
-
-        /// <summary>
-        /// Set this to your application's display pos X (viewport pos).
-        /// </summary>
-        unsigned int displayPosX = 0;
-
-        /// <summary>
-        /// Set this to your application's display pos Y (viewport pos).
-        /// </summary>
-        unsigned int displayPosY = 0;
-
-        /// <summary>
-        /// Set this to your application's display width.
-        /// </summary>
-        unsigned int displayWidth = 0;
-
-        /// <summary>
-        /// Set this to your application's display height.
-        /// </summary>
-        unsigned int displayHeight = 0;
-
-        /// <summary>
         /// Used as an additional scale on outline and AA thickness.
         /// Normally you can set this to whatever your OS' display scale is, e.g. OS scaling factor on high-dpi monitors.
         /// All Text and Style options also have their own/local framebuffer scale, which is multiplied by this value.
@@ -861,13 +821,13 @@ namespace LinaVG
     struct DrawBuffer
     {
         DrawBuffer(){};
-        DrawBuffer(int drawOrder, DrawBufferType type, DrawBufferShapeType shapeType)
+        DrawBuffer(int drawOrder, DrawBufferType type, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
             : m_drawOrder(drawOrder), m_drawBufferType(type), m_shapeType(shapeType)
         {
-            clipPosX  = Config.clipPosX;
-            clipPosY  = Config.clipPosY;
-            clipSizeX = Config.clipSizeX;
-            clipSizeY = Config.clipSizeY;
+            this->clipPosX  = clipPosX;
+            this->clipPosY  = clipPosY;
+            this->clipSizeX = clipSizeX;
+            this->clipSizeY = clipSizeY;
         };
 
         Array<Vertex>       m_vertexBuffer;
@@ -916,8 +876,8 @@ namespace LinaVG
     struct GradientDrawBuffer : public DrawBuffer
     {
         GradientDrawBuffer(){};
-        GradientDrawBuffer(const Vec4Grad& g, int drawOrder, DrawBufferShapeType shapeType)
-            : m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_color(g), DrawBuffer(drawOrder, DrawBufferType::Gradient, shapeType){};
+        GradientDrawBuffer(const Vec4Grad& g, int drawOrder, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+            : m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_color(g), DrawBuffer(drawOrder, DrawBufferType::Gradient, shapeType, clipPosX, clipPosY, clipSizeX, clipSizeY){};
 
         bool     m_isAABuffer = false;
         Vec4Grad m_color      = Vec4(1, 1, 1, 1);
@@ -926,9 +886,9 @@ namespace LinaVG
     struct TextureDrawBuffer : public DrawBuffer
     {
         TextureDrawBuffer(){};
-        TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
+        TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
             : m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_tint(tint), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset),
-              DrawBuffer(drawOrder, DrawBufferType::Textured, shapeType){};
+              DrawBuffer(drawOrder, DrawBufferType::Textured, shapeType, clipPosX, clipPosY, clipSizeX, clipSizeY){};
 
         bool          m_isAABuffer      = false;
         BackendHandle m_textureHandle   = 0;
@@ -940,9 +900,9 @@ namespace LinaVG
     struct SimpleTextDrawBuffer : public DrawBuffer
     {
         SimpleTextDrawBuffer(){};
-        SimpleTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, bool isDropShadow)
+        SimpleTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
             : m_textureHandle(glyphHandle), m_isDropShadow(isDropShadow),
-              DrawBuffer(drawOrder, DrawBufferType::SimpleText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape){};
+              DrawBuffer(drawOrder, DrawBufferType::SimpleText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY){};
 
         BackendHandle m_textureHandle = 0;
         bool          m_isDropShadow  = false;
@@ -951,11 +911,11 @@ namespace LinaVG
     struct SDFTextDrawBuffer : public DrawBuffer
     {
         SDFTextDrawBuffer(){};
-        SDFTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow)
+        SDFTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
             : m_textureHandle(glyphHandle), m_thickness(opts.sdfThickness),
               m_softness(opts.sdfSoftness), m_outlineThickness(opts.sdfOutlineThickness),
               m_outlineColor(opts.sdfOutlineColor), m_flipAlpha(opts.flipAlpha), m_isDropShadow(isDropShadow),
-              DrawBuffer(drawOrder, DrawBufferType::SDFText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape){};
+              DrawBuffer(drawOrder, DrawBufferType::SDFText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY){};
 
         bool          m_isDropShadow     = false;
         bool          m_flipAlpha        = false;

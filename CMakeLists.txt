@@ -34,12 +34,7 @@ endif()
 #--------------------------------------------------------------------
 
 option(LINAVG_BUILD_EXAMPLES "Builds example backend projects." ON)
-option(LINAVG_BACKEND_GL "Enables OpenGL Backend." ON)
 option(LINAVG_TEXT_SUPPORT "Enables FreeType text support. Requires you to link to FreeType library." ON)
-
-if(LINAVG_BACKEND_GL)
-	add_compile_definitions(LINAVG_BACKEND_GL)
-endif()
 
 if(LINAVG_BUILD_EXAMPLES)
 	add_compile_definitions(LINAVG_TEXT_SUPPORT)
@@ -70,19 +65,11 @@ include/Utility/Utility.hpp
 include/Core/Renderer.hpp
 include/Core/Text.hpp
 include/Core/Drawer.hpp
-include/Core/Backend.hpp
 include/Core/Common.hpp
 include/Core/Math.hpp
-include/Backends/BaseBackend.hpp
+include/Core/BaseBackend.hpp
 )
 
-if(LINAVG_BACKEND_GL)
-set(LinaVG_BackendHPP include/Backends/GL/GLBackend.hpp)
-set(LinaVG_BackendCPP src/Backends/GL/GLBackend.cpp)
-else()
-set(LinaVG_BackendHPP)
-set(LinaVG_BackendCPP)
-endif()
 
 set(LinaVG_HEADERS
 
@@ -90,7 +77,6 @@ set(LinaVG_HEADERS
 src/Utility/Utility.cpp
 src/Core/Renderer.cpp
 src/Core/Text.cpp
-src/Core/Backend.cpp
 src/Core/Drawer.cpp
 src/Core/Common.cpp
 src/Core/Math.cpp
@@ -100,7 +86,7 @@ src/Core/Math.cpp
 #--------------------------------------------------------------------
 # Create executable project
 #--------------------------------------------------------------------
-add_library(${PROJECT_NAME} ${LinaVG_SOURCES} ${LinaVG_HEADERS} ${LinaVG_BackendHPP} ${LinaVG_BackendCPP})
+add_library(${PROJECT_NAME} ${LinaVG_SOURCES} ${LinaVG_HEADERS})
 add_library(Lina::VG ALIAS ${PROJECT_NAME}) 
 
 #--------------------------------------------------------------------
@@ -110,16 +96,11 @@ add_library(Lina::VG ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MAJOR=1)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MINOR=3)
-target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=5)
+target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=6)
 
 #--------------------------------------------------------------------
 # Subdirectories & linking
 #--------------------------------------------------------------------
-
-if(LINAVG_BACKEND_GL)
-	include(_Dependencies/glad/link.cmake)
-	link_glad()
-endif()
 
 if(LINAVG_BUILD_EXAMPLES)
 	include(_Dependencies/freetype/link.cmake)

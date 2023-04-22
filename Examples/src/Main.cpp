@@ -30,7 +30,8 @@ SOFTWARE.
 #include "LinaVG.hpp"
 #include <iostream>
 #include <chrono>
-#include "Backends/OpenGLGLFW.hpp"
+#include "Backends/GLFWWindow.hpp"
+#include "Backends/GL/GLBackend.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -48,7 +49,7 @@ namespace LinaVG
         void ExampleApp::Run()
         {
             s_exampleApp = this;
-            ExampleBackend exampleBackend;
+            GLFWWindow exampleBackend;
 
             const unsigned int sizeX = 1440;
             const unsigned int sizeY = 960;
@@ -57,13 +58,10 @@ namespace LinaVG
             exampleBackend.InitWindow(static_cast<int>(sizeX), static_cast<int>(sizeY));
 
             // Setup Lina VG config.
-            LinaVG::Config.displayPosX   = 0;
-            LinaVG::Config.displayPosY   = 0;
-            LinaVG::Config.displayWidth  = sizeX;
-            LinaVG::Config.displayHeight = sizeY;
-            LinaVG::Config.clipPosX = LinaVG::Config.clipPosY = 0;
-            LinaVG::Config.clipSizeX                            = sizeX;
-            LinaVG::Config.clipSizeY                            = sizeY;
+            Backend::GLBackend::s_displayPosX   = 0;
+            Backend::GLBackend::s_displayPosY   = 0;
+            Backend::GLBackend::s_displayWidth  = sizeX;
+            Backend::GLBackend::s_displayHeight = sizeY;
 
             LinaVG::Config.errorCallback = [](const std::string& err) {
                 std::cerr << err.c_str() << std::endl;
@@ -77,6 +75,7 @@ namespace LinaVG
             m_linaTexture      = exampleBackend.CreateTexture("Resources/Textures/Lina.png");
 
             // Init LinaVG
+            LinaVG::Backend::BaseBackend::SetBackend(new Backend::GLBackend());
             LinaVG::Initialize();
             m_demoScreens.Initialize();
 
@@ -102,7 +101,7 @@ namespace LinaVG
 
                 // Example exampleBackend input & rendering.
                 exampleBackend.Poll();
-                exampleBackend.Render();
+                exampleBackend.Clear();
 
                 // Lina VG start frame.
                 LinaVG::StartFrame();
@@ -216,10 +215,8 @@ namespace LinaVG
 
         void ExampleApp::OnWindowResizeCallback(int width, int height)
         {
-            LinaVG::Config.displayWidth  = static_cast<BackendHandle>(width);
-            LinaVG::Config.displayHeight = static_cast<BackendHandle>(height);
-            LinaVG::Config.clipSizeX     = static_cast<BackendHandle>(width);
-            LinaVG::Config.clipSizeY     = static_cast<BackendHandle>(height);
+            Backend::GLBackend::s_displayWidth  = static_cast<BackendHandle>(width);
+            Backend::GLBackend::s_displayHeight = static_cast<BackendHandle>(height);
         }
         void ExampleApp::OnWindowCloseCallback()
         {

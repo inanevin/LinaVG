@@ -88,6 +88,10 @@ namespace LinaVG
         int                                m_textCacheFrameCounter = 0;
         RectOverrideData                   m_rectOverrideData;
         UVOverrideData                     m_uvOverride;
+        BackendHandle                      m_clipPosX  = 0;
+        BackendHandle                      m_clipPosY  = 0;
+        BackendHandle                      m_clipSizeX = 0;
+        BackendHandle                      m_clipSizeY = 0;
 
         void                  SetDrawOrderLimits(int drawOrder);
         int                   GetBufferIndexInGradientArray(DrawBuffer* buf);
@@ -141,6 +145,15 @@ namespace LinaVG
     /// </summary>
     /// <returns></returns>
     LINAVG_API void Render(int thread = 0);
+
+    /// <summary>
+    /// Sets the scissors/clipping data. Only use after calling LinaVG::StartFrame().
+    /// </summary>
+    /// <returns></returns>
+    LINAVG_API void SetClipPosX(BackendHandle posX, int thread = 0);
+    LINAVG_API void SetClipPosY(BackendHandle posY, int thread = 0);
+    LINAVG_API void SetClipSizeX(BackendHandle sizeX, int thread = 0);
+    LINAVG_API void SetClipSizeY(BackendHandle sizeY, int thread = 0);
 
     /// <summary>
     /// Any Draw commands via LinaVG must take place between StartFrame and EndFrame.

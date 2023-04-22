@@ -39,7 +39,7 @@ Timestamp: 3/24/2022 11:33:52 PM
 #define LinaVGGLBackend_HPP
 
 // Headers here.
-#include "../BaseBackend.hpp"
+#include <LinaVG.hpp>
 
 namespace LinaVG::Backend
 {
@@ -106,6 +106,11 @@ namespace LinaVG::Backend
         virtual void          SaveAPIState() override;
         virtual void          RestoreAPIState() override;
         virtual BackendHandle CreateFontTexture(int width, int height) override;
+
+        static unsigned int s_displayPosX;
+        static unsigned int s_displayPosY;
+        static unsigned int s_displayWidth;
+        static unsigned int s_displayHeight;
 
     private:
         void SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height);

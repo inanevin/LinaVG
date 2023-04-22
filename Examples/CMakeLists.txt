@@ -23,14 +23,16 @@ set(EXAMPLES_SOURCES
 
 src/Main.cpp
 src/DemoScreens.cpp
-src/Backends/OpenGLGLFW.cpp
+src/Backends/GLFWWindow.cpp
+src/Backends/GL/GLBackend.cpp
 )
 
 set(EXAMPLES_HEADERS
 
 include/Main.hpp
 include/DemoScreens.hpp
-include/Backends/OpenGLGLFW.hpp
+include/Backends/GLFWWindow.hpp
+include/Backends/GL/GLBackend.hpp
 include/Utility/stb_image.h
 )
 

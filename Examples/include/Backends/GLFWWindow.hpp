@@ -36,19 +36,19 @@ namespace LinaVG
 {
     namespace Examples
     {
-        class ExampleBackend
+        class GLFWWindow
         {
         public:
-            ExampleBackend()  = default;
-            ~ExampleBackend() = default;
+            GLFWWindow()  = default;
+            ~GLFWWindow() = default;
 
-            bool InitWindow(int width, int height);
-            void Poll();
-            void Render();
-            void SwapBuffers();
-            void Terminate();
+            bool  InitWindow(int width, int height);
+            void  Poll();
+            void  Clear();
+            void  SwapBuffers();
+            void  Terminate();
             float GetTime();
-            
+
             inline float GetFramebufferScale()
             {
                 return m_frameBufferScaleX;
@@ -57,9 +57,9 @@ namespace LinaVG
             unsigned int CreateTexture(const char* file);
 
         private:
-            GLFWwindow*            m_window            = nullptr;
-            float                  m_frameBufferScaleX = 0.0f;
-            float                  m_frameBufferScaleY = 0.0f;
+            GLFWwindow* m_window            = nullptr;
+            float       m_frameBufferScaleX = 0.0f;
+            float       m_frameBufferScaleY = 0.0f;
         };
     } // namespace Examples
 } // namespace LinaVG
