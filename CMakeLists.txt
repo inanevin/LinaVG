@@ -87,7 +87,7 @@ src/Core/Math.cpp
 # Create executable project
 #--------------------------------------------------------------------
 add_library(${PROJECT_NAME} ${LinaVG_SOURCES} ${LinaVG_HEADERS})
-add_library(Lina::VG ALIAS ${PROJECT_NAME}) 8
+add_library(Lina::VG ALIAS ${PROJECT_NAME})
 
 #--------------------------------------------------------------------
 # Set include directories
