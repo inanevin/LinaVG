@@ -87,7 +87,7 @@ src/Core/Math.cpp
 # Create executable project
 #--------------------------------------------------------------------
 add_library(${PROJECT_NAME} ${LinaVG_SOURCES} ${LinaVG_HEADERS})
-add_library(Lina::VG ALIAS ${PROJECT_NAME}) 
+add_library(Lina::VG ALIAS ${PROJECT_NAME}) 8
 
 #--------------------------------------------------------------------
 # Set include directories
@@ -96,7 +96,7 @@ add_library(Lina::VG ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MAJOR=1)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MINOR=3)
-target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=7)
+target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=8)
 
 #--------------------------------------------------------------------
 # Subdirectories & linking
