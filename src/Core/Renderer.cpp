@@ -110,10 +110,6 @@ namespace LinaVG
     {
         Internal::InitThreadedData();
 
-#ifdef LINAVG_BACKEND_GL
-        Backend::BaseBackend::SetBackend(new Backend::GLBackend());
-#endif
-
         _ASSERT(Backend::BaseBackend::Get() != nullptr);
 
         if (!Backend::BaseBackend::Get()->Initialize())
