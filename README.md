@@ -108,7 +108,19 @@ LinaVG is thread-safe as long as the [Threading](https://github.com/inanevin/Lin
 
 # Installation
 
-[Releases](https://github.com/inanevin/LinaVG/releases) contain pre-built binaries for linking against LinaVG. Your application first needs to link against Glad (only if using the embedded OpenGL renderer) and FreeType libraries (if want to use text rendering) distributed alongside with LinaVG release. Simply link against those two, then against LinaVG and you are good to go. If you plan to use LinaVG within your source-code and compile it along with your application, again you still need to link against those two, then include the header & source files of LinaVG in your application.
+Download a release from [Releases](https://github.com/inanevin/LinaVG/releases). The zip file will contain pre-built binaries for LinaVG and FreeType. 
+
+If you want to use text drawing functionalities:
+
+- Your application first needs to link against & include FreeType.
+- Then link against & include LinaVG.
+- ```#define LINAVG_TEXT_SUPPORT``` before including ```<LinaVG.hpp>```. 
+
+If you don't want to use text drawing:
+
+- You can directly link against and include LinaVG, omit FreeType. Don't define text support macro.
+
+The pre-built binaries and LinaVG core do not support any kind of rendering backend. You are expected to provide your own backend. You can of course make use of the example OpenGL backend given in the Example project.
 
 Note: LinaVG requires C++ 17 features.
 
@@ -125,8 +137,8 @@ git clone https://github.com/inanevin/LinaVG
 mkdir build_x64
 cd build_x64
 
-# Build LinaVG w/ GL backend & examples
-cmake ../ -DLINAVG_TEXT_SUPPORT=ON -DLINAVG_BUILD_EXAMPLES=ON -DLINAVG_BACKEND_GL=ON -G "Visual Studio 17 2022" -A "x64"
+# Build LinaVG w/ examples & text support
+cmake ../ -DLINAVG_TEXT_SUPPORT=ON -DLINAVG_BUILD_EXAMPLES=ON -G "Visual Studio 17 2022" -A "x64"
 
 # After the project files are generated, you can build the project via
 cmake --build . --target ALL_BUILD
@@ -142,12 +154,6 @@ Below is a bare-minimum implementation steps for drawing with LinaVG. As said in
 
 // Include LinaVG
 #include "LinaVG.hpp"
-
-// Configure display properties based on your application window
-LinaVG::Config.displayPosX   = 0;
-LinaVG::Config.displayPosY   = 0;
-LinaVG::Config.displayWidth  = myDisplayWidth;
-LinaVG::Config.displayHeight = myDisplayHeight;
 
 // Initialize LinaVG
 LinaVG::Initialize();
