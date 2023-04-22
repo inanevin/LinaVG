@@ -842,7 +842,7 @@ namespace LinaVG
 
         bool IsClipDifferent(BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
         {
-            return (clipPosX != clipPosX || clipPosY != clipPosY || clipSizeX != clipSizeX || clipSizeY != clipSizeY);
+            return (this->clipPosX != clipPosX || this->clipPosY != clipPosY || this->clipSizeX != clipSizeX || this->clipSizeY != clipSizeY);
         }
 
         inline void Clear()
