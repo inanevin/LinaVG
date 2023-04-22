@@ -20,7 +20,9 @@ LinaVG is a 2D vector graphics library providing low-level functionality to draw
 
 ![image](https://user-images.githubusercontent.com/3519379/173692019-f624a50f-5ae5-41e2-bed2-8a8e1b2c9f47.png)
 
-LinaVG currently only supports OpenGL backend, however the actual rendering API is rather similar, so feel free to add your own backends! This process is explained in [Wiki](https://github.com/inanevin/LinaVG/wiki) in detail. Additionally, it's possible to access the internal vector buffers for any kind of custom rendering functionality.
+LinaVG does not provide a "rendering" functionality on its own. It generates buffers according to your draw calls and sends them back to a custom backend you determine in batches of optimized buffers.
+
+That being said, the example project provides an example OpenGL backend you can basically copy and paste. Also [Lina Engine](https://github.com/inanevin/LinaEngine) uses LinaVG and have examples for custom DirectX12 backend. Please check [Wiki](https://github.com/inanevin/LinaVG/wiki) for more details.
 
 # What
 
