@@ -105,6 +105,7 @@ namespace LinaVG
             Backend::BaseBackend::Get()->SaveAPIState();
 
             LinaVGFont* font        = new LinaVGFont();
+            font->m_supportsUnicode = customRanges != nullptr;
             font->m_size            = size;
             font->m_isSDF           = loadAsSDF;
             font->m_newLineHeight   = static_cast<float>(face->size->metrics.height) / 64.0f;

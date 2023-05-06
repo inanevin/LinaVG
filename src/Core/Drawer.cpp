@@ -3268,7 +3268,7 @@ namespace LinaVG
                 characterCount++;
             };
 
-            if (Config.useUnicodeEncoding)
+            if (font->m_supportsUnicode)
             {
 // _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 #pragma warning(disable : 4996)
@@ -3302,15 +3302,38 @@ namespace LinaVG
             float          totalWidth         = 0.0f;
             const uint8_t* c;
 
-            // Iterate through the whole text and determine max width & height
-            // As well as line breaks based on wrapping.
-            for (c = (const uint8_t*)text; *c; c++)
-            {
-                auto& ch = font->m_characterGlyphs[*c];
-                float x  = ch.m_advance.x * scale;
-                float y  = ch.m_bearing.y * scale;
+            auto calcSizeChar = [&](TextCharacter& ch, GlyphEncoding c) {
+                float x = ch.m_advance.x * scale;
+                float y = ch.m_bearing.y * scale;
                 totalWidth += x + spacing;
                 maxCharacterHeight = Math::Max(maxCharacterHeight, y);
+            };
+
+            if (font->m_supportsUnicode)
+            {
+// _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#pragma warning(disable : 4996)
+
+                std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
+                auto                                                        str32 = cv.from_bytes(text);
+                std::u32string::iterator                                    it;
+                int                                                         counter = 0;
+                for (it = str32.begin(); it < str32.end(); it++)
+                {
+                    auto character = *it;
+                    auto ch        = font->m_characterGlyphs[character];
+                    calcSizeChar(ch, character);
+                    counter++;
+                }
+            }
+            else
+            {
+                for (c = (uint8_t*)text; *c; c++)
+                {
+                    auto character = *c;
+                    auto ch        = font->m_characterGlyphs[character];
+                    calcSizeChar(ch, character);
+                }
             }
 
             if (font->m_isSDF)

@@ -76,6 +76,7 @@ namespace LinaVG
         int                                           m_size            = 0;
         float                                         m_newLineHeight   = 0.0f;
         float                                         m_spaceAdvance    = 0.0f;
+        bool                                          m_supportsUnicode = false;
         bool                                          m_isSDF           = false;
         bool                                          m_supportsKerning = false;
         LINAVG_MAP<GlyphEncoding, TextCharacter>      m_characterGlyphs;

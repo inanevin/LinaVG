@@ -680,14 +680,6 @@ namespace LinaVG
         float miterLimit = 150;
 
         /// <summary>
-        /// If true, texts will be drawn by interpreting each character w/ 32 bit encoding.
-        /// Set this to true if you want to draw unicode characters.
-        /// Also you need to load the glyph ranges using customRanges in LoadFont.
-        /// Do not forget to send your text with in utf8-format, e.g. c++11 > u8"my string"
-        /// </summary>
-        bool useUnicodeEncoding = false;
-
-        /// <summary>
         /// Maximum size a font texture atlas can have, all atlasses are square, so this is used for both width and height.
         /// Increase if you are loading a lot of characters or fonts with big sizes (e.g. 100)
         /// You can use Internal::DrawDebugFontAtlas to visualize the atlas target font belongs to.
