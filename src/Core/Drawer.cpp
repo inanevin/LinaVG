@@ -3176,6 +3176,90 @@ namespace LinaVG
             return offset;
         }
 
+        uint32_t GetNextUnicodeChar(const uint8_t*& text)
+        {
+            uint32_t codepoint = 0;
+            if ((*text & 0x80) == 0)
+            {
+                // ASCII character
+                codepoint = *text;
+                ++text;
+            }
+            else if ((*text & 0xE0) == 0xC0)
+            {
+                // 2-byte character
+                codepoint = (*text & 0x1F) << 6;
+                ++text;
+                if ((*text & 0xC0) != 0x80)
+                {
+                    if (Config.errorCallback)
+                        Config.errorCallback("Invalid UTF-8!");
+                    return 0;
+                }
+                codepoint |= *text & 0x3F;
+                ++text;
+            }
+            else if ((*text & 0xF0) == 0xE0)
+            {
+                // 3-byte character
+                codepoint = (*text & 0x0F) << 12;
+                ++text;
+                if ((*text & 0xC0) != 0x80)
+                {
+                    if (Config.errorCallback)
+                        Config.errorCallback("Invalid UTF-8!");
+                    return 0;
+                }
+                codepoint |= (*text & 0x3F) << 6;
+                ++text;
+                if ((*text & 0xC0) != 0x80)
+                {
+                    if (Config.errorCallback)
+                        Config.errorCallback("Invalid UTF-8!");
+                    return 0;
+                }
+                codepoint |= *text & 0x3F;
+                ++text;
+            }
+            else if ((*text & 0xF8) == 0xF0)
+            {
+                // 4-byte character
+                codepoint = (*text & 0x07) << 18;
+                ++text;
+                if ((*text & 0xC0) != 0x80)
+                {
+                    if (Config.errorCallback)
+                        Config.errorCallback("Invalid UTF-8!");
+                    return 0;
+                }
+                codepoint |= (*text & 0x3F) << 12;
+                ++text;
+                if ((*text & 0xC0) != 0x80)
+                {
+                    if (Config.errorCallback)
+                        Config.errorCallback("Invalid UTF-8!");
+                    return 0;
+                }
+                codepoint |= (*text & 0x3F) << 6;
+                ++text;
+                if ((*text & 0xC0) != 0x80)
+                {
+                    if (Config.errorCallback)
+                        Config.errorCallback("Invalid UTF-8!");
+                    return 0;
+                }
+                codepoint |= *text & 0x3F;
+                ++text;
+            }
+            else
+            {
+                if (Config.errorCallback)
+                    Config.errorCallback("Invalid UTF-8!");
+                return 0;
+            }
+            return codepoint;
+        }
+
         void DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale)
         {
             const uint8_t* c;
@@ -3270,19 +3354,12 @@ namespace LinaVG
 
             if (font->m_supportsUnicode)
             {
-// _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#pragma warning(disable : 4996)
-
-                std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
-                auto                                                        str32 = cv.from_bytes(text);
-                std::u32string::iterator                                    it;
-                int                                                         counter = 0;
-                for (it = str32.begin(); it < str32.end(); it++)
+                const uint8_t* c = (const uint8_t*)text;
+                while (*c)
                 {
-                    auto character = *it;
-                    auto ch        = font->m_characterGlyphs[character];
+                    uint32_t character = GetNextUnicodeChar(c);
+                    auto     ch        = font->m_characterGlyphs[character];
                     drawChar(ch, character);
-                    counter++;
                 }
             }
             else
@@ -3311,19 +3388,12 @@ namespace LinaVG
 
             if (font->m_supportsUnicode)
             {
-// _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#pragma warning(disable : 4996)
-
-                std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
-                auto                                                        str32 = cv.from_bytes(text);
-                std::u32string::iterator                                    it;
-                int                                                         counter = 0;
-                for (it = str32.begin(); it < str32.end(); it++)
+                const uint8_t* c = (const uint8_t*)text;
+                while (*c)
                 {
-                    auto character = *it;
-                    auto ch        = font->m_characterGlyphs[character];
+                    uint32_t character = GetNextUnicodeChar(c);
+                    auto     ch        = font->m_characterGlyphs[character];
                     calcSizeChar(ch, character);
-                    counter++;
                 }
             }
             else

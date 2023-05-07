@@ -465,6 +465,11 @@ namespace LinaVG
         /// Returns the total text size for wrapped text.
         /// </summary>
         Vec2 CalcTextSizeWrapped(const char* text, LinaVGFont*, float newLineSpacing, float wrapping, float scale, float spacing, float sdfThickness);
+
+        /// <summary>
+        /// For processing UTf8 texts.
+        /// </summary>
+        uint32_t GetNextUnicodeChar(const uint8_t*& text);
 #endif
 
     }; // namespace Internal
