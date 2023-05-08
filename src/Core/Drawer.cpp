@@ -3176,87 +3176,47 @@ namespace LinaVG
             return offset;
         }
 
-        uint32_t GetNextUnicodeChar(const uint8_t*& text)
+        uint32_t GetNextUnicodeChar(const char* p, uint32_t& byteCount)
         {
             uint32_t codepoint = 0;
-            if ((*text & 0x80) == 0)
+            if ((*p & 0b10000000) == 0b00000000)
             {
-                // ASCII character
-                codepoint = *text;
-                ++text;
+                // 1-byte character (ASCII)
+                auto ch   = static_cast<unsigned char>(*p);
+                byteCount = 1;
+                codepoint = static_cast<uint32_t>(ch);
             }
-            else if ((*text & 0xE0) == 0xC0)
+            else if ((*p & 0b11100000) == 0b11000000)
             {
                 // 2-byte character
-                codepoint = (*text & 0x1F) << 6;
-                ++text;
-                if ((*text & 0xC0) != 0x80)
-                {
-                    if (Config.errorCallback)
-                        Config.errorCallback("Invalid UTF-8!");
-                    return 0;
-                }
-                codepoint |= *text & 0x3F;
-                ++text;
+                codepoint = ((*p & 0b00011111) << 6) |
+                            (*(p + 1) & 0b00111111);
+                byteCount = 2;
             }
-            else if ((*text & 0xF0) == 0xE0)
+            else if ((*p & 0b11110000) == 0b11100000)
             {
                 // 3-byte character
-                codepoint = (*text & 0x0F) << 12;
-                ++text;
-                if ((*text & 0xC0) != 0x80)
-                {
-                    if (Config.errorCallback)
-                        Config.errorCallback("Invalid UTF-8!");
-                    return 0;
-                }
-                codepoint |= (*text & 0x3F) << 6;
-                ++text;
-                if ((*text & 0xC0) != 0x80)
-                {
-                    if (Config.errorCallback)
-                        Config.errorCallback("Invalid UTF-8!");
-                    return 0;
-                }
-                codepoint |= *text & 0x3F;
-                ++text;
+                codepoint = ((*p & 0b00001111) << 12) |
+                            ((*(p + 1) & 0b00111111) << 6) |
+                            (*(p + 2) & 0b00111111);
+                byteCount = 3;
             }
-            else if ((*text & 0xF8) == 0xF0)
+            else if ((*p & 0b11111000) == 0b11110000)
             {
                 // 4-byte character
-                codepoint = (*text & 0x07) << 18;
-                ++text;
-                if ((*text & 0xC0) != 0x80)
-                {
-                    if (Config.errorCallback)
-                        Config.errorCallback("Invalid UTF-8!");
-                    return 0;
-                }
-                codepoint |= (*text & 0x3F) << 12;
-                ++text;
-                if ((*text & 0xC0) != 0x80)
-                {
-                    if (Config.errorCallback)
-                        Config.errorCallback("Invalid UTF-8!");
-                    return 0;
-                }
-                codepoint |= (*text & 0x3F) << 6;
-                ++text;
-                if ((*text & 0xC0) != 0x80)
-                {
-                    if (Config.errorCallback)
-                        Config.errorCallback("Invalid UTF-8!");
-                    return 0;
-                }
-                codepoint |= *text & 0x3F;
-                ++text;
+                codepoint = ((*p & 0b00000111) << 18) |
+                            ((*(p + 1) & 0b00111111) << 12) |
+                            ((*(p + 2) & 0b00111111) << 6) |
+                            (*(p + 3) & 0b00111111);
+                byteCount = 4;
             }
             else
             {
+                // Invalid UTF-8 sequence
                 if (Config.errorCallback)
-                    Config.errorCallback("Invalid UTF-8!");
-                return 0;
+                    Config.errorCallback("LinaVG -> Invalid UTF-8 sequence!");
             }
+
             return codepoint;
         }
 
@@ -3355,11 +3315,18 @@ namespace LinaVG
             if (font->m_supportsUnicode)
             {
                 const uint8_t* c = (const uint8_t*)text;
-                while (*c)
+                for (const char* p = text; *p; p++)
                 {
-                    uint32_t character = GetNextUnicodeChar(c);
-                    auto     ch        = font->m_characterGlyphs[character];
+                    uint32_t byteCount = 0;
+                    uint32_t character = GetNextUnicodeChar(p, byteCount);
+
+                    if (byteCount == 0)
+                        return;
+
+                    auto ch = font->m_characterGlyphs[character];
                     drawChar(ch, character);
+
+                    p += byteCount - 1;
                 }
             }
             else
@@ -3388,12 +3355,18 @@ namespace LinaVG
 
             if (font->m_supportsUnicode)
             {
-                const uint8_t* c = (const uint8_t*)text;
-                while (*c)
+                for (const char* p = text; *p; p++)
                 {
-                    uint32_t character = GetNextUnicodeChar(c);
-                    auto     ch        = font->m_characterGlyphs[character];
+                    uint32_t byteCount = 0;
+                    uint32_t character = GetNextUnicodeChar(p, byteCount);
+
+                    if (byteCount == 0)
+                        return Vec2(0, 0);
+
+                    auto ch = font->m_characterGlyphs[character];
                     calcSizeChar(ch, character);
+
+                    p += byteCount - 1;
                 }
             }
             else
