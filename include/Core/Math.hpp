@@ -82,10 +82,10 @@ namespace LinaVG
         /// <returns></returns>
         static Vec2 GetPolygonCentroidFast(Vec2* points, int size);
 
-        static bool  Math::IsEqual(const Vec2& v1, const Vec2& v2);
-        static bool  Math::IsEqualMarg(const Vec2& v1, const Vec2& v2, float err = 0.001f);
-        static bool  Math::IsEqualMarg(float f1, float f2, float err = 0.001f);
-        static bool  Math::IsEqual(const Vec4& v1, const Vec4& v2);
+        static bool  IsEqual(const Vec2& v1, const Vec2& v2);
+        static bool  IsEqualMarg(const Vec2& v1, const Vec2& v2, float err = 0.001f);
+        static bool  IsEqualMarg(float f1, float f2, float err = 0.001f);
+        static bool  IsEqual(const Vec4& v1, const Vec4& v2);
         static float Abs(float f);
         static float Clamp(float f, float min, float max);
         static int   Clamp(int i, int min, int max);

@@ -3176,50 +3176,6 @@ namespace LinaVG
             return offset;
         }
 
-        uint32_t GetNextUnicodeChar(const char* p, uint32_t& byteCount)
-        {
-            uint32_t codepoint = 0;
-            if ((*p & 0b10000000) == 0b00000000)
-            {
-                // 1-byte character (ASCII)
-                auto ch   = static_cast<unsigned char>(*p);
-                byteCount = 1;
-                codepoint = static_cast<uint32_t>(ch);
-            }
-            else if ((*p & 0b11100000) == 0b11000000)
-            {
-                // 2-byte character
-                codepoint = ((*p & 0b00011111) << 6) |
-                            (*(p + 1) & 0b00111111);
-                byteCount = 2;
-            }
-            else if ((*p & 0b11110000) == 0b11100000)
-            {
-                // 3-byte character
-                codepoint = ((*p & 0b00001111) << 12) |
-                            ((*(p + 1) & 0b00111111) << 6) |
-                            (*(p + 2) & 0b00111111);
-                byteCount = 3;
-            }
-            else if ((*p & 0b11111000) == 0b11110000)
-            {
-                // 4-byte character
-                codepoint = ((*p & 0b00000111) << 18) |
-                            ((*(p + 1) & 0b00111111) << 12) |
-                            ((*(p + 2) & 0b00111111) << 6) |
-                            (*(p + 3) & 0b00111111);
-                byteCount = 4;
-            }
-            else
-            {
-                // Invalid UTF-8 sequence
-                if (Config.errorCallback)
-                    Config.errorCallback("LinaVG -> Invalid UTF-8 sequence!");
-            }
-
-            return codepoint;
-        }
-
         void DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale)
         {
             const uint8_t* c;
@@ -3314,19 +3270,12 @@ namespace LinaVG
 
             if (font->m_supportsUnicode)
             {
-                const uint8_t* c = (const uint8_t*)text;
-                for (const char* p = text; *p; p++)
+                auto codepoints = GetUtf8Codepoints(text);
+
+                for (auto cp : codepoints)
                 {
-                    uint32_t byteCount = 0;
-                    uint32_t character = GetNextUnicodeChar(p, byteCount);
-
-                    if (byteCount == 0)
-                        return;
-
-                    auto ch = font->m_characterGlyphs[character];
-                    drawChar(ch, character);
-
-                    p += byteCount - 1;
+                    auto ch = font->m_characterGlyphs[cp];
+                    drawChar(ch, cp);
                 }
             }
             else
@@ -3338,6 +3287,39 @@ namespace LinaVG
                     drawChar(ch, character);
                 }
             }
+        }
+
+        std::vector<int32_t> GetUtf8Codepoints(const char* str)
+        {
+            std::vector<int32_t> codepoints;
+            const char*          p = str;
+            while (*p)
+            {
+                int32_t       codepoint = 0;
+                unsigned char c         = *p;
+                if (c < 0x80)
+                { // 1-byte sequence
+                    codepoint = c;
+                    p += 1;
+                }
+                else if (c < 0xE0)
+                { // 2-byte sequence
+                    codepoint = ((p[0] & 0x1F) << 6) | (p[1] & 0x3F);
+                    p += 2;
+                }
+                else if (c < 0xF0)
+                { // 3-byte sequence
+                    codepoint = ((p[0] & 0x0F) << 12) | ((p[1] & 0x3F) << 6) | (p[2] & 0x3F);
+                    p += 3;
+                }
+                else
+                { // 4-byte sequence
+                    codepoint = ((p[0] & 0x07) << 18) | ((p[1] & 0x3F) << 12) | ((p[2] & 0x3F) << 6) | (p[3] & 0x3F);
+                    p += 4;
+                }
+                codepoints.push_back(codepoint);
+            }
+            return codepoints;
         }
 
         Vec2 CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing, float sdfThickness)
@@ -3355,18 +3337,12 @@ namespace LinaVG
 
             if (font->m_supportsUnicode)
             {
-                for (const char* p = text; *p; p++)
+                auto codepoints = GetUtf8Codepoints(text);
+
+                for (auto cp : codepoints)
                 {
-                    uint32_t byteCount = 0;
-                    uint32_t character = GetNextUnicodeChar(p, byteCount);
-
-                    if (byteCount == 0)
-                        return Vec2(0, 0);
-
-                    auto ch = font->m_characterGlyphs[character];
-                    calcSizeChar(ch, character);
-
-                    p += byteCount - 1;
+                    auto ch = font->m_characterGlyphs[cp];
+                    calcSizeChar(ch, cp);
                 }
             }
             else

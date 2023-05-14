@@ -469,7 +469,7 @@ namespace LinaVG
         /// <summary>
         /// For processing UTf8 texts.
         /// </summary>
-        uint32_t GetNextUnicodeChar(const char* text, uint32_t& byteCount);
+        std::vector<int32_t> GetUtf8Codepoints(const char* str);
 #endif
 
     }; // namespace Internal

@@ -61,12 +61,12 @@ namespace LinaVG::Backend
         ShaderData    m_sdfTextShaderData;
         ShaderData    m_simpleTextShaderData;
         float         m_proj[4][4]                = {0};
-        char*         m_defaultVtxShader          = nullptr;
-        char*         m_defaultFragShader         = nullptr;
-        char*         m_roundedGradientFragShader = nullptr;
-        char*         m_texturedFragShader        = nullptr;
-        char*         m_sdfTextFragShader         = nullptr;
-        char*         m_simpleTextFragShader      = nullptr;
+        const char*   m_defaultVtxShader          = nullptr;
+        const char*   m_defaultFragShader         = nullptr;
+        const char*   m_roundedGradientFragShader = nullptr;
+        const char*   m_texturedFragShader        = nullptr;
+        const char*   m_sdfTextFragShader         = nullptr;
+        const char*   m_simpleTextFragShader      = nullptr;
         bool          m_skipDraw                  = false;
     };
 
