@@ -3213,9 +3213,6 @@ namespace LinaVG
                 pos.x += (kerning + ch.m_advance.x) * scale + spacing;
                 pos.y += ch.m_advance.y * scale;
 
-                if (w == 0.0f || h == 0.0f)
-                    return;
-
                 Vertex v0, v1, v2, v3;
 
                 if (isGradient)
@@ -3262,6 +3259,9 @@ namespace LinaVG
                     ci.sizeY = ybot - ytop;
                     outData->characterInfo.push_back(ci);
                 }
+
+                if (w == 0.0f || h == 0.0f)
+                    return;
 
                 buf->PushVertex(v0);
                 buf->PushVertex(v1);
