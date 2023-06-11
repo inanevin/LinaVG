@@ -3086,7 +3086,7 @@ namespace LinaVG
             TextPart* newLine = new TextPart();
             newLine->m_size.x = totalWidth - spaceAdvance;
             newLine->m_size.y = maxHeight;
-            newLine->m_str    = append;
+            newLine->m_str    = append.substr(0, append.size()-1);
             lines.push_back(newLine);
         }
 
