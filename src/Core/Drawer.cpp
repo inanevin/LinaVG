@@ -3255,7 +3255,7 @@ namespace LinaVG
                     CharacterInfo ci;
                     ci.x     = v0.pos.x;
                     ci.y     = v3.pos.y;
-                    ci.sizeX = w;
+                    ci.sizeX = Math::IsEqualMarg(w, 0.0f) ? (kerning + ch.m_advance.x) * scale : w;
                     ci.sizeY = ybot - ytop;
                     outData->characterInfo.push_back(ci);
                 }
