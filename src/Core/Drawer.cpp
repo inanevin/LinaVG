@@ -31,7 +31,6 @@ SOFTWARE.
 #include "Core/Renderer.hpp"
 #include "Core/Text.hpp"
 #include "Utility/Utility.hpp"
-#include <codecvt> // for std::codecvt_utf8
 
 namespace LinaVG
 {
@@ -3289,10 +3288,10 @@ namespace LinaVG
             }
         }
 
-        std::vector<int32_t> GetUtf8Codepoints(const char* str)
+        LINAVG_VEC<int32_t> GetUtf8Codepoints(const char* str)
         {
-            std::vector<int32_t> codepoints;
-            const char*          p = str;
+            LINAVG_VEC<int32_t> codepoints;
+            const char*         p = str;
             while (*p)
             {
                 int32_t       codepoint = 0;
@@ -3317,6 +3316,7 @@ namespace LinaVG
                     codepoint = ((p[0] & 0x07) << 18) | ((p[1] & 0x3F) << 12) | ((p[2] & 0x3F) << 6) | (p[3] & 0x3F);
                     p += 4;
                 }
+
                 codepoints.push_back(codepoint);
             }
             return codepoints;
@@ -3338,6 +3338,8 @@ namespace LinaVG
             if (font->m_supportsUnicode)
             {
                 auto codepoints = GetUtf8Codepoints(text);
+
+                const size_t sz = codepoints.size();
 
                 for (auto cp : codepoints)
                 {
