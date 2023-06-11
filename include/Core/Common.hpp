@@ -393,6 +393,23 @@ namespace LinaVG
         Center,
         Right
     };
+
+    struct CharacterInfo
+    {
+        float x     = 0.0f;
+        float y     = 0.0f;
+        float sizeX = 0.0f;
+        float sizeY = 0.0f;
+    };
+
+    LINAVG_API struct TextOutData
+    {
+        /// <summary>
+        /// Upon drawing a text, this vector contains position and size information for each character.
+        /// </summary>
+        LINAVG_VEC<CharacterInfo> characterInfo;
+    };
+
     /// <summary>
     /// Text styling, DrawText will render the given text as normal or via signed-distance-field (SDF) methods.
     /// This depends on the font handle given with options (or default font if not-provided).
