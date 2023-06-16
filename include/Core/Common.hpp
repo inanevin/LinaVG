@@ -402,12 +402,46 @@ namespace LinaVG
         float sizeY = 0.0f;
     };
 
+    LINAVG_API struct LineInfo
+    {
+        /// <summary>
+        /// First character index of the line that corresponds to a character in TextOutData.characterInfo
+        /// </summary>
+        unsigned int startCharacterIndex = 0;
+
+        /// <summary>
+        /// Last character index of the line that corresponds to a character in TextOutData.characterInfo
+        /// </summary>
+        unsigned int endCharacterIndex = 0;
+
+        /// <summary>
+        /// Start position x of this line.
+        /// </summary>
+        float posX = 0.0f;
+
+        /// <summary>
+        /// Start position y of this line.
+        /// </summary>
+        float posY = 0.0f;
+    };
+
     LINAVG_API struct TextOutData
     {
         /// <summary>
         /// Upon drawing a text, this vector contains position and size information for each character.
         /// </summary>
         LINAVG_VEC<CharacterInfo> characterInfo;
+
+        /// <summary>
+        /// If wrapped text, contains information about each line, empty if not wrapped.
+        /// </summary>
+        LINAVG_VEC<LineInfo> lineInfo;
+
+        void Clear()
+        {
+            characterInfo.clear();
+            lineInfo.clear();
+        }
     };
 
     /// <summary>

@@ -3086,7 +3086,7 @@ namespace LinaVG
             TextPart* newLine = new TextPart();
             newLine->m_size.x = totalWidth - spaceAdvance;
             newLine->m_size.y = maxHeight;
-            newLine->m_str    = append.substr(0, append.size()-1);
+            newLine->m_str    = append.substr(0, append.size() - 1);
             lines.push_back(newLine);
         }
 
@@ -3126,6 +3126,15 @@ namespace LinaVG
 
                 for (int i = 0; i < lines.m_size; i++)
                 {
+                    if (outData != nullptr)
+                    {
+                        LineInfo lineInfo;
+                        lineInfo.startCharacterIndex = static_cast<unsigned int>(outData->characterInfo.size());
+                        lineInfo.posX = usedPos.x;
+                        lineInfo.posY = usedPos.y;
+                        outData->lineInfo.push_back(lineInfo);
+                    }
+
                     if (alignment == TextAlignment::Center)
                     {
                         usedPos.x = pos.x - lines[i]->m_size.x / 2.0f;
@@ -3136,6 +3145,12 @@ namespace LinaVG
                     DrawText(buf, font, lines[i]->m_str.c_str(), usedPos, offset, color, spacing, isGradient, scale, outData);
                     usedPos.y += font->m_newLineHeight * scale + newLineSpacing;
                     delete lines[i];
+
+                    if (outData != nullptr)
+                    {
+                        auto& thisLine             = outData->lineInfo[outData->lineInfo.size() - 1];
+                        thisLine.endCharacterIndex = static_cast<unsigned int>(outData->characterInfo.size() - 1);
+                    }
                 }
 
                 for (int i = 0; i < arr.m_size; i++)
