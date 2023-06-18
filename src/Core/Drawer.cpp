@@ -3153,14 +3153,14 @@ namespace LinaVG
                     }
 
                     // Add current word to current line (with a leading space if it's not empty)
-                    if (!line.m_str.empty())
-                    {
-                        line.m_str += ' ';
-                        line.m_size.x += spaceAdvance;
-                    }
+                    //if (!line.m_str.empty())
+                    //{
+                    //    line.m_str += ' ';
+                    //    line.m_size.x += spaceAdvance;
+                    //}
 
-                    line.m_str += word.m_str;
-                    line.m_size.x += word.m_size.x;
+                    line.m_str += word.m_str + ' ';
+                    line.m_size.x += word.m_size.x + spaceAdvance;
                     line.m_size.y = Math::Max(line.m_size.y, word.m_size.y);
 
                     // Clear current word
@@ -3199,11 +3199,11 @@ namespace LinaVG
                 }
                 else
                 {
-                    if (!line.m_str.empty())
-                    {
-                        line.m_str += ' ';
-                        line.m_size.x += spaceAdvance;
-                    }
+                   //if (!line.m_str.empty())
+                   //{
+                   //    line.m_str += ' ';
+                   //    line.m_size.x += spaceAdvance;
+                   //}
 
                     line.m_str += word.m_str;
                     line.m_size.x += word.m_size.x;
