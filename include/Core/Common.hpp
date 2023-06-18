@@ -430,17 +430,23 @@ namespace LinaVG
         /// <summary>
         /// Upon drawing a text, this vector contains position and size information for each character.
         /// </summary>
-        LINAVG_VEC<CharacterInfo> characterInfo;
+        Array<CharacterInfo> characterInfo;
 
         /// <summary>
         /// If wrapped text, contains information about each line, empty if not wrapped.
         /// </summary>
-        LINAVG_VEC<LineInfo> lineInfo;
+        Array<LineInfo> lineInfo;
 
         void Clear()
         {
             characterInfo.clear();
             lineInfo.clear();
+        }
+
+        void Shrink()
+        {
+            characterInfo.shrink(0);
+            lineInfo.shrink(0);
         }
     };
 

@@ -472,6 +472,11 @@ namespace LinaVG
         /// For processing UTf8 texts.
         /// </summary>
         LINAVG_VEC<int32_t> GetUtf8Codepoints(const char* str);
+
+        /// <summary>
+        /// Parse text into wrapped lines.
+        /// </summary>
+        void WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth);
 #endif
 
     }; // namespace Internal

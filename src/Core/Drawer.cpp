@@ -3090,6 +3090,134 @@ namespace LinaVG
             lines.push_back(newLine);
         }
 
+        void AppendUTF8(LINAVG_STRING& str, unsigned long cp)
+        {
+            if (cp < 0x80)
+            { // 1-byte character
+                str += static_cast<char>(cp);
+            }
+            else if (cp < 0x800)
+            { // 2-byte character
+                str += static_cast<char>(0xC0 | cp >> 6);
+                str += static_cast<char>(0x80 | (cp & 0x3F));
+            }
+            else if (cp < 0x10000)
+            { // 3-byte character
+                str += static_cast<char>(0xE0 | cp >> 12);
+                str += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+                str += static_cast<char>(0x80 | (cp & 0x3F));
+            }
+            else if (cp <= 0x10FFFF)
+            { // 4-byte character
+                str += static_cast<char>(0xF0 | cp >> 18);
+                str += static_cast<char>(0x80 | ((cp >> 12) & 0x3F));
+                str += static_cast<char>(0x80 | ((cp >> 6) & 0x3F));
+                str += static_cast<char>(0x80 | (cp & 0x3F));
+            }
+            else
+            {
+                // the code point is not valid
+            }
+        }
+
+        void Internal::WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth)
+        {
+            TextPart line = {};
+            TextPart word = {};
+
+            const uint8_t* c;
+            const float    spaceAdvance = font->m_spaceAdvance * scale + spacing;
+
+            auto process = [&](TextCharacter& ch, GlyphEncoding c) {
+                // Add character to current word
+                if (c != ' ')
+                {
+                    if (font->m_supportsUnicode)
+                        AppendUTF8(word.m_str, c);
+                    else
+                        word.m_str += static_cast<char>(c);
+
+                    word.m_size.x += ch.m_advance.x * scale;
+                    word.m_size.y = Math::Max(word.m_size.y, ch.m_size.y * scale);
+                }
+                else
+                {
+                    // If adding the current word to the current line would
+                    // make it too long, add the current line to the list of
+                    // lines and start a new line with the current word.
+                    if (line.m_size.x + word.m_size.x > wrapWidth)
+                    {
+                        lines.push_back(line);
+                        line.m_str.clear();
+                        line.m_size = Vec2(0.0f, 0.0f);
+                    }
+
+                    // Add current word to current line (with a leading space if it's not empty)
+                    if (!line.m_str.empty())
+                    {
+                        line.m_str += ' ';
+                        line.m_size.x += spaceAdvance;
+                    }
+
+                    line.m_str += word.m_str;
+                    line.m_size.x += word.m_size.x;
+                    line.m_size.y = Math::Max(line.m_size.y, word.m_size.y);
+
+                    // Clear current word
+                    word.m_str.clear();
+                    word.m_size = Vec2(0.0f, 0.0f);
+                }
+            };
+
+            if (font->m_supportsUnicode)
+            {
+                auto codepoints = GetUtf8Codepoints(text);
+
+                for (auto cp : codepoints)
+                {
+                    auto ch = font->m_characterGlyphs[cp];
+                    process(ch, cp);
+                }
+            }
+            else
+            {
+                for (c = (uint8_t*)text; *c; c++)
+                {
+                    auto character = *c;
+                    auto ch        = font->m_characterGlyphs[character];
+                    process(ch, character);
+                }
+            }
+
+            // If there's still a word left that wasn't added to the lines, try to add it
+            if (!word.m_str.empty())
+            {
+                if (line.m_size.x + word.m_size.x > wrapWidth)
+                {
+                    lines.push_back(line);
+                    line = word;
+                }
+                else
+                {
+                    if (!line.m_str.empty())
+                    {
+                        line.m_str += ' ';
+                        line.m_size.x += spaceAdvance;
+                    }
+
+                    line.m_str += word.m_str;
+                    line.m_size.x += word.m_size.x;
+                    line.m_size.y = Math::Max(line.m_size.y, word.m_size.y);
+                }
+            }
+
+            // If there's still a line left that wasn't added to the lines, add it
+            if (!line.m_str.empty())
+            {
+                lines.push_back(line);
+            }
+        }
+
         void ProcessText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData)
         {
             const int  bufStart = buf->m_vertexBuffer.m_size;
@@ -3102,6 +3230,12 @@ namespace LinaVG
             // const Vec2 off = CalcMaxCharOffset(text, font, scale);
             // usedPos.x += Math::Abs(off.x) * remap;
             // usedPos.y += font->m_ascent + font->m_descent;
+
+            if (outData != nullptr)
+            {
+                outData->characterInfo.reserve(200);
+                outData->lineInfo.reserve(10);
+            }
 
             if (wrapWidth == 0.0f || size.x < wrapWidth)
             {
@@ -3116,47 +3250,38 @@ namespace LinaVG
             }
             else
             {
-                Array<TextPart*> arr;
-                Array<TextPart*> lines;
-                arr.reserve(10);
-                lines.reserve(5);
+                LINAVG_VEC<TextPart> lines;
+                lines.reserve(20);
+                WrapText(lines, font, text, spacing, scale, wrapWidth);
 
-                ParseTextIntoWords(arr, text, font, scale, spacing);
-                ParseWordsIntoLines(lines, arr, font, scale, spacing, wrapWidth, sdfThickness);
-
-                for (int i = 0; i < lines.m_size; i++)
+                for (const auto& line : lines)
                 {
                     if (outData != nullptr)
                     {
                         LineInfo lineInfo;
-                        lineInfo.startCharacterIndex = static_cast<unsigned int>(outData->characterInfo.size());
-                        lineInfo.posX = usedPos.x;
-                        lineInfo.posY = usedPos.y;
+                        lineInfo.startCharacterIndex = static_cast<unsigned int>(outData->characterInfo.m_size);
+                        lineInfo.posX                = usedPos.x;
+                        lineInfo.posY                = usedPos.y;
                         outData->lineInfo.push_back(lineInfo);
                     }
 
                     if (alignment == TextAlignment::Center)
                     {
-                        usedPos.x = pos.x - lines[i]->m_size.x / 2.0f;
+                        usedPos.x = pos.x - line.m_size.x / 2.0f;
                     }
                     else if (alignment == TextAlignment::Right)
-                        usedPos.x = pos.x - lines[i]->m_size.x;
+                        usedPos.x = pos.x - line.m_size.x;
 
-                    DrawText(buf, font, lines[i]->m_str.c_str(), usedPos, offset, color, spacing, isGradient, scale, outData);
+                    DrawText(buf, font, line.m_str.c_str(), usedPos, offset, color, spacing, isGradient, scale, outData);
                     usedPos.y += font->m_newLineHeight * scale + newLineSpacing;
-                    delete lines[i];
 
                     if (outData != nullptr)
                     {
-                        auto& thisLine             = outData->lineInfo[outData->lineInfo.size() - 1];
-                        thisLine.endCharacterIndex = static_cast<unsigned int>(outData->characterInfo.size() - 1);
+                        auto& thisLine             = outData->lineInfo[outData->lineInfo.m_size - 1];
+                        thisLine.endCharacterIndex = static_cast<unsigned int>(outData->characterInfo.m_size - 1);
                     }
                 }
 
-                for (int i = 0; i < arr.m_size; i++)
-                    delete arr[i];
-
-                arr.clear();
                 lines.clear();
             }
 
@@ -3403,35 +3528,26 @@ namespace LinaVG
 
         Vec2 CalcTextSizeWrapped(const char* text, LinaVGFont* font, float newLineSpacing, float wrapWidth, float scale, float spacing, float sdfThickness)
         {
-            Array<TextPart*> arr;
-            Array<TextPart*> lines;
-            arr.reserve(10);
-            lines.reserve(5);
-            ParseTextIntoWords(arr, text, font, scale, spacing);
-            ParseWordsIntoLines(lines, arr, font, scale, spacing, wrapWidth, sdfThickness);
+            LINAVG_VEC<TextPart> lines;
+            lines.reserve(15);
+            WrapText(lines, font, text, spacing, scale, wrapWidth);
 
-            if (lines.m_size == 1)
+            if (lines.size() == 1)
             {
-                const Vec2 finalSize = lines[0]->m_size;
-
-                for (int i = 0; i < lines.m_size; i++)
-                    delete lines[i];
-
-                for (int i = 0; i < arr.m_size; i++)
-                    delete arr[i];
-
-                arr.clear();
+                const Vec2 finalSize = lines[0].m_size;
                 lines.clear();
                 return finalSize;
             }
 
             Vec2 size = Vec2(0.0f, 0.0f);
 
-            for (int i = 0; i < lines.m_size; i++)
+            const int sz = static_cast<int>(lines.size());
+
+            for (int i = 0; i < sz; i++)
             {
-                const Vec2 calcSize = lines[i]->m_size;
+                const Vec2 calcSize = lines[i].m_size;
                 size.x              = Math::Max(calcSize.x, size.x);
-                if (i < lines.m_size - 1)
+                if (i < sz - 1)
                     size.y += font->m_newLineHeight * scale + newLineSpacing;
                 else
                     size.y += calcSize.y;
@@ -3439,14 +3555,8 @@ namespace LinaVG
                 // if (i < lines.m_size - 1)
                 //     size.y += font->m_newLineHeight + newLineSpacing + lines[i]->m_maxBearingYDiff;
                 // size.y += newLineSpacing + font->m_newLineHeight;
-
-                delete lines[i];
             }
 
-            for (int i = 0; i < arr.m_size; i++)
-                delete arr[i];
-
-            arr.clear();
             lines.clear();
             // size.y -= offset.y * remap;
             return size;
