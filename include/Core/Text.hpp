@@ -32,8 +32,6 @@ Class: Text
 Timestamp: 12/29/2018 10:43:46 PM
 */
 
-#ifdef LINAVG_TEXT_SUPPORT
-
 #pragma once
 #ifndef LinaVGText_HPP
 #define LinaVGText_HPP
@@ -154,7 +152,5 @@ namespace LinaVG
     } // namespace Internal
 
 }; // namespace LinaVG
-
-#endif
 
 #endif

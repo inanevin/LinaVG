@@ -26,8 +26,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifdef LINAVG_TEXT_SUPPORT
-
 #include "Core/Text.hpp"
 #include "Core/Renderer.hpp"
 #include "Core/BaseBackend.hpp"
@@ -341,5 +339,3 @@ namespace LinaVG
     } // namespace Internal
 
 } // namespace LinaVG
-
-#endif

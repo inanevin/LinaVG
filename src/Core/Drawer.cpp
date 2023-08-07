@@ -715,7 +715,6 @@ namespace LinaVG
         return DrawCircle(0, center, radius, style, segments, rotateAngle, startAngle, endAngle, drawOrder);
     }
 
-#ifdef LINAVG_TEXT_SUPPORT
 
     LINAVG_API void DrawTextSDF(int thread, const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder, bool skipCache, TextOutData* outData)
     {
@@ -857,8 +856,6 @@ namespace LinaVG
     {
         return CalculateTextSize(0, text, opts);
     }
-
-#endif
 
     namespace Internal
     {
@@ -3004,8 +3001,6 @@ namespace LinaVG
             return sourceBuffer;
         }
 
-#ifdef LINAVG_TEXT_SUPPORT
-
         void ParseTextIntoWords(Array<TextPart*>& arr, const char* text, LinaVGFont* font, float scale, float spacing)
         {
             bool          added  = false;
@@ -3563,5 +3558,4 @@ namespace LinaVG
         }
     }
 
-#endif
 } // namespace LinaVG

@@ -12,44 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions 
 # and limitations under the License.
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-cmake_minimum_required (VERSION 3.6)
+cmake_minimum_required (VERSION 3.8)
 project(LinaVG)
 set(CMAKE_CXX_STANDARD 17)
-
-#--------------------------------------------------------------------
-# Download dependencies
-#--------------------------------------------------------------------
-
-if(NOT EXISTS ${CMAKE_SOURCE_DIR}/_Dependencies)
-	include(CMake/GitUtils.cmake)
-	git_clone(
-        	PROJECT_NAME    _Dependencies
-        	GIT_URL         https://github.com/inanevin/LinaDependencies.git
-        	GIT_BRANCH      dev_linavg
-        	DIRECTORY 	${CMAKE_SOURCE_DIR})
-endif()
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #--------------------------------------------------------------------
 # Options & Definitions
 #--------------------------------------------------------------------
 
-option(LINAVG_BUILD_EXAMPLES "Builds example backend projects." ON)
-option(LINAVG_TEXT_SUPPORT "Enables FreeType text support. Requires you to link to FreeType library." ON)
-
-if(LINAVG_BUILD_EXAMPLES)
-	add_compile_definitions(LINAVG_TEXT_SUPPORT)
-else()
-	if(LINAVG_TEXT_SUPPORT)
-		add_compile_definitions(LINAVG_TEXT_SUPPORT)
-	endif()
-endif()
-
+option(LINAVG_BUILD_EXAMPLES "Builds example backend projects." OFF)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_SUPPRESS_REGENERATION true)
-
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
@@ -95,28 +72,20 @@ add_library(Lina::VG ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MAJOR=1)
-target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MINOR=5)
-target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=1)
+target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MINOR=6)
+target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=0)
 
 #--------------------------------------------------------------------
 # Subdirectories & linking
 #--------------------------------------------------------------------
+set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER LinaVGProject)
 
-if(LINAVG_BUILD_EXAMPLES)
-	include(_Dependencies/freetype/link.cmake)
-	link_freetype()
-else()
-	if(LINAVG_TEXT_SUPPORT)
-		include(_Dependencies/freetype/link.cmake)
-		link_freetype()
-	endif()
-endif()
-
+include(Dependencies/Dependencies.cmake)
 #--------------------------------------------------------------------
 # Folder structuring in visual studio
 #--------------------------------------------------------------------
 if(MSVC_IDE)
-	foreach(source IN LISTS LinaVG_HEADERS LinaVG_SOURCES LinaVG_BackendHPP LinaVG_BackendCPP)
+	foreach(source IN LISTS LinaVG_HEADERS LinaVG_SOURCES)
 		get_filename_component(source_path "${source}" PATH)
 		string(REPLACE "${LinaVG_SOURCE_DIR}" "" relative_source_path "${source_path}")
 		string(REPLACE "/" "\\" source_path_msvc "${relative_source_path}")
@@ -124,12 +93,8 @@ if(MSVC_IDE)
 	endforeach()
 
 if(LINAVG_BUILD_EXAMPLES)
-	add_subdirectory(examples)
-endif()
-
-
-if(LINAVG_BUILD_EXAMPLES)
-	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Examples)
+	add_subdirectory(Example)
+	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Example)
 endif()
 
 endif()
