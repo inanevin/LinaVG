@@ -110,7 +110,7 @@ LinaVG is thread-safe as long as the [Threading](https://github.com/inanevin/Lin
 
 # Installation
 
-Download a release from [Releases](https://github.com/inanevin/LinaVG/releases). The zip file will contain pre-built binaries for LinaVG and FreeType. 
+Download a release from [Releases](https://github.com/inanevin/LinaVG/releases).
 
 Recommended way of using LinaVG is to link it together with your application using CMake. Alternatively, you can build the CMake project yourself and link to produced binaries, but please mind that you also have to link to the produced FreeType binaries if you choose to do it this way.
 
