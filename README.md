@@ -112,42 +112,15 @@ LinaVG is thread-safe as long as the [Threading](https://github.com/inanevin/Lin
 
 Download a release from [Releases](https://github.com/inanevin/LinaVG/releases). The zip file will contain pre-built binaries for LinaVG and FreeType. 
 
-If you want to use text drawing functionalities:
+Recommended way of using LinaVG is to link it together with your application using CMake. Alternatively, you can build the CMake project yourself and link to produced binaries, but please mind that you also have to link to the produced FreeType binaries if you choose to do it this way.
 
-- Your application first needs to link against & include FreeType.
-- Then link against & include LinaVG.
-- ```#define LINAVG_TEXT_SUPPORT``` before including ```<LinaVG.hpp>```. 
-
-If you don't want to use text drawing:
-
-- You can directly link against and include LinaVG, omit FreeType. Don't define text support macro.
-
-The pre-built binaries and LinaVG core do not support any kind of rendering backend. You are expected to provide your own backend. You can of course make use of the example OpenGL backend given in the Example project.
-
-Note: LinaVG requires C++ 17 features.
-
-# Demo Application
-
-You can download this whole repository and generate the project files using CMake to run the example application, demonstrating all capabilities of LinaVG.
+Use ```LINAVG_BUILD_EXAMPLES``` option to build the example project.
 
 ```shell
-
-# Clone repo
-git clone https://github.com/inanevin/LinaVG
-
-# Create target dir & cd
-mkdir build_x64
-cd build_x64
-
-# Build LinaVG w/ examples & text support
-cmake ../ -DLINAVG_TEXT_SUPPORT=ON -DLINAVG_BUILD_EXAMPLES=ON -G "Visual Studio 17 2022" -A "x64"
-
-# After the project files are generated, you can build the project via
-cmake --build . --target ALL_BUILD
-
+cmake DLINAVG_BUILD_EXAMPLES=ON
 ```
 
-CMake build process downloads the pre-built dependencies during configuration. If you choose to build & run the demo application using another method, remember to get the required dependency binaries from [Lina Dependencies](https://github.com/inanevin/LinaDependencies/tree/linavg) repository.
+Note: LinaVG requires C++ 17 features.
 
 # Quick Demonstration
 
