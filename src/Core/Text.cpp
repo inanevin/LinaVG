@@ -26,10 +26,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "Core/Text.hpp"
-#include "Core/Renderer.hpp"
-#include "Core/BaseBackend.hpp"
-#include "Core/Math.hpp"
+#include "LinaVG/Core/Text.hpp"
+#include "LinaVG/Core/Renderer.hpp"
+#include "LinaVG/Core/BaseBackend.hpp"
+#include "LinaVG/Core/Math.hpp"
 #include <iostream>
 
 namespace LinaVG

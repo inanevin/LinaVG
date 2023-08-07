@@ -26,11 +26,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "Core/Drawer.hpp"
-#include "Core/Math.hpp"
-#include "Core/Renderer.hpp"
-#include "Core/Text.hpp"
-#include "Utility/Utility.hpp"
+#include "LinaVG/Core/Drawer.hpp"
+#include "LinaVG/Core/Math.hpp"
+#include "LinaVG/Core/Renderer.hpp"
+#include "LinaVG/Core/Text.hpp"
+#include "LinaVG/Utility/Utility.hpp"
 
 namespace LinaVG
 {

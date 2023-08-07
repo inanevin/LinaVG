@@ -26,13 +26,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Class: Common
-
-
-
-Timestamp: 3/26/2022 10:36:46 AM
-*/
 
 #pragma once
 

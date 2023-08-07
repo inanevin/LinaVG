@@ -28,7 +28,7 @@ SOFTWARE.
 
 #pragma once
 
-#include "Utility/Utility.hpp"
+#include "LinaVG/Utility/Utility.hpp"
 
 namespace LinaVG
 {
