@@ -28,9 +28,9 @@ SOFTWARE.
 
 #include "glad/glad.h"
 #include "Backends/GL/GLBackend.hpp"
-#include "Core/Renderer.hpp"
-#include "Core/Drawer.hpp"
-#include "Core/Math.hpp"
+#include "LinaVG/Core/Renderer.hpp"
+#include "LinaVG/Core/Drawer.hpp"
+#include "LinaVG/Core/Math.hpp"
 #include <iostream>
 #include <stdio.h>
 

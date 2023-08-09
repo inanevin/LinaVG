@@ -27,7 +27,7 @@ SOFTWARE.
 */
 
 #include "Main.hpp"
-#include "LinaVG.hpp"
+#include "LinaVG/LinaVG.hpp"
 #include <iostream>
 #include <chrono>
 #include "Backends/GLFWWindow.hpp"

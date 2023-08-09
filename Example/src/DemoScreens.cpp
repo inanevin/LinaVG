@@ -28,9 +28,9 @@ SOFTWARE.
 
 #include "DemoScreens.hpp"
 #include "Main.hpp"
-#include "LinaVG.hpp"
-#include "Core/Math.hpp"
-#include "Utility/Utility.hpp"
+#include "LinaVG/LinaVG.hpp"
+#include "LinaVG/Core/Math.hpp"
+#include "LinaVG/Utility/Utility.hpp"
 #include "Backends/GL/GLBackend.hpp"
 #include <string>
 #include <iostream>

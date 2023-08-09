@@ -26,7 +26,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 #pragma once
 
 #ifndef LinaVGCommon_HPP
@@ -51,8 +50,8 @@ namespace LinaVG
 #define LVG_DEG2RAD    0.0174533f
 #define LINAVG_API     // TODO
 
-    typedef unsigned int Index;
-    typedef unsigned int BackendHandle;
+    typedef unsigned short Index;
+    typedef unsigned int   BackendHandle;
     class LinaVGFont;
 
     /// <summary>
