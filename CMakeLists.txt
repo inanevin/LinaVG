@@ -74,7 +74,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MAJOR=1)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MINOR=6)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=1)
-1
+
 #--------------------------------------------------------------------
 # Subdirectories & linking
 #--------------------------------------------------------------------
