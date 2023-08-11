@@ -44,6 +44,7 @@ include/LinaVG/Core/Text.hpp
 include/LinaVG/Core/Drawer.hpp
 include/LinaVG/Core/Common.hpp
 include/LinaVG/Core/Math.hpp
+include/LinaVG/Core/Vectors.hpp
 include/LinaVG/Core/BaseBackend.hpp
 )
 

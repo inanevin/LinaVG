@@ -36,6 +36,7 @@ SOFTWARE.
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "Vectors.hpp"
 
 namespace LinaVG
 {
@@ -53,28 +54,6 @@ namespace LinaVG
     typedef unsigned short Index;
     typedef unsigned int   BackendHandle;
     class LinaVGFont;
-
-    /// <summary>
-    /// Color vector, range 0.0f - 1.0f
-    /// </summary>
-    LINAVG_API struct Vec4
-    {
-        Vec4(){};
-        Vec4(float x, float y, float z, float w)
-            : x(x), y(y), z(z), w(w){};
-        Vec4(const Vec4& v)
-        {
-            this->x = v.x;
-            this->y = v.y;
-            this->z = v.z;
-            this->w = v.w;
-        }
-
-        float x = 0.0f;
-        float y = 0.0f;
-        float z = 0.0f;
-        float w = 0.0f;
-    };
 
     LINAVG_API enum class GradientType
     {
@@ -97,21 +76,6 @@ namespace LinaVG
         Vec4         end          = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
         GradientType gradientType = GradientType::Horizontal;
         float        radialSize   = 1.0f;
-    };
-
-    LINAVG_API struct Vec2
-    {
-        Vec2(){};
-        Vec2(float x, float y)
-            : x(x), y(y){};
-        Vec2(const Vec2& v)
-        {
-            x = v.x;
-            y = v.y;
-        }
-
-        float x = 0.0f;
-        float y = 0.0f;
     };
 
     LINAVG_API struct ThicknessGrad
