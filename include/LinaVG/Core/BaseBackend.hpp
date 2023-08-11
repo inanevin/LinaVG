@@ -78,6 +78,7 @@ namespace LinaVG::Backend
         virtual void          DrawSDFText(SDFTextDrawBuffer* buf, int thread)                                              = 0;
         virtual void          EndFrame()                                                                                   = 0;
         virtual void          BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data) = 0;
+        virtual void          BufferEnded()                                                                                = 0;
         virtual void          BindFontTexture(BackendHandle texture)                                                       = 0;
         virtual void          SaveAPIState()                                                                               = 0;
         virtual void          RestoreAPIState()                                                                            = 0;

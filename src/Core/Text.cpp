@@ -83,8 +83,7 @@ namespace LinaVG
 
     namespace Internal
     {
-        TextData   g_textData;
-        std::mutex g_loadingMutex;
+        TextData g_textData;
 
         LinaVGFont* SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
         {
@@ -266,6 +265,8 @@ namespace LinaVG
             rowh = 0;
 
             bool firstRow = true;
+            bool buffered = false;
+
             for (auto& ch : characterMap)
             {
                 const unsigned int glyphWidth = static_cast<unsigned int>(ch.second.m_size.x);
@@ -308,6 +309,7 @@ namespace LinaVG
                 if (ch.second.m_buffer != nullptr)
                 {
                     Backend::BaseBackend::Get()->BufferFontTextureAtlas(glyphWidth, glyphRows, offsetX, offsetY, ch.second.m_buffer);
+                    buffered = true;
                     LINAVG_FREE(ch.second.m_buffer);
                 }
 
@@ -319,6 +321,9 @@ namespace LinaVG
                 g_textData.m_createdAtlases[usedAtlasIndex].m_rowSizeY = rowh;
                 offsetX += glyphWidth + bufferCharSpacing;
             }
+
+            if (buffered)
+                Backend::BaseBackend::Get()->BufferEnded();
 
             if (usedAtlasIndex != -1)
             {
