@@ -149,7 +149,7 @@ namespace LinaVG
 
 				auto demoNow2			 = std::chrono::high_resolution_clock::now();
 				auto duration			 = std::chrono::duration_cast<std::chrono::nanoseconds>(demoNow2 - demoNow);
-				m_demoScreens.m_screenMS = static_cast<float>(duration.count()) * 1e-6;
+				m_demoScreens.m_screenMS = static_cast<float>(duration.count()) * 1e-6f;
 
 				// Flush everything we've drawn so far to the screen.
 				LinaVG::Render();

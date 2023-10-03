@@ -762,7 +762,7 @@ namespace LinaVG
 			usedOpts.sdfThickness	= opts.sdfDropShadowThickness;
 			usedOpts.sdfSoftness	= opts.sdfDropShadowSoftness;
 			DrawBuffer* dsBuf		= &Internal::g_rendererData[thread].GetSDFTextBuffer(font->m_texture, drawOrder, usedOpts, true);
-			const int	dsStart		= buf->m_vertexBuffer.m_size;
+			// const int	dsStart		= buf->m_vertexBuffer.m_size;
 			Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness, outData);
 		}
 	}
@@ -1179,7 +1179,7 @@ namespace LinaVG
 		void FillTri_NoRound_RadialGra(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& startcolor, const Vec4& endColor, StyleOptions& opts, int drawOrder)
 		{
 			Vertex v[4];
-			Vec2   points[3] = {p1, p2, p3};
+			// Vec2   points[3] = {p1, p2, p3};
 			FillTriData(thread, v, true, true, p3, p2, p1);
 			int startIndex = buf->m_vertexBuffer.m_size;
 
@@ -1838,11 +1838,11 @@ namespace LinaVG
 			for (int i = 0; i < size; i++)
 			{
 				Vertex v;
-				v.pos				= points[i];
-				const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
-				v.uv.x				= Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-				v.uv.y				= Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-				v.col				= color;
+				v.pos = points[i];
+				// const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
+				v.uv.x = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+				v.uv.y = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+				v.col  = color;
 				buf->PushVertex(v);
 			}
 
@@ -1882,11 +1882,11 @@ namespace LinaVG
 			for (int i = 0; i < size; i++)
 			{
 				Vertex v;
-				v.pos				= points[i];
-				const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
-				v.uv.x				= Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-				v.uv.y				= Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-				v.col				= Math::Lerp(colorStart, colorEnd, isHor ? v.uv.x : v.uv.y);
+				v.pos = points[i];
+				// const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
+				v.uv.x = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+				v.uv.y = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+				v.col  = Math::Lerp(colorStart, colorEnd, isHor ? v.uv.x : v.uv.y);
 				buf->PushVertex(v);
 			}
 
@@ -1926,10 +1926,10 @@ namespace LinaVG
 			for (int i = 0; i < size; i++)
 			{
 				Vertex v;
-				v.pos				= points[i];
-				const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
-				v.uv.x				= Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-				v.uv.y				= Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+				v.pos = points[i];
+				// const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
+				v.uv.x = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+				v.uv.y = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
 				buf->PushVertex(v);
 			}
 
@@ -2103,7 +2103,7 @@ namespace LinaVG
 			if (angle2 < angle1)
 				angle2 += 360.0f;
 
-			const float midAngle	  = (angle2 + angle1) / 2.0f;
+			// const float midAngle	  = (angle2 + angle1) / 2.0f;
 			const float angleIncrease = (segments >= 180.0f || segments < 0.0f) ? 1.0f : 180.0f / (float)segments;
 
 			for (float i = angle1 + angleIncrease + angleOffset; i < angle2 - angleOffset; i += angleIncrease)
@@ -2663,7 +2663,7 @@ namespace LinaVG
 				destBuf->PushVertex(v);
 			}
 
-			const int halfVC = vertexCount / 2;
+			// const int halfVC = vertexCount / 2;
 
 			// only used if we are drawing AA.
 			Array<int> extrudedVerticesOrder;
@@ -2801,8 +2801,8 @@ namespace LinaVG
 
 			Vec2 bbMin, bbMax;
 			GetConvexBoundingBox(sourceBuffer, startIndex, endIndex, bbMin, bbMax);
-			const bool reCalcUVs	= useTextureBuffer || useGradBuffer;
-			const int  destBufStart = destBuf->m_vertexBuffer.m_size;
+			// const bool reCalcUVs	= useTextureBuffer || useGradBuffer;
+			// const int  destBufStart = destBuf->m_vertexBuffer.m_size;
 
 			auto copyAndFill = [&](DrawBuffer* sourceBuffer, DrawBuffer* destBuf, int startIndex, int endIndex, float thickness, bool reCalcUVs) {
 				const int destBufStart = destBuf->m_vertexBuffer.m_size;
@@ -3047,13 +3047,13 @@ namespace LinaVG
 
 		void ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, LinaVGFont* font, float scale, float spacing, float wrapWidth, float sdfThickness)
 		{
-			const float	  spaceAdvance	  = font->m_spaceAdvance * scale + spacing;
-			float		  maxHeight		  = 0.0f;
-			float		  totalWidth	  = 0.0f;
-			float		  maxBearingDiffY = 0.0f;
-			LINAVG_STRING append		  = "";
-			// float         remap        = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f) : 0.0f;
-			const Vec2 offset = CalcMaxCharOffset(words[0]->m_str.c_str(), font, scale);
+			const float	  spaceAdvance = font->m_spaceAdvance * scale + spacing;
+			float		  maxHeight	   = 0.0f;
+			float		  totalWidth   = 0.0f;
+			LINAVG_STRING append	   = "";
+			// float		maxBearingDiffY = 0.0f;
+			// float        remap        = font->m_isSDF ? Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f) : 0.0f;
+			// const Vec2	offset = CalcMaxCharOffset(words[0]->m_str.c_str(), font, scale);
 
 			for (int i = 0; i < words.m_size; i++)
 			{
@@ -3304,8 +3304,8 @@ namespace LinaVG
 			for (c = (const uint8_t*)text; *c; c++)
 			{
 				auto& ch = font->m_characterGlyphs[*c];
-				float x	 = ch.m_advance.x * scale;
-				float y	 = ch.m_size.y * scale;
+				// float x	 = ch.m_advance.x * scale;
+				// float y	 = ch.m_size.y * scale;
 
 				if (counter == 0)
 					offset.x = ch.m_bearing.x < 0.0f ? ch.m_bearing.x * scale : 0.0f;
@@ -3320,11 +3320,11 @@ namespace LinaVG
 		{
 			const uint8_t* c;
 			const int	   totalCharacterCount = Utility::GetTextCharacterSize(text);
-			const int	   bufStart			   = buf->m_vertexBuffer.m_size;
+			//const int	   bufStart			   = buf->m_vertexBuffer.m_size;
 			Vec4		   lastMinGrad		   = color.start;
 			Vec2		   pos				   = position;
 			int			   characterCount	   = 0;
-			bool		   first			   = true;
+			//bool		   first			   = true;
 
 			pos.x = static_cast<float>(static_cast<int>(pos.x));
 			pos.y = static_cast<float>(static_cast<int>(pos.y));
@@ -3490,7 +3490,7 @@ namespace LinaVG
 			{
 				auto codepoints = GetUtf8Codepoints(text);
 
-				const size_t sz = codepoints.size();
+				// const size_t sz = codepoints.size();
 
 				for (auto cp : codepoints)
 				{

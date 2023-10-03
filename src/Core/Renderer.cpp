@@ -159,7 +159,7 @@ namespace LinaVG
 
 	void Render(int thread)
 	{
-		auto& renderBuffs = [thread](int drawOrder, DrawBufferShapeType shapeType) {
+		auto renderBuffs = [thread](int drawOrder, DrawBufferShapeType shapeType) {
 			for (int i = 0; i < Internal::g_rendererData[thread].m_defaultBuffers.m_size; i++)
 			{
 				DrawBuffer& buf = Internal::g_rendererData[thread].m_defaultBuffers[i];
@@ -397,7 +397,7 @@ namespace LinaVG
 
 	TextCache* RendererData::CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf)
 	{
-		auto& it = m_textCache.find(sid);
+		const auto& it = m_textCache.find(sid);
 
 		if (it == m_textCache.end())
 			return nullptr;
@@ -418,7 +418,7 @@ namespace LinaVG
 
 	SDFTextCache* RendererData::CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf)
 	{
-		auto& it = m_sdfTextCache.find(sid);
+		const auto& it = m_sdfTextCache.find(sid);
 
 		if (it == m_sdfTextCache.end())
 			return nullptr;
