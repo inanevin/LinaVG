@@ -889,7 +889,7 @@ namespace LinaVG
 	{
 		TextureDrawBuffer(){};
 		TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: DrawBuffer(drawOrder, DrawBufferType::Textured, shapeType, clipPosX, clipPosY, clipSizeX, clipSizeY), m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_tint(tint), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset){};
+			: DrawBuffer(drawOrder, DrawBufferType::Textured, shapeType, clipPosX, clipPosY, clipSizeX, clipSizeY), m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset), m_tint(tint){};
 
 		bool		  m_isAABuffer		= false;
 		BackendHandle m_textureHandle	= 0;
@@ -912,9 +912,8 @@ namespace LinaVG
 	{
 		SDFTextDrawBuffer(){};
 		SDFTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: DrawBuffer(drawOrder, DrawBufferType::SDFText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY), m_textureHandle(glyphHandle), m_thickness(opts.sdfThickness),
-			  m_softness(opts.sdfSoftness), m_outlineThickness(opts.sdfOutlineThickness),
-			  m_outlineColor(opts.sdfOutlineColor), m_flipAlpha(opts.flipAlpha), m_isDropShadow(isDropShadow){};
+			: DrawBuffer(drawOrder, DrawBufferType::SDFText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY),
+			  m_isDropShadow(isDropShadow), m_flipAlpha(opts.flipAlpha), m_thickness(opts.sdfThickness), m_softness(opts.sdfSoftness), m_outlineThickness(opts.sdfOutlineThickness), m_outlineColor(opts.sdfOutlineColor), m_textureHandle(glyphHandle){};
 
 		bool		  m_isDropShadow	 = false;
 		bool		  m_flipAlpha		 = false;

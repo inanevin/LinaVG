@@ -179,12 +179,12 @@ namespace LinaVG
 		// Line 1
 		float a1 = p01.y - p00.y;
 		float b1 = p00.x - p01.x;
-		float c1 = a1 * (p00.x) + b1 * (p00.y);
+		// float c1 = a1 * (p00.x) + b1 * (p00.y);
 
 		// Line 2
 		float a2 = p11.y - p10.y;
 		float b2 = p10.x - p11.x;
-		float c2 = a2 * (p10.x) + b2 * (p10.y);
+		// float c2 = a2 * (p10.x) + b2 * (p10.y);
 
 		float det = a1 * b2 - a2 * b1;
 
@@ -212,7 +212,7 @@ namespace LinaVG
 
 	Vec2 Math::ScalePoint(const Vec2& p, const Vec2& center, float scale)
 	{
-		const Vec2 dir			= Math::Normalized(Vec2(p.x - center.x, p.y - center.y));
+		// const Vec2 dir			= Math::Normalized(Vec2(p.x - center.x, p.y - center.y));
 		const Vec2 aroundOrigin = Vec2(p.x - center.x, p.y - center.y);
 		const Vec2 scaled		= Vec2(aroundOrigin.x * scale, aroundOrigin.y * scale);
 		return Vec2(scaled.x + center.x, scaled.y + center.y);

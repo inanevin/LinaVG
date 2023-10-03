@@ -110,8 +110,8 @@ namespace LinaVG
 			font->m_newLineHeight	= static_cast<float>(face->size->metrics.height) / 64.0f;
 			font->m_supportsKerning = useKerningIfAvailable && FT_HAS_KERNING(face) != 0;
 
+			// int		 maxHeight		   = 0;
 			auto&		 characterMap	   = font->m_characterGlyphs;
-			int			 maxHeight		   = 0;
 			unsigned int roww			   = 0;
 			unsigned int rowh			   = 0;
 			int			 bufferCharSpacing = 5;

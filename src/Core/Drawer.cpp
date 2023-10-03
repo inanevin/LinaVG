@@ -289,7 +289,6 @@ namespace LinaVG
 			{
 				Vertex& v	= destBuf->m_vertexBuffer[indicesOrder[i]];
 				Vec4	col = v.col;
-				int		a	= 5;
 			}
 			Internal::DrawOutlineAroundShape(thread, destBuf, opts2, &indicesOrder[0], indicesOrder.m_size, opts2.outlineOptions.thickness, false, drawOrder, Internal::OutlineCallType::AA);
 		}
@@ -892,13 +891,13 @@ namespace LinaVG
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
 			{
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
 			}
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -933,12 +932,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, current, opts.isFilled ? current + 3 : current + 7, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -962,12 +961,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + 4 : startIndex + 7, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1060,12 +1059,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + vertexCount : startIndex + (vertexCount * 2) - 1, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? vertexCount : vertexCount * 2, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? vertexCount : vertexCount * 2, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? vertexCount : vertexCount * 2, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? vertexCount : vertexCount * 2, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1131,12 +1130,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, startIndex, opts.isFilled ? startIndex + 2 : startIndex + 5, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1167,12 +1166,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, startIndex, opts.isFilled ? startIndex + 2 : startIndex + 5, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1197,12 +1196,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + 3 : startIndex + 5, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1336,12 +1335,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + vertexCount : startIndex + (vertexCount * 2) - 1, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? vertexCount : vertexCount * 2, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? vertexCount : vertexCount * 2, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? vertexCount : vertexCount * 2, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? vertexCount : vertexCount * 2, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1394,12 +1393,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + n : startIndex + (n * 2) - 1, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1424,12 +1423,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + n : startIndex + (n * 2) - 1, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1453,12 +1452,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + n : startIndex + (n * 2) - 1, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1517,7 +1516,7 @@ namespace LinaVG
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
 			{
 				if (isFullCircle)
-					buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
+					DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
 				else
 				{
 					if (opts.isFilled)
@@ -1527,7 +1526,7 @@ namespace LinaVG
 						for (int i = 0; i < v.m_size; i++)
 							indices.push_back(startIndex + i);
 
-						buf = DrawOutlineAroundShape(thread, buf, opts, &indices[0], v.m_size, opts.outlineOptions.thickness, true, drawOrder);
+						DrawOutlineAroundShape(thread, buf, opts, &indices[0], v.m_size, opts.outlineOptions.thickness, true, drawOrder);
 					}
 					else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Both)
 					{
@@ -1541,10 +1540,10 @@ namespace LinaVG
 						for (int i = fullSize - 1; i > halfSize - 1; i--)
 							indices.push_back(startIndex + i);
 
-						buf = DrawOutlineAroundShape(thread, buf, opts, &indices[0], halfSize * 2, opts.outlineOptions.thickness, false, drawOrder);
+						DrawOutlineAroundShape(thread, buf, opts, &indices[0], halfSize * 2, opts.outlineOptions.thickness, false, drawOrder);
 					}
 					else
-						buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
+						DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
 				}
 			}
 			else if (opts.aaEnabled)
@@ -1556,7 +1555,7 @@ namespace LinaVG
 				{
 					if (isFullCircle)
 					{
-						buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
+						DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
 					}
 					else
 					{
@@ -1565,7 +1564,7 @@ namespace LinaVG
 						for (int i = 0; i < v.m_size; i++)
 							indices.push_back(startIndex + i);
 
-						buf = DrawOutlineAroundShape(thread, buf, opts2, &indices[0], v.m_size, opts2.outlineOptions.thickness, true, drawOrder, OutlineCallType::AA);
+						DrawOutlineAroundShape(thread, buf, opts2, &indices[0], v.m_size, opts2.outlineOptions.thickness, true, drawOrder, OutlineCallType::AA);
 					}
 				}
 				else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Both)
@@ -1580,10 +1579,10 @@ namespace LinaVG
 					for (int i = fullSize - 1; i > halfSize - 1; i--)
 						indices.push_back(startIndex + i);
 
-					buf = DrawOutlineAroundShape(thread, buf, opts2, &indices[0], halfSize * 2, opts2.outlineOptions.thickness, false, drawOrder, OutlineCallType::AA);
+					DrawOutlineAroundShape(thread, buf, opts2, &indices[0], halfSize * 2, opts2.outlineOptions.thickness, false, drawOrder, OutlineCallType::AA);
 				}
 				else
-					buf = DrawOutline(thread, buf, opts2, opts2.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
+					DrawOutline(thread, buf, opts2, opts2.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1613,7 +1612,7 @@ namespace LinaVG
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
 			{
 				if (isFullCircle)
-					buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
+					DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
 				else
 				{
 					if (opts.isFilled)
@@ -1623,7 +1622,7 @@ namespace LinaVG
 						for (int i = 0; i < v.m_size; i++)
 							indices.push_back(startIndex + i);
 
-						buf = DrawOutlineAroundShape(thread, buf, opts, &indices[0], v.m_size, opts.outlineOptions.thickness, true, drawOrder);
+						DrawOutlineAroundShape(thread, buf, opts, &indices[0], v.m_size, opts.outlineOptions.thickness, true, drawOrder);
 					}
 					else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Both)
 					{
@@ -1637,10 +1636,10 @@ namespace LinaVG
 						for (int i = fullSize - 1; i > halfSize - 1; i--)
 							indices.push_back(startIndex + i);
 
-						buf = DrawOutlineAroundShape(thread, buf, opts, &indices[0], halfSize * 2, opts.outlineOptions.thickness, false, drawOrder);
+						DrawOutlineAroundShape(thread, buf, opts, &indices[0], halfSize * 2, opts.outlineOptions.thickness, false, drawOrder);
 					}
 					else
-						buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
+						DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
 				}
 			}
 			else if (opts.aaEnabled)
@@ -1651,7 +1650,7 @@ namespace LinaVG
 				if (opts.isFilled)
 				{
 					if (isFullCircle)
-						buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
+						DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
 					else
 					{
 						Array<int> indices;
@@ -1659,7 +1658,7 @@ namespace LinaVG
 						for (int i = 0; i < v.m_size; i++)
 							indices.push_back(startIndex + i);
 
-						buf = DrawOutlineAroundShape(thread, buf, opts2, &indices[0], v.m_size, opts2.outlineOptions.thickness, true, drawOrder, OutlineCallType::AA);
+						DrawOutlineAroundShape(thread, buf, opts2, &indices[0], v.m_size, opts2.outlineOptions.thickness, true, drawOrder, OutlineCallType::AA);
 					}
 				}
 				else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Both)
@@ -1674,10 +1673,10 @@ namespace LinaVG
 					for (int i = fullSize - 1; i > halfSize - 1; i--)
 						indices.push_back(startIndex + i);
 
-					buf = DrawOutlineAroundShape(thread, buf, opts2, &indices[0], halfSize * 2, opts2.outlineOptions.thickness, false, drawOrder, OutlineCallType::AA);
+					DrawOutlineAroundShape(thread, buf, opts2, &indices[0], halfSize * 2, opts2.outlineOptions.thickness, false, drawOrder, OutlineCallType::AA);
 				}
 				else
-					buf = DrawOutline(thread, buf, opts2, opts2.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
+					DrawOutline(thread, buf, opts2, opts2.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1710,7 +1709,7 @@ namespace LinaVG
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
 			{
 				if (isFullCircle)
-					buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
+					DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
 				else
 				{
 					if (opts.isFilled)
@@ -1720,7 +1719,7 @@ namespace LinaVG
 						for (int i = v.m_size - 1; i > -1; i--)
 							indices.push_back(startIndex + i);
 
-						buf = DrawOutlineAroundShape(thread, buf, opts, &indices[0], v.m_size, opts.outlineOptions.thickness, false, drawOrder);
+						DrawOutlineAroundShape(thread, buf, opts, &indices[0], v.m_size, opts.outlineOptions.thickness, false, drawOrder);
 					}
 					else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Both)
 					{
@@ -1734,10 +1733,10 @@ namespace LinaVG
 						for (int i = fullSize - 1; i > halfSize - 1; i--)
 							indices.push_back(startIndex + i);
 
-						buf = DrawOutlineAroundShape(thread, buf, opts, &indices[0], halfSize * 2, opts.outlineOptions.thickness, false, drawOrder);
+						DrawOutlineAroundShape(thread, buf, opts, &indices[0], halfSize * 2, opts.outlineOptions.thickness, false, drawOrder);
 					}
 					else
-						buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
+						DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
 				}
 			}
 			else if (opts.aaEnabled)
@@ -1748,7 +1747,7 @@ namespace LinaVG
 				if (opts.isFilled)
 				{
 					if (isFullCircle)
-						buf = DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
+						DrawOutline(thread, buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
 					else
 					{
 						Array<int> indices;
@@ -1756,7 +1755,7 @@ namespace LinaVG
 						for (int i = 0; i < v.m_size; i++)
 							indices.push_back(startIndex + i);
 
-						buf = DrawOutlineAroundShape(thread, buf, opts2, &indices[0], v.m_size, opts2.outlineOptions.thickness, true, drawOrder, OutlineCallType::AA);
+						DrawOutlineAroundShape(thread, buf, opts2, &indices[0], v.m_size, opts2.outlineOptions.thickness, true, drawOrder, OutlineCallType::AA);
 					}
 				}
 				else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Both)
@@ -1771,10 +1770,10 @@ namespace LinaVG
 					for (int i = fullSize - 1; i > halfSize - 1; i--)
 						indices.push_back(startIndex + i);
 
-					buf = DrawOutlineAroundShape(thread, buf, opts2, &indices[0], halfSize * 2, opts2.outlineOptions.thickness, false, drawOrder, OutlineCallType::AA);
+					DrawOutlineAroundShape(thread, buf, opts2, &indices[0], halfSize * 2, opts2.outlineOptions.thickness, false, drawOrder, OutlineCallType::AA);
 				}
 				else
-					buf = DrawOutline(thread, buf, opts2, opts2.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
+					DrawOutline(thread, buf, opts2, opts2.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1854,12 +1853,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + size : startIndex + (size * 2) - 1, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1898,12 +1897,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + size : startIndex + (size * 2) - 1, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -1941,12 +1940,12 @@ namespace LinaVG
 			RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + size : startIndex + (size * 2) - 1, rotateAngle);
 
 			if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-				buf = DrawOutline(thread, buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
+				DrawOutline(thread, buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
 			else if (opts.aaEnabled)
 			{
 				StyleOptions opts2	 = StyleOptions(opts);
 				opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-				buf					 = DrawOutline(thread, buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, OutlineCallType::AA);
+				DrawOutline(thread, buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, OutlineCallType::AA);
 			}
 		}
 
@@ -2868,7 +2867,7 @@ namespace LinaVG
 				if (!isAAOutline && reCalcUVs)
 					CalculateVertexUVs(destBuf, destBufStart, (destBufStart + totalSize * 2) - 1);
 
-				const int halfIndex = (destBufStart + totalSize) / 2;
+				// const int halfIndex = (destBufStart + totalSize) / 2;
 				for (int i = destBufStart; i < destBufStart + totalSize; i++)
 				{
 					int next = i + 1;
@@ -3121,7 +3120,7 @@ namespace LinaVG
 			}
 		}
 
-		void Internal::WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth)
+		void WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth)
 		{
 			TextPart line = {};
 			TextPart word = {};
@@ -3320,11 +3319,11 @@ namespace LinaVG
 		{
 			const uint8_t* c;
 			const int	   totalCharacterCount = Utility::GetTextCharacterSize(text);
-			//const int	   bufStart			   = buf->m_vertexBuffer.m_size;
-			Vec4		   lastMinGrad		   = color.start;
-			Vec2		   pos				   = position;
-			int			   characterCount	   = 0;
-			//bool		   first			   = true;
+			// const int	   bufStart			   = buf->m_vertexBuffer.m_size;
+			Vec4 lastMinGrad	= color.start;
+			Vec2 pos			= position;
+			int	 characterCount = 0;
+			// bool		   first			   = true;
 
 			pos.x = static_cast<float>(static_cast<int>(pos.x));
 			pos.y = static_cast<float>(static_cast<int>(pos.y));
