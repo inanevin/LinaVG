@@ -32,6 +32,11 @@ With that in mind, you can use LinaVG to build both retained and immediate mode 
 
 LinaVG was initially made for [Lina Engine](https://www.github.com/inanevin/LinaEngine), however this library is completely decoupled from it. You can use LinaVG in your own projects with minimal dependencies. 
 
+LinaVG is tested on:
+
+- MSVC 14.36.xxx
+- Clang 17.0.1
+
 # Thread-safety
 
 LinaVG is thread-safe as long as the [Threading](https://github.com/inanevin/LinaVG/wiki/13-Threading) guidelines are followed. Only functions that are not thread-safe at the moment are those used for loading fonts, which require wrapping around a mutex.
