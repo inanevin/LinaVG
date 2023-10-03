@@ -125,6 +125,12 @@ Use ```LINAVG_BUILD_EXAMPLES``` option to build the example project.
 cmake DLINAVG_BUILD_EXAMPLES=ON
 ```
 
+Use ```LINAVG_DISABLE_TEXT_SUPPORT``` option to skip text support and FreeType dependency.
+
+```shell
+cmake DLINAVG_DISABLE_TEXT_SUPPORT=ON
+```
+
 Note: LinaVG requires C++ 17 features.
 
 # Quick Demonstration
