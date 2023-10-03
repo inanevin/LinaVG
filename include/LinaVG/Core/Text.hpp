@@ -26,15 +26,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Class: Text
-
-Timestamp: 12/29/2018 10:43:46 PM
-*/
-
 #pragma once
-#ifndef LinaVGText_HPP
-#define LinaVGText_HPP
+
+#ifndef LINAVG_DISABLE_TEXT_SUPPORT
 
 #include "Common.hpp"
 #include <unordered_map>

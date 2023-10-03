@@ -28,9 +28,6 @@ SOFTWARE.
 
 #pragma once
 
-#ifndef LinaVGCommon_HPP
-#define LinaVGCommon_HPP
-
 // Headers here.
 #include <functional>
 #include <string>
@@ -932,5 +929,3 @@ namespace LinaVG
     };
 
 } // namespace LinaVG
-
-#endif

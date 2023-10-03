@@ -25,20 +25,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-/*
-Class: GLBackend
-
-
-
-Timestamp: 3/24/2022 11:33:52 PM
-*/
 
 #pragma once
 
-#ifndef LinaVGBaseBackend_HPP
-#define LinaVGBaseBackend_HPP
-
-// Headers here.
 #include "../Core/Common.hpp"
 
 namespace LinaVG
@@ -48,6 +37,7 @@ namespace LinaVG
         class ShaderData;
     }
 } // namespace LinaVG
+
 namespace LinaVG::Backend
 {
 
@@ -88,5 +78,3 @@ namespace LinaVG::Backend
     };
 
 } // namespace LinaVG::Backend
-
-#endif

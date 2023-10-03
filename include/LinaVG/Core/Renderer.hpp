@@ -26,15 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Class: Renderer
-
-Timestamp: 12/29/2018 10:43:46 PM
-*/
-
 #pragma once
-#ifndef LinaVGRenderer_HPP
-#define LinaVGRenderer_HPP
 
 #include "Common.hpp"
 
@@ -163,4 +155,3 @@ namespace LinaVG
 
 }; // namespace LinaVG
 
-#endif

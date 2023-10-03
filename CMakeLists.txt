@@ -21,7 +21,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Options & Definitions
 #--------------------------------------------------------------------
 
-option(LINAVG_BUILD_EXAMPLES "Builds example backend projects." OFF)
+option(LINAVG_BUILD_EXAMPLES "Builds example backend projects." ON)
+option(LINAVG_DISABLE_TEXT_SUPPORT "Disables text support and linking to FreeType." OFF)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -74,7 +75,7 @@ add_library(Lina::VG ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MAJOR=1)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MINOR=6)
-target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=4)
+target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=5)
 
 #--------------------------------------------------------------------
 # Subdirectories & linking

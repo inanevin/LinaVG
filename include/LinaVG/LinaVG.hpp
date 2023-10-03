@@ -35,10 +35,7 @@ Timestamp: 3/28/2022 2:38:21 PM
 
 #pragma once
 
-#ifndef LinaVG_HPP
-#define LinaVG_HPP
 #include "Core/Renderer.hpp"
 #include "Core/Text.hpp"
 #include "Core/Drawer.hpp"
 #include "Core/BaseBackend.hpp"
-#endif

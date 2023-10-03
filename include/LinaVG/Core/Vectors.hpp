@@ -26,18 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Class: Math
-
-
-
-Timestamp: 3/26/2022 10:42:37 AM
-*/
-
 #pragma once
-
-#ifndef LinaVGVectors_HPP
-#define LinaVGVectors_HPP
 
 namespace LinaVG
 {
@@ -80,5 +69,3 @@ namespace LinaVG
     };
 
 } // namespace LinaVG
-
-#endif

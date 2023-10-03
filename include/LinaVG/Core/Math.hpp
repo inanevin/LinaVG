@@ -26,20 +26,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Class: Math
-
-
-
-Timestamp: 3/26/2022 10:42:37 AM
-*/
-
 #pragma once
 
-#ifndef LinaVGMath_HPP
-#define LinaVGMath_HPP
-
-// Headers here.
 #include "Common.hpp"
 
 namespace LinaVG
@@ -120,4 +108,3 @@ namespace LinaVG
 
 } // namespace LinaVG
 
-#endif

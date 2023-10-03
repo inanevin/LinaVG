@@ -26,20 +26,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Class: Drawer
-
-
-
-Timestamp: 3/24/2022 10:57:37 PM
-*/
-
 #pragma once
 
-#ifndef LinaVGDrawer_HPP
-#define LinaVGDrawer_HPP
-
-// Headers here.
 #include "Common.hpp"
 
 namespace LinaVG
@@ -234,6 +222,8 @@ namespace LinaVG
     LINAVG_API void DrawCircle(int thread, const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
     LINAVG_API void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 
+#ifndef LINAVG_DISABLE_TEXT_SUPPORT
+
     /// <summary>
     /// Draws the given text at position. The font used in Text Options must be loaded as normal font, e.g. non-sdf.
     /// Given position will be upper-left corner of the text. Use CalculateTextSize to offset the text, e.g. center.
@@ -285,6 +275,8 @@ namespace LinaVG
     /// <returns></returns>
     LINAVG_API Vec2 CalculateTextSize(int thread, const char* text, SDFTextOptions& opts);
     LINAVG_API Vec2 CalculateTextSize(const char* text, SDFTextOptions& opts);
+
+#endif
 
     namespace Internal
     {
@@ -425,6 +417,8 @@ namespace LinaVG
         /// <returns></returns>
         DrawBuffer* DrawOutline(int thread, DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, int drawOrder = 0, OutlineCallType = OutlineCallType::Normal, bool reverseDrawDir = false);
 
+#ifndef LINAVG_DISABLE_TEXT_SUPPORT
+
         /// <summary>
         /// Break down text into words, with each word having calculated size properties.
         /// </summary>
@@ -472,8 +466,9 @@ namespace LinaVG
         /// </summary>
         void WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth);
 
+#endif
+
     }; // namespace Internal
 
 } // namespace LinaVG
 
-#endif

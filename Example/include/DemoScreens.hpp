@@ -29,8 +29,8 @@ SOFTWARE.
 #ifndef DEMOS_HPP
 #define DEMOS_HPP
 
-#include "LinaVG/Core/Common.hpp"
 #include <vector>
+#include <string>
 
 namespace LinaVG
 {

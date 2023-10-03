@@ -715,6 +715,7 @@ namespace LinaVG
         return DrawCircle(0, center, radius, style, segments, rotateAngle, startAngle, endAngle, drawOrder);
     }
 
+#ifndef LINAVG_DISABLE_TEXT_SUPPORT
 
     LINAVG_API void DrawTextSDF(int thread, const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder, bool skipCache, TextOutData* outData)
     {
@@ -856,6 +857,8 @@ namespace LinaVG
     {
         return CalculateTextSize(0, text, opts);
     }
+
+#endif
 
     namespace Internal
     {
@@ -3001,6 +3004,8 @@ namespace LinaVG
             return sourceBuffer;
         }
 
+#ifndef LINAVG_DISABLE_TEXT_SUPPORT
+
         void ParseTextIntoWords(Array<TextPart*>& arr, const char* text, LinaVGFont* font, float scale, float spacing)
         {
             bool          added  = false;
@@ -3148,7 +3153,7 @@ namespace LinaVG
                     }
 
                     // Add current word to current line (with a leading space if it's not empty)
-                    //if (!line.m_str.empty())
+                    // if (!line.m_str.empty())
                     //{
                     //    line.m_str += ' ';
                     //    line.m_size.x += spaceAdvance;
@@ -3194,11 +3199,11 @@ namespace LinaVG
                 }
                 else
                 {
-                   //if (!line.m_str.empty())
-                   //{
-                   //    line.m_str += ' ';
-                   //    line.m_size.x += spaceAdvance;
-                   //}
+                    // if (!line.m_str.empty())
+                    //{
+                    //     line.m_str += ' ';
+                    //     line.m_size.x += spaceAdvance;
+                    // }
 
                     line.m_str += word.m_str;
                     line.m_size.x += word.m_size.x;
@@ -3556,6 +3561,8 @@ namespace LinaVG
             // size.y -= offset.y * remap;
             return size;
         }
-    }
+#endif
+
+    } // namespace Internal
 
 } // namespace LinaVG

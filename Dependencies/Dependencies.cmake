@@ -13,7 +13,11 @@
 # and limitations under the License.
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-add_subdirectory(Dependencies/FreeType-2.12.1)
-target_link_libraries(${PROJECT_NAME} PUBLIC freetype)
-set_property(TARGET freetype PROPERTY FOLDER LinaVGProject/Dependencies)
-message("LinaGX -> FreeType has been linked.")
+if(NOT LINAVG_DISABLE_TEXT_SUPPORT)
+    add_subdirectory(Dependencies/FreeType-2.12.1)
+    target_link_libraries(${PROJECT_NAME} PUBLIC freetype)
+    set_property(TARGET freetype PROPERTY FOLDER LinaVGProject/Dependencies)
+    message("LinaVG -> FreeType has been linked.")
+else()
+    add_definitions(-DLINAVG_DISABLE_TEXT_SUPPORT=1)
+endif()

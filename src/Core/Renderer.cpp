@@ -116,12 +116,14 @@ namespace LinaVG
             return false;
         }
 
+#ifndef LINAVG_DISABLE_TEXT_SUPPORT
         if (!Text::Initialize())
         {
             if (Config.errorCallback)
                 Config.errorCallback("LinaVG: Could not initialize! Error initializing text API.");
             return false;
         }
+#endif
 
         // TODO - error check
         if (Config.logCallback)
@@ -133,7 +135,11 @@ namespace LinaVG
     {
         Backend::BaseBackend::Get()->Terminate();
         delete Backend::BaseBackend::s_backend;
+
+#ifndef LINAVG_DISABLE_TEXT_SUPPORT
         Text::Terminate();
+#endif
+
         Internal::ClearAllBuffers();
 
         // TODO - error check
