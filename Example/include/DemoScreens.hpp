@@ -54,6 +54,7 @@ namespace LinaVG
             void ShowDemoScreen9_Final();
             void PreEndFrame();
 
+            float                    m_screenMS        = 0.0f;
             bool                     m_clippingEnabled = true;
             bool                     m_statsWindowOn   = true;
             bool                     m_rotate          = false;

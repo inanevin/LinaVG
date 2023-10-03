@@ -127,14 +127,15 @@ namespace LinaVG
                 style.rounding           = 0.2f;
                 style.onlyRoundTheseCorners.push_back(0);
                 style.onlyRoundTheseCorners.push_back(3);
-                LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.17f), style, 0.0f, 3);
+                LinaVG::DrawRect(Vec2(statsWindowX, statsWindowY), Vec2(screenSize.x, screenSize.y * 0.19f), style, 0.0f, 3);
                 style.onlyRoundTheseCorners.clear();
 
                 // Draw stats texts.
                 const std::string drawCountStr     = "Draw Calls: " + std::to_string(m_drawCount);
                 const std::string triangleCountStr = "Tris Count: " + std::to_string(m_triangleCount);
                 const std::string vertexCountStr   = "Vertex Count: " + std::to_string(m_vertexCount);
-                const std::string frameTimeStr     = "Frame: " + std::to_string(ExampleApp::Get()->GetFrameTimeRead()) + " ms";
+                const std::string frameTimeStr     = "Frame: " + std::to_string(ExampleApp::Get()->GetFrameTimeRead() * 1000.0f) + " ms";
+                const std::string screenTimeStr    = "Screen: " + std::to_string(m_screenMS) + " ms";
                 const std::string fpsStr           = "FPS: " + std::to_string(ExampleApp::Get()->GetFPS()) + " " + frameTimeStr;
 
                 Vec2           textPosition = Vec2(statsWindowX + 10, statsWindowY + 22);
@@ -148,6 +149,8 @@ namespace LinaVG
                 LinaVG::DrawTextNormal(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
                 textPosition.y += 25;
                 LinaVG::DrawTextNormal(fpsStr.c_str(), textPosition, textStyle, 0.0f, 4);
+                textPosition.y += 25;
+                LinaVG::DrawTextNormal(screenTimeStr.c_str(), textPosition, textStyle, 0.0f, 4);
             }
 
             // Draw semi-transparent black rectangle on the bottom of the screen.

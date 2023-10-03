@@ -32,6 +32,7 @@ SOFTWARE.
 #include <chrono>
 #include "Backends/GLFWWindow.hpp"
 #include "Backends/GL/GLBackend.hpp"
+#include <chrono>
 
 int main(int argc, char* argv[])
 {
@@ -70,6 +71,8 @@ namespace LinaVG
             LinaVG::Config.logCallback = [](const std::string& log) {
                 std::cout << log.c_str() << std::endl;
             };
+
+            LinaVG::Config.defaultBufferReserve = 100000;
 
             m_checkeredTexture = exampleBackend.CreateTexture("Resources/Textures/Checkered.png");
             m_linaTexture      = exampleBackend.CreateTexture("Resources/Textures/Lina.png");
@@ -122,6 +125,8 @@ namespace LinaVG
 
                 m_demoScreens.ShowBackground();
 
+                auto demoNow = std::chrono::high_resolution_clock::now();
+
                 if (m_currentDemoScreen == 1)
                     m_demoScreens.ShowDemoScreen1_Shapes();
                 else if (m_currentDemoScreen == 2)
@@ -140,6 +145,10 @@ namespace LinaVG
                     m_demoScreens.ShowDemoScreen8_Animated();
                 else if (m_currentDemoScreen == 9)
                     m_demoScreens.ShowDemoScreen9_Final();
+
+                auto demoNow2            = std::chrono::high_resolution_clock::now();
+                auto duration            = std::chrono::duration_cast<std::chrono::microseconds>(demoNow2 - demoNow);
+                m_demoScreens.m_screenMS = static_cast<float>(duration.count()) * 0.001f;
 
                 // Flush everything we've drawn so far to the screen.
                 LinaVG::Render();
