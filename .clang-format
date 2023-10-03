@@ -13,4 +13,5 @@ PointerAlignment: Left
 ReflowComments: 'true'
 Standard: Cpp11
 SortIncludes: 'false'
+UseTab: Always
 ...

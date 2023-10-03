@@ -31,41 +31,41 @@ SOFTWARE.
 namespace LinaVG
 {
 
-    /// <summary>
-    /// Color vector, range 0.0f - 1.0f
-    /// </summary>
-    struct Vec4
-    {
-        Vec4(){};
-        Vec4(float x, float y, float z, float w)
-            : x(x), y(y), z(z), w(w){};
-        Vec4(const Vec4& v)
-        {
-            this->x = v.x;
-            this->y = v.y;
-            this->z = v.z;
-            this->w = v.w;
-        }
+	/// <summary>
+	/// Color vector, range 0.0f - 1.0f
+	/// </summary>
+	struct Vec4
+	{
+		Vec4(){};
+		Vec4(float x, float y, float z, float w)
+			: x(x), y(y), z(z), w(w){};
+		Vec4(const Vec4& v)
+		{
+			this->x = v.x;
+			this->y = v.y;
+			this->z = v.z;
+			this->w = v.w;
+		}
 
-        float x = 0.0f;
-        float y = 0.0f;
-        float z = 0.0f;
-        float w = 0.0f;
-    };
+		float x = 0.0f;
+		float y = 0.0f;
+		float z = 0.0f;
+		float w = 0.0f;
+	};
 
-    struct Vec2
-    {
-        Vec2(){};
-        Vec2(float x, float y)
-            : x(x), y(y){};
-        Vec2(const Vec2& v)
-        {
-            x = v.x;
-            y = v.y;
-        }
+	struct Vec2
+	{
+		Vec2(){};
+		Vec2(float x, float y)
+			: x(x), y(y){};
+		Vec2(const Vec2& v)
+		{
+			x = v.x;
+			y = v.y;
+		}
 
-        float x = 0.0f;
-        float y = 0.0f;
-    };
+		float x = 0.0f;
+		float y = 0.0f;
+	};
 
 } // namespace LinaVG

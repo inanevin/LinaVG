@@ -26,30 +26,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
-
 #include "LinaVG/Utility/Utility.hpp"
 
 namespace LinaVG
 {
-    namespace Utility
-    {
-        int GetTextCharacterSize(const char* text)
-        {
-            int size = 0;
-            while (text[size] != '\0')
-                size++;
-            return size;
-        }
+	namespace Utility
+	{
+		int GetTextCharacterSize(const char* text)
+		{
+			int size = 0;
+			while (text[size] != '\0')
+				size++;
+			return size;
+		}
 
-        Vec4 HexToVec4(int hex)
-        {
-            Vec4 rgbColor;
-            rgbColor.x = ((hex >> 16) & 0xFF) / 255.0f;
-            rgbColor.y = ((hex >> 8) & 0xFF) / 255.0f;
-            rgbColor.z = ((hex)&0xFF) / 255.0f;
-            rgbColor.w = 1.0f;
-            return rgbColor;
-        }
-    } // namespace Utility
+		Vec4 HexToVec4(int hex)
+		{
+			Vec4 rgbColor;
+			rgbColor.x = ((hex >> 16) & 0xFF) / 255.0f;
+			rgbColor.y = ((hex >> 8) & 0xFF) / 255.0f;
+			rgbColor.z = ((hex)&0xFF) / 255.0f;
+			rgbColor.w = 1.0f;
+			return rgbColor;
+		}
+	} // namespace Utility
 } // namespace LinaVG

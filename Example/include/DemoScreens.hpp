@@ -26,45 +26,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef DEMOS_HPP
-#define DEMOS_HPP
+#pragma once
 
 #include <vector>
 #include <string>
 
 namespace LinaVG
 {
-    namespace Examples
-    {
-        class DemoScreens
-        {
-        public:
-            void Initialize();
-            void Terminate();
+	namespace Examples
+	{
+		class DemoScreens
+		{
+		public:
+			void Initialize();
+			void Terminate();
 
-            void ShowBackground();
-            void ShowDemoScreen1_Shapes();
-            void ShowDemoScreen2_Colors();
-            void ShowDemoScreen3_Outlines();
-            void ShowDemoScreen4_Lines();
-            void ShowDemoScreen5_Texts();
-            void ShowDemoScreen6_DrawOrder();
-            void ShowDemoScreen7_Clipping();
-            void ShowDemoScreen8_Animated();
-            void ShowDemoScreen9_Final();
-            void PreEndFrame();
+			void ShowBackground();
+			void ShowDemoScreen1_Shapes();
+			void ShowDemoScreen2_Colors();
+			void ShowDemoScreen3_Outlines();
+			void ShowDemoScreen4_Lines();
+			void ShowDemoScreen5_Texts();
+			void ShowDemoScreen6_DrawOrder();
+			void ShowDemoScreen7_Clipping();
+			void ShowDemoScreen8_Animated();
+			void ShowDemoScreen9_Final();
+			void PreEndFrame();
 
-            float                    m_screenMS        = 0.0f;
-            bool                     m_clippingEnabled = true;
-            bool                     m_statsWindowOn   = true;
-            bool                     m_rotate          = false;
-            float                    m_rotateAngle     = 0.0f;
-            int                      m_drawCount       = 0;
-            int                      m_triangleCount   = 0;
-            int                      m_vertexCount     = 0;
-            std::vector<std::string> m_screenTitles    = {"SHAPES", "COLORS", "OUTLINES", "LINES", "TEXTS", "Z-ORDER", "CLIPPING", "ANIMATED", "FINAL"};
-            std::vector<std::string> m_screenDescriptions;
-        };
-    } // namespace Examples
+			float					 m_screenMS		   = 0.0f;
+			bool					 m_clippingEnabled = true;
+			bool					 m_statsWindowOn   = true;
+			bool					 m_rotate		   = false;
+			float					 m_rotateAngle	   = 0.0f;
+			int						 m_drawCount	   = 0;
+			int						 m_triangleCount   = 0;
+			int						 m_vertexCount	   = 0;
+			std::vector<std::string> m_screenTitles	   = {"SHAPES", "COLORS", "OUTLINES", "LINES", "TEXTS", "Z-ORDER", "CLIPPING", "ANIMATED", "FINAL"};
+			std::vector<std::string> m_screenDescriptions;
+		};
+	} // namespace Examples
 } // namespace LinaVG
-#endif

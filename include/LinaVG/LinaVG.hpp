@@ -26,12 +26,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/*
-Class: LinaVG
-
-
-Timestamp: 3/28/2022 2:38:21 PM
-*/
 
 #pragma once
 

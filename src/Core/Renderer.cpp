@@ -28,11 +28,6 @@ SOFTWARE.
 
 #include <iostream>
 
-#ifdef _DEBUG
-#define DEBUG_NEW new (_NORMAL_BLOCK, __FILE__, __LINE__)
-#define new       DEBUG_NEW
-#endif
-
 #include "LinaVG/Core/Renderer.hpp"
 #include "LinaVG/Core/BaseBackend.hpp"
 #include "LinaVG/Core/Drawer.hpp"
@@ -43,462 +38,462 @@ SOFTWARE.
 
 namespace LinaVG
 {
-    Backend::BaseBackend* Backend::BaseBackend::s_backend = nullptr;
+	Backend::BaseBackend* Backend::BaseBackend::s_backend = nullptr;
 
-    namespace Internal
-    {
-        LINAVG_VEC<RendererData> g_rendererData;
+	namespace Internal
+	{
+		LINAVG_VEC<RendererData> g_rendererData;
 
-        void ClearAllBuffers()
-        {
-            const int totalSize = static_cast<int>(Internal::g_rendererData.size());
-            for (int j = 0; j < totalSize; j++)
-            {
-                Internal::g_rendererData[j].m_gcFrameCounter = 0;
+		void ClearAllBuffers()
+		{
+			const int totalSize = static_cast<int>(Internal::g_rendererData.size());
+			for (int j = 0; j < totalSize; j++)
+			{
+				Internal::g_rendererData[j].m_gcFrameCounter = 0;
 
-                for (int i = 0; i < Internal::g_rendererData[j].m_gradientBuffers.m_size; i++)
-                    Internal::g_rendererData[j].m_gradientBuffers[i].Clear();
+				for (int i = 0; i < Internal::g_rendererData[j].m_gradientBuffers.m_size; i++)
+					Internal::g_rendererData[j].m_gradientBuffers[i].Clear();
 
-                Internal::g_rendererData[j].m_gradientBuffers.clear();
+				Internal::g_rendererData[j].m_gradientBuffers.clear();
 
-                for (int i = 0; i < Internal::g_rendererData[j].m_textureBuffers.m_size; i++)
-                    Internal::g_rendererData[j].m_textureBuffers[i].Clear();
+				for (int i = 0; i < Internal::g_rendererData[j].m_textureBuffers.m_size; i++)
+					Internal::g_rendererData[j].m_textureBuffers[i].Clear();
 
-                Internal::g_rendererData[j].m_textureBuffers.clear();
+				Internal::g_rendererData[j].m_textureBuffers.clear();
 
-                for (int i = 0; i < Internal::g_rendererData[j].m_defaultBuffers.m_size; i++)
-                    Internal::g_rendererData[j].m_defaultBuffers[i].Clear();
+				for (int i = 0; i < Internal::g_rendererData[j].m_defaultBuffers.m_size; i++)
+					Internal::g_rendererData[j].m_defaultBuffers[i].Clear();
 
-                Internal::g_rendererData[j].m_defaultBuffers.clear();
+				Internal::g_rendererData[j].m_defaultBuffers.clear();
 
-                for (int i = 0; i < Internal::g_rendererData[j].m_simpleTextBuffers.m_size; i++)
-                    Internal::g_rendererData[j].m_simpleTextBuffers[i].Clear();
+				for (int i = 0; i < Internal::g_rendererData[j].m_simpleTextBuffers.m_size; i++)
+					Internal::g_rendererData[j].m_simpleTextBuffers[i].Clear();
 
-                Internal::g_rendererData[j].m_simpleTextBuffers.clear();
+				Internal::g_rendererData[j].m_simpleTextBuffers.clear();
 
-                for (int i = 0; i < Internal::g_rendererData[j].m_sdfTextBuffers.m_size; i++)
-                    Internal::g_rendererData[j].m_sdfTextBuffers[i].Clear();
+				for (int i = 0; i < Internal::g_rendererData[j].m_sdfTextBuffers.m_size; i++)
+					Internal::g_rendererData[j].m_sdfTextBuffers[i].Clear();
 
-                Internal::g_rendererData[j].m_sdfTextBuffers.clear();
-                Internal::g_rendererData[j].m_drawOrders.clear();
-            }
-        }
+				Internal::g_rendererData[j].m_sdfTextBuffers.clear();
+				Internal::g_rendererData[j].m_drawOrders.clear();
+			}
+		}
 
-        void InitThreadedData()
-        {
-            const int index = static_cast<int>(Internal::g_rendererData.size());
-            Internal::g_rendererData.push_back(RendererData());
+		void InitThreadedData()
+		{
+			const int index = static_cast<int>(Internal::g_rendererData.size());
+			Internal::g_rendererData.push_back(RendererData());
 
-            Internal::g_rendererData[index].m_defaultBuffers.reserve(Config.defaultBufferReserve);
-            Internal::g_rendererData[index].m_gradientBuffers.reserve(Config.gradientBufferReserve);
-            Internal::g_rendererData[index].m_textureBuffers.reserve(Config.textureBufferReserve);
-            Internal::g_rendererData[index].m_simpleTextBuffers.reserve(Config.textBuffersReserve);
-            Internal::g_rendererData[index].m_sdfTextBuffers.reserve(Config.textBuffersReserve);
+			Internal::g_rendererData[index].m_defaultBuffers.reserve(Config.defaultBufferReserve);
+			Internal::g_rendererData[index].m_gradientBuffers.reserve(Config.gradientBufferReserve);
+			Internal::g_rendererData[index].m_textureBuffers.reserve(Config.textureBufferReserve);
+			Internal::g_rendererData[index].m_simpleTextBuffers.reserve(Config.textBuffersReserve);
+			Internal::g_rendererData[index].m_sdfTextBuffers.reserve(Config.textBuffersReserve);
 
-            if (Config.textCachingEnabled)
-                Internal::g_rendererData[index].m_textCache.reserve(Config.textCacheReserve);
+			if (Config.textCachingEnabled)
+				Internal::g_rendererData[index].m_textCache.reserve(Config.textCacheReserve);
 
-            if (Config.textCachingSDFEnabled)
-                Internal::g_rendererData[index].m_sdfTextCache.reserve(Config.textCacheSDFReserve);
-        }
-    } // namespace Internal
+			if (Config.textCachingSDFEnabled)
+				Internal::g_rendererData[index].m_sdfTextCache.reserve(Config.textCacheSDFReserve);
+		}
+	} // namespace Internal
 
-    bool Initialize()
-    {
-        Internal::InitThreadedData();
+	bool Initialize()
+	{
+		Internal::InitThreadedData();
 
-        _ASSERT(Backend::BaseBackend::Get() != nullptr);
+		_ASSERT(Backend::BaseBackend::Get() != nullptr);
 
-        if (!Backend::BaseBackend::Get()->Initialize())
-        {
-            if (Config.errorCallback)
-                Config.errorCallback("LinaVG: Could not initialize! Error initializing backend.");
-            return false;
-        }
-
-#ifndef LINAVG_DISABLE_TEXT_SUPPORT
-        if (!Text::Initialize())
-        {
-            if (Config.errorCallback)
-                Config.errorCallback("LinaVG: Could not initialize! Error initializing text API.");
-            return false;
-        }
-#endif
-
-        // TODO - error check
-        if (Config.logCallback)
-            Config.logCallback("LinaVG: Renderer and Backend initialized successfuly.");
-        return true;
-    }
-
-    void Terminate()
-    {
-        Backend::BaseBackend::Get()->Terminate();
-        delete Backend::BaseBackend::s_backend;
+		if (!Backend::BaseBackend::Get()->Initialize())
+		{
+			if (Config.errorCallback)
+				Config.errorCallback("LinaVG: Could not initialize! Error initializing backend.");
+			return false;
+		}
 
 #ifndef LINAVG_DISABLE_TEXT_SUPPORT
-        Text::Terminate();
+		if (!Text::Initialize())
+		{
+			if (Config.errorCallback)
+				Config.errorCallback("LinaVG: Could not initialize! Error initializing text API.");
+			return false;
+		}
 #endif
 
-        Internal::ClearAllBuffers();
-
-        // TODO - error check
-        if (Config.logCallback)
-            Config.logCallback("LinaVG: Renderer and Backend terminated successfuly.");
-    }
-
-    void StartFrame(int threadCount)
-    {
-        bool added = false;
-        while (static_cast<int>(Internal::g_rendererData.size()) < threadCount)
-        {
-            added = true;
-            Internal::InitThreadedData();
-        }
-
-        if (added)
-            Internal::ClearAllBuffers();
-
-        Backend::BaseBackend::Get()->StartFrame(threadCount);
-    }
-
-    void Render(int thread)
-    {
-        auto& renderBuffs = [thread](int drawOrder, DrawBufferShapeType shapeType) {
-            for (int i = 0; i < Internal::g_rendererData[thread].m_defaultBuffers.m_size; i++)
-            {
-                DrawBuffer& buf = Internal::g_rendererData[thread].m_defaultBuffers[i];
-
-                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-                    Backend::BaseBackend::Get()->DrawDefault(&(buf), thread);
-            }
-
-            for (int i = 0; i < Internal::g_rendererData[thread].m_gradientBuffers.m_size; i++)
-            {
-                GradientDrawBuffer& buf = Internal::g_rendererData[thread].m_gradientBuffers[i];
-
-                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-                    Backend::BaseBackend::Get()->DrawGradient(&buf, thread);
-            }
-
-            for (int i = 0; i < Internal::g_rendererData[thread].m_textureBuffers.m_size; i++)
-            {
-                TextureDrawBuffer& buf = Internal::g_rendererData[thread].m_textureBuffers[i];
-
-                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-                    Backend::BaseBackend::Get()->DrawTextured(&buf, thread);
-            }
-
-            for (int i = 0; i < Internal::g_rendererData[thread].m_simpleTextBuffers.m_size; i++)
-            {
-                SimpleTextDrawBuffer& buf = Internal::g_rendererData[thread].m_simpleTextBuffers[i];
-
-                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-                    Backend::BaseBackend::Get()->DrawSimpleText(&buf, thread);
-            }
-
-            for (int i = 0; i < Internal::g_rendererData[thread].m_sdfTextBuffers.m_size; i++)
-            {
-                SDFTextDrawBuffer& buf = Internal::g_rendererData[thread].m_sdfTextBuffers[i];
-
-                if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-                    Backend::BaseBackend::Get()->DrawSDFText(&buf, thread);
-            }
-        };
-
-        auto& arr = Internal::g_rendererData[thread].m_drawOrders;
-
-        for (int i = 0; i < arr.m_size; i++)
-        {
-            const int drawOrder = arr[i];
-            renderBuffs(drawOrder, DrawBufferShapeType::DropShadow);
-            renderBuffs(drawOrder, DrawBufferShapeType::Shape);
-            renderBuffs(drawOrder, DrawBufferShapeType::Outline);
-            renderBuffs(drawOrder, DrawBufferShapeType::AA);
-        }
-    }
-
-    LINAVG_API void SetClipPosX(BackendHandle posX, int thread)
-    {
-        Internal::g_rendererData[thread].m_clipPosX = posX;
-    }
-
-    LINAVG_API void SetClipPosY(BackendHandle posY, int thread)
-    {
-        Internal::g_rendererData[thread].m_clipPosY = posY;
-    }
-
-    LINAVG_API void SetClipSizeX(BackendHandle sizeX, int thread)
-    {
-        Internal::g_rendererData[thread].m_clipSizeX = sizeX;
-    }
-
-    LINAVG_API void SetClipSizeY(BackendHandle sizeY, int thread)
-    {
-        Internal::g_rendererData[thread].m_clipSizeY = sizeY;
-    }
-
-    void EndFrame()
-    {
-        Backend::BaseBackend::Get()->EndFrame();
-        const int totalSize = static_cast<int>(Internal::g_rendererData.size());
-
-        for (int j = 0; j < totalSize; j++)
-        {
-            Internal::g_rendererData[j].m_gcFrameCounter++;
-
-            if (Internal::g_rendererData[j].m_gcFrameCounter > Config.gcCollectInterval)
-            {
-                Internal::ClearAllBuffers();
-            }
-            else
-            {
-                for (int i = 0; i < Internal::g_rendererData[j].m_gradientBuffers.m_size; i++)
-                    Internal::g_rendererData[j].m_gradientBuffers[i].ShrinkZero();
-
-                for (int i = 0; i < Internal::g_rendererData[j].m_textureBuffers.m_size; i++)
-                    Internal::g_rendererData[j].m_textureBuffers[i].ShrinkZero();
-
-                for (int i = 0; i < Internal::g_rendererData[j].m_defaultBuffers.m_size; i++)
-                    Internal::g_rendererData[j].m_defaultBuffers[i].ShrinkZero();
-
-                for (int i = 0; i < Internal::g_rendererData[j].m_simpleTextBuffers.m_size; i++)
-                    Internal::g_rendererData[j].m_simpleTextBuffers[i].ShrinkZero();
-
-                for (int i = 0; i < Internal::g_rendererData[j].m_sdfTextBuffers.m_size; i++)
-                    Internal::g_rendererData[j].m_sdfTextBuffers[i].ShrinkZero();
-            }
-
-            // SDF
-            if (Config.textCachingEnabled || Config.textCachingSDFEnabled)
-                Internal::g_rendererData[j].m_textCacheFrameCounter++;
-
-            if (Internal::g_rendererData[j].m_textCacheFrameCounter > Config.textCacheExpireInterval)
-            {
-                Internal::g_rendererData[j].m_textCacheFrameCounter = 0;
-                Internal::g_rendererData[j].m_textCache.clear();
-                Internal::g_rendererData[j].m_sdfTextCache.clear();
-            }
-        }
-    }
-
-    GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)
-    {
-        const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
-
-        for (int i = 0; i < m_gradientBuffers.m_size; i++)
-        {
-            auto& buf = m_gradientBuffers[i];
-            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.start, grad.start) && Math::IsEqual(buf.m_color.end, grad.end) && buf.m_color.gradientType == grad.gradientType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
-            {
-                if (grad.gradientType == GradientType::Radial || grad.gradientType == GradientType::RadialCorner)
-                {
-                    if (buf.m_color.radialSize == grad.radialSize && buf.m_isAABuffer == isAABuffer)
-                        return m_gradientBuffers[i];
-                }
-                else
-                {
-                    if (buf.m_isAABuffer == isAABuffer)
-                        return m_gradientBuffers[i];
-                }
-            }
-        }
-
-        SetDrawOrderLimits(drawOrder);
-
-        m_gradientBuffers.push_back(GradientDrawBuffer(grad, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
-        return m_gradientBuffers.last_ref();
-    }
-
-    DrawBuffer& RendererData::GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType)
-    {
-        for (int i = 0; i < m_defaultBuffers.m_size; i++)
-        {
-            auto& buf = m_defaultBuffers[i];
-            if (m_defaultBuffers[i].m_drawOrder == drawOrder && buf.m_shapeType == shapeType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
-                return m_defaultBuffers[i];
-        }
-
-        SetDrawOrderLimits(drawOrder);
-
-        m_defaultBuffers.push_back(DrawBuffer(drawOrder, DrawBufferType::Default, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
-        return m_defaultBuffers.last_ref();
-    }
-
-    TextureDrawBuffer& RendererData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
-    {
-        const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
-        for (int i = 0; i < m_textureBuffers.m_size; i++)
-        {
-            auto& buf = m_textureBuffers[i];
-            if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_tint, tint) && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
-                return m_textureBuffers[i];
-        }
-
-        SetDrawOrderLimits(drawOrder);
-
-        m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset, tint, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
-        return m_textureBuffers.last_ref();
-    }
-
-    SimpleTextDrawBuffer& RendererData::GetSimpleTextBuffer(BackendHandle textureHandle, int drawOrder, bool isDropShadow)
-    {
-        for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
-        {
-            auto& buf = m_simpleTextBuffers[i];
-            if (buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
-                return m_simpleTextBuffers[i];
-        }
-
-        SetDrawOrderLimits(drawOrder);
-
-        m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(textureHandle, drawOrder, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
-        return m_simpleTextBuffers.last_ref();
-    }
-
-    SDFTextDrawBuffer& RendererData::GetSDFTextBuffer(BackendHandle textureHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow)
-    {
-        for (int i = 0; i < m_sdfTextBuffers.m_size; i++)
-        {
-            auto& buf = m_sdfTextBuffers[i];
-            if (buf.m_isDropShadow == isDropShadow && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && buf.m_thickness == opts.sdfThickness && buf.m_softness == opts.sdfSoftness &&
-                buf.m_outlineThickness == opts.sdfOutlineThickness && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
-                return m_sdfTextBuffers[i];
-        }
-
-        SetDrawOrderLimits(drawOrder);
-
-        m_sdfTextBuffers.push_back(SDFTextDrawBuffer(textureHandle, drawOrder, opts, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
-        return m_sdfTextBuffers.last_ref();
-    }
-
-    void RendererData::AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
-    {
-        TextCache& newCache = m_textCache[sid];
-        newCache.opts       = opts;
-        newCache.indxBuffer.clear();
-        newCache.vtxBuffer.clear();
-
-        for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
-            newCache.vtxBuffer.push_back(buf->m_vertexBuffer[i]);
-
-        for (int i = indexStart; i < buf->m_indexBuffer.m_size; i++)
-            newCache.indxBuffer.push_back(buf->m_indexBuffer[i] - vtxStart);
-    }
-
-    void RendererData::AddSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
-    {
-        SDFTextCache& newCache = m_sdfTextCache[sid];
-        newCache.opts          = opts;
-        newCache.indxBuffer.clear();
-        newCache.vtxBuffer.clear();
-
-        for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
-            newCache.vtxBuffer.push_back(buf->m_vertexBuffer[i]);
-
-        for (int i = indexStart; i < buf->m_indexBuffer.m_size; i++)
-            newCache.indxBuffer.push_back(buf->m_indexBuffer[i] - vtxStart);
-    }
-
-    TextCache* RendererData::CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf)
-    {
-        auto& it = m_textCache.find(sid);
-
-        if (it == m_textCache.end())
-            return nullptr;
-
-        if (!it->second.opts.IsSame(opts))
-            return nullptr;
-
-        const int vtxStart = buf->m_vertexBuffer.m_size;
-
-        for (auto& b : it->second.vtxBuffer)
-            buf->PushVertex(b);
-
-        for (auto& i : it->second.indxBuffer)
-            buf->PushIndex(i + vtxStart);
-
-        return &it->second;
-    }
-
-    SDFTextCache* RendererData::CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf)
-    {
-        auto& it = m_sdfTextCache.find(sid);
-
-        if (it == m_sdfTextCache.end())
-            return nullptr;
-
-        if (!it->second.opts.IsSame(opts))
-            return nullptr;
-
-        const int vtxStart = buf->m_vertexBuffer.m_size;
-
-        for (auto& b : it->second.vtxBuffer)
-            buf->PushVertex(b);
-
-        for (auto& i : it->second.indxBuffer)
-            buf->PushIndex(i + vtxStart);
-
-        return &it->second;
-    }
-
-    int RendererData::GetBufferIndexInDefaultArray(DrawBuffer* buf)
-    {
-        for (int i = 0; i < m_defaultBuffers.m_size; i++)
-        {
-            if (buf == &m_defaultBuffers[i])
-                return i;
-        }
-        return -1;
-    }
-
-    int RendererData::GetBufferIndexInCharArray(DrawBuffer* buf)
-    {
-        for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
-        {
-            if (buf == &m_simpleTextBuffers[i])
-                return i;
-        }
-        return -1;
-    }
-
-    int RendererData::GetBufferIndexInGradientArray(DrawBuffer* buf)
-    {
-        for (int i = 0; i < m_gradientBuffers.m_size; i++)
-        {
-            if (buf == &m_gradientBuffers[i])
-                return i;
-        }
-        return -1;
-    }
-
-    int RendererData::GetBufferIndexInTextureArray(DrawBuffer* buf)
-    {
-        for (int i = 0; i < m_textureBuffers.m_size; i++)
-        {
-            if (buf == &m_textureBuffers[i])
-                return i;
-        }
-        return -1;
-    }
-
-    void RendererData::SetDrawOrderLimits(int drawOrder)
-    {
-        bool found = false;
-        for (int i = 0; i < m_drawOrders.m_size; i++)
-        {
-            if (m_drawOrders[i] == drawOrder)
-            {
-                found = true;
-                break;
-            }
-        }
-
-        if (!found)
-        {
-            m_drawOrders.push_back(drawOrder);
-            Utility::QuickSortArray<int>(m_drawOrders, 0, m_drawOrders.m_size - 1);
-        }
-    }
+		// TODO - error check
+		if (Config.logCallback)
+			Config.logCallback("LinaVG: Renderer and Backend initialized successfuly.");
+		return true;
+	}
+
+	void Terminate()
+	{
+		Backend::BaseBackend::Get()->Terminate();
+		delete Backend::BaseBackend::s_backend;
+
+#ifndef LINAVG_DISABLE_TEXT_SUPPORT
+		Text::Terminate();
+#endif
+
+		Internal::ClearAllBuffers();
+
+		// TODO - error check
+		if (Config.logCallback)
+			Config.logCallback("LinaVG: Renderer and Backend terminated successfuly.");
+	}
+
+	void StartFrame(int threadCount)
+	{
+		bool added = false;
+		while (static_cast<int>(Internal::g_rendererData.size()) < threadCount)
+		{
+			added = true;
+			Internal::InitThreadedData();
+		}
+
+		if (added)
+			Internal::ClearAllBuffers();
+
+		Backend::BaseBackend::Get()->StartFrame(threadCount);
+	}
+
+	void Render(int thread)
+	{
+		auto& renderBuffs = [thread](int drawOrder, DrawBufferShapeType shapeType) {
+			for (int i = 0; i < Internal::g_rendererData[thread].m_defaultBuffers.m_size; i++)
+			{
+				DrawBuffer& buf = Internal::g_rendererData[thread].m_defaultBuffers[i];
+
+				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
+					Backend::BaseBackend::Get()->DrawDefault(&(buf), thread);
+			}
+
+			for (int i = 0; i < Internal::g_rendererData[thread].m_gradientBuffers.m_size; i++)
+			{
+				GradientDrawBuffer& buf = Internal::g_rendererData[thread].m_gradientBuffers[i];
+
+				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
+					Backend::BaseBackend::Get()->DrawGradient(&buf, thread);
+			}
+
+			for (int i = 0; i < Internal::g_rendererData[thread].m_textureBuffers.m_size; i++)
+			{
+				TextureDrawBuffer& buf = Internal::g_rendererData[thread].m_textureBuffers[i];
+
+				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
+					Backend::BaseBackend::Get()->DrawTextured(&buf, thread);
+			}
+
+			for (int i = 0; i < Internal::g_rendererData[thread].m_simpleTextBuffers.m_size; i++)
+			{
+				SimpleTextDrawBuffer& buf = Internal::g_rendererData[thread].m_simpleTextBuffers[i];
+
+				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
+					Backend::BaseBackend::Get()->DrawSimpleText(&buf, thread);
+			}
+
+			for (int i = 0; i < Internal::g_rendererData[thread].m_sdfTextBuffers.m_size; i++)
+			{
+				SDFTextDrawBuffer& buf = Internal::g_rendererData[thread].m_sdfTextBuffers[i];
+
+				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
+					Backend::BaseBackend::Get()->DrawSDFText(&buf, thread);
+			}
+		};
+
+		auto& arr = Internal::g_rendererData[thread].m_drawOrders;
+
+		for (int i = 0; i < arr.m_size; i++)
+		{
+			const int drawOrder = arr[i];
+			renderBuffs(drawOrder, DrawBufferShapeType::DropShadow);
+			renderBuffs(drawOrder, DrawBufferShapeType::Shape);
+			renderBuffs(drawOrder, DrawBufferShapeType::Outline);
+			renderBuffs(drawOrder, DrawBufferShapeType::AA);
+		}
+	}
+
+	LINAVG_API void SetClipPosX(BackendHandle posX, int thread)
+	{
+		Internal::g_rendererData[thread].m_clipPosX = posX;
+	}
+
+	LINAVG_API void SetClipPosY(BackendHandle posY, int thread)
+	{
+		Internal::g_rendererData[thread].m_clipPosY = posY;
+	}
+
+	LINAVG_API void SetClipSizeX(BackendHandle sizeX, int thread)
+	{
+		Internal::g_rendererData[thread].m_clipSizeX = sizeX;
+	}
+
+	LINAVG_API void SetClipSizeY(BackendHandle sizeY, int thread)
+	{
+		Internal::g_rendererData[thread].m_clipSizeY = sizeY;
+	}
+
+	void EndFrame()
+	{
+		Backend::BaseBackend::Get()->EndFrame();
+		const int totalSize = static_cast<int>(Internal::g_rendererData.size());
+
+		for (int j = 0; j < totalSize; j++)
+		{
+			Internal::g_rendererData[j].m_gcFrameCounter++;
+
+			if (Internal::g_rendererData[j].m_gcFrameCounter > Config.gcCollectInterval)
+			{
+				Internal::ClearAllBuffers();
+			}
+			else
+			{
+				for (int i = 0; i < Internal::g_rendererData[j].m_gradientBuffers.m_size; i++)
+					Internal::g_rendererData[j].m_gradientBuffers[i].ShrinkZero();
+
+				for (int i = 0; i < Internal::g_rendererData[j].m_textureBuffers.m_size; i++)
+					Internal::g_rendererData[j].m_textureBuffers[i].ShrinkZero();
+
+				for (int i = 0; i < Internal::g_rendererData[j].m_defaultBuffers.m_size; i++)
+					Internal::g_rendererData[j].m_defaultBuffers[i].ShrinkZero();
+
+				for (int i = 0; i < Internal::g_rendererData[j].m_simpleTextBuffers.m_size; i++)
+					Internal::g_rendererData[j].m_simpleTextBuffers[i].ShrinkZero();
+
+				for (int i = 0; i < Internal::g_rendererData[j].m_sdfTextBuffers.m_size; i++)
+					Internal::g_rendererData[j].m_sdfTextBuffers[i].ShrinkZero();
+			}
+
+			// SDF
+			if (Config.textCachingEnabled || Config.textCachingSDFEnabled)
+				Internal::g_rendererData[j].m_textCacheFrameCounter++;
+
+			if (Internal::g_rendererData[j].m_textCacheFrameCounter > Config.textCacheExpireInterval)
+			{
+				Internal::g_rendererData[j].m_textCacheFrameCounter = 0;
+				Internal::g_rendererData[j].m_textCache.clear();
+				Internal::g_rendererData[j].m_sdfTextCache.clear();
+			}
+		}
+	}
+
+	GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)
+	{
+		const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
+
+		for (int i = 0; i < m_gradientBuffers.m_size; i++)
+		{
+			auto& buf = m_gradientBuffers[i];
+			if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.start, grad.start) && Math::IsEqual(buf.m_color.end, grad.end) && buf.m_color.gradientType == grad.gradientType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+			{
+				if (grad.gradientType == GradientType::Radial || grad.gradientType == GradientType::RadialCorner)
+				{
+					if (buf.m_color.radialSize == grad.radialSize && buf.m_isAABuffer == isAABuffer)
+						return m_gradientBuffers[i];
+				}
+				else
+				{
+					if (buf.m_isAABuffer == isAABuffer)
+						return m_gradientBuffers[i];
+				}
+			}
+		}
+
+		SetDrawOrderLimits(drawOrder);
+
+		m_gradientBuffers.push_back(GradientDrawBuffer(grad, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		return m_gradientBuffers.last_ref();
+	}
+
+	DrawBuffer& RendererData::GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType)
+	{
+		for (int i = 0; i < m_defaultBuffers.m_size; i++)
+		{
+			auto& buf = m_defaultBuffers[i];
+			if (m_defaultBuffers[i].m_drawOrder == drawOrder && buf.m_shapeType == shapeType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+				return m_defaultBuffers[i];
+		}
+
+		SetDrawOrderLimits(drawOrder);
+
+		m_defaultBuffers.push_back(DrawBuffer(drawOrder, DrawBufferType::Default, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		return m_defaultBuffers.last_ref();
+	}
+
+	TextureDrawBuffer& RendererData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
+	{
+		const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
+		for (int i = 0; i < m_textureBuffers.m_size; i++)
+		{
+			auto& buf = m_textureBuffers[i];
+			if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_tint, tint) && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+				return m_textureBuffers[i];
+		}
+
+		SetDrawOrderLimits(drawOrder);
+
+		m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset, tint, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		return m_textureBuffers.last_ref();
+	}
+
+	SimpleTextDrawBuffer& RendererData::GetSimpleTextBuffer(BackendHandle textureHandle, int drawOrder, bool isDropShadow)
+	{
+		for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
+		{
+			auto& buf = m_simpleTextBuffers[i];
+			if (buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+				return m_simpleTextBuffers[i];
+		}
+
+		SetDrawOrderLimits(drawOrder);
+
+		m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(textureHandle, drawOrder, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		return m_simpleTextBuffers.last_ref();
+	}
+
+	SDFTextDrawBuffer& RendererData::GetSDFTextBuffer(BackendHandle textureHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow)
+	{
+		for (int i = 0; i < m_sdfTextBuffers.m_size; i++)
+		{
+			auto& buf = m_sdfTextBuffers[i];
+			if (buf.m_isDropShadow == isDropShadow && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && buf.m_thickness == opts.sdfThickness && buf.m_softness == opts.sdfSoftness &&
+				buf.m_outlineThickness == opts.sdfOutlineThickness && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+				return m_sdfTextBuffers[i];
+		}
+
+		SetDrawOrderLimits(drawOrder);
+
+		m_sdfTextBuffers.push_back(SDFTextDrawBuffer(textureHandle, drawOrder, opts, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		return m_sdfTextBuffers.last_ref();
+	}
+
+	void RendererData::AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
+	{
+		TextCache& newCache = m_textCache[sid];
+		newCache.opts		= opts;
+		newCache.indxBuffer.clear();
+		newCache.vtxBuffer.clear();
+
+		for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
+			newCache.vtxBuffer.push_back(buf->m_vertexBuffer[i]);
+
+		for (int i = indexStart; i < buf->m_indexBuffer.m_size; i++)
+			newCache.indxBuffer.push_back(buf->m_indexBuffer[i] - vtxStart);
+	}
+
+	void RendererData::AddSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
+	{
+		SDFTextCache& newCache = m_sdfTextCache[sid];
+		newCache.opts		   = opts;
+		newCache.indxBuffer.clear();
+		newCache.vtxBuffer.clear();
+
+		for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
+			newCache.vtxBuffer.push_back(buf->m_vertexBuffer[i]);
+
+		for (int i = indexStart; i < buf->m_indexBuffer.m_size; i++)
+			newCache.indxBuffer.push_back(buf->m_indexBuffer[i] - vtxStart);
+	}
+
+	TextCache* RendererData::CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf)
+	{
+		auto& it = m_textCache.find(sid);
+
+		if (it == m_textCache.end())
+			return nullptr;
+
+		if (!it->second.opts.IsSame(opts))
+			return nullptr;
+
+		const int vtxStart = buf->m_vertexBuffer.m_size;
+
+		for (auto& b : it->second.vtxBuffer)
+			buf->PushVertex(b);
+
+		for (auto& i : it->second.indxBuffer)
+			buf->PushIndex(i + vtxStart);
+
+		return &it->second;
+	}
+
+	SDFTextCache* RendererData::CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf)
+	{
+		auto& it = m_sdfTextCache.find(sid);
+
+		if (it == m_sdfTextCache.end())
+			return nullptr;
+
+		if (!it->second.opts.IsSame(opts))
+			return nullptr;
+
+		const int vtxStart = buf->m_vertexBuffer.m_size;
+
+		for (auto& b : it->second.vtxBuffer)
+			buf->PushVertex(b);
+
+		for (auto& i : it->second.indxBuffer)
+			buf->PushIndex(i + vtxStart);
+
+		return &it->second;
+	}
+
+	int RendererData::GetBufferIndexInDefaultArray(DrawBuffer* buf)
+	{
+		for (int i = 0; i < m_defaultBuffers.m_size; i++)
+		{
+			if (buf == &m_defaultBuffers[i])
+				return i;
+		}
+		return -1;
+	}
+
+	int RendererData::GetBufferIndexInCharArray(DrawBuffer* buf)
+	{
+		for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
+		{
+			if (buf == &m_simpleTextBuffers[i])
+				return i;
+		}
+		return -1;
+	}
+
+	int RendererData::GetBufferIndexInGradientArray(DrawBuffer* buf)
+	{
+		for (int i = 0; i < m_gradientBuffers.m_size; i++)
+		{
+			if (buf == &m_gradientBuffers[i])
+				return i;
+		}
+		return -1;
+	}
+
+	int RendererData::GetBufferIndexInTextureArray(DrawBuffer* buf)
+	{
+		for (int i = 0; i < m_textureBuffers.m_size; i++)
+		{
+			if (buf == &m_textureBuffers[i])
+				return i;
+		}
+		return -1;
+	}
+
+	void RendererData::SetDrawOrderLimits(int drawOrder)
+	{
+		bool found = false;
+		for (int i = 0; i < m_drawOrders.m_size; i++)
+		{
+			if (m_drawOrders[i] == drawOrder)
+			{
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+		{
+			m_drawOrders.push_back(drawOrder);
+			Utility::QuickSortArray<int>(m_drawOrders, 0, m_drawOrders.m_size - 1);
+		}
+	}
 
 } // namespace LinaVG

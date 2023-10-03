@@ -27,41 +27,38 @@ SOFTWARE.
 */
 
 #pragma once
-#ifndef LinaVGExampleBackendGL_HPP
-#define LinaVGExampleBackendGL_HPP
 
 struct GLFWwindow;
 
 namespace LinaVG
 {
-    namespace Examples
-    {
-        class GLFWWindow
-        {
-        public:
-            GLFWWindow()  = default;
-            ~GLFWWindow() = default;
+	namespace Examples
+	{
+		class GLFWWindow
+		{
+		public:
+			GLFWWindow()  = default;
+			~GLFWWindow() = default;
 
-            bool  InitWindow(int width, int height);
-            void  Poll();
-            void  Clear();
-            void  SwapBuffers();
-            void  Terminate();
-            float GetTime();
+			bool  InitWindow(int width, int height);
+			void  Poll();
+			void  Clear();
+			void  SwapBuffers();
+			void  Terminate();
+			float GetTime();
 
-            inline float GetFramebufferScale()
-            {
-                return m_frameBufferScaleX;
-            }
+			inline float GetFramebufferScale()
+			{
+				return m_frameBufferScaleX;
+			}
 
-            unsigned int CreateTexture(const char* file);
+			unsigned int CreateTexture(const char* file);
 
-        private:
-            GLFWwindow* m_window            = nullptr;
-            float       m_frameBufferScaleX = 0.0f;
-            float       m_frameBufferScaleY = 0.0f;
-        };
-    } // namespace Examples
+		private:
+			GLFWwindow* m_window			= nullptr;
+			float		m_frameBufferScaleX = 0.0f;
+			float		m_frameBufferScaleY = 0.0f;
+		};
+	} // namespace Examples
 } // namespace LinaVG
 
-#endif

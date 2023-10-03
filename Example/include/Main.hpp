@@ -26,85 +26,82 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef MAIN_HPP
-#define MAIN_HPP
+#pragma once
 
 #include "DemoScreens.hpp"
 
 namespace LinaVG
 {
-    namespace Examples
-    {
-        class ExampleApp
-        {
-        public:
-            void Run();
+	namespace Examples
+	{
+		class ExampleApp
+		{
+		public:
+			void Run();
 
-            static inline ExampleApp* Get()
-            {
-                return s_exampleApp;
-            }
+			static inline ExampleApp* Get()
+			{
+				return s_exampleApp;
+			}
 
-            void OnHorizontalKeyCallback(float input);
-            void OnVerticalKeyCallback(float input);
-            void OnNumKeyCallback(int key);
-            void OnPCallback();
-            void OnRCallback();
-            void OnFCallback();
-            void OnCCallback();
-            void OnECallback();
-            void OnMouseScrollCallback(float val);
-            void OnWindowResizeCallback(int width, int height);
-            void OnWindowCloseCallback();
+			void OnHorizontalKeyCallback(float input);
+			void OnVerticalKeyCallback(float input);
+			void OnNumKeyCallback(int key);
+			void OnPCallback();
+			void OnRCallback();
+			void OnFCallback();
+			void OnCCallback();
+			void OnECallback();
+			void OnMouseScrollCallback(float val);
+			void OnWindowResizeCallback(int width, int height);
+			void OnWindowCloseCallback();
 
-            inline int GetFPS()
-            {
-                return m_fps;
-            }
+			inline int GetFPS()
+			{
+				return m_fps;
+			}
 
-            inline float GetFrameTime()
-            {
-                return m_deltaTime;
-            }
+			inline float GetFrameTime()
+			{
+				return m_deltaTime;
+			}
 
-            inline float GetFrameTimeRead()
-            {
-                return m_deltaTimeRead;
-            }
+			inline float GetFrameTimeRead()
+			{
+				return m_deltaTimeRead;
+			}
 
-            inline float GetElapsed()
-            {
-                return m_elapsedTime;
-            }
+			inline float GetElapsed()
+			{
+				return m_elapsedTime;
+			}
 
-            inline unsigned int GetLinaLogoTexture()
-            {
-                return m_linaTexture;
-            }
+			inline unsigned int GetLinaLogoTexture()
+			{
+				return m_linaTexture;
+			}
 
-            inline unsigned int GetCheckeredTexture()
-            {
-                return m_checkeredTexture;
-            }
+			inline unsigned int GetCheckeredTexture()
+			{
+				return m_checkeredTexture;
+			}
 
-            inline int GetCurrentScreen()
-            {
-                return m_currentDemoScreen;
-            }
+			inline int GetCurrentScreen()
+			{
+				return m_currentDemoScreen;
+			}
 
-        private:
-            DemoScreens        m_demoScreens;
-            unsigned int       m_linaTexture       = 0;
-            unsigned int       m_checkeredTexture  = 0;
-            int                m_currentDemoScreen = 1;
-            float              m_deltaTime         = 0.0f;
-            float              m_deltaTimeRead     = 0.0f;
-            float              m_elapsedTime       = 0.0f;
-            int                m_fps               = 0;
-            bool               m_shouldClose       = false;
-            static ExampleApp* s_exampleApp;
-        };
-    } // namespace Examples
+		private:
+			DemoScreens		   m_demoScreens;
+			unsigned int	   m_linaTexture	   = 0;
+			unsigned int	   m_checkeredTexture  = 0;
+			int				   m_currentDemoScreen = 1;
+			float			   m_deltaTime		   = 0.0f;
+			float			   m_deltaTimeRead	   = 0.0f;
+			float			   m_elapsedTime	   = 0.0f;
+			int				   m_fps			   = 0;
+			bool			   m_shouldClose	   = false;
+			static ExampleApp* s_exampleApp;
+		};
+	} // namespace Examples
 } // namespace LinaVG
-
-#endif

@@ -32,49 +32,49 @@ SOFTWARE.
 
 namespace LinaVG
 {
-    namespace Internal
-    {
-        class ShaderData;
-    }
+	namespace Internal
+	{
+		class ShaderData;
+	}
 } // namespace LinaVG
 
 namespace LinaVG::Backend
 {
 
-    class BaseBackend
-    {
-    public:
-        BaseBackend()          = default;
-        virtual ~BaseBackend() = default;
+	class BaseBackend
+	{
+	public:
+		BaseBackend()		   = default;
+		virtual ~BaseBackend() = default;
 
-        static BaseBackend* Get()
-        {
-            return s_backend;
-        }
+		static BaseBackend* Get()
+		{
+			return s_backend;
+		}
 
-        static void SetBackend(BaseBackend* ptr)
-        {
-            s_backend = ptr;
-        }
+		static void SetBackend(BaseBackend* ptr)
+		{
+			s_backend = ptr;
+		}
 
-        // Public API, if you want to implement your own backend, it needs to define these exact signatures.
-        virtual bool          Initialize()                                                                                 = 0;
-        virtual void          Terminate()                                                                                  = 0;
-        virtual void          StartFrame(int threadCount)                                                                  = 0;
-        virtual void          DrawGradient(GradientDrawBuffer* buf, int thread)                                            = 0;
-        virtual void          DrawTextured(TextureDrawBuffer* buf, int thread)                                             = 0;
-        virtual void          DrawDefault(DrawBuffer* buf, int thread)                                                     = 0;
-        virtual void          DrawSimpleText(SimpleTextDrawBuffer* buf, int thread)                                        = 0;
-        virtual void          DrawSDFText(SDFTextDrawBuffer* buf, int thread)                                              = 0;
-        virtual void          EndFrame()                                                                                   = 0;
-        virtual void          BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data) = 0;
-        virtual void          BufferEnded()                                                                                = 0;
-        virtual void          BindFontTexture(BackendHandle texture)                                                       = 0;
-        virtual void          SaveAPIState()                                                                               = 0;
-        virtual void          RestoreAPIState()                                                                            = 0;
-        virtual BackendHandle CreateFontTexture(int width, int height)                                                     = 0;
+		// Public API, if you want to implement your own backend, it needs to define these exact signatures.
+		virtual bool		  Initialize()																				   = 0;
+		virtual void		  Terminate()																				   = 0;
+		virtual void		  StartFrame(int threadCount)																   = 0;
+		virtual void		  DrawGradient(GradientDrawBuffer* buf, int thread)											   = 0;
+		virtual void		  DrawTextured(TextureDrawBuffer* buf, int thread)											   = 0;
+		virtual void		  DrawDefault(DrawBuffer* buf, int thread)													   = 0;
+		virtual void		  DrawSimpleText(SimpleTextDrawBuffer* buf, int thread)										   = 0;
+		virtual void		  DrawSDFText(SDFTextDrawBuffer* buf, int thread)											   = 0;
+		virtual void		  EndFrame()																				   = 0;
+		virtual void		  BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data) = 0;
+		virtual void		  BufferEnded()																				   = 0;
+		virtual void		  BindFontTexture(BackendHandle texture)													   = 0;
+		virtual void		  SaveAPIState()																			   = 0;
+		virtual void		  RestoreAPIState()																			   = 0;
+		virtual BackendHandle CreateFontTexture(int width, int height)													   = 0;
 
-        static BaseBackend* s_backend;
-    };
+		static BaseBackend* s_backend;
+	};
 
 } // namespace LinaVG::Backend

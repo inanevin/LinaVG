@@ -25,23 +25,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 #include "LinaVG/Core/Common.hpp"
 #include "LinaVG/Core/Math.hpp"
 
 namespace LinaVG
 {
-    Configuration Config;
+	Configuration Config;
 
-    OutlineOptions OutlineOptions::FromStyle(const StyleOptions& opts, OutlineDrawDirection drawDir)
-    {
-        OutlineOptions o;
-        o.color           = opts.color;
-        o.textureHandle   = opts.textureHandle;
-        o.textureUVOffset = opts.textureUVOffset;
-        o.textureUVTiling = opts.textureUVTiling;
-        o.drawDirection   = drawDir;
-        return o;
-    }
-
+	OutlineOptions OutlineOptions::FromStyle(const StyleOptions& opts, OutlineDrawDirection drawDir)
+	{
+		OutlineOptions o;
+		o.color			  = opts.color;
+		o.textureHandle	  = opts.textureHandle;
+		o.textureUVOffset = opts.textureUVOffset;
+		o.textureUVTiling = opts.textureUVTiling;
+		o.drawDirection	  = drawDir;
+		return o;
+	}
 
 } // namespace LinaVG
