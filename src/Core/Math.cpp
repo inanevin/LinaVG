@@ -28,6 +28,7 @@ SOFTWARE.
 
 #include "LinaVG/Core/Math.hpp"
 #include <cmath>
+#include <cassert>
 
 namespace LinaVG
 {
@@ -55,22 +56,22 @@ namespace LinaVG
 
 	float Math::GetAngleFromCenter(const Vec2& center, const Vec2& point)
 	{
-		return LVG_RAD2DEG * (std::atan2(point.y - center.y, point.x - center.x));
+		return LVG_RAD2DEG * (atan2(point.y - center.y, point.x - center.x));
 	}
 
 	float Math::GetAngleBetween(const Vec2& p1, const Vec2& p2)
 	{
-		return LVG_RAD2DEG * (std::atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
+		return LVG_RAD2DEG * (atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
 	}
 
 	float Math::GetAngleBetweenDirs(const Vec2& dir1, const Vec2& dir2)
 	{
-		return LVG_RAD2DEG * std::atan2f(dir1.x * dir2.y - dir1.y * dir2.x, dir1.x * dir2.x + dir1.y * dir2.y);
+		return LVG_RAD2DEG * atan2f(dir1.x * dir2.y - dir1.y * dir2.x, dir1.x * dir2.x + dir1.y * dir2.y);
 	}
 
 	float Math::GetAngleBetweenShort(const Vec2& p1, const Vec2& p2)
 	{
-		float ang = LVG_RAD2DEG * (std::atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
+		float ang = LVG_RAD2DEG * (atan2(p2.y, p2.x) - atan2(p1.y, p1.x));
 
 		if (ang > 180.0f)
 			ang = 360.0f - ang;
@@ -165,8 +166,8 @@ namespace LinaVG
 		// Parallel
 		if (det == 0.0f)
 			return p10;
-
-		_ASSERT(det != 0.0f);
+		
+		assert(det != 0.0f);
 
 		float x = (b2 * c1 - b1 * c2) / det;
 		float y = (a1 * c2 - a2 * c1) / det;

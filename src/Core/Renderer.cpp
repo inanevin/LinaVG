@@ -35,6 +35,7 @@ SOFTWARE.
 #include "LinaVG/Core/Text.hpp"
 #include "LinaVG/Utility/Utility.hpp"
 #include <math.h>
+#include <cassert>
 
 namespace LinaVG
 {
@@ -102,7 +103,7 @@ namespace LinaVG
 	{
 		Internal::InitThreadedData();
 
-		_ASSERT(Backend::BaseBackend::Get() != nullptr);
+		assert(Backend::BaseBackend::Get() != nullptr);
 
 		if (!Backend::BaseBackend::Get()->Initialize())
 		{

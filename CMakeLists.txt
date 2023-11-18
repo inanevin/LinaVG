@@ -28,8 +28,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_SUPPRESS_REGENERATION true)
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+##set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+## set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 
 #--------------------------------------------------------------------
 # Set sources
@@ -75,7 +75,7 @@ add_library(Lina::VG ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MAJOR=1)
 target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MINOR=6)
-target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=7)
+target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=8)
 
 #--------------------------------------------------------------------
 # Subdirectories & linking

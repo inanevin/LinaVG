@@ -33,6 +33,9 @@ SOFTWARE.
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <cassert>
+#include <cstring>
+#include <cstddef>
 #include "Vectors.hpp"
 
 namespace LinaVG
@@ -198,7 +201,7 @@ namespace LinaVG
 
 		inline void shrink(int size)
 		{
-			_ASSERT(size <= m_size);
+			assert(size <= m_size);
 			m_size = size;
 		}
 
@@ -235,8 +238,8 @@ namespace LinaVG
 
 		inline T* erase(const T* it)
 		{
-			_ASSERT(it >= m_data && it < m_data + m_size);
-			const ptrdiff_t off = it - m_data;
+			assert(it >= m_data && it < m_data + m_size);
+			const std::ptrdiff_t off = it - m_data;
 			std::memmove(m_data + off, m_data + off + 1, ((size_t)m_size - (size_t)off - 1) * sizeof(T));
 			m_size--;
 			return m_data + off;
@@ -254,13 +257,13 @@ namespace LinaVG
 
 		inline T& operator[](int i)
 		{
-			_ASSERT(i >= 0 && i < m_capacity);
+			assert(i >= 0 && i < m_capacity);
 			return m_data[i];
 		}
 
 		inline const T& operator[](int i) const
 		{
-			_ASSERT(i >= 0 && i < m_capacity);
+			assert(i >= 0 && i < m_capacity);
 			return m_data[i];
 		}
 
@@ -289,7 +292,7 @@ namespace LinaVG
 
 		inline void swap(int start, int end)
 		{
-			_ASSERT(start > -1 && start < m_size && end > -1 && end < m_size);
+			assert(start > -1 && start < m_size && end > -1 && end < m_size);
 			T temp		  = m_data[start];
 			m_data[start] = m_data[end];
 			m_data[end]	  = temp;
@@ -842,9 +845,9 @@ namespace LinaVG
 		BackendHandle		clipSizeX		 = 0;
 		BackendHandle		clipSizeY		 = 0;
 
-		bool IsClipDifferent(BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+		bool IsClipDifferent(BackendHandle cpx, BackendHandle cpy, BackendHandle csx, BackendHandle csy)
 		{
-			return (this->clipPosX != clipPosX || this->clipPosY != clipPosY || this->clipSizeX != clipSizeX || this->clipSizeY != clipSizeY);
+			return (this->clipPosX != cpx || this->clipPosY != cpy || this->clipSizeX != csx || this->clipSizeY != csy);
 		}
 
 		inline void Clear()
