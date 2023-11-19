@@ -9,7 +9,6 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT) 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/inanevin) 
 [![Lina Discord](https://badgen.net/discord/members/QYeTkEtRMB)](https://discord.gg/QYeTkEtRMB)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/59f8c18dd1a24b478fe6459344252e3c)](https://www.codacy.com/gh/inanevin/LinaVG/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=inanevin/LinaVG&amp;utm_campaign=Badge_Grade)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/inanevin/LinaVG/issues) 
 ![GitHub issues](https://img.shields.io/github/issues/inanevin/LinaEngine.svg)
   
