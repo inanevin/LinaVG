@@ -166,7 +166,7 @@ namespace LinaVG
 				{
 					ch.m_buffer = (unsigned char*)LINAVG_MALLOC(bufSize);
 
-					if (ch.m_buffer != 0)
+					if (ch.m_buffer != 0) 
 						LINAVG_MEMCPY(ch.m_buffer, slot->bitmap.buffer, bufSize);
 				}
 

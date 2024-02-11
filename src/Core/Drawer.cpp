@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -852,9 +852,9 @@ namespace LinaVG
 		const float scale = opts.textScale;
 
 		if (Math::IsEqualMarg(opts.wrapWidth, 0.0f, 0.1f))
-			return Internal::CalcTextSize(text, font, scale, opts.spacing, opts.sdfThickness);
+			return Internal::CalcTextSize(text, font, scale, opts.spacing, opts.sdfSoftness);
 		else
-			return Internal::CalcTextSizeWrapped(text, font, opts.newLineSpacing, opts.wrapWidth, scale, opts.spacing, opts.sdfThickness);
+			return Internal::CalcTextSizeWrapped(text, font, opts.newLineSpacing, opts.wrapWidth, scale, opts.spacing, opts.sdfSoftness);
 	}
 
 	LINAVG_API Vec2 CalculateTextSize(const char* text, SDFTextOptions& opts)
@@ -3478,7 +3478,7 @@ namespace LinaVG
 			return codepoints;
 		}
 
-		Vec2 CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing, float sdfThickness)
+		Vec2 CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing, float sdfSoftness)
 		{
 			float		   maxCharacterHeight = 0.0f;
 			float		   totalWidth		  = 0.0f;
@@ -3487,6 +3487,18 @@ namespace LinaVG
 			auto calcSizeChar = [&](TextCharacter& ch, GlyphEncoding c) {
 				float x = ch.m_advance.x * scale;
 				float y = ch.m_bearing.y * scale;
+                
+                if(font->m_isSDF)
+                {
+                    const float ratio = ch.m_advance.x / ch.m_size.x;
+                    const float yBase = ch.m_size.y * ratio;
+                    const float yFull = ch.m_size.y;
+                    y = std::floor(Math::Lerp(yBase, yFull, sdfSoftness)) - 1;
+                    
+                    const float xBase = ch.m_advance.x;
+                    const float xFull = ch.m_size.x;
+                    x = std::floor(Math::Lerp(xBase, xFull, sdfSoftness));
+                }
 				totalWidth += x + spacing;
 				maxCharacterHeight = Math::Max(maxCharacterHeight, y);
 			};
