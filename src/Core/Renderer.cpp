@@ -363,8 +363,8 @@ namespace LinaVG
 		for (int i = 0; i < m_sdfTextBuffers.m_size; i++)
 		{
 			auto& buf = m_sdfTextBuffers[i];
-			if (buf.m_isDropShadow == isDropShadow && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && buf.m_thickness == opts.sdfThickness && buf.m_softness == opts.sdfSoftness &&
-				buf.m_outlineThickness == opts.sdfOutlineThickness && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+			if (buf.m_isDropShadow == isDropShadow && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && Math::IsEqualMarg(buf.m_thickness, opts.sdfThickness) && Math::IsEqualMarg(buf.m_softness, opts.sdfSoftness) &&
+                Math::IsEqualMarg(buf.m_outlineThickness, opts.sdfOutlineThickness) && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
 				return m_sdfTextBuffers[i];
 		}
 

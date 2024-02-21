@@ -169,7 +169,7 @@ namespace LinaVG
 					if (ch.m_buffer != 0) 
 						LINAVG_MEMCPY(ch.m_buffer, slot->bitmap.buffer, bufSize);
 				}
-
+                
 				ch.m_size	 = Vec2(static_cast<float>(glyphWidth), static_cast<float>(glyphRows));
 				ch.m_bearing = Vec2(static_cast<float>(slot->bitmap_left), static_cast<float>(slot->bitmap_top));
 				ch.m_advance = Vec2(static_cast<float>(slot->advance.x >> 6), static_cast<float>(slot->advance.y >> 6));

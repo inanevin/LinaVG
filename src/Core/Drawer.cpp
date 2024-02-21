@@ -742,13 +742,13 @@ namespace LinaVG
 		const int	indexStart = buf->m_indexBuffer.m_size;
 
 		if (!Config.textCachingSDFEnabled || skipCache)
-			Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness, outData);
+			Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfSoftness, outData);
 		else
 		{
 			uint32_t sid = Utility::FnvHash(text);
 			if (Internal::g_rendererData[thread].CheckSDFTextCache(sid, opts, buf) == nullptr)
 			{
-				Internal::ProcessText(buf, font, text, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness, outData);
+				Internal::ProcessText(buf, font, text, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfSoftness, outData);
 				Internal::g_rendererData[thread].AddSDFTextCache(sid, opts, buf, vtxStart, indexStart);
 			}
 
@@ -3351,7 +3351,8 @@ namespace LinaVG
 				previousCharacter = c;
 				float ytop		  = pos.y - ch.m_bearing.y * scale;
 				float ybot		  = pos.y + (ch.m_size.y - ch.m_bearing.y) * scale;
-
+                
+               
 				float x2 = pos.x + (kerning + ch.m_bearing.x) * scale;
 				float w	 = ch.m_size.x * scale;
 				float h	 = ch.m_size.y * scale;
@@ -3490,14 +3491,16 @@ namespace LinaVG
                 
                 if(font->m_isSDF)
                 {
-                    const float ratio = ch.m_advance.x / ch.m_size.x;
-                    const float yBase = ch.m_size.y * ratio;
-                    const float yFull = ch.m_size.y;
-                    y = std::floor(Math::Lerp(yBase, yFull, sdfSoftness)) - 1;
+                    // const float ratio = ch.m_advance.x / ch.m_size.x;
+                    // const float yBase = ch.m_size.y * ratio;
+                    // const float yFull = ch.m_size.y;
+                    // y = std::floor(Math::Lerp(yBase, yFull, 0.0f));
+                    // y *= scale;
                     
-                    const float xBase = ch.m_advance.x;
-                    const float xFull = ch.m_size.x;
-                    x = std::floor(Math::Lerp(xBase, xFull, sdfSoftness));
+                    // const float xBase = ch.m_advance.x;
+                    // const float xFull = ch.m_size.x;
+                    // x = std::floor(Math::Lerp(xBase, xFull, sdfSoftness));
+                    // x *= scale;
                 }
 				totalWidth += x + spacing;
 				maxCharacterHeight = Math::Max(maxCharacterHeight, y);

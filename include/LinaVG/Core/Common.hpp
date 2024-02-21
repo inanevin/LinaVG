@@ -542,20 +542,23 @@ namespace LinaVG
 
 		/// <summary>
 		/// 0.0f - 1.0f range, defines how strongly the text is extruded.
-		/// !NOTE! 0.5 is default m_thickness, e.g. renders the text like no SDF. 0.0 goes to invisible, while 1.0 gets closer to max
-		/// m_thickness.
 		/// </summary>
 		float sdfThickness = 0.5f;
 
 		/// <summary>
-		/// Defines text blurring/smoothing. Usually 0.0f - 1.0f is a good range.
+		/// Defines text blurring/smoothing.
 		/// </summary>
-		float sdfSoftness = 0.2f;
+		float sdfSoftness = 0.0f;
 
 		/// <summary>
 		/// 0.0f - 1.0f range, defines how strongly the outline is extruded.
 		/// </summary>
 		float sdfOutlineThickness = 0.0f;
+        
+        /// <summary>
+        /// Defines outline blurring/smoothing.
+        /// </summary>
+        float sdfOutlineSoftness = 0.1f;
 
 		/// <summary>
 		/// Well, outline m_color.
@@ -922,13 +925,14 @@ namespace LinaVG
 		SDFTextDrawBuffer(){};
 		SDFTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
 			: DrawBuffer(drawOrder, DrawBufferType::SDFText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY),
-			  m_isDropShadow(isDropShadow), m_flipAlpha(opts.flipAlpha), m_thickness(opts.sdfThickness), m_softness(opts.sdfSoftness), m_outlineThickness(opts.sdfOutlineThickness), m_outlineColor(opts.sdfOutlineColor), m_textureHandle(glyphHandle){};
+			  m_isDropShadow(isDropShadow), m_flipAlpha(opts.flipAlpha), m_thickness(opts.sdfThickness), m_softness(opts.sdfSoftness), m_outlineThickness(opts.sdfOutlineThickness), m_outlineSoftness(opts.sdfOutlineSoftness), m_outlineColor(opts.sdfOutlineColor), m_textureHandle(glyphHandle){};
 
 		bool		  m_isDropShadow	 = false;
 		bool		  m_flipAlpha		 = false;
 		float		  m_thickness		 = 0.0f;
 		float		  m_softness		 = 0.0f;
-		float		  m_outlineThickness = 0.0f;
+        float         m_outlineThickness = 0.0f;
+		float		  m_outlineSoftness = 0.0f;
 		Vec4		  m_outlineColor	 = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		BackendHandle m_textureHandle	 = 0;
 	};
