@@ -58,8 +58,14 @@ include/Utility/stb_image.h
 #--------------------------------------------------------------------
 # Create executable project
 #--------------------------------------------------------------------
-add_executable(${PROJECT_NAME} ${EXAMPLE_SOURCES} ${EXAMPLE_HEADERS})
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER LinaVGProject/Examples)
+
+if(WIN32)
+	add_executable(${PROJECT_NAME} WIN32 ${EXAMPLE_SOURCES} ${EXAMPLE_HEADERS})
+else()
+	add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${EXAMPLE_SOURCES} ${EXAMPLE_HEADERS})
+endif()
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER ${LINAVG_FOLDER_BASE}/Examples)
 
 #--------------------------------------------------------------------
 # Options & Definitions
@@ -67,6 +73,22 @@ set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER LinaVGProject/Examples)
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/LinaVG/include)
+
+
+if(MSVC)
+  set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/)
+endif()
+
+if(APPLE)
+set_target_properties(
+    ${PROJECT_NAME}
+    PROPERTIES
+    XCODE_GENERATE_SCHEME TRUE
+    XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf-with-dsym"
+    XCODE_SCHEME_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>/
+)
+
+endif()
 
 #--------------------------------------------------------------------
 # Links

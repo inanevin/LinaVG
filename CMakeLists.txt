@@ -42,6 +42,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 option(LINAVG_BUILD_EXAMPLES "Builds example backend projects." OFF)
 option(LINAVG_DISABLE_TEXT_SUPPORT "Disables text support and linking to FreeType." OFF)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if(MSVC)
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
@@ -108,17 +109,23 @@ include(Dependencies/Dependencies.cmake)
 #--------------------------------------------------------------------
 # Folder structuring in visual studio
 #--------------------------------------------------------------------
-if(MSVC_IDE)
-	foreach(source IN LISTS LinaVG_HEADERS LinaVG_SOURCES)
+
+if(MSVC_IDE OR APPLE)
+	foreach(source IN LISTS LinaGX_HEADERS LinaVG_SOURCES LinaVG_HEADERS)
 		get_filename_component(source_path "${source}" PATH)
-		string(REPLACE "${LinaVG_SOURCE_DIR}" "" relative_source_path "${source_path}")
-		string(REPLACE "/" "\\" source_path_msvc "${relative_source_path}")
-				source_group("${source_path_msvc}" FILES "${source}")
+		string(REPLACE "${LinaGX_SOURCE_DIR}" "" relative_source_path "${source_path}")
+
+		if (MSVC_IDE)
+			string(REPLACE "/" "\\" source_path_ide "${relative_source_path}")
+		elseif (APPLE)
+			set(source_path_ide "${relative_source_path}")
+		endif()
+
+		source_group("${source_path_ide}" FILES "${source}")
 	endforeach()
+endif()
 
 if(LINAVG_BUILD_EXAMPLES)
 	add_subdirectory(Example)
 	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Example)
-endif()
-
 endif()
