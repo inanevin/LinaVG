@@ -127,9 +127,17 @@ namespace LinaVG
 
 			auto setSizes = [&](FT_ULong c) {
 				auto i			  = FT_Get_Char_Index(face, c);
+                
+                // not found.
+                if(i == 0)
+                {
+                    return true;
+                }
+                
 				err				  = FT_Load_Glyph(face, i, FT_LOAD_DEFAULT);
 				TextCharacter& ch = characterMap[c];
 
+                
 				if (err)
 				{
 					if (Config.errorCallback)
