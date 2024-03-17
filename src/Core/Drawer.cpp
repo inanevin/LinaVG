@@ -3260,6 +3260,16 @@ namespace LinaVG
 				lines.reserve(20);
 				WrapText(lines, font, text, spacing, scale, wrapWidth);
 
+                const size_t sz = lines.size();
+                size_t ctr = 0;
+                for(const auto& line : lines)
+                {
+                    if(ctr < sz - 1)
+                       usedPos.y -= font->m_newLineHeight * scale + newLineSpacing;
+                  
+                       ctr++;
+                }
+                
 				for (const auto& line : lines)
 				{
 					if (outData != nullptr)

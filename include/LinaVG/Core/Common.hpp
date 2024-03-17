@@ -501,7 +501,7 @@ namespace LinaVG
 		/// <summary>
 		/// Spacing used if the text is word-wrapped and dropped to a new line.
 		/// </summary>
-		float newLineSpacing = 5.0f;
+		float newLineSpacing = 0.0f;
 
 		/// <summary>
 		/// Text will wrap at, e.g. go to a new line when it reaches = position.x + wrapWidth
