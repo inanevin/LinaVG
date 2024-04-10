@@ -433,6 +433,7 @@ namespace LinaVG
 			newLineSpacing	 = opts.newLineSpacing;
 			wrapWidth		 = opts.wrapWidth;
 			framebufferScale = opts.framebufferScale;
+            cpuClipping      = opts.cpuClipping;
 		}
 
 		bool CheckColors(const Vec4& c1, const Vec4& c2)
@@ -518,6 +519,11 @@ namespace LinaVG
 		/// Set to 0.0f, 0.0f to disable drop-shadows.
 		/// </summary>
 		Vec2 dropShadowOffset = Vec2(0.0f, 0.0f);
+        
+        /// <summary>
+        /// Defines custom clip rectangle for text vertices.
+        /// </summary>
+        Vec4 cpuClipping = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	};
 
 	LINAVG_API struct SDFTextOptions : public TextOptions
@@ -538,6 +544,7 @@ namespace LinaVG
 			sdfThickness		   = opts.sdfThickness;
 			sdfDropShadowSoftness  = opts.sdfDropShadowSoftness;
 			framebufferScale	   = opts.framebufferScale;
+            cpuClipping            = opts.cpuClipping;
 		}
 
 		/// <summary>

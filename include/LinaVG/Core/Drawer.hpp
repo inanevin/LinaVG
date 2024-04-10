@@ -398,7 +398,11 @@ namespace LinaVG
 		/// Returns the average center position for the given vertices.
 		/// </summary>
 		Vec2 GetVerticesCenter(DrawBuffer* buf, int startIndex, int endIndex);
-
+    
+        /// <summary>
+        /// </summary>
+        bool IsPointInside(const Vec2& point, const Vec4& rect);
+    
 		/// Line calculation methods.
 		void	   CalculateLine(Line& line, const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection lineCapToAdd);
 		void	   JoinLines(Line& line1, Line& line2, StyleOptions& opts, LineJointType joinType, bool mergeUpperVertices);
@@ -438,12 +442,12 @@ namespace LinaVG
 		/// <summary>
 		/// Process, parse & draw text according to options.
 		/// </summary>
-		void ProcessText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData);
+		void ProcessText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData, const Vec4& clip);
 
 		/// <summary>
 		/// DrawText implementation.
 		/// </summary>
-		void DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, TextOutData* outData);
+		void DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, TextOutData* outData, const Vec4& clip);
 
 		/// <summary>
 		/// Returns the total text size for non-wrapped text.
