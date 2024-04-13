@@ -742,13 +742,13 @@ namespace LinaVG
 		const int	indexStart = buf->m_indexBuffer.m_size;
 
 		if (!Config.textCachingSDFEnabled || skipCache)
-			Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfSoftness, outData, opts.cpuClipping);
+			Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfSoftness, outData, opts.cpuClipping, opts.wordWrap);
 		else
 		{
 			uint32_t sid = Utility::FnvHash(text);
 			if (Internal::g_rendererData[thread].CheckSDFTextCache(sid, opts, buf) == nullptr)
 			{
-				Internal::ProcessText(buf, font, text, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfSoftness, outData, opts.cpuClipping);
+				Internal::ProcessText(buf, font, text, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfSoftness, outData, opts.cpuClipping, opts.wordWrap);
 				Internal::g_rendererData[thread].AddSDFTextCache(sid, opts, buf, vtxStart, indexStart);
 			}
 
@@ -768,7 +768,7 @@ namespace LinaVG
 			usedOpts.sdfSoftness	= opts.sdfDropShadowSoftness;
 			DrawBuffer* dsBuf		= &Internal::g_rendererData[thread].GetSDFTextBuffer(font->m_texture, drawOrder, usedOpts, true);
 			// const int	dsStart		= buf->m_vertexBuffer.m_size;
-			Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness, outData, opts.cpuClipping);
+			Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness, outData, opts.cpuClipping, opts.wordWrap);
 		}
 	}
 
@@ -798,13 +798,13 @@ namespace LinaVG
 		const int	indexStart = buf->m_indexBuffer.m_size;
 
 		if (!Config.textCachingEnabled || skipCache)
-			Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping);
+			Internal::ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping, opts.wordWrap);
 		else
 		{
 			uint32_t sid = Utility::FnvHash(text);
 			if (Internal::g_rendererData[thread].CheckTextCache(sid, opts, buf) == nullptr)
 			{
-				Internal::ProcessText(buf, font, text, Vec2(0, 0), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping);
+				Internal::ProcessText(buf, font, text, Vec2(0, 0), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping, opts.wordWrap);
 				Internal::g_rendererData[thread].AddTextCache(sid, opts, buf, vtxStart, indexStart);
 			}
 
@@ -821,7 +821,7 @@ namespace LinaVG
 		if (!Math::IsEqualMarg(opts.dropShadowOffset.x, 0.0f) || !Math::IsEqualMarg(opts.dropShadowOffset.y, 0.0f))
 		{
 			DrawBuffer* dsBuf = &Internal::g_rendererData[thread].GetSimpleTextBuffer(font->m_texture, drawOrder, true);
-			Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping);
+			Internal::ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping, opts.wordWrap);
 		}
 	}
 
@@ -838,7 +838,7 @@ namespace LinaVG
 		if (Math::IsEqualMarg(opts.wrapWidth, 0.0f, 0.1f))
 			return Internal::CalcTextSize(text, font, scale, opts.spacing, 0.0f);
 		else
-			return Internal::CalcTextSizeWrapped(text, font, opts.newLineSpacing, opts.wrapWidth, scale, opts.spacing, 0.0f);
+			return Internal::CalcTextSizeWrapped(text, font, opts.newLineSpacing, opts.wrapWidth, scale, opts.spacing, 0.0f, opts.wordWrap);
 	}
 
 	LINAVG_API Vec2 CalculateTextSize(const char* text, TextOptions& opts)
@@ -854,7 +854,7 @@ namespace LinaVG
 		if (Math::IsEqualMarg(opts.wrapWidth, 0.0f, 0.1f))
 			return Internal::CalcTextSize(text, font, scale, opts.spacing, opts.sdfSoftness);
 		else
-			return Internal::CalcTextSizeWrapped(text, font, opts.newLineSpacing, opts.wrapWidth, scale, opts.spacing, opts.sdfSoftness);
+			return Internal::CalcTextSizeWrapped(text, font, opts.newLineSpacing, opts.wrapWidth, scale, opts.spacing, opts.sdfSoftness, opts.wordWrap);
 	}
 
 	LINAVG_API Vec2 CalculateTextSize(const char* text, SDFTextOptions& opts)
@@ -3132,7 +3132,7 @@ namespace LinaVG
 			}
 		}
 
-		void WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth)
+		void WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth, bool wordWrap)
 		{
 			TextPart line = {};
 			TextPart word = {};
@@ -3141,6 +3141,22 @@ namespace LinaVG
 			const float	   spaceAdvance = font->m_spaceAdvance * scale + spacing;
 
 			auto process = [&](TextCharacter& ch, GlyphEncoding c) {
+                
+                if(!wordWrap)
+                {
+                    if(line.m_size.x + ch.m_size.x * scale > wrapWidth)
+                    {
+                        lines.push_back(line);
+                        line.m_str.clear();
+                        line.m_size = Vec2(0.0f, 0.0f);
+                    }
+                    
+                    line.m_str += static_cast<char>(c);
+                    line.m_size.x += ch.m_advance.x * scale;
+                    line.m_size.y = Math::Max(ch.m_size.y * scale, line.m_size.y);
+                    return;
+                }
+                
 				// Add character to current word
 				if (c != ' ')
 				{
@@ -3157,7 +3173,7 @@ namespace LinaVG
 					// If adding the current word to the current line would
 					// make it too long, add the current line to the list of
 					// lines and start a new line with the current word.
-					if (line.m_size.x + word.m_size.x > wrapWidth)
+					if (!line.m_str.empty() && line.m_size.x + word.m_size.x > wrapWidth)
 					{
 						lines.push_back(line);
 						line.m_str.clear();
@@ -3204,7 +3220,7 @@ namespace LinaVG
 			// If there's still a word left that wasn't added to the lines, try to add it
 			if (!word.m_str.empty())
 			{
-				if (line.m_size.x + word.m_size.x > wrapWidth)
+				if (!line.m_str.empty() && line.m_size.x + word.m_size.x > wrapWidth)
 				{
 					lines.push_back(line);
 					line = word;
@@ -3228,9 +3244,10 @@ namespace LinaVG
 			{
 				lines.push_back(line);
 			}
+            
 		}
 
-		void ProcessText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData, const Vec4& clip)
+		void ProcessText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData, const Vec4& clip, bool wordWrap)
 		{
 			const int  bufStart = buf->m_vertexBuffer.m_size;
 			const Vec2 size		= CalcTextSize(text, font, scale, spacing, sdfThickness);
@@ -3264,7 +3281,7 @@ namespace LinaVG
 			{
 				LINAVG_VEC<TextPart> lines;
 				lines.reserve(20);
-				WrapText(lines, font, text, spacing, scale, wrapWidth);
+				WrapText(lines, font, text, spacing, scale, wrapWidth, wordWrap);
 
                 const size_t sz = lines.size();
                 size_t ctr = 0;
@@ -3579,11 +3596,11 @@ namespace LinaVG
 			return Vec2(totalWidth, maxCharacterHeight);
 		}
 
-		Vec2 CalcTextSizeWrapped(const char* text, LinaVGFont* font, float newLineSpacing, float wrapWidth, float scale, float spacing, float sdfThickness)
+		Vec2 CalcTextSizeWrapped(const char* text, LinaVGFont* font, float newLineSpacing, float wrapWidth, float scale, float spacing, float sdfThickness, bool wordWrap)
 		{
 			LINAVG_VEC<TextPart> lines;
 			lines.reserve(15);
-			WrapText(lines, font, text, spacing, scale, wrapWidth);
+			WrapText(lines, font, text, spacing, scale, wrapWidth, wordWrap);
 
 			if (lines.size() == 1)
 			{

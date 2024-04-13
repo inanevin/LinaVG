@@ -434,6 +434,7 @@ namespace LinaVG
 			wrapWidth		 = opts.wrapWidth;
 			framebufferScale = opts.framebufferScale;
             cpuClipping      = opts.cpuClipping;
+            wordWrap         = opts.wordWrap;
 		}
 
 		bool CheckColors(const Vec4& c1, const Vec4& c2)
@@ -455,14 +456,24 @@ namespace LinaVG
 					return false;
 			}
 
-			if (!CheckColors(color.start, color.end))
+			if (!CheckColors(color.start, opts.color.start))
 				return false;
+            
+            if (!CheckColors(color.end, opts.color.end))
+                return false;
 
-			if (dropShadowOffset.x != 0.0f || dropShadowOffset.y != 0.0f)
+            if (!CheckColors(cpuClipping, opts.cpuClipping))
+                return false;
+            
+            if(wordWrap != opts.wordWrap)
+                return false;
+            
+            if (dropShadowOffset.x != 0.0f || dropShadowOffset.y != 0.0f)
 			{
 				if (!CheckColors(dropShadowColor, opts.dropShadowColor))
 					return false;
 			}
+            
 
 			return alignment == opts.alignment && textScale == opts.textScale && spacing == opts.spacing && newLineSpacing == opts.newLineSpacing && wrapWidth == opts.wrapWidth;
 		}
@@ -508,6 +519,11 @@ namespace LinaVG
 		/// Text will wrap at, e.g. go to a new line when it reaches = position.x + wrapWidth
 		/// </summary>
 		float wrapWidth = 0.0f;
+        
+        /// <summary>
+        /// If wrapWidth != 0, wraps the text word by word. If false, it's per-character based.
+        /// </summary>
+        bool wordWrap = true;
 
 		/// <summary>
 		/// Drop shadow m_color, lol.
@@ -524,6 +540,7 @@ namespace LinaVG
         /// Defines custom clip rectangle for text vertices.
         /// </summary>
         Vec4 cpuClipping = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+       
 	};
 
 	LINAVG_API struct SDFTextOptions : public TextOptions
@@ -545,6 +562,7 @@ namespace LinaVG
 			sdfDropShadowSoftness  = opts.sdfDropShadowSoftness;
 			framebufferScale	   = opts.framebufferScale;
             cpuClipping            = opts.cpuClipping;
+            wordWrap               = opts.wordWrap;
 		}
 
 		/// <summary>

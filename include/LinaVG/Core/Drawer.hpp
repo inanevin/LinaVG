@@ -442,7 +442,7 @@ namespace LinaVG
 		/// <summary>
 		/// Process, parse & draw text according to options.
 		/// </summary>
-		void ProcessText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData, const Vec4& clip);
+		void ProcessText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData, const Vec4& clip, bool wordWrap);
 
 		/// <summary>
 		/// DrawText implementation.
@@ -464,7 +464,7 @@ namespace LinaVG
 		/// <summary>
 		/// Returns the total text size for wrapped text.
 		/// </summary>
-		Vec2 CalcTextSizeWrapped(const char* text, LinaVGFont*, float newLineSpacing, float wrapping, float scale, float spacing, float sdfThickness);
+		Vec2 CalcTextSizeWrapped(const char* text, LinaVGFont*, float newLineSpacing, float wrapping, float scale, float spacing, float sdfThickness, bool wordWrap);
 
 		/// <summary>
 		/// For processing UTf8 texts.
@@ -474,7 +474,7 @@ namespace LinaVG
 		/// <summary>
 		/// Parse text into wrapped lines.
 		/// </summary>
-		void WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth);
+		void WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth, bool wordWrap);
 
 #endif
 
