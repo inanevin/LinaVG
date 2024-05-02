@@ -38,7 +38,7 @@ LinaVG is tested on:
   
 # Thread-safety
 
-LinaVG is thread-safe as long as the [Threading](https://github.com/inanevin/LinaVG/wiki/13-Threading) guidelines are followed. Only functions that are not thread-safe at the moment are those used for loading fonts, which require wrapping around a mutex.
+LinaVG is thread-safe as long as no multiple threads modify the same LinaVG::Drawer object. Only global functions are not thread-safe at the moment are those used for loading fonts, which require wrapping around a mutex.
 
 # Features
 
