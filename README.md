@@ -137,12 +137,9 @@ Note: LinaVG requires C++ 17 features.
 Below is a bare-minimum implementation steps for drawing with LinaVG. As said in the home page, it's assumed that your application already has a graphics rendering backend setup and running, of course along with a window with a valid context.
 ```cpp
 
-// Include LinaVG
 #include "LinaVG.hpp"
 
-// Initialize LinaVG
 LinaVG::Drawer lvgDrawer;
-
 lvgDrawer.GetCallbacks().drawDefault = std::bind(&MyRenderingBackend::DrawDefault, &myRenderer, std::placeholders::_1);
 
 // Your application loop
