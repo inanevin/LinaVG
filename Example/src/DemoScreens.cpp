@@ -191,7 +191,8 @@ namespace LinaVG
 			TextOptions descText;
 			descText.font	   = fontDesc;
 			descText.wrapWidth = rectWidth * 0.45f;
-			ExampleApp::Get()->GetLVGDrawer().DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), Vec2(rectWidth * 0.25f, rectMin.y + 30), descText, 0, 4);
+            const Vec2 sz = ExampleApp::Get()->GetLVGDrawer().CalculateTextSize(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), descText);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), Vec2(rectWidth * 0.25f, rectMin.y + sz.y + 10), descText, 0, 4);
 
 			// Draw version text.
 			TextOptions versionText;
@@ -688,7 +689,7 @@ namespace LinaVG
 			ExampleApp::Get()->GetLVGDrawer().DrawTextNormal("Gradient color.", startPos, textOpts, m_rotateAngle, 1);
 
 			startPos.x = screenSize.x * 0.05f;
-			startPos.y += 50;
+			startPos.y += 350;
 			textOpts.wrapWidth		 = 100;
 			textOpts.dropShadowColor = Vec4(1, 0, 0, 1);
 			textOpts.color			 = Vec4(1, 1, 1, 1);
@@ -713,7 +714,7 @@ namespace LinaVG
 			ExampleApp::Get()->GetLVGDrawer().DrawTextNormal("Same, but it's right alignment", startPos, textOpts, m_rotateAngle, 1);
 
 			startPos.x = screenSize.x * 0.05f;
-			startPos.y += 370;
+			startPos.y += 50;
 			textOpts.spacing   = 10;
 			textOpts.wrapWidth = 0.0f;
 			textOpts.alignment = TextAlignment::Left;
@@ -722,7 +723,7 @@ namespace LinaVG
 
 			startPos.y += 70;
 			startPos.x						 = screenSize.x * 0.05f;
-			const float	   beforeSDFStartPos = startPos.y;
+			const float	   beforeSDFStartPos = startPos.y + 200;
 			SDFTextOptions sdfOpts;
 			sdfOpts.font		 = fontSDF;
 			sdfOpts.sdfThickness = 0.55f;
