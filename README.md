@@ -141,15 +141,13 @@ Below is a bare-minimum implementation steps for drawing with LinaVG. As said in
 #include "LinaVG.hpp"
 
 // Initialize LinaVG
-LinaVG::Initialize();
+LinaVG::Drawer lvgDrawer;
+
+lvgDrawer.GetCallbacks().drawDefault = std::bind(&MyRenderingBackend::DrawDefault, &myRenderer, std::placeholders::_1);
 
 // Your application loop
 while (m_applicationRunning)
 {
-
-    // Let LinaVG know that we are starting to render.
-    LinaVG::StartFrame();
-
     // Setup style, give a gradient color from red to blue.
     StyleOptions style;
     style.isFilled      = true;
@@ -159,21 +157,15 @@ while (m_applicationRunning)
     // Draw a 200x200 rectangle starting from 300, 300.
     const Vec2 min = Vec2(300, 300);
     const Vec2 max = Vec2(500, 500);
-    LinaVG::DrawRect(min, max, style);
+    lvgDrawer.DrawRect(min, max, style);
 
-    // Finally, flush all the buffers and render to screen.
-    LinaVG::Render();
-
-    // Let LinaVG know that we are finishing this frame
-    LinaVG::EndFrame();
+    lvgDrawer.FlushBuffers();
+    lvgDrawer.ResetFrame();
 }
-
-// Terminate LinaVG before exiting your application.
-LinaVG::Terminate();
 
 ```
 
-And that's basically it! Now you should have this on your screen, easy peasy.
+And that's basically it!
 
 ![1](https://user-images.githubusercontent.com/3519379/173247621-4f38cbe2-308f-4cd7-aa9f-8da150d83780.png)
 
