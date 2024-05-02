@@ -60,7 +60,7 @@ include/Utility/stb_image.h
 #--------------------------------------------------------------------
 
 if(WIN32)
-	add_executable(${PROJECT_NAME} WIN32 ${EXAMPLE_SOURCES} ${EXAMPLE_HEADERS})
+	add_executable(${PROJECT_NAME} ${EXAMPLE_SOURCES} ${EXAMPLE_HEADERS})
 else()
 	add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${EXAMPLE_SOURCES} ${EXAMPLE_HEADERS})
 endif()

@@ -33,10 +33,10 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Main.hpp"
-#include <iostream>
-#include <chrono>
 #include "Backends/GLFWWindow.hpp"
 #include "Backends/GL/GLBackend.hpp"
+#include <iostream>
+#include <chrono>
 #include <chrono>
 
 int main(int argc, char* argv[])

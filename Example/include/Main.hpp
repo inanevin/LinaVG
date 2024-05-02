@@ -39,8 +39,6 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace LinaVG
 {
-    class Drawer;
-
 	namespace Examples
 	{
         class GLBackend;
