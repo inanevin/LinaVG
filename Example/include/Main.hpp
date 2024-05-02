@@ -107,6 +107,10 @@ namespace LinaVG
                 return m_lvgDrawer;
             }
 
+            inline GLBackend* GetGLBackend()
+            {
+                return m_renderingBackend;
+            }
 		private:
 			DemoScreens		   m_demoScreens;
 			unsigned int	   m_linaTexture	   = 0;

@@ -34,8 +34,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 
-#include "LinaVG/Core/Renderer.hpp"
-#include "LinaVG/Core/BaseBackend.hpp"
+#include "LinaVG/Core/BufferStore.hpp"
 #include "LinaVG/Core/Drawer.hpp"
 #include "LinaVG/Core/Math.hpp"
 #include "LinaVG/Core/Text.hpp"
@@ -45,64 +44,59 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace LinaVG
 {
-	Backend::BaseBackend* Backend::BaseBackend::s_backend = nullptr;
+    BufferStore::BufferStore()
+    {
+        m_data.m_defaultBuffers.reserve(Config.defaultBufferReserve);
+        m_data.m_gradientBuffers.reserve(Config.gradientBufferReserve);
+        m_data.m_textureBuffers.reserve(Config.textureBufferReserve);
+        m_data.m_simpleTextBuffers.reserve(Config.textBuffersReserve);
+        m_data.m_sdfTextBuffers.reserve(Config.textBuffersReserve);
+        
+        if (Config.textCachingEnabled)
+            m_data.m_textCache.reserve(Config.textCacheReserve);
+        
+        if (Config.textCachingSDFEnabled)
+            m_data.m_sdfTextCache.reserve(Config.textCacheSDFReserve);
+    }
 
-void Renderer::ClearAllBuffers()
-{
-    m_data.m_gcFrameCounter = 0;
-
-    for (int i = 0; i < m_data.m_gradientBuffers.m_size; i++)
-        m_data.m_gradientBuffers[i].Clear();
-
-    m_data.m_gradientBuffers.clear();
-
-    for (int i = 0; i < m_data.m_textureBuffers.m_size; i++)
-        m_data.m_textureBuffers[i].Clear();
-
-    m_data.m_textureBuffers.clear();
-
-    for (int i = 0; i < m_data.m_defaultBuffers.m_size; i++)
-        m_data.m_defaultBuffers[i].Clear();
-
-    m_data.m_defaultBuffers.clear();
-
-    for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
-        m_data.m_simpleTextBuffers[i].Clear();
-
-    m_data.m_simpleTextBuffers.clear();
-
-    for (int i = 0; i < m_data.m_sdfTextBuffers.m_size; i++)
-        m_data.m_sdfTextBuffers[i].Clear();
-
-    m_data.m_sdfTextBuffers.clear();
-    m_data.m_drawOrders.clear();
-}
-
-void Renderer::InitThreadedData()
-{
-    m_data.m_defaultBuffers.reserve(Config.defaultBufferReserve);
-    m_data.m_gradientBuffers.reserve(Config.gradientBufferReserve);
-    m_data.m_textureBuffers.reserve(Config.textureBufferReserve);
-    m_data.m_simpleTextBuffers.reserve(Config.textBuffersReserve);
-    m_data.m_sdfTextBuffers.reserve(Config.textBuffersReserve);
-
-    if (Config.textCachingEnabled)
-        m_data.m_textCache.reserve(Config.textCacheReserve);
-
-    if (Config.textCachingSDFEnabled)
-        m_data.m_sdfTextCache.reserve(Config.textCacheSDFReserve);
-}
-
-    Renderer::~Renderer()
+    BufferStore::~BufferStore()
     {
         ClearAllBuffers();
     }
 
-	void Renderer::StartFrame()
-	{
-        if(m_data.m_defaultBuffers.m_size == 0)
-            InitThreadedData();
+    void BufferStore::ClearAllBuffers()
+    {
+        m_data.m_gcFrameCounter = 0;
         
+        for (int i = 0; i < m_data.m_gradientBuffers.m_size; i++)
+            m_data.m_gradientBuffers[i].Clear();
+        
+        m_data.m_gradientBuffers.clear();
+        
+        for (int i = 0; i < m_data.m_textureBuffers.m_size; i++)
+            m_data.m_textureBuffers[i].Clear();
+        
+        m_data.m_textureBuffers.clear();
+        
+        for (int i = 0; i < m_data.m_defaultBuffers.m_size; i++)
+            m_data.m_defaultBuffers[i].Clear();
+        
+        m_data.m_defaultBuffers.clear();
+        
+        for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
+            m_data.m_simpleTextBuffers[i].Clear();
+        
+        m_data.m_simpleTextBuffers.clear();
+        
+        for (int i = 0; i < m_data.m_sdfTextBuffers.m_size; i++)
+            m_data.m_sdfTextBuffers[i].Clear();
+        
+        m_data.m_sdfTextBuffers.clear();
+        m_data.m_drawOrders.clear();
+    }
+
+	void BufferStore::ResetFrame()
+	{
         m_data.m_gcFrameCounter++;
 
         if (m_data.m_gcFrameCounter > Config.gcCollectInterval)
@@ -139,7 +133,7 @@ void Renderer::InitThreadedData()
         }
 	}
 
-	void Renderer::Render()
+	void BufferStore::FlushBuffers()
 	{
         int thread = 0;
 		auto renderBuffs = [this, thread](int drawOrder, DrawBufferShapeType shapeType) {
@@ -148,7 +142,15 @@ void Renderer::InitThreadedData()
 				DrawBuffer& buf = m_data.m_defaultBuffers[i];
 
 				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-					Backend::BaseBackend::Get()->DrawDefault(&(buf), thread);
+                {
+                    if(m_callbacks.drawDefault)
+                        m_callbacks.drawDefault(&buf);
+                    else
+                    {
+                        if(LinaVG::Config.logCallback)
+                            LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawDefault");
+                    }
+                }
 			}
 
 			for (int i = 0; i < m_data.m_gradientBuffers.m_size; i++)
@@ -156,7 +158,15 @@ void Renderer::InitThreadedData()
 				GradientDrawBuffer& buf = m_data.m_gradientBuffers[i];
 
 				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-					Backend::BaseBackend::Get()->DrawGradient(&buf, thread);
+                {
+                    if(m_callbacks.drawGradient)
+                        m_callbacks.drawGradient(&buf);
+                    else
+                    {
+                        if(LinaVG::Config.logCallback)
+                            LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawGradient");
+                    }
+                }
 			}
 
 			for (int i = 0; i < m_data.m_textureBuffers.m_size; i++)
@@ -164,7 +174,15 @@ void Renderer::InitThreadedData()
 				TextureDrawBuffer& buf = m_data.m_textureBuffers[i];
 
 				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-					Backend::BaseBackend::Get()->DrawTextured(&buf, thread);
+                {
+                    if(m_callbacks.drawTextured)
+                        m_callbacks.drawTextured(&buf);
+                    else
+                    {
+                        if(LinaVG::Config.logCallback)
+                            LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawTextured");
+                    }
+                }
 			}
 
 			for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
@@ -172,7 +190,15 @@ void Renderer::InitThreadedData()
 				SimpleTextDrawBuffer& buf = m_data.m_simpleTextBuffers[i];
 
 				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-					Backend::BaseBackend::Get()->DrawSimpleText(&buf, thread);
+                {
+                    if(m_callbacks.drawSimpleText)
+                        m_callbacks.drawSimpleText(&buf);
+                    else
+                    {
+                        if(LinaVG::Config.logCallback)
+                            LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawSimpleText");
+                    }
+                }
 			}
 
 			for (int i = 0; i < m_data.m_sdfTextBuffers.m_size; i++)
@@ -180,7 +206,15 @@ void Renderer::InitThreadedData()
 				SDFTextDrawBuffer& buf = m_data.m_sdfTextBuffers[i];
 
 				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-					Backend::BaseBackend::Get()->DrawSDFText(&buf, thread);
+                {
+                    if(m_callbacks.drawSDFText)
+                        m_callbacks.drawSDFText(&buf);
+                    else
+                    {
+                        if(LinaVG::Config.logCallback)
+                            LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawSDFText");
+                    }
+                }
 			}
 		};
 
@@ -196,27 +230,27 @@ void Renderer::InitThreadedData()
 		}
 	}
 
-	LINAVG_API void Renderer::SetClipPosX(BackendHandle posX, int thread)
+	LINAVG_API void BufferStore::SetClipPosX(BackendHandle posX)
 	{
 		m_data.m_clipPosX = posX;
 	}
 
-	LINAVG_API void Renderer::SetClipPosY(BackendHandle posY, int thread)
+	LINAVG_API void BufferStore::SetClipPosY(BackendHandle posY)
 	{
 		m_data.m_clipPosY = posY;
 	}
 
-	LINAVG_API void Renderer::SetClipSizeX(BackendHandle sizeX, int thread)
+	LINAVG_API void BufferStore::SetClipSizeX(BackendHandle sizeX)
 	{
 		m_data.m_clipSizeX = sizeX;
 	}
 
-	LINAVG_API void Renderer::SetClipSizeY(BackendHandle sizeY, int thread)
+	LINAVG_API void BufferStore::SetClipSizeY(BackendHandle sizeY)
 	{
 		m_data.m_clipSizeY = sizeY;
 	}
 
-	GradientDrawBuffer& RendererData::GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)
+	GradientDrawBuffer& BufferStoreData::GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)
 	{
 		const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
 
@@ -244,7 +278,7 @@ void Renderer::InitThreadedData()
 		return m_gradientBuffers.last_ref();
 	}
 
-	DrawBuffer& RendererData::GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType)
+	DrawBuffer& BufferStoreData::GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType)
 	{
 		for (int i = 0; i < m_defaultBuffers.m_size; i++)
 		{
@@ -259,7 +293,7 @@ void Renderer::InitThreadedData()
 		return m_defaultBuffers.last_ref();
 	}
 
-	TextureDrawBuffer& RendererData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
+	TextureDrawBuffer& BufferStoreData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
 	{
 		const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
 		for (int i = 0; i < m_textureBuffers.m_size; i++)
@@ -275,7 +309,7 @@ void Renderer::InitThreadedData()
 		return m_textureBuffers.last_ref();
 	}
 
-	SimpleTextDrawBuffer& RendererData::GetSimpleTextBuffer(BackendHandle textureHandle, int drawOrder, bool isDropShadow)
+	SimpleTextDrawBuffer& BufferStoreData::GetSimpleTextBuffer(BackendHandle textureHandle, int drawOrder, bool isDropShadow)
 	{
 		for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
 		{
@@ -290,7 +324,7 @@ void Renderer::InitThreadedData()
 		return m_simpleTextBuffers.last_ref();
 	}
 
-	SDFTextDrawBuffer& RendererData::GetSDFTextBuffer(BackendHandle textureHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow)
+	SDFTextDrawBuffer& BufferStoreData::GetSDFTextBuffer(BackendHandle textureHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow)
 	{
 		for (int i = 0; i < m_sdfTextBuffers.m_size; i++)
 		{
@@ -306,7 +340,7 @@ void Renderer::InitThreadedData()
 		return m_sdfTextBuffers.last_ref();
 	}
 
-	void RendererData::AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
+	void BufferStoreData::AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
 	{
 		TextCache& newCache = m_textCache[sid];
 		newCache.opts		= opts;
@@ -320,7 +354,7 @@ void Renderer::InitThreadedData()
 			newCache.indxBuffer.push_back(buf->m_indexBuffer[i] - vtxStart);
 	}
 
-	void RendererData::AddSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
+	void BufferStoreData::AddSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
 	{
 		SDFTextCache& newCache = m_sdfTextCache[sid];
 		newCache.opts		   = opts;
@@ -334,7 +368,7 @@ void Renderer::InitThreadedData()
 			newCache.indxBuffer.push_back(buf->m_indexBuffer[i] - vtxStart);
 	}
 
-	TextCache* RendererData::CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf)
+	TextCache* BufferStoreData::CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf)
 	{
 		const auto& it = m_textCache.find(sid);
 
@@ -355,7 +389,7 @@ void Renderer::InitThreadedData()
 		return &it->second;
 	}
 
-	SDFTextCache* RendererData::CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf)
+	SDFTextCache* BufferStoreData::CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf)
 	{
 		const auto& it = m_sdfTextCache.find(sid);
 
@@ -376,7 +410,7 @@ void Renderer::InitThreadedData()
 		return &it->second;
 	}
 
-	int RendererData::GetBufferIndexInDefaultArray(DrawBuffer* buf)
+	int BufferStoreData::GetBufferIndexInDefaultArray(DrawBuffer* buf)
 	{
 		for (int i = 0; i < m_defaultBuffers.m_size; i++)
 		{
@@ -386,7 +420,7 @@ void Renderer::InitThreadedData()
 		return -1;
 	}
 
-	int RendererData::GetBufferIndexInCharArray(DrawBuffer* buf)
+	int BufferStoreData::GetBufferIndexInCharArray(DrawBuffer* buf)
 	{
 		for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
 		{
@@ -396,7 +430,7 @@ void Renderer::InitThreadedData()
 		return -1;
 	}
 
-	int RendererData::GetBufferIndexInGradientArray(DrawBuffer* buf)
+	int BufferStoreData::GetBufferIndexInGradientArray(DrawBuffer* buf)
 	{
 		for (int i = 0; i < m_gradientBuffers.m_size; i++)
 		{
@@ -406,7 +440,7 @@ void Renderer::InitThreadedData()
 		return -1;
 	}
 
-	int RendererData::GetBufferIndexInTextureArray(DrawBuffer* buf)
+	int BufferStoreData::GetBufferIndexInTextureArray(DrawBuffer* buf)
 	{
 		for (int i = 0; i < m_textureBuffers.m_size; i++)
 		{
@@ -416,7 +450,7 @@ void Renderer::InitThreadedData()
 		return -1;
 	}
 
-	void RendererData::SetDrawOrderLimits(int drawOrder)
+	void BufferStoreData::SetDrawOrderLimits(int drawOrder)
 	{
 		bool found = false;
 		for (int i = 0; i < m_drawOrders.m_size; i++)

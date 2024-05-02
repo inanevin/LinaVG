@@ -72,7 +72,7 @@ namespace LinaVG
 	/// <summary>
 	/// Management for draw buffers.
 	/// </summary>
-	struct RendererData
+	struct BufferStoreData
 	{
 		Array<DrawBuffer>				   m_defaultBuffers;
 		Array<GradientDrawBuffer>		   m_gradientBuffers;
@@ -107,52 +107,65 @@ namespace LinaVG
 		SDFTextCache*		  CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf);
 	};
 
-    class Renderer
-{
-public:
-
-
-    ~Renderer();
- 
-    /// <summary>
-    /// Any Draw commands via LinaVG must take place between StartFrame and EndFrame.
-    /// You may need to Clear your color buffer bits before calling StartFrame. LinaVG doesn't do any clearing.
-    /// </summary>
-    /// <returns></returns>
-    LINAVG_API void StartFrame();
-
-    /// <summary>
-    /// Call after you submit your draw requests to LinaVG, before EndFrame;
-    /// </summary>
-    /// <returns></returns>
-    LINAVG_API void Render();
-
-    /// <summary>
-    /// Sets the scissors/clipping data. Only use after calling LinaVG::StartFrame().
-    /// </summary>
-    /// <returns></returns>
-    LINAVG_API void SetClipPosX(BackendHandle posX, int thread = 0);
-    LINAVG_API void SetClipPosY(BackendHandle posY, int thread = 0);
-    LINAVG_API void SetClipSizeX(BackendHandle sizeX, int thread = 0);
-    LINAVG_API void SetClipSizeY(BackendHandle sizeY, int thread = 0);
-
-    
-    /// <summary>
-    /// Erases all vertex & index data on all buffers.
-    /// </summary>
-    LINAVG_API void ClearAllBuffers();
-
-    LINAVG_API void InitThreadedData();
-    
-    inline RendererData& GetData()
+    struct BufferStoreCallbacks
     {
-        return m_data;
-    }
-    
-private:
-    
-    RendererData m_data;
-};
+        std::function<void(DrawBuffer* buf)> drawDefault;
+        std::function<void(GradientDrawBuffer* buf)> drawGradient;
+        std::function<void(TextureDrawBuffer* buf)> drawTextured;
+        std::function<void(SimpleTextDrawBuffer* buf)> drawSimpleText;
+        std::function<void(SDFTextDrawBuffer* buf)> drawSDFText;
+    };
+
+    class BufferStore
+    {
+    public:
+        
+        BufferStore();
+        ~BufferStore();
+        
+        /// <summary>
+        /// Clears up or shrinks (depending on gc interval) internal vertex/index buffers. Call each frame at the end of your draw commands, after Flushing.
+        /// </summary>
+        /// <returns></returns>
+        LINAVG_API void ResetFrame();
+        
+        /// <summary>
+        /// Call after you have submitted your draw commands, this will flush the buffers in batches to your callback functions.
+        /// </summary>
+        /// <returns></returns>
+        LINAVG_API void FlushBuffers();
+        
+        /// <summary>
+        /// Sets the scissors/clipping data.
+        /// </summary>
+        /// <returns></returns>
+        LINAVG_API void SetClipPosX(BackendHandle posX);
+        LINAVG_API void SetClipPosY(BackendHandle posY);
+        LINAVG_API void SetClipSizeX(BackendHandle sizeX);
+        LINAVG_API void SetClipSizeY(BackendHandle sizeY);
+        
+        /// <summary>
+        /// Erases all vertex & index data on all buffers.
+        /// </summary>
+        LINAVG_API void ClearAllBuffers();
+        
+        LINAVG_API inline BufferStoreData& GetData()
+        {
+            return m_data;
+        }
+        
+        inline BufferStoreCallbacks& GetCallbacks()
+        {
+            return m_callbacks;
+        }
+        
+    private:
+        void InitData();
+        
+    private:
+        BufferStoreData m_data;
+        BufferStoreCallbacks m_callbacks;
+    };
 
 	
 

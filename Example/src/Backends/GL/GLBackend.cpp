@@ -34,7 +34,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "glad/glad.h"
 #include "Backends/GL/GLBackend.hpp"
-#include "LinaVG/Core/Renderer.hpp"
+#include "LinaVG/Core/BufferStore.hpp"
 #include "LinaVG/Core/Drawer.hpp"
 #include "LinaVG/Core/Math.hpp"
 #include <iostream>
@@ -48,7 +48,7 @@ namespace LinaVG::Examples
 	unsigned int GLBackend::s_displayWidth	= 0;
 	unsigned int GLBackend::s_displayHeight = 0;
 
-	bool GLBackend::Initialize()
+	GLBackend::GLBackend()
 	{
 		m_backendData.m_defaultVtxShader = "#version 330 core\n"
 										   "layout (location = 0) in vec2 pos;\n"
@@ -172,7 +172,7 @@ namespace LinaVG::Examples
 				Config.errorCallback("LinaVG: Backend shader creation failed!");
 				Config.errorCallback(err.what());
 			}
-			return false;
+			return;
 		}
 
 		glGenVertexArrays(1, &m_backendData.m_vao);
@@ -218,11 +218,9 @@ namespace LinaVG::Examples
 		// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
 		// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
 		glBindVertexArray(0);
-
-		return true;
 	}
 
-	void GLBackend::StartFrame(int threadCount)
+	void GLBackend::StartFrame()
 	{
 		Config.debugCurrentDrawCalls	 = 0;
 		Config.debugCurrentTriangleCount = 0;
@@ -297,7 +295,7 @@ namespace LinaVG::Examples
 		glBindVertexArray(m_backendData.m_vao);
 	}
 
-	void GLBackend::DrawGradient(GradientDrawBuffer* buf, int thread)
+	void GLBackend::DrawGradient(GradientDrawBuffer* buf)
 	{
 		if (m_backendData.m_skipDraw)
 			return;
@@ -327,7 +325,7 @@ namespace LinaVG::Examples
 		Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
 	}
 
-	void GLBackend::DrawTextured(TextureDrawBuffer* buf, int thread)
+	void GLBackend::DrawTextured(TextureDrawBuffer* buf)
 	{
 		if (m_backendData.m_skipDraw)
 			return;
@@ -360,7 +358,7 @@ namespace LinaVG::Examples
 		Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
 	}
 
-	void GLBackend::DrawDefault(DrawBuffer* buf, int thread)
+	void GLBackend::DrawDefault(DrawBuffer* buf)
 	{
 		if (m_backendData.m_skipDraw)
 			return;
@@ -384,7 +382,7 @@ namespace LinaVG::Examples
 		Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
 	}
 
-	void GLBackend::DrawSimpleText(SimpleTextDrawBuffer* buf, int thread)
+	void GLBackend::DrawSimpleText(SimpleTextDrawBuffer* buf)
 	{
 		if (m_backendData.m_skipDraw)
 			return;
@@ -412,7 +410,7 @@ namespace LinaVG::Examples
 		Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
 	}
 
-	void GLBackend::DrawSDFText(SDFTextDrawBuffer* buf, int thread)
+	void GLBackend::DrawSDFText(SDFTextDrawBuffer* buf)
 	{
 		if (m_backendData.m_skipDraw)
 			return;
@@ -549,10 +547,6 @@ namespace LinaVG::Examples
 
 		// Reset GL state
 		RestoreAPIState();
-	}
-
-	void GLBackend::Terminate()
-	{
 	}
 
 	void GLBackend::CreateShader(ShaderData& data, const char* vert, const char* frag)

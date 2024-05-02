@@ -55,13 +55,13 @@ namespace LinaVG
 		void ExampleApp::Run()
 		{
 			s_exampleApp = this;
-			GLFWWindow exampleBackend;
+			GLFWWindow window;
 
 			const unsigned int sizeX = 1440;
 			const unsigned int sizeY = 960;
 
 			// Initialize example exampleBackend.
-			exampleBackend.InitWindow(static_cast<int>(sizeX), static_cast<int>(sizeY));
+			window.InitWindow(static_cast<int>(sizeX), static_cast<int>(sizeY));
 
 			// Setup Lina VG config.
 			GLBackend::s_displayPosX	= 0;
@@ -80,25 +80,36 @@ namespace LinaVG
 			LinaVG::Config.defaultBufferReserve = 100000;
 			LinaVG::Config.gcCollectInterval	= 20000;
 
+            
             LinaVG::Text::Initialize();
             
-			m_checkeredTexture = exampleBackend.CreateTexture("Resources/Textures/Checkered.png");
-			m_linaTexture	   = exampleBackend.CreateTexture("Resources/Textures/Lina.png");
+			m_checkeredTexture = window.CreateTexture("Resources/Textures/Checkered.png");
+			m_linaTexture	   = window.CreateTexture("Resources/Textures/Lina.png");
 
 			// Init LinaVG
             m_renderingBackend = new GLBackend();
-            LinaVG::Backend::BaseBackend::SetBackend(m_renderingBackend);
-            m_renderingBackend->Initialize();
-			m_demoScreens.Initialize();
+	
+            LinaVG::Text::GetCallbacks().fontTextureBind = std::bind(&GLBackend::BindFontTexture, m_renderingBackend, std::placeholders::_1);
+            LinaVG::Text::GetCallbacks().fontTextureCreate = std::bind(&GLBackend::CreateFontTexture, m_renderingBackend, std::placeholders::_1, std::placeholders::_2);
+            LinaVG::Text::GetCallbacks().fontTextureBufferData =std::bind(&GLBackend::BufferFontTextureAtlas, m_renderingBackend, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
+            LinaVG::Text::GetCallbacks().fontTextureBufferEnd = std::bind(&GLBackend::BufferEnded, m_renderingBackend);
+            
+            m_lvgDrawer.GetCallbacks().drawDefault = std::bind(&GLBackend::DrawDefault, m_renderingBackend, std::placeholders::_1);
+            m_lvgDrawer.GetCallbacks().drawGradient = std::bind(&GLBackend::DrawGradient, m_renderingBackend, std::placeholders::_1);
+            m_lvgDrawer.GetCallbacks().drawTextured = std::bind(&GLBackend::DrawTextured, m_renderingBackend, std::placeholders::_1);
+            m_lvgDrawer.GetCallbacks().drawSimpleText = std::bind(&GLBackend::DrawSimpleText, m_renderingBackend, std::placeholders::_1);
+            m_lvgDrawer.GetCallbacks().drawSDFText = std::bind(&GLBackend::DrawSDFText, m_renderingBackend, std::placeholders::_1);
+            
+            m_demoScreens.Initialize();
 
-			float prevTime	  = exampleBackend.GetTime();
-			float lastFPSTime = exampleBackend.GetTime();
+			float prevTime	  = window.GetTime();
+			float lastFPSTime = window.GetTime();
 			int	  frameCount  = 0;
 
 			// Application loop.
 			while (!m_shouldClose)
 			{
-				float now	= exampleBackend.GetTime();
+				float now	= window.GetTime();
 				m_deltaTime = now - prevTime;
 				prevTime	= now;
 				m_elapsedTime += m_deltaTime;
@@ -112,13 +123,12 @@ namespace LinaVG
 				}
 
 				// Example exampleBackend input & rendering.
-				exampleBackend.Poll();
-				exampleBackend.Clear();
+				window.Poll();
+				window.Clear();
 
                 
 				// Lina VG start frame.
-                m_renderingBackend->StartFrame(0);
-                GetLVGDrawer().GetRenderer().StartFrame();
+                m_renderingBackend->StartFrame();
                 
 				// Setup style.
 				StyleOptions style;
@@ -161,22 +171,23 @@ namespace LinaVG
 				auto duration			 = std::chrono::duration_cast<std::chrono::nanoseconds>(demoNow2 - demoNow);
 				m_demoScreens.m_screenMS = static_cast<float>(duration.count()) * 1e-6f;
 
-				// Flush everything we've drawn so far to the screen.
-                GetLVGDrawer().GetRenderer().Render();
+				// Flush everything we've drawn so far.
+                m_lvgDrawer.FlushBuffers();
+                m_lvgDrawer.ResetFrame();
 
 				m_demoScreens.PreEndFrame();
                 m_renderingBackend->EndFrame();
 
 				// Backend window swap buffers.
-				exampleBackend.SwapBuffers();
+				window.SwapBuffers();
 				frameCount++;
 			}
 
 			// Terminate Lina VG & example exampleBackend.
 			m_demoScreens.Terminate();
-            m_renderingBackend->Terminate();
+            delete m_renderingBackend;
             LinaVG::Text::Terminate();
-			exampleBackend.Terminate();
+			window.Terminate();
 		}
 
 		void ExampleApp::OnHorizontalKeyCallback(float input)
@@ -216,9 +227,7 @@ namespace LinaVG
 		void ExampleApp::OnCCallback()
 		{
 			if (m_currentDemoScreen == 7)
-			{
 				m_demoScreens.m_clippingEnabled = !m_demoScreens.m_clippingEnabled;
-			}
 		}
 
 		void ExampleApp::OnECallback()

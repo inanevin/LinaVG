@@ -34,7 +34,5 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "Core/Renderer.hpp"
 #include "Core/Text.hpp"
 #include "Core/Drawer.hpp"
-#include "Core/BaseBackend.hpp"

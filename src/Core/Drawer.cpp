@@ -34,7 +34,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LinaVG/Core/Drawer.hpp"
 #include "LinaVG/Core/Math.hpp"
-#include "LinaVG/Core/Renderer.hpp"
+#include "LinaVG/Core/BufferStore.hpp"
 #include "LinaVG/Core/Text.hpp"
 #include "LinaVG/Utility/Utility.hpp"
 
@@ -118,11 +118,11 @@ namespace LinaVG
 		DrawBuffer* destBuf = nullptr;
 
 		if (useTextureBuffer)
-			destBuf = &m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+			destBuf = &m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 		else if (useGradBuffer)
-			destBuf = &m_renderer.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
+			destBuf = &m_bufferStore.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
 		else
-			destBuf = &m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape);
+			destBuf = &m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape);
 
 		// Calculate the line points.
 		Array<Line*>	 lines;
@@ -302,13 +302,13 @@ namespace LinaVG
 		const Vec2 min		  = Vec2(pos.x - size.x / 2.0f, pos.y - size.y / 2.0f);
 		const Vec2 max		  = Vec2(pos.x + size.x / 2.0f, pos.y + size.y / 2.0f);
 
-		m_renderer.GetData().m_uvOverride.m_override = true;
-		m_renderer.GetData().m_uvOverride.m_uvTL	 = uvTL;
-		m_renderer.GetData().m_uvOverride.m_uvBR	 = uvBR;
+		m_bufferStore.GetData().m_uvOverride.m_override = true;
+		m_bufferStore.GetData().m_uvOverride.m_uvTL	 = uvTL;
+		m_bufferStore.GetData().m_uvOverride.m_uvBR	 = uvBR;
 		DrawRect(min, max, style, rotateAngle, drawOrder);
-		m_renderer.GetData().m_uvOverride.m_override = false;
-		m_renderer.GetData().m_uvOverride.m_uvTL	 = Vec2(0, 0);
-		m_renderer.GetData().m_uvOverride.m_uvBR	 = Vec2(1, 1);
+		m_bufferStore.GetData().m_uvOverride.m_override = false;
+		m_bufferStore.GetData().m_uvOverride.m_uvTL	 = Vec2(0, 0);
+		m_bufferStore.GetData().m_uvOverride.m_uvBR	 = Vec2(1, 1);
 	}
 
 	void Drawer::DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle, int drawOrder)
@@ -323,11 +323,11 @@ namespace LinaVG
 			if (Math::IsEqual(style.color.start, style.color.end))
 			{
 				if (style.textureHandle == 0)
-					FillTri_NoRound_SC(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.start, style, drawOrder);
+					FillTri_NoRound_SC(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.start, style, drawOrder);
 				else
 				{
 
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillTri_NoRound_SC(&buf, rotateAngle, top, right, left, style.color.start, style, drawOrder);
 				}
 			}
@@ -337,10 +337,10 @@ namespace LinaVG
 				{
 					// Horizontal, non rounded
 					if (style.textureHandle == 0)
-						FillTri_NoRound_VerHorGra(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.start, style.color.end, style.color.end, style, drawOrder);
+						FillTri_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.start, style.color.end, style.color.end, style, drawOrder);
 					else
 					{
-						TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 						FillTri_NoRound_VerHorGra(&buf, rotateAngle, top, right, left, style.color.start, style.color.end, style.color.end, style, drawOrder);
 					}
 				}
@@ -348,10 +348,10 @@ namespace LinaVG
 				{
 					// Vertical, non rounded
 					if (style.textureHandle == 0)
-						FillTri_NoRound_VerHorGra(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.end, style.color.end, style.color.start, style, drawOrder);
+						FillTri_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.end, style.color.end, style.color.start, style, drawOrder);
 					else
 					{
-						TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 						FillTri_NoRound_VerHorGra(&buf, rotateAngle, top, right, left, style.color.end, style.color.end, style.color.start, style, drawOrder);
 					}
 				}
@@ -360,12 +360,12 @@ namespace LinaVG
 					// Radial, non rounded
 					if (style.textureHandle == 0)
 					{
-						GradientDrawBuffer& buf = m_renderer.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
+						GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
 						FillTri_NoRound_RadialGra(&buf, rotateAngle, top, right, left, style.color.start, style.color.end, style, drawOrder);
 					}
 					else
 					{
-						TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 						FillTri_NoRound_RadialGra(&buf, rotateAngle, top, right, left, style.color.start, style.color.end, style, drawOrder);
 					}
 				}
@@ -377,10 +377,10 @@ namespace LinaVG
 			{
 				// Rounded, single m_color.
 				if (style.textureHandle == 0)
-					FillTri_Round(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.color.start, style.rounding, style, drawOrder);
+					FillTri_Round(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.color.start, style.rounding, style, drawOrder);
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillTri_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.color.start, style.rounding, style, drawOrder);
 				}
 			}
@@ -389,12 +389,12 @@ namespace LinaVG
 				// Rounded, gradient.
 				if (style.textureHandle == 0)
 				{
-					GradientDrawBuffer& buf = m_renderer.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
+					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
 					FillTri_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.color.start, style.rounding, style, drawOrder);
 				}
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillTri_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.color.start, style.rounding, style, drawOrder);
 				}
 			}
@@ -410,10 +410,10 @@ namespace LinaVG
 			if (Math::IsEqual(style.color.start, style.color.end))
 			{
 				if (style.textureHandle == 0)
-					FillRect_NoRound_SC(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max, style.color.start, style, drawOrder);
+					FillRect_NoRound_SC(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max, style.color.start, style, drawOrder);
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillRect_NoRound_SC(&buf, rotateAngle, min, max, style.color.start, style, drawOrder);
 				}
 			}
@@ -424,12 +424,12 @@ namespace LinaVG
 					// Horizontal, non rounded
 					if (style.textureHandle == 0)
 					{
-						FillRect_NoRound_VerHorGra(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max,
+						FillRect_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max,
 															 style.color.start, style.color.end, style.color.end, style.color.start, style, drawOrder);
 					}
 					else
 					{
-						TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 						FillRect_NoRound_VerHorGra(&buf, rotateAngle, min, max,
 															 style.color.start, style.color.end, style.color.end, style.color.start, style, drawOrder);
 					}
@@ -439,12 +439,12 @@ namespace LinaVG
 					// Vertical, non rounded
 					if (style.textureHandle == 0)
 					{
-						FillRect_NoRound_VerHorGra(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max,
+						FillRect_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max,
 															 style.color.start, style.color.start, style.color.end, style.color.end, style, drawOrder);
 					}
 					else
 					{
-						TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 						FillRect_NoRound_VerHorGra(&buf, rotateAngle, min, max,
 															 style.color.start, style.color.start, style.color.end, style.color.end, style, drawOrder);
 					}
@@ -454,12 +454,12 @@ namespace LinaVG
 					// Radial, non rounded
 					if (style.textureHandle == 0)
 					{
-						GradientDrawBuffer& buf = m_renderer.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
+						GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
 						FillRect_NoRound_RadialGra(&buf, rotateAngle, min, max, style.color.start, style.color.end, style, drawOrder);
 					}
 					else
 					{
-						TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 						FillRect_NoRound_RadialGra(&buf, rotateAngle, min, max, style.color.start, style.color.end, style, drawOrder);
 					}
 				}
@@ -472,11 +472,11 @@ namespace LinaVG
 				// Rounded, single m_color.
 				if (style.textureHandle == 0)
 				{
-					FillRect_Round(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), style.onlyRoundTheseCorners, rotateAngle, min, max, style.color.start, style.rounding, style, drawOrder);
+					FillRect_Round(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), style.onlyRoundTheseCorners, rotateAngle, min, max, style.color.start, style.rounding, style, drawOrder);
 				}
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillRect_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, min, max, style.color.start, style.rounding, style, drawOrder);
 				}
 			}
@@ -485,13 +485,13 @@ namespace LinaVG
 				if (style.textureHandle == 0)
 				{
 					// Rounded, gradient.
-					GradientDrawBuffer& buf = m_renderer.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
+					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
 					FillRect_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, min, max, style.color.start, style.rounding, style, drawOrder);
 				}
 				else
 				{
 					// Rounded, gradient.
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillRect_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, min, max, style.color.start, style.rounding, style, drawOrder);
 				}
 			}
@@ -504,10 +504,10 @@ namespace LinaVG
 		if (Math::IsEqual(style.color.start, style.color.end))
 		{
 			if (style.textureHandle == 0)
-				FillNGon_SC(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style, drawOrder);
+				FillNGon_SC(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style, drawOrder);
 			else
 			{
-				TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+				TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 				FillNGon_SC(&buf, rotateAngle, center, radius, n, style.color.start, style, drawOrder);
 			}
 		}
@@ -517,10 +517,10 @@ namespace LinaVG
 			{
 				// Horizontal, non rounded
 				if (style.textureHandle == 0)
-					FillNGon_VerHorGra(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style.color.end, true, style, drawOrder);
+					FillNGon_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style.color.end, true, style, drawOrder);
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillNGon_VerHorGra(&buf, rotateAngle, center, radius, n, style.color.start, style.color.end, true, style, drawOrder);
 				}
 			}
@@ -528,10 +528,10 @@ namespace LinaVG
 			{
 				// Vertical, non rounded
 				if (style.textureHandle == 0)
-					FillNGon_VerHorGra(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style.color.end, false, style, drawOrder);
+					FillNGon_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style.color.end, false, style, drawOrder);
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillNGon_VerHorGra(&buf, rotateAngle, center, radius, n, style.color.start, style.color.end, false, style, drawOrder);
 				}
 			}
@@ -540,12 +540,12 @@ namespace LinaVG
 				// // Radial, non rounded
 				if (style.textureHandle == 0)
 				{
-					GradientDrawBuffer& buf = m_renderer.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
+					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
 					FillNGon_RadialGra(&buf, rotateAngle, center, radius, n, style.color.start, style.color.end, style, drawOrder);
 				}
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillNGon_RadialGra(&buf, rotateAngle, center, radius, n, style.color.start, style.color.end, style, drawOrder);
 				}
 			}
@@ -566,10 +566,10 @@ namespace LinaVG
 		if (Math::IsEqual(style.color.start, style.color.end))
 		{
 			if (style.textureHandle == 0)
-				FillConvex_SC(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style, drawOrder);
+				FillConvex_SC(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style, drawOrder);
 			else
 			{
-				TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+				TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 				FillConvex_SC(&buf, rotateAngle, points, size, avgCenter, style.color.start, style, drawOrder);
 			}
 		}
@@ -579,10 +579,10 @@ namespace LinaVG
 			{
 				// Horizontal, non rounded
 				if (style.textureHandle == 0)
-					FillConvex_VerHorGra(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style.color.end, true, style, drawOrder);
+					FillConvex_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style.color.end, true, style, drawOrder);
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillConvex_VerHorGra(&buf, rotateAngle, points, size, avgCenter, style.color.start, style.color.end, true, style, drawOrder);
 				}
 			}
@@ -590,10 +590,10 @@ namespace LinaVG
 			{
 				// Vertical, non rounded
 				if (style.textureHandle == 0)
-					FillConvex_VerHorGra(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style.color.end, false, style, drawOrder);
+					FillConvex_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style.color.end, false, style, drawOrder);
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillConvex_VerHorGra(&buf, rotateAngle, points, size, avgCenter, style.color.start, style.color.end, false, style, drawOrder);
 				}
 			}
@@ -602,12 +602,12 @@ namespace LinaVG
 				// // Radial, non rounded
 				if (style.textureHandle == 0)
 				{
-					GradientDrawBuffer& buf = m_renderer.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
+					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
 					FillConvex_RadialGra(&buf, rotateAngle, points, size, avgCenter, style.color.start, style.color.end, style, drawOrder);
 				}
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillConvex_RadialGra(&buf, rotateAngle, points, size, avgCenter, style.color.start, style.color.end, style, drawOrder);
 				}
 			}
@@ -623,10 +623,10 @@ namespace LinaVG
 		if (Math::IsEqual(style.color.start, style.color.end))
 		{
 			if (style.textureHandle == 0)
-				FillCircle_SC(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, startAngle, endAngle, style, drawOrder);
+				FillCircle_SC(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, startAngle, endAngle, style, drawOrder);
 			else
 			{
-				TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+				TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 				FillCircle_SC(&buf, rotateAngle, center, radius, segments, style.color.start, startAngle, endAngle, style, drawOrder);
 			}
 		}
@@ -636,10 +636,10 @@ namespace LinaVG
 			{
 				// Horizontal, non rounded
 				if (style.textureHandle == 0)
-					FillCircle_VerHorGra(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, style.color.end, true, startAngle, endAngle, style, drawOrder);
+					FillCircle_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, style.color.end, true, startAngle, endAngle, style, drawOrder);
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillCircle_VerHorGra(&buf, rotateAngle, center, radius, segments, style.color.start, style.color.end, true, startAngle, endAngle, style, drawOrder);
 				}
 			}
@@ -647,10 +647,10 @@ namespace LinaVG
 			{
 				// Vertical, non rounded
 				if (style.textureHandle == 0)
-					FillCircle_VerHorGra(&m_renderer.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, style.color.end, false, startAngle, endAngle, style, drawOrder);
+					FillCircle_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, style.color.end, false, startAngle, endAngle, style, drawOrder);
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillCircle_VerHorGra(&buf, rotateAngle, center, radius, segments, style.color.start, style.color.end, false, startAngle, endAngle, style, drawOrder);
 				}
 			}
@@ -659,12 +659,12 @@ namespace LinaVG
 				// // Radial, non rounded
 				if (style.textureHandle == 0)
 				{
-					GradientDrawBuffer& buf = m_renderer.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
+					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.color, drawOrder, DrawBufferShapeType::Shape);
 					FillCircle_RadialGra(&buf, rotateAngle, center, radius, segments, style.color.start, style.color.end, startAngle, endAngle, style, drawOrder);
 				}
 				else
 				{
-					TextureDrawBuffer& buf = m_renderer.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
+					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
 					FillCircle_RadialGra(&buf, rotateAngle, center, radius, segments, style.color.start, style.color.end, startAngle, endAngle, style, drawOrder);
 				}
 			}
@@ -689,7 +689,7 @@ namespace LinaVG
 		}
 
 		const float scale	   = opts.textScale;
-		DrawBuffer* buf		   = &m_renderer.GetData().GetSDFTextBuffer(font->m_texture, drawOrder, opts, false);
+		DrawBuffer* buf		   = &m_bufferStore.GetData().GetSDFTextBuffer(font->m_texture, drawOrder, opts, false);
 		const bool	isGradient = !Math::IsEqual(opts.color.start, opts.color.end);
 		const int	vtxStart   = buf->m_vertexBuffer.m_size;
 		const int	indexStart = buf->m_indexBuffer.m_size;
@@ -699,10 +699,10 @@ namespace LinaVG
 		else
 		{
 			uint32_t sid = Utility::FnvHash(text);
-			if (m_renderer.GetData().CheckSDFTextCache(sid, opts, buf) == nullptr)
+			if (m_bufferStore.GetData().CheckSDFTextCache(sid, opts, buf) == nullptr)
 			{
 				ProcessText(buf, font, text, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfSoftness, outData, opts.cpuClipping, opts.wordWrap);
-				m_renderer.GetData().AddSDFTextCache(sid, opts, buf, vtxStart, indexStart);
+				m_bufferStore.GetData().AddSDFTextCache(sid, opts, buf, vtxStart, indexStart);
 			}
 
 			// Update position
@@ -719,7 +719,7 @@ namespace LinaVG
 			SDFTextOptions usedOpts = SDFTextOptions(opts);
 			usedOpts.sdfThickness	= opts.sdfDropShadowThickness;
 			usedOpts.sdfSoftness	= opts.sdfDropShadowSoftness;
-			DrawBuffer* dsBuf		= &m_renderer.GetData().GetSDFTextBuffer(font->m_texture, drawOrder, usedOpts, true);
+			DrawBuffer* dsBuf		= &m_bufferStore.GetData().GetSDFTextBuffer(font->m_texture, drawOrder, usedOpts, true);
 			// const int	dsStart		= buf->m_vertexBuffer.m_size;
 			ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness, outData, opts.cpuClipping, opts.wordWrap);
 		}
@@ -740,7 +740,7 @@ namespace LinaVG
 		}
 
 		const float scale	   = opts.textScale;
-		DrawBuffer* buf		   = &m_renderer.GetData().GetSimpleTextBuffer(font->m_texture, drawOrder, false);
+		DrawBuffer* buf		   = &m_bufferStore.GetData().GetSimpleTextBuffer(font->m_texture, drawOrder, false);
 		const bool	isGradient = !Math::IsEqual(opts.color.start, opts.color.end);
 		const int	vtxStart   = buf->m_vertexBuffer.m_size;
 		const int	indexStart = buf->m_indexBuffer.m_size;
@@ -750,10 +750,10 @@ namespace LinaVG
 		else
 		{
 			uint32_t sid = Utility::FnvHash(text);
-			if (m_renderer.GetData().CheckTextCache(sid, opts, buf) == nullptr)
+			if (m_bufferStore.GetData().CheckTextCache(sid, opts, buf) == nullptr)
 			{
 				ProcessText(buf, font, text, Vec2(0, 0), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping, opts.wordWrap);
-				m_renderer.GetData().AddTextCache(sid, opts, buf, vtxStart, indexStart);
+				m_bufferStore.GetData().AddTextCache(sid, opts, buf, vtxStart, indexStart);
 			}
 
 			// Update position
@@ -768,7 +768,7 @@ namespace LinaVG
 		// Drop-shadow texts don't support caching yet.
 		if (!Math::IsEqualMarg(opts.dropShadowOffset.x, 0.0f) || !Math::IsEqualMarg(opts.dropShadowOffset.y, 0.0f))
 		{
-			DrawBuffer* dsBuf = &m_renderer.GetData().GetSimpleTextBuffer(font->m_texture, drawOrder, true);
+			DrawBuffer* dsBuf = &m_bufferStore.GetData().GetSimpleTextBuffer(font->m_texture, drawOrder, true);
 			ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping, opts.wordWrap);
 		}
 	}
@@ -1014,10 +1014,10 @@ namespace LinaVG
 			if (hasCenter)
 			{
 				v[0].pos = center;
-				v[0].uv	 = Vec2((m_renderer.GetData().m_uvOverride.m_uvTL.x + m_renderer.GetData().m_uvOverride.m_uvBR.x) / 2.0f, (m_renderer.GetData().m_uvOverride.m_uvTL.y + m_renderer.GetData().m_uvOverride.m_uvBR.y) / 2.0f);
+				v[0].uv	 = Vec2((m_bufferStore.GetData().m_uvOverride.m_uvTL.x + m_bufferStore.GetData().m_uvOverride.m_uvBR.x) / 2.0f, (m_bufferStore.GetData().m_uvOverride.m_uvTL.y + m_bufferStore.GetData().m_uvOverride.m_uvBR.y) / 2.0f);
 			}
 
-			if (!m_renderer.GetData().m_rectOverrideData.overrideRectPositions)
+			if (!m_bufferStore.GetData().m_rectOverrideData.overrideRectPositions)
 			{
 				v[i].pos	   = min;
 				v[i + 1].pos.x = max.x;
@@ -1029,16 +1029,16 @@ namespace LinaVG
 			}
 			else
 			{
-				v[i].pos	 = m_renderer.GetData().m_rectOverrideData.m_p1;
-				v[i + 1].pos = m_renderer.GetData().m_rectOverrideData.m_p2;
-				v[i + 2].pos = m_renderer.GetData().m_rectOverrideData.m_p3;
-				v[i + 3].pos = m_renderer.GetData().m_rectOverrideData.m_p4;
+				v[i].pos	 = m_bufferStore.GetData().m_rectOverrideData.m_p1;
+				v[i + 1].pos = m_bufferStore.GetData().m_rectOverrideData.m_p2;
+				v[i + 2].pos = m_bufferStore.GetData().m_rectOverrideData.m_p3;
+				v[i + 3].pos = m_bufferStore.GetData().m_rectOverrideData.m_p4;
 			}
 
-			v[i].uv		= m_renderer.GetData().m_uvOverride.m_uvTL;
-			v[i + 1].uv = Vec2(m_renderer.GetData().m_uvOverride.m_uvBR.x, m_renderer.GetData().m_uvOverride.m_uvTL.y);
-			v[i + 2].uv = m_renderer.GetData().m_uvOverride.m_uvBR;
-			v[i + 3].uv = Vec2(m_renderer.GetData().m_uvOverride.m_uvTL.x, m_renderer.GetData().m_uvOverride.m_uvBR.y);
+			v[i].uv		= m_bufferStore.GetData().m_uvOverride.m_uvTL;
+			v[i + 1].uv = Vec2(m_bufferStore.GetData().m_uvOverride.m_uvBR.x, m_bufferStore.GetData().m_uvOverride.m_uvTL.y);
+			v[i + 2].uv = m_bufferStore.GetData().m_uvOverride.m_uvBR;
+			v[i + 3].uv = Vec2(m_bufferStore.GetData().m_uvOverride.m_uvTL.x, m_bufferStore.GetData().m_uvOverride.m_uvBR.y);
 		}
 
 		void Drawer::FillTri_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts, int drawOrder)
@@ -2516,13 +2516,13 @@ namespace LinaVG
 
 		void Drawer::DrawSimpleLine(SimpleLine& line, StyleOptions& opts, float rotateAngle, int drawOrder)
 		{
-            m_renderer.GetData().m_rectOverrideData.m_p1					= line.m_points[0];
-            m_renderer.GetData().m_rectOverrideData.m_p4					= line.m_points[3];
-            m_renderer.GetData().m_rectOverrideData.m_p2					= line.m_points[1];
-            m_renderer.GetData().m_rectOverrideData.m_p3					= line.m_points[2];
-            m_renderer.GetData().m_rectOverrideData.overrideRectPositions = true;
-			DrawRect(m_renderer.GetData().m_rectOverrideData.m_p1, m_renderer.GetData().m_rectOverrideData.m_p3, opts, rotateAngle, drawOrder);
-            m_renderer.GetData().m_rectOverrideData.overrideRectPositions = false;
+            m_bufferStore.GetData().m_rectOverrideData.m_p1					= line.m_points[0];
+            m_bufferStore.GetData().m_rectOverrideData.m_p4					= line.m_points[3];
+            m_bufferStore.GetData().m_rectOverrideData.m_p2					= line.m_points[1];
+            m_bufferStore.GetData().m_rectOverrideData.m_p3					= line.m_points[2];
+            m_bufferStore.GetData().m_rectOverrideData.overrideRectPositions = true;
+			DrawRect(m_bufferStore.GetData().m_rectOverrideData.m_p1, m_bufferStore.GetData().m_rectOverrideData.m_p3, opts, rotateAngle, drawOrder);
+            m_bufferStore.GetData().m_rectOverrideData.overrideRectPositions = false;
 		}
 
 		void Drawer::CalculateLineUVs(Line& line)
@@ -2558,31 +2558,31 @@ namespace LinaVG
 
 			if (useTextureBuffer)
 			{
-				const int			sourceIndex = m_renderer.GetData().GetBufferIndexInTextureArray(sourceBuffer);
+				const int			sourceIndex = m_bufferStore.GetData().GetBufferIndexInTextureArray(sourceBuffer);
 				const BackendHandle handle		= outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle;
 				const Vec2			uvOffset	= outlineType == OutlineCallType::AA ? opts.textureUVOffset : opts.outlineOptions.textureUVOffset;
 				const Vec2			uvTiling	= outlineType == OutlineCallType::AA ? opts.textureUVTiling : opts.outlineOptions.textureUVTiling;
-				destBuf							= &m_renderer.GetData().GetTextureBuffer(handle, uvTiling, uvOffset, opts.outlineOptions.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+				destBuf							= &m_bufferStore.GetData().GetTextureBuffer(handle, uvTiling, uvOffset, opts.outlineOptions.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
 				if (sourceIndex != -1)
-					sourceBuffer = &m_renderer.GetData().m_textureBuffers[sourceIndex];
+					sourceBuffer = &m_bufferStore.GetData().m_textureBuffers[sourceIndex];
 			}
 			else if (useGradBuffer)
 			{
-				const int sourceIndex = m_renderer.GetData().GetBufferIndexInGradientArray(sourceBuffer);
+				const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInGradientArray(sourceBuffer);
 				Vec4Grad  col		  = outlineType == OutlineCallType::AA ? opts.color : opts.outlineOptions.color;
-				destBuf				  = &m_renderer.GetData().GetGradientBuffer(col, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+				destBuf				  = &m_bufferStore.GetData().GetGradientBuffer(col, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
 				if (sourceIndex != -1)
-					sourceBuffer = &m_renderer.GetData().m_gradientBuffers[sourceIndex];
+					sourceBuffer = &m_bufferStore.GetData().m_gradientBuffers[sourceIndex];
 			}
 			else
 			{
-				const int sourceIndex = m_renderer.GetData().GetBufferIndexInDefaultArray(sourceBuffer);
-				destBuf				  = &m_renderer.GetData().GetDefaultBuffer(drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+				const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInDefaultArray(sourceBuffer);
+				destBuf				  = &m_bufferStore.GetData().GetDefaultBuffer(drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
 				if (sourceIndex != -1)
-					sourceBuffer = &m_renderer.GetData().m_defaultBuffers[sourceIndex];
+					sourceBuffer = &m_bufferStore.GetData().m_defaultBuffers[sourceIndex];
 			}
 
 			// only used if we are drawing AA.
@@ -2687,32 +2687,32 @@ namespace LinaVG
 
 			if (useTextureBuffer)
 			{
-				const int			sourceIndex = m_renderer.GetData().GetBufferIndexInTextureArray(sourceBuffer);
+				const int			sourceIndex = m_bufferStore.GetData().GetBufferIndexInTextureArray(sourceBuffer);
 				const BackendHandle handle		= outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle;
 				const Vec2			uvOffset	= outlineType == OutlineCallType::AA ? opts.textureUVOffset : opts.outlineOptions.textureUVOffset;
 				const Vec2			uvTiling	= outlineType == OutlineCallType::AA ? opts.textureUVTiling : opts.outlineOptions.textureUVTiling;
-				destBuf							= &m_renderer.GetData().GetTextureBuffer(handle, uvTiling, uvOffset, opts.outlineOptions.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+				destBuf							= &m_bufferStore.GetData().GetTextureBuffer(handle, uvTiling, uvOffset, opts.outlineOptions.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
 				if (sourceIndex != -1)
-					sourceBuffer = &m_renderer.GetData().m_textureBuffers[sourceIndex];
+					sourceBuffer = &m_bufferStore.GetData().m_textureBuffers[sourceIndex];
 			}
 			else if (useGradBuffer)
 			{
-				const int sourceIndex = m_renderer.GetData().GetBufferIndexInGradientArray(sourceBuffer);
+				const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInGradientArray(sourceBuffer);
 				Vec4Grad  col		  = outlineType == OutlineCallType::AA ? opts.color : opts.outlineOptions.color;
-				destBuf				  = &m_renderer.GetData().GetGradientBuffer(col, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+				destBuf				  = &m_bufferStore.GetData().GetGradientBuffer(col, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
 				if (sourceIndex != -1)
-					sourceBuffer = &m_renderer.GetData().m_gradientBuffers[sourceIndex];
+					sourceBuffer = &m_bufferStore.GetData().m_gradientBuffers[sourceIndex];
 			}
 			else
 			{
-				const int sourceIndex = m_renderer.GetData().GetBufferIndexInDefaultArray(sourceBuffer);
+				const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInDefaultArray(sourceBuffer);
 
-				destBuf = &m_renderer.GetData().GetDefaultBuffer(drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+				destBuf = &m_bufferStore.GetData().GetDefaultBuffer(drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
 
 				if (sourceIndex != -1)
-					sourceBuffer = &m_renderer.GetData().m_defaultBuffers[sourceIndex];
+					sourceBuffer = &m_bufferStore.GetData().m_defaultBuffers[sourceIndex];
 			}
 
 			int startIndex, endIndex;

@@ -66,11 +66,11 @@ namespace LinaVG::Examples
 		bool		  m_skipDraw				  = false;
 	};
 
-	class GLBackend : public Backend::BaseBackend
+	class GLBackend
 	{
 	public:
-		GLBackend()			 = default;
-		virtual ~GLBackend() = default;
+		GLBackend();
+        virtual ~GLBackend() = default;
 
 		struct GLState
 		{
@@ -88,21 +88,20 @@ namespace LinaVG::Examples
 			int	 m_unpackAlignment	  = 0;
 		};
 
-		virtual bool		  Initialize() override;
-		virtual void		  Terminate() override;
-		virtual void		  StartFrame(int threadCount) override;
-		virtual void		  DrawGradient(GradientDrawBuffer* buf, int thread) override;
-		virtual void		  DrawTextured(TextureDrawBuffer* buf, int thread) override;
-		virtual void		  DrawDefault(DrawBuffer* buf, int thread) override;
-		virtual void		  DrawSimpleText(SimpleTextDrawBuffer* buf, int thread) override;
-		virtual void		  DrawSDFText(SDFTextDrawBuffer* buf, int thread) override;
-		virtual void		  EndFrame() override;
-		virtual void		  BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data) override;
-		virtual void		  BufferEnded() override{};
-		virtual void		  BindFontTexture(BackendHandle texture) override;
-		virtual void		  SaveAPIState() override;
-		virtual void		  RestoreAPIState() override;
-		virtual BackendHandle CreateFontTexture(int width, int height) override;
+		
+		void		  StartFrame();
+		void		  DrawGradient(GradientDrawBuffer* buf);
+		void		  DrawTextured(TextureDrawBuffer* buf) ;
+		void		  DrawDefault(DrawBuffer* buf);
+		void		  DrawSimpleText(SimpleTextDrawBuffer* buf);
+		void		  DrawSDFText(SDFTextDrawBuffer* buf) ;
+		void		  EndFrame();
+		void		  BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data) ;
+		void		  BufferEnded() {};
+		void		  BindFontTexture(BackendHandle texture) ;
+		void		  SaveAPIState();
+		void		  RestoreAPIState();
+		BackendHandle CreateFontTexture(int width, int height) ;
 
 		static unsigned int s_displayPosX;
 		static unsigned int s_displayPosY;

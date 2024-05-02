@@ -58,13 +58,12 @@ set(LinaVG_SOURCES
 # Core
 include/LinaVG/LinaVG.hpp
 include/LinaVG/Utility/Utility.hpp
-include/LinaVG/Core/Renderer.hpp
+include/LinaVG/Core/BufferStore.hpp
 include/LinaVG/Core/Text.hpp
 include/LinaVG/Core/Drawer.hpp
 include/LinaVG/Core/Common.hpp
 include/LinaVG/Core/Math.hpp
 include/LinaVG/Core/Vectors.hpp
-include/LinaVG/Core/BaseBackend.hpp
 )
 
 
@@ -72,7 +71,7 @@ set(LinaVG_HEADERS
 
 # Core
 src/Utility/Utility.cpp
-src/Core/Renderer.cpp
+src/Core/BufferStore.cpp
 src/Core/Text.cpp
 src/Core/Drawer.cpp
 src/Core/Common.cpp

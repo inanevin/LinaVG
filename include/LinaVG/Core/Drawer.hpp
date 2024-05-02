@@ -35,7 +35,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "Common.hpp"
-#include "Renderer.hpp"
+#include "BufferStore.hpp"
 
 namespace LinaVG
 {
@@ -108,10 +108,6 @@ class Drawer
 {
 public:
     
-    inline Renderer& GetRenderer()
-    {
-        return m_renderer;
-    }
 	/// <summary>
 	/// Draws a bezier curve defined by the start, end and control points.
 	/// </summary>
@@ -279,6 +275,43 @@ public:
 
 #endif
 
+    
+    inline LINAVG_API void SetClipPosX(BackendHandle posX)
+    {
+        m_bufferStore.SetClipPosX(posX);
+    }
+    
+    inline LINAVG_API void SetClipPosY(BackendHandle posY)
+    {
+        m_bufferStore.SetClipPosY(posY);
+    }
+    
+    inline LINAVG_API void SetClipSizeX(BackendHandle sizeX)
+    {
+        m_bufferStore.SetClipSizeX(sizeX);
+    }
+    
+    inline LINAVG_API void SetClipSizeY(BackendHandle sizeY)
+    {
+        m_bufferStore.SetClipSizeY(sizeY);
+    }
+    
+    inline LINAVG_API void FlushBuffers()
+    {
+        m_bufferStore.FlushBuffers();
+    }
+    
+    inline LINAVG_API void ResetFrame()
+    {
+        m_bufferStore.ResetFrame();
+    }
+    
+    inline LINAVG_API BufferStoreCallbacks& GetCallbacks()
+    {
+        return m_bufferStore.GetCallbacks();
+    }
+    
+    
 private:
     
 		enum class OutlineCallType
@@ -475,7 +508,7 @@ private:
     
 private:
     
-    Renderer m_renderer;
+    BufferStore m_bufferStore;
 };
 
 } // namespace LinaVG

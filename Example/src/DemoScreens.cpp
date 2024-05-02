@@ -67,12 +67,13 @@ namespace LinaVG
     
 		void DemoScreens::Initialize()
 		{
-            
-			fontDefault = LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 18);
-			fontTitle	= LinaVG::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 52);
-			fontDesc	= LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
-			fontDemo	= LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
-			fontSDF		= LinaVG::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
+            ExampleApp::Get()->GetGLBackend()->SaveAPIState();
+			fontDefault = LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 18);
+			fontTitle	= LinaVG::Text::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 52);
+			fontDesc	= LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
+			fontDemo	= LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
+			fontSDF		= LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
+            ExampleApp::Get()->GetGLBackend()->RestoreAPIState();
 
 			m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
 			m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
@@ -818,10 +819,10 @@ namespace LinaVG
 			if (m_clippingEnabled)
 			{
                 
-                ExampleApp::Get()->GetLVGDrawer().GetRenderer().SetClipPosX(static_cast<BackendHandle>(min.x));
-                ExampleApp::Get()->GetLVGDrawer().GetRenderer().SetClipPosY(static_cast<BackendHandle>(min.y));
-                ExampleApp::Get()->GetLVGDrawer().GetRenderer().SetClipSizeX(static_cast<BackendHandle>(size.x));
-                ExampleApp::Get()->GetLVGDrawer().GetRenderer().SetClipSizeY(static_cast<BackendHandle>(size.y));
+                ExampleApp::Get()->GetLVGDrawer().SetClipPosX(static_cast<BackendHandle>(min.x));
+                ExampleApp::Get()->GetLVGDrawer().SetClipPosY(static_cast<BackendHandle>(min.y));
+                ExampleApp::Get()->GetLVGDrawer().SetClipSizeX(static_cast<BackendHandle>(size.x));
+                ExampleApp::Get()->GetLVGDrawer().SetClipSizeY(static_cast<BackendHandle>(size.y));
 			}
 
 			// Main rect.
@@ -839,10 +840,10 @@ namespace LinaVG
 			textOpts.font = fontDefault;
 			ExampleApp::Get()->GetLVGDrawer().DrawTextNormal("This text is clipped by the black rectangle.", Vec2(min.x - 50, min.y + 250), textOpts, 0.0f, 2);
 
-            ExampleApp::Get()->GetLVGDrawer().GetRenderer().SetClipPosX(0);
-            ExampleApp::Get()->GetLVGDrawer().GetRenderer().SetClipPosY(0);
-            ExampleApp::Get()->GetLVGDrawer().GetRenderer().SetClipSizeX(0);
-            ExampleApp::Get()->GetLVGDrawer().GetRenderer().SetClipSizeY(0);
+            ExampleApp::Get()->GetLVGDrawer().SetClipPosX(0);
+            ExampleApp::Get()->GetLVGDrawer().SetClipPosY(0);
+            ExampleApp::Get()->GetLVGDrawer().SetClipSizeX(0);
+            ExampleApp::Get()->GetLVGDrawer().SetClipSizeY(0);
 		}
 
 		void DemoScreens::ShowDemoScreen8_Animated()
