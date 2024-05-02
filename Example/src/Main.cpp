@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -33,7 +33,6 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Main.hpp"
-#include "LinaVG/LinaVG.hpp"
 #include <iostream>
 #include <chrono>
 #include "Backends/GLFWWindow.hpp"
@@ -65,10 +64,10 @@ namespace LinaVG
 			exampleBackend.InitWindow(static_cast<int>(sizeX), static_cast<int>(sizeY));
 
 			// Setup Lina VG config.
-			Backend::GLBackend::s_displayPosX	= 0;
-			Backend::GLBackend::s_displayPosY	= 0;
-			Backend::GLBackend::s_displayWidth	= sizeX;
-			Backend::GLBackend::s_displayHeight = sizeY;
+			GLBackend::s_displayPosX	= 0;
+			GLBackend::s_displayPosY	= 0;
+			GLBackend::s_displayWidth	= sizeX;
+			GLBackend::s_displayHeight = sizeY;
 
 			LinaVG::Config.errorCallback = [](const std::string& err) {
 				std::cerr << err.c_str() << std::endl;
@@ -81,12 +80,15 @@ namespace LinaVG
 			LinaVG::Config.defaultBufferReserve = 100000;
 			LinaVG::Config.gcCollectInterval	= 20000;
 
+            LinaVG::Text::Initialize();
+            
 			m_checkeredTexture = exampleBackend.CreateTexture("Resources/Textures/Checkered.png");
 			m_linaTexture	   = exampleBackend.CreateTexture("Resources/Textures/Lina.png");
 
 			// Init LinaVG
-			LinaVG::Backend::BaseBackend::SetBackend(new Backend::GLBackend());
-			LinaVG::Initialize();
+            m_renderingBackend = new GLBackend();
+            LinaVG::Backend::BaseBackend::SetBackend(m_renderingBackend);
+            m_renderingBackend->Initialize();
 			m_demoScreens.Initialize();
 
 			float prevTime	  = exampleBackend.GetTime();
@@ -113,9 +115,11 @@ namespace LinaVG
 				exampleBackend.Poll();
 				exampleBackend.Clear();
 
+                
 				// Lina VG start frame.
-				LinaVG::StartFrame();
-
+                m_renderingBackend->StartFrame(0);
+                GetLVGDrawer().GetRenderer().StartFrame();
+                
 				// Setup style.
 				StyleOptions style;
 				style.outlineOptions.thickness	   = 2.0f;
@@ -158,13 +162,10 @@ namespace LinaVG
 				m_demoScreens.m_screenMS = static_cast<float>(duration.count()) * 1e-6f;
 
 				// Flush everything we've drawn so far to the screen.
-				LinaVG::Render();
+                GetLVGDrawer().GetRenderer().Render();
 
-				// Let demo screens know we're ending this frame.
 				m_demoScreens.PreEndFrame();
-
-				// Let LinaVG know we are ending this frame.
-				LinaVG::EndFrame();
+                m_renderingBackend->EndFrame();
 
 				// Backend window swap buffers.
 				exampleBackend.SwapBuffers();
@@ -173,7 +174,8 @@ namespace LinaVG
 
 			// Terminate Lina VG & example exampleBackend.
 			m_demoScreens.Terminate();
-			LinaVG::Terminate();
+            m_renderingBackend->Terminate();
+            LinaVG::Text::Terminate();
 			exampleBackend.Terminate();
 		}
 
@@ -231,8 +233,8 @@ namespace LinaVG
 
 		void ExampleApp::OnWindowResizeCallback(int width, int height)
 		{
-			Backend::GLBackend::s_displayWidth	= static_cast<BackendHandle>(width);
-			Backend::GLBackend::s_displayHeight = static_cast<BackendHandle>(height);
+			GLBackend::s_displayWidth	= static_cast<BackendHandle>(width);
+			GLBackend::s_displayHeight = static_cast<BackendHandle>(height);
 		}
 		void ExampleApp::OnWindowCloseCallback()
 		{

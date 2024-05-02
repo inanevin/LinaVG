@@ -35,11 +35,16 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "DemoScreens.hpp"
+#include "LinaVG/LinaVG.hpp"
 
 namespace LinaVG
 {
+    class Drawer;
+
 	namespace Examples
 	{
+        class GLBackend;
+    
 		class ExampleApp
 		{
 		public:
@@ -96,6 +101,11 @@ namespace LinaVG
 			{
 				return m_currentDemoScreen;
 			}
+            
+            inline Drawer& GetLVGDrawer()
+            {
+                return m_lvgDrawer;
+            }
 
 		private:
 			DemoScreens		   m_demoScreens;
@@ -108,6 +118,8 @@ namespace LinaVG
 			int				   m_fps			   = 0;
 			bool			   m_shouldClose	   = false;
 			static ExampleApp* s_exampleApp;
+            LinaVG::Drawer m_lvgDrawer;
+            GLBackend* m_renderingBackend = nullptr;
 		};
 	} // namespace Examples
 } // namespace LinaVG

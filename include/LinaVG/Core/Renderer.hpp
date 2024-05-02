@@ -107,56 +107,53 @@ namespace LinaVG
 		SDFTextCache*		  CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf);
 	};
 
-	namespace Internal
-	{
-		extern LINAVG_API LINAVG_VEC<RendererData> g_rendererData;
+    class Renderer
+{
+public:
 
-		/// <summary>
-		/// Erases all vertex & index data on all buffers.
-		/// </summary>
-		LINAVG_API void ClearAllBuffers();
 
-		LINAVG_API void InitThreadedData();
-	} // namespace Internal
+    ~Renderer();
+ 
+    /// <summary>
+    /// Any Draw commands via LinaVG must take place between StartFrame and EndFrame.
+    /// You may need to Clear your color buffer bits before calling StartFrame. LinaVG doesn't do any clearing.
+    /// </summary>
+    /// <returns></returns>
+    LINAVG_API void StartFrame();
 
-	/// <summary>
-	/// Initializes LinaVG renderer. Must be called before any other calls to LinaVG API!
-	/// </summary>
-	/// <returns></returns>
-	LINAVG_API bool Initialize();
+    /// <summary>
+    /// Call after you submit your draw requests to LinaVG, before EndFrame;
+    /// </summary>
+    /// <returns></returns>
+    LINAVG_API void Render();
 
-	/// <summary>
-	/// Terminates LinaVG. Call once your main application loop is complete.
-	/// </summary>
-	/// <returns></returns>
-	LINAVG_API void Terminate();
+    /// <summary>
+    /// Sets the scissors/clipping data. Only use after calling LinaVG::StartFrame().
+    /// </summary>
+    /// <returns></returns>
+    LINAVG_API void SetClipPosX(BackendHandle posX, int thread = 0);
+    LINAVG_API void SetClipPosY(BackendHandle posY, int thread = 0);
+    LINAVG_API void SetClipSizeX(BackendHandle sizeX, int thread = 0);
+    LINAVG_API void SetClipSizeY(BackendHandle sizeY, int thread = 0);
 
-	/// <summary>
-	/// Any Draw commands via LinaVG must take place between StartFrame and EndFrame.
-	/// You may need to Clear your color buffer bits before calling StartFrame. LinaVG doesn't do any clearing.
-	/// </summary>
-	/// <returns></returns>
-	LINAVG_API void StartFrame(int threadCount = 1);
+    
+    /// <summary>
+    /// Erases all vertex & index data on all buffers.
+    /// </summary>
+    LINAVG_API void ClearAllBuffers();
 
-	/// <summary>
-	/// Call after you submit your draw requests to LinaVG, before EndFrame;
-	/// </summary>
-	/// <returns></returns>
-	LINAVG_API void Render(int thread = 0);
+    LINAVG_API void InitThreadedData();
+    
+    inline RendererData& GetData()
+    {
+        return m_data;
+    }
+    
+private:
+    
+    RendererData m_data;
+};
 
-	/// <summary>
-	/// Sets the scissors/clipping data. Only use after calling LinaVG::StartFrame().
-	/// </summary>
-	/// <returns></returns>
-	LINAVG_API void SetClipPosX(BackendHandle posX, int thread = 0);
-	LINAVG_API void SetClipPosY(BackendHandle posY, int thread = 0);
-	LINAVG_API void SetClipSizeX(BackendHandle sizeX, int thread = 0);
-	LINAVG_API void SetClipSizeY(BackendHandle sizeY, int thread = 0);
-
-	/// <summary>
-	/// Any Draw commands via LinaVG must take place between StartFrame and EndFrame.
-	/// </summary>
-	/// <returns></returns>
-	LINAVG_API void EndFrame();
+	
 
 }; // namespace LinaVG

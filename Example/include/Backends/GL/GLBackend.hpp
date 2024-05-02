@@ -37,7 +37,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 // Headers here.
 #include "LinaVG/LinaVG.hpp"
 
-namespace LinaVG::Backend
+namespace LinaVG::Examples
 {
 	class ShaderData
 	{
@@ -66,7 +66,7 @@ namespace LinaVG::Backend
 		bool		  m_skipDraw				  = false;
 	};
 
-	class GLBackend : public BaseBackend
+	class GLBackend : public Backend::BaseBackend
 	{
 	public:
 		GLBackend()			 = default;

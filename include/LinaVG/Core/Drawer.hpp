@@ -35,6 +35,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "Common.hpp"
+#include "Renderer.hpp"
 
 namespace LinaVG
 {
@@ -103,6 +104,14 @@ namespace LinaVG
 		Both
 	};
 
+class Drawer
+{
+public:
+    
+    inline Renderer& GetRenderer()
+    {
+        return m_renderer;
+    }
 	/// <summary>
 	/// Draws a bezier curve defined by the start, end and control points.
 	/// </summary>
@@ -115,13 +124,11 @@ namespace LinaVG
 	/// <param name="jointType">Determines how to join the lines.</param>
 	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
 	/// <param name="segments"> Determines the smoothness of the curve. 0-100 range, 100 smoothest. </param>
-	LINAVG_API void DrawBezier(int thread, const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, int segments = 50);
 	LINAVG_API void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, int segments = 50);
 
 	/// <summary>
 	/// Draws a single point.
 	/// </summary>
-	LINAVG_API void DrawPoint(int thread, const Vec2& p1, const Vec4& col);
 	LINAVG_API void DrawPoint(const Vec2& p1, const Vec4& col);
 
 	/// <summary>
@@ -133,7 +140,6 @@ namespace LinaVG
 	/// <param name="cap">Puts a line cap to either first, last or both ends.</param>
 	/// <param name="rotateAngle">Rotates the whole line by the given angle (degrees).</param>
 	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawLine(int thread, const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, float rotateAngle = 0.0f, int drawOrder = 0);
 	LINAVG_API void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, float rotateAngle = 0.0f, int drawOrder = 0);
 
 	/// <summary>
@@ -145,7 +151,6 @@ namespace LinaVG
 	/// <param name="cap">Puts a line cap to either first, last or both ends.</param>
 	/// <param name="jointType">Determines how to join the lines.</param>
 	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawLines(int thread, Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0);
 	LINAVG_API void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0);
 
 	/// <summary>
@@ -160,7 +165,6 @@ namespace LinaVG
 	/// <param name="uvOffset">Texture UV offset.</param>
 	/// <param name="uvTL">Top-left UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
 	/// <param name="uvBR">Bottom-right UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
-	LINAVG_API void DrawImage(int thread, BackendHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint = Vec4(1, 1, 1, 1), float rotateAngle = 0.0f, int drawOrder = 0, Vec2 uvTiling = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
 	LINAVG_API void DrawImage(BackendHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint = Vec4(1, 1, 1, 1), float rotateAngle = 0.0f, int drawOrder = 0, Vec2 uvTiling = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
 
 	/// <summary>
@@ -173,7 +177,6 @@ namespace LinaVG
 	/// <param name="style">Style options.</param>
 	/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
 	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawTriangle(int thread, const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 	LINAVG_API void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
 	/// <summary>
@@ -184,7 +187,6 @@ namespace LinaVG
 	/// <param name="style">Style options.</param>
 	/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
 	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawRect(int thread, const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 	LINAVG_API void DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
 	/// <summary>
@@ -196,7 +198,6 @@ namespace LinaVG
 	/// <param name="style">Style options.</param>
 	/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
 	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawNGon(int thread, const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 	LINAVG_API void DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
 	/// <summary>
@@ -207,7 +208,6 @@ namespace LinaVG
 	/// <param name="style">Style options.</param>
 	/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
 	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawConvex(int thread, Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 	LINAVG_API void DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
 	/// <summary>
@@ -225,7 +225,6 @@ namespace LinaVG
 	/// <param name="endAngle">Use start and end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
 	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
 	/// <returns></returns>
-	LINAVG_API void DrawCircle(int thread, const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 	LINAVG_API void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 
 #ifndef LINAVG_DISABLE_TEXT_SUPPORT
@@ -242,7 +241,6 @@ namespace LinaVG
 	/// <param name="skipCache">Even if text caching is enabled globally, setting this to true will skip it for this call. Best used for dynamically changing text such as number counters. </param>
 	/// <param name="outData"> Fill character related information if not nullptr. </param>
 	/// <returns></returns>
-	LINAVG_API void DrawTextNormal(int thread, const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
 	LINAVG_API void DrawTextNormal(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
 
 	/// <summary>
@@ -259,7 +257,6 @@ namespace LinaVG
 	/// <param name="skipCache">Even if text caching is enabled globally, setting this to true will skip it for this call. Best used for dynamically changing text such as number counters. </param>
 	/// <param name="outData"> Fill character related information if not nullptr. </param>
 	/// <returns></returns>
-	LINAVG_API void DrawTextSDF(int thread, const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
 	LINAVG_API void DrawTextSDF(const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
 
 	/// <summary>
@@ -269,7 +266,6 @@ namespace LinaVG
 	/// <param name="text">Text, lol.</param>
 	/// <param name="opts">Style options used to draw the text.</param>
 	/// <returns></returns>
-	LINAVG_API Vec2 CalculateTextSize(int thread, const char* text, TextOptions& opts);
 	LINAVG_API Vec2 CalculateTextSize(const char* text, TextOptions& opts);
 
 	/// <summary>
@@ -279,13 +275,12 @@ namespace LinaVG
 	/// <param name="text">Text, lol.</param>
 	/// <param name="opts">Style options used to draw the text.</param>
 	/// <returns></returns>
-	LINAVG_API Vec2 CalculateTextSize(int thread, const char* text, SDFTextOptions& opts);
 	LINAVG_API Vec2 CalculateTextSize(const char* text, SDFTextOptions& opts);
 
 #endif
 
-	namespace Internal
-	{
+private:
+    
 		enum class OutlineCallType
 		{
 			Normal,
@@ -294,67 +289,67 @@ namespace LinaVG
 		};
 
 		// No rounding, vertical or horizontal gradient
-		void FillRect_NoRound_VerHorGra(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts, int drawOrder);
+		void FillRect_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts, int drawOrder);
 
 		// No rounding, single color
-		void FillRect_NoRound_SC(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& color, StyleOptions& opts, int drawOrder);
+		void FillRect_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& color, StyleOptions& opts, int drawOrder);
 
 		// No rounding, radial gradient
-		void FillRect_NoRound_RadialGra(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& startcolor, const Vec4& endColor, StyleOptions& opts, int drawOrder);
+		void FillRect_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& startcolor, const Vec4& endColor, StyleOptions& opts, int drawOrder);
 
 		// Rounding
-		void FillRect_Round(int thread, DrawBuffer* buf, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& col, float rounding, StyleOptions& opts, int drawOrder);
+		void FillRect_Round(DrawBuffer* buf, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& col, float rounding, StyleOptions& opts, int drawOrder);
 
 		// Fill rect impl.
-		void FillRectData(int thread, Vertex* vertArray, bool hasCenter, const Vec2& min, const Vec2& max);
+		void FillRectData(Vertex* vertArray, bool hasCenter, const Vec2& min, const Vec2& max);
 
 		// No rounding, vertical or horizontal gradient
-		void FillTri_NoRound_VerHorGra(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts, int drawOrder);
+		void FillTri_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts, int drawOrder);
 
 		// No rounding, single color
-		void FillTri_NoRound_SC(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& color, StyleOptions& opts, int drawOrder);
+		void FillTri_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& color, StyleOptions& opts, int drawOrder);
 
 		// No rounding, radial gradient
-		void FillTri_NoRound_RadialGra(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts, int drawOrder);
+		void FillTri_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts, int drawOrder);
 
 		// Rounding
-		void FillTri_Round(int thread, DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& col, float rounding, StyleOptions& opts, int drawOrder);
+		void FillTri_Round(DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& col, float rounding, StyleOptions& opts, int drawOrder);
 
 		// Fill rect impl.
-		void FillTriData(int thread, Vertex* vertArray, bool hasCenter, bool calculateUV, const Vec2& p1, const Vec2& p2, const Vec2& p3);
+		void FillTriData(Vertex* vertArray, bool hasCenter, bool calculateUV, const Vec2& p1, const Vec2& p2, const Vec2& p3);
 
 		// No rounding, single color
-		void FillNGon_SC(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color, StyleOptions& opts, int drawOrder);
+		void FillNGon_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color, StyleOptions& opts, int drawOrder);
 
 		// No rounding, horizontal or vertical gradient
-		void FillNGon_VerHorGra(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts, int drawOrder);
+		void FillNGon_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts, int drawOrder);
 
 		// No rounding, radial gradient
-		void FillNGon_RadialGra(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts, int drawOrder);
+		void FillNGon_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts, int drawOrder);
 
 		// Fill NGon imp
-		void FillNGonData(int thread, Array<Vertex>&, bool hasCenter, const Vec2& center, float radius, int n);
+		void FillNGonData(Array<Vertex>&, bool hasCenter, const Vec2& center, float radius, int n);
 
 		// Single color
-		void FillCircle_SC(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
+		void FillCircle_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
 
 		// Vertical or horizontal gradinet.
-		void FillCircle_VerHorGra(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
+		void FillCircle_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
 
 		// Radial gradient
-		void FillCircle_RadialGra(int thread, DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
+		void FillCircle_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
 
 		// Fill circle impl
-		void FillCircleData(int thread, Array<Vertex>& v, bool hasCenter, const Vec2& center, float radius, int segments, float startAngle, float endAngle);
+		void FillCircleData(Array<Vertex>& v, bool hasCenter, const Vec2& center, float radius, int segments, float startAngle, float endAngle);
 
 		// Single color
-		void FillConvex_SC(int thread, DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& color, StyleOptions& opts, int drawOrder);
+		void FillConvex_SC(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& color, StyleOptions& opts, int drawOrder);
 
 		// Vertical horizontal gradient
-		void FillConvex_VerHorGra(int thread, DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts, int drawOrder);
+		void FillConvex_VerHorGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts, int drawOrder);
 
 		// Radial gradient.
-		void FillConvex_RadialGra(int thread, DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts, int drawOrder);
+		void FillConvex_RadialGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts, int drawOrder);
 
 		/// Triangle bounding box.
 		void GetTriangleBoundingBox(const Vec2& p1, const Vec2& p2, const Vec2& p3, Vec2& outMin, Vec2& outMax);
@@ -406,7 +401,7 @@ namespace LinaVG
 		/// Line calculation methods.
 		void	   CalculateLine(Line& line, const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection lineCapToAdd);
 		void	   JoinLines(Line& line1, Line& line2, StyleOptions& opts, LineJointType joinType, bool mergeUpperVertices);
-		void	   DrawSimpleLine(int thread, SimpleLine& line, StyleOptions& style, float rotateAngle, int drawOrder);
+		void	   DrawSimpleLine(SimpleLine& line, StyleOptions& style, float rotateAngle, int drawOrder);
 		void	   CalculateLineUVs(Line& line);
 		SimpleLine CalculateSimpleLine(const Vec2& p1, const Vec2& p2, StyleOptions& style);
 
@@ -415,7 +410,7 @@ namespace LinaVG
 		/// Used for semi-circles, arcs, lines and alike.
 		/// </summary>
 		/// <returns></returns>
-		DrawBuffer* DrawOutlineAroundShape(int thread, DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw = false, int drawOrder = 0, OutlineCallType = OutlineCallType::Normal);
+		DrawBuffer* DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw = false, int drawOrder = 0, OutlineCallType = OutlineCallType::Normal);
 
 		/// <summary>
 		/// Draws an outline (or AA) around a convex shape.
@@ -425,7 +420,7 @@ namespace LinaVG
 		/// <param name="vertexCount"></param>
 		/// <param name="opts"></param>
 		/// <returns></returns>
-		DrawBuffer* DrawOutline(int thread, DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, int drawOrder = 0, OutlineCallType = OutlineCallType::Normal, bool reverseDrawDir = false);
+		DrawBuffer* DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds = false, int drawOrder = 0, OutlineCallType = OutlineCallType::Normal, bool reverseDrawDir = false);
 
 #ifndef LINAVG_DISABLE_TEXT_SUPPORT
 
@@ -477,7 +472,10 @@ namespace LinaVG
 		void WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth, bool wordWrap);
 
 #endif
-
-	}; // namespace Internal
+    
+private:
+    
+    Renderer m_renderer;
+};
 
 } // namespace LinaVG

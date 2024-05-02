@@ -40,7 +40,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <stdio.h>
 
-namespace LinaVG::Backend
+namespace LinaVG::Examples
 {
 
 	unsigned int GLBackend::s_displayPosX	= 0;
