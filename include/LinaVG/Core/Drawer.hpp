@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -13,11 +13,11 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
    1. Redistributions of source code must retain the above copyright notice, this
-      list of conditions and the following disclaimer.
+	  list of conditions and the following disclaimer.
 
    2. Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
+	  this list of conditions and the following disclaimer in the documentation
+	  and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -104,216 +104,212 @@ namespace LinaVG
 		Both
 	};
 
-class Drawer
-{
-public:
-    
-	/// <summary>
-	/// Draws a bezier curve defined by the start, end and control points.
-	/// </summary>
-	/// <param name="p0">Start point.</param>
-	/// <param name="p1">Control point 1.</param>
-	/// <param name="p2">Control point 2.</param>
-	/// <param name="p3">End point.</param>
-	/// <param name="style">Style options.</param>
-	/// <param name="cap">Puts a line cap to either first, last or both ends.</param>
-	/// <param name="jointType">Determines how to join the lines.</param>
-	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	/// <param name="segments"> Determines the smoothness of the curve. 0-100 range, 100 smoothest. </param>
-	LINAVG_API void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, int segments = 50);
+	class Drawer
+	{
+	public:
+		/// <summary>
+		/// Draws a bezier curve defined by the start, end and control points.
+		/// </summary>
+		/// <param name="p0">Start point.</param>
+		/// <param name="p1">Control point 1.</param>
+		/// <param name="p2">Control point 2.</param>
+		/// <param name="p3">End point.</param>
+		/// <param name="style">Style options.</param>
+		/// <param name="cap">Puts a line cap to either first, last or both ends.</param>
+		/// <param name="jointType">Determines how to join the lines.</param>
+		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+		/// <param name="segments"> Determines the smoothness of the curve. 0-100 range, 100 smoothest. </param>
+		LINAVG_API void DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0, int segments = 50);
 
-	/// <summary>
-	/// Draws a single point.
-	/// </summary>
-	LINAVG_API void DrawPoint(const Vec2& p1, const Vec4& col);
+		/// <summary>
+		/// Draws a single point.
+		/// </summary>
+		LINAVG_API void DrawPoint(const Vec2& p1, const Vec4& col);
 
-	/// <summary>
-	/// Draws a line between two points.
-	/// </summary>
-	/// <param name="p1">Start point.</param>
-	/// <param name="p2">End point.</param>
-	/// <param name="style">Style options.</param>
-	/// <param name="cap">Puts a line cap to either first, last or both ends.</param>
-	/// <param name="rotateAngle">Rotates the whole line by the given angle (degrees).</param>
-	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, float rotateAngle = 0.0f, int drawOrder = 0);
+		/// <summary>
+		/// Draws a line between two points.
+		/// </summary>
+		/// <param name="p1">Start point.</param>
+		/// <param name="p2">End point.</param>
+		/// <param name="style">Style options.</param>
+		/// <param name="cap">Puts a line cap to either first, last or both ends.</param>
+		/// <param name="rotateAngle">Rotates the whole line by the given angle (degrees).</param>
+		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+		LINAVG_API void DrawLine(const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, float rotateAngle = 0.0f, int drawOrder = 0);
 
-	/// <summary>
-	/// Draws multiple lines defined by the given path.
-	/// </summary>
-	/// <param name="points">Line path, needs to be at least 3 points.</param>
-	/// <param name="count">Total number of points in the given path.</param>
-	/// <param name="style">Style options.</param>
-	/// <param name="cap">Puts a line cap to either first, last or both ends.</param>
-	/// <param name="jointType">Determines how to join the lines.</param>
-	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0);
+		/// <summary>
+		/// Draws multiple lines defined by the given path.
+		/// </summary>
+		/// <param name="points">Line path, needs to be at least 3 points.</param>
+		/// <param name="count">Total number of points in the given path.</param>
+		/// <param name="style">Style options.</param>
+		/// <param name="cap">Puts a line cap to either first, last or both ends.</param>
+		/// <param name="jointType">Determines how to join the lines.</param>
+		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+		LINAVG_API void DrawLines(Vec2* points, int count, StyleOptions& style, LineCapDirection cap = LineCapDirection::None, LineJointType jointType = LineJointType::Miter, int drawOrder = 0);
 
-	/// <summary>
-	/// Draws a texture in the given pos.
-	/// </summary>
-	/// <param name="textureHandle">Texture handle, should be a valid texture loaded into the target backend device.</param>
-	/// <param name="pos">Center position of the draw rect.</param>
-	/// <param name="size">Size of the draw rect, should be same aspect ratio to prevent stretching.</param>
-	/// <param name="rotateAngle">Rotates the whole image by the given angle (degrees).</param>
-	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	/// <param name="uvTiling">Texture tiling.</param>
-	/// <param name="uvOffset">Texture UV offset.</param>
-	/// <param name="uvTL">Top-left UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
-	/// <param name="uvBR">Bottom-right UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
-	LINAVG_API void DrawImage(BackendHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint = Vec4(1, 1, 1, 1), float rotateAngle = 0.0f, int drawOrder = 0, Vec2 uvTiling = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
+		/// <summary>
+		/// Draws a texture in the given pos.
+		/// </summary>
+		/// <param name="textureHandle">Texture handle, should be a valid texture loaded into the target backend device.</param>
+		/// <param name="pos">Center position of the draw rect.</param>
+		/// <param name="size">Size of the draw rect, should be same aspect ratio to prevent stretching.</param>
+		/// <param name="rotateAngle">Rotates the whole image by the given angle (degrees).</param>
+		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+		/// <param name="uvTiling">Texture tiling.</param>
+		/// <param name="uvOffset">Texture UV offset.</param>
+		/// <param name="uvTL">Top-left UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
+		/// <param name="uvBR">Bottom-right UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
+		LINAVG_API void DrawImage(BackendHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint = Vec4(1, 1, 1, 1), float rotateAngle = 0.0f, int drawOrder = 0, Vec2 uvTiling = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
 
-	/// <summary>
-	/// Your points for the triangle must follow the given parameter order -- left, right and top edges.
-	/// If you are drawing odd triangles, e.g. maxAngle > 90, rounding of the triangle might perform poorly on sharp edges.
-	/// </summary>
-	/// <param name="top"> Top corner. </param>
-	/// <param name="right"> Bottom right corner. </param>
-	/// <param name="left"> Bottom left corner. </param>
-	/// <param name="style">Style options.</param>
-	/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
+		/// <summary>
+		/// Your points for the triangle must follow the given parameter order -- left, right and top edges.
+		/// If you are drawing odd triangles, e.g. maxAngle > 90, rounding of the triangle might perform poorly on sharp edges.
+		/// </summary>
+		/// <param name="top"> Top corner. </param>
+		/// <param name="right"> Bottom right corner. </param>
+		/// <param name="left"> Bottom left corner. </param>
+		/// <param name="style">Style options.</param>
+		/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+		LINAVG_API void DrawTriangle(const Vec2& top, const Vec2& right, const Vec2& left, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
-	/// <summary>
-	/// Draws a filled rectangle between min and max with the given style options and rotation angle.
-	/// </summary>
-	/// <param name="min">Top left corner of the rectangle.</param>
-	/// <param name="max">Bottom right corner of the rectangle.</param>
-	/// <param name="style">Style options.</param>
-	/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
+		/// <summary>
+		/// Draws a filled rectangle between min and max with the given style options and rotation angle.
+		/// </summary>
+		/// <param name="min">Top left corner of the rectangle.</param>
+		/// <param name="max">Bottom right corner of the rectangle.</param>
+		/// <param name="style">Style options.</param>
+		/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+		LINAVG_API void DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
-	/// <summary>
-	/// Draws a convex polygon with N corners. !Rounding options do not apply to NGons!
-	/// </summary>
-	/// <param name="center">Shape center.</param>
-	/// <param name="radius">Shape radius.</param>
-	/// <param name="n">Segment count.</param>
-	/// <param name="style">Style options.</param>
-	/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
+		/// <summary>
+		/// Draws a convex polygon with N corners. !Rounding options do not apply to NGons!
+		/// </summary>
+		/// <param name="center">Shape center.</param>
+		/// <param name="radius">Shape radius.</param>
+		/// <param name="n">Segment count.</param>
+		/// <param name="style">Style options.</param>
+		/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+		LINAVG_API void DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
-	/// <summary>
-	/// Draws a convex shape defined by the set of points. All points must be unique.
-	/// </summary>
-	/// <param name="points">Path to follow while drawing the shape. It's users' responsibility to ensure this is a convex shape.</param>
-	/// <param name="size">Total number of given points.</param>
-	/// <param name="style">Style options.</param>
-	/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	LINAVG_API void DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
+		/// <summary>
+		/// Draws a convex shape defined by the set of points. All points must be unique.
+		/// </summary>
+		/// <param name="points">Path to follow while drawing the shape. It's users' responsibility to ensure this is a convex shape.</param>
+		/// <param name="size">Total number of given points.</param>
+		/// <param name="style">Style options.</param>
+		/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+		LINAVG_API void DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle = 0.0f, int drawOrder = 0);
 
-	/// <summary>
-	/// Draws a filled circle with the given radius and center.
-	/// You can change the start and end angles to create a filled semi-circle or a filled arc.
-	/// It's recommended to send angles always in the range of 0.0f - 360.0f, clock-wise. This method will try to auto-convert if not.
-	/// !Rounding options have no effect.!
-	/// </summary>
-	/// <param name="center">Center of the shape.</param>
-	/// <param name="radius">Radius of the shape.</param>
-	/// <param name="style">Style options.</param>
-	/// <param name="segments">Defines the smoothness of the circle, default 36. Clamped to 6-360, 360 being perfect circle. Higher the segment cause more weight on the performance. 18-54 is a good range for balance. Always recommended to use segments that leave no remainder when 360 is divided by it. </param>
-	/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-	/// <param name="startAngle">Use start and end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
-	/// <param name="endAngle">Use start and end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
-	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	/// <returns></returns>
-	LINAVG_API void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
+		/// <summary>
+		/// Draws a filled circle with the given radius and center.
+		/// You can change the start and end angles to create a filled semi-circle or a filled arc.
+		/// It's recommended to send angles always in the range of 0.0f - 360.0f, clock-wise. This method will try to auto-convert if not.
+		/// !Rounding options have no effect.!
+		/// </summary>
+		/// <param name="center">Center of the shape.</param>
+		/// <param name="radius">Radius of the shape.</param>
+		/// <param name="style">Style options.</param>
+		/// <param name="segments">Defines the smoothness of the circle, default 36. Clamped to 6-360, 360 being perfect circle. Higher the segment cause more weight on the performance. 18-54 is a good range for balance. Always recommended to use segments that leave no remainder when 360 is divided by it. </param>
+		/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+		/// <param name="startAngle">Use start and end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
+		/// <param name="endAngle">Use start and end angle to draw semi-circles or arcs. Leave empty (0.0f, 360.0f) for complete circles.</param>
+		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+		/// <returns></returns>
+		LINAVG_API void DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments = 36, float rotateAngle = 0.0f, float startAngle = 0.0f, float endAngle = 360.0f, int drawOrder = 0);
 
 #ifndef LINAVG_DISABLE_TEXT_SUPPORT
 
-	/// <summary>
-	/// Draws the given text at position. The font used in Text Options must be loaded as normal font, e.g. non-sdf.
-	/// Given position will be upper-left corner of the text. Use CalculateTextSize to offset the text, e.g. center.
-	/// </summary>
-	/// <param name="text">Text to draw.</param>
-	/// <param name="position">Screen-space position.</param>
-	/// <param name="style">Style options.</param>
-	/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	/// <param name="skipCache">Even if text caching is enabled globally, setting this to true will skip it for this call. Best used for dynamically changing text such as number counters. </param>
-	/// <param name="outData"> Fill character related information if not nullptr. </param>
-	/// <returns></returns>
-	LINAVG_API void DrawTextNormal(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
+		/// <summary>
+		/// Draws the given text at position. The font used in Text Options must be loaded as normal font, e.g. non-sdf.
+		/// Given position will be upper-left corner of the text. Use CalculateTextSize to offset the text, e.g. center.
+		/// </summary>
+		/// <param name="text">Text to draw.</param>
+		/// <param name="position">Screen-space position.</param>
+		/// <param name="style">Style options.</param>
+		/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+		/// <param name="skipCache">Even if text caching is enabled globally, setting this to true will skip it for this call. Best used for dynamically changing text such as number counters. </param>
+		/// <param name="outData"> Fill character related information if not nullptr. </param>
+		/// <returns></returns>
+		LINAVG_API void DrawTextNormal(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
 
-	/// <summary>
-	/// Draws the given text at position as an SDF text, which produces a lot more high-quality results than normal text, regardless
-	/// of scaling & rotation. Also SDF texts has a lot more styling options, such as outlines and more paramaterized drop shadows.
-	/// The font used in Text Options must be loaded as an SDF-font.
-	/// Given position will be upper-left corner of the text. Use CalculateTextSize to offset the text, e.g. center.
-	/// </summary>
-	/// <param name="text">Text to draw.</param>
-	/// <param name="position">Screen-space position.</param>
-	/// <param name="style">Style options.</param>
-	/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-	/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-	/// <param name="skipCache">Even if text caching is enabled globally, setting this to true will skip it for this call. Best used for dynamically changing text such as number counters. </param>
-	/// <param name="outData"> Fill character related information if not nullptr. </param>
-	/// <returns></returns>
-	LINAVG_API void DrawTextSDF(const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
+		/// <summary>
+		/// Draws the given text at position as an SDF text, which produces a lot more high-quality results than normal text, regardless
+		/// of scaling & rotation. Also SDF texts has a lot more styling options, such as outlines and more paramaterized drop shadows.
+		/// The font used in Text Options must be loaded as an SDF-font.
+		/// Given position will be upper-left corner of the text. Use CalculateTextSize to offset the text, e.g. center.
+		/// </summary>
+		/// <param name="text">Text to draw.</param>
+		/// <param name="position">Screen-space position.</param>
+		/// <param name="style">Style options.</param>
+		/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
+		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
+		/// <param name="skipCache">Even if text caching is enabled globally, setting this to true will skip it for this call. Best used for dynamically changing text such as number counters. </param>
+		/// <param name="outData"> Fill character related information if not nullptr. </param>
+		/// <returns></returns>
+		LINAVG_API void DrawTextSDF(const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
 
-	/// <summary>
-	/// Returns a Vec2 containing max width and height this text will occupy.
-	/// Takes spacing and wrapping into account.
-	/// </summary>
-	/// <param name="text">Text, lol.</param>
-	/// <param name="opts">Style options used to draw the text.</param>
-	/// <returns></returns>
-	LINAVG_API Vec2 CalculateTextSize(const char* text, TextOptions& opts);
+		/// <summary>
+		/// Returns a Vec2 containing max width and height this text will occupy.
+		/// Takes spacing and wrapping into account.
+		/// </summary>
+		/// <param name="text">Text, lol.</param>
+		/// <param name="opts">Style options used to draw the text.</param>
+		/// <returns></returns>
+		LINAVG_API Vec2 CalculateTextSize(const char* text, TextOptions& opts);
 
-	/// <summary>
-	/// Returns a Vec2 containing max width and height this text will occupy.
-	/// Takes spacing and wrapping into account.
-	/// </summary>
-	/// <param name="text">Text, lol.</param>
-	/// <param name="opts">Style options used to draw the text.</param>
-	/// <returns></returns>
-	LINAVG_API Vec2 CalculateTextSize(const char* text, SDFTextOptions& opts);
+		/// <summary>
+		/// Returns a Vec2 containing max width and height this text will occupy.
+		/// Takes spacing and wrapping into account.
+		/// </summary>
+		/// <param name="text">Text, lol.</param>
+		/// <param name="opts">Style options used to draw the text.</param>
+		/// <returns></returns>
+		LINAVG_API Vec2 CalculateTextSize(const char* text, SDFTextOptions& opts);
 
 #endif
 
-    
-    inline LINAVG_API void SetClipPosX(BackendHandle posX)
-    {
-        m_bufferStore.SetClipPosX(posX);
-    }
-    
-    inline LINAVG_API void SetClipPosY(BackendHandle posY)
-    {
-        m_bufferStore.SetClipPosY(posY);
-    }
-    
-    inline LINAVG_API void SetClipSizeX(BackendHandle sizeX)
-    {
-        m_bufferStore.SetClipSizeX(sizeX);
-    }
-    
-    inline LINAVG_API void SetClipSizeY(BackendHandle sizeY)
-    {
-        m_bufferStore.SetClipSizeY(sizeY);
-    }
-    
-    inline LINAVG_API void FlushBuffers()
-    {
-        m_bufferStore.FlushBuffers();
-    }
-    
-    inline LINAVG_API void ResetFrame()
-    {
-        m_bufferStore.ResetFrame();
-    }
-    
-    inline LINAVG_API BufferStoreCallbacks& GetCallbacks()
-    {
-        return m_bufferStore.GetCallbacks();
-    }
-    
-    
-private:
-    
+		inline LINAVG_API void SetClipPosX(BackendHandle posX)
+		{
+			m_bufferStore.SetClipPosX(posX);
+		}
+
+		inline LINAVG_API void SetClipPosY(BackendHandle posY)
+		{
+			m_bufferStore.SetClipPosY(posY);
+		}
+
+		inline LINAVG_API void SetClipSizeX(BackendHandle sizeX)
+		{
+			m_bufferStore.SetClipSizeX(sizeX);
+		}
+
+		inline LINAVG_API void SetClipSizeY(BackendHandle sizeY)
+		{
+			m_bufferStore.SetClipSizeY(sizeY);
+		}
+
+		inline LINAVG_API void FlushBuffers()
+		{
+			m_bufferStore.FlushBuffers();
+		}
+
+		inline LINAVG_API void ResetFrame()
+		{
+			m_bufferStore.ResetFrame();
+		}
+
+		inline LINAVG_API BufferStoreCallbacks& GetCallbacks()
+		{
+			return m_bufferStore.GetCallbacks();
+		}
+
+	private:
 		enum class OutlineCallType
 		{
 			Normal,
@@ -426,11 +422,11 @@ private:
 		/// Returns the average center position for the given vertices.
 		/// </summary>
 		Vec2 GetVerticesCenter(DrawBuffer* buf, int startIndex, int endIndex);
-    
-        /// <summary>
-        /// </summary>
-        bool IsPointInside(const Vec2& point, const Vec4& rect);
-    
+
+		/// <summary>
+		/// </summary>
+		bool IsPointInside(const Vec2& point, const Vec4& rect);
+
 		/// Line calculation methods.
 		void	   CalculateLine(Line& line, const Vec2& p1, const Vec2& p2, StyleOptions& style, LineCapDirection lineCapToAdd);
 		void	   JoinLines(Line& line1, Line& line2, StyleOptions& opts, LineJointType joinType, bool mergeUpperVertices);
@@ -505,10 +501,9 @@ private:
 		void WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth, bool wordWrap);
 
 #endif
-    
-private:
-    
-    BufferStore m_bufferStore;
-};
+
+	private:
+		BufferStore m_bufferStore;
+	};
 
 } // namespace LinaVG

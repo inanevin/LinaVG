@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -13,11 +13,11 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
    1. Redistributions of source code must retain the above copyright notice, this
-      list of conditions and the following disclaimer.
+	  list of conditions and the following disclaimer.
 
    2. Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
+	  this list of conditions and the following disclaimer in the documentation
+	  and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -44,113 +44,113 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace LinaVG
 {
-    BufferStore::BufferStore()
-    {
-        m_data.m_defaultBuffers.reserve(Config.defaultBufferReserve);
-        m_data.m_gradientBuffers.reserve(Config.gradientBufferReserve);
-        m_data.m_textureBuffers.reserve(Config.textureBufferReserve);
-        m_data.m_simpleTextBuffers.reserve(Config.textBuffersReserve);
-        m_data.m_sdfTextBuffers.reserve(Config.textBuffersReserve);
-        
-        if (Config.textCachingEnabled)
-            m_data.m_textCache.reserve(Config.textCacheReserve);
-        
-        if (Config.textCachingSDFEnabled)
-            m_data.m_sdfTextCache.reserve(Config.textCacheSDFReserve);
-    }
+	BufferStore::BufferStore()
+	{
+		m_data.m_defaultBuffers.reserve(Config.defaultBufferReserve);
+		m_data.m_gradientBuffers.reserve(Config.gradientBufferReserve);
+		m_data.m_textureBuffers.reserve(Config.textureBufferReserve);
+		m_data.m_simpleTextBuffers.reserve(Config.textBuffersReserve);
+		m_data.m_sdfTextBuffers.reserve(Config.textBuffersReserve);
 
-    BufferStore::~BufferStore()
-    {
-        ClearAllBuffers();
-    }
+		if (Config.textCachingEnabled)
+			m_data.m_textCache.reserve(Config.textCacheReserve);
 
-    void BufferStore::ClearAllBuffers()
-    {
-        m_data.m_gcFrameCounter = 0;
-        
-        for (int i = 0; i < m_data.m_gradientBuffers.m_size; i++)
-            m_data.m_gradientBuffers[i].Clear();
-        
-        m_data.m_gradientBuffers.clear();
-        
-        for (int i = 0; i < m_data.m_textureBuffers.m_size; i++)
-            m_data.m_textureBuffers[i].Clear();
-        
-        m_data.m_textureBuffers.clear();
-        
-        for (int i = 0; i < m_data.m_defaultBuffers.m_size; i++)
-            m_data.m_defaultBuffers[i].Clear();
-        
-        m_data.m_defaultBuffers.clear();
-        
-        for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
-            m_data.m_simpleTextBuffers[i].Clear();
-        
-        m_data.m_simpleTextBuffers.clear();
-        
-        for (int i = 0; i < m_data.m_sdfTextBuffers.m_size; i++)
-            m_data.m_sdfTextBuffers[i].Clear();
-        
-        m_data.m_sdfTextBuffers.clear();
-        m_data.m_drawOrders.clear();
-    }
+		if (Config.textCachingSDFEnabled)
+			m_data.m_sdfTextCache.reserve(Config.textCacheSDFReserve);
+	}
+
+	BufferStore::~BufferStore()
+	{
+		ClearAllBuffers();
+	}
+
+	void BufferStore::ClearAllBuffers()
+	{
+		m_data.m_gcFrameCounter = 0;
+
+		for (int i = 0; i < m_data.m_gradientBuffers.m_size; i++)
+			m_data.m_gradientBuffers[i].Clear();
+
+		m_data.m_gradientBuffers.clear();
+
+		for (int i = 0; i < m_data.m_textureBuffers.m_size; i++)
+			m_data.m_textureBuffers[i].Clear();
+
+		m_data.m_textureBuffers.clear();
+
+		for (int i = 0; i < m_data.m_defaultBuffers.m_size; i++)
+			m_data.m_defaultBuffers[i].Clear();
+
+		m_data.m_defaultBuffers.clear();
+
+		for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
+			m_data.m_simpleTextBuffers[i].Clear();
+
+		m_data.m_simpleTextBuffers.clear();
+
+		for (int i = 0; i < m_data.m_sdfTextBuffers.m_size; i++)
+			m_data.m_sdfTextBuffers[i].Clear();
+
+		m_data.m_sdfTextBuffers.clear();
+		m_data.m_drawOrders.clear();
+	}
 
 	void BufferStore::ResetFrame()
 	{
-        m_data.m_gcFrameCounter++;
+		m_data.m_gcFrameCounter++;
 
-        if (m_data.m_gcFrameCounter > Config.gcCollectInterval)
-        {
-            ClearAllBuffers();
-        }
-        else
-        {
-            for (int i = 0; i < m_data.m_gradientBuffers.m_size; i++)
-                m_data.m_gradientBuffers[i].ShrinkZero();
+		if (m_data.m_gcFrameCounter > Config.gcCollectInterval)
+		{
+			ClearAllBuffers();
+		}
+		else
+		{
+			for (int i = 0; i < m_data.m_gradientBuffers.m_size; i++)
+				m_data.m_gradientBuffers[i].ShrinkZero();
 
-            for (int i = 0; i < m_data.m_textureBuffers.m_size; i++)
-                m_data.m_textureBuffers[i].ShrinkZero();
+			for (int i = 0; i < m_data.m_textureBuffers.m_size; i++)
+				m_data.m_textureBuffers[i].ShrinkZero();
 
-            for (int i = 0; i < m_data.m_defaultBuffers.m_size; i++)
-                m_data.m_defaultBuffers[i].ShrinkZero();
+			for (int i = 0; i < m_data.m_defaultBuffers.m_size; i++)
+				m_data.m_defaultBuffers[i].ShrinkZero();
 
-            for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
-                m_data.m_simpleTextBuffers[i].ShrinkZero();
+			for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
+				m_data.m_simpleTextBuffers[i].ShrinkZero();
 
-            for (int i = 0; i < m_data.m_sdfTextBuffers.m_size; i++)
-                m_data.m_sdfTextBuffers[i].ShrinkZero();
-        }
+			for (int i = 0; i < m_data.m_sdfTextBuffers.m_size; i++)
+				m_data.m_sdfTextBuffers[i].ShrinkZero();
+		}
 
-        // SDF
-        if (Config.textCachingEnabled || Config.textCachingSDFEnabled)
-            m_data.m_textCacheFrameCounter++;
+		// SDF
+		if (Config.textCachingEnabled || Config.textCachingSDFEnabled)
+			m_data.m_textCacheFrameCounter++;
 
-        if (m_data.m_textCacheFrameCounter > Config.textCacheExpireInterval)
-        {
-            m_data.m_textCacheFrameCounter = 0;
-            m_data.m_textCache.clear();
-            m_data.m_sdfTextCache.clear();
-        }
+		if (m_data.m_textCacheFrameCounter > Config.textCacheExpireInterval)
+		{
+			m_data.m_textCacheFrameCounter = 0;
+			m_data.m_textCache.clear();
+			m_data.m_sdfTextCache.clear();
+		}
 	}
 
 	void BufferStore::FlushBuffers()
 	{
-        int thread = 0;
+		int	 thread		 = 0;
 		auto renderBuffs = [this, thread](int drawOrder, DrawBufferShapeType shapeType) {
 			for (int i = 0; i < m_data.m_defaultBuffers.m_size; i++)
 			{
 				DrawBuffer& buf = m_data.m_defaultBuffers[i];
 
 				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-                {
-                    if(m_callbacks.drawDefault)
-                        m_callbacks.drawDefault(&buf);
-                    else
-                    {
-                        if(LinaVG::Config.logCallback)
-                            LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawDefault");
-                    }
-                }
+				{
+					if (m_callbacks.drawDefault)
+						m_callbacks.drawDefault(&buf);
+					else
+					{
+						if (LinaVG::Config.logCallback)
+							LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawDefault");
+					}
+				}
 			}
 
 			for (int i = 0; i < m_data.m_gradientBuffers.m_size; i++)
@@ -158,15 +158,15 @@ namespace LinaVG
 				GradientDrawBuffer& buf = m_data.m_gradientBuffers[i];
 
 				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-                {
-                    if(m_callbacks.drawGradient)
-                        m_callbacks.drawGradient(&buf);
-                    else
-                    {
-                        if(LinaVG::Config.logCallback)
-                            LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawGradient");
-                    }
-                }
+				{
+					if (m_callbacks.drawGradient)
+						m_callbacks.drawGradient(&buf);
+					else
+					{
+						if (LinaVG::Config.logCallback)
+							LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawGradient");
+					}
+				}
 			}
 
 			for (int i = 0; i < m_data.m_textureBuffers.m_size; i++)
@@ -174,15 +174,15 @@ namespace LinaVG
 				TextureDrawBuffer& buf = m_data.m_textureBuffers[i];
 
 				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-                {
-                    if(m_callbacks.drawTextured)
-                        m_callbacks.drawTextured(&buf);
-                    else
-                    {
-                        if(LinaVG::Config.logCallback)
-                            LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawTextured");
-                    }
-                }
+				{
+					if (m_callbacks.drawTextured)
+						m_callbacks.drawTextured(&buf);
+					else
+					{
+						if (LinaVG::Config.logCallback)
+							LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawTextured");
+					}
+				}
 			}
 
 			for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
@@ -190,15 +190,15 @@ namespace LinaVG
 				SimpleTextDrawBuffer& buf = m_data.m_simpleTextBuffers[i];
 
 				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-                {
-                    if(m_callbacks.drawSimpleText)
-                        m_callbacks.drawSimpleText(&buf);
-                    else
-                    {
-                        if(LinaVG::Config.logCallback)
-                            LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawSimpleText");
-                    }
-                }
+				{
+					if (m_callbacks.drawSimpleText)
+						m_callbacks.drawSimpleText(&buf);
+					else
+					{
+						if (LinaVG::Config.logCallback)
+							LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawSimpleText");
+					}
+				}
 			}
 
 			for (int i = 0; i < m_data.m_sdfTextBuffers.m_size; i++)
@@ -206,15 +206,15 @@ namespace LinaVG
 				SDFTextDrawBuffer& buf = m_data.m_sdfTextBuffers[i];
 
 				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-                {
-                    if(m_callbacks.drawSDFText)
-                        m_callbacks.drawSDFText(&buf);
-                    else
-                    {
-                        if(LinaVG::Config.logCallback)
-                            LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawSDFText");
-                    }
-                }
+				{
+					if (m_callbacks.drawSDFText)
+						m_callbacks.drawSDFText(&buf);
+					else
+					{
+						if (LinaVG::Config.logCallback)
+							LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawSDFText");
+					}
+				}
 			}
 		};
 
@@ -330,7 +330,7 @@ namespace LinaVG
 		{
 			auto& buf = m_sdfTextBuffers[i];
 			if (buf.m_isDropShadow == isDropShadow && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && Math::IsEqualMarg(buf.m_thickness, opts.sdfThickness) && Math::IsEqualMarg(buf.m_softness, opts.sdfSoftness) &&
-                Math::IsEqualMarg(buf.m_outlineThickness, opts.sdfOutlineThickness) && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+				Math::IsEqualMarg(buf.m_outlineThickness, opts.sdfOutlineThickness) && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
 				return m_sdfTextBuffers[i];
 		}
 

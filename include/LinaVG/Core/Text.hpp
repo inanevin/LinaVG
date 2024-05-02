@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -13,11 +13,11 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
    1. Redistributions of source code must retain the above copyright notice, this
-      list of conditions and the following disclaimer.
+	  list of conditions and the following disclaimer.
 
    2. Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
+	  this list of conditions and the following disclaimer in the documentation
+	  and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -62,13 +62,13 @@ namespace LinaVG
 		unsigned char* m_buffer = nullptr;
 	};
 
-    struct Callbacks
-    {
-        std::function<void(BackendHandle)> fontTextureBind;
-        std::function<BackendHandle(unsigned int width, unsigned int height)> fontTextureCreate;
-        std::function<void(unsigned int glyphWidth, unsigned int glyphHeight, int offsetX, int offsetY, unsigned char* data)> fontTextureBufferData;
-        std::function<void()> fontTextureBufferEnd;
-    };
+	struct Callbacks
+	{
+		std::function<void(BackendHandle)>																					  fontTextureBind;
+		std::function<BackendHandle(unsigned int width, unsigned int height)>												  fontTextureCreate;
+		std::function<void(unsigned int glyphWidth, unsigned int glyphHeight, int offsetX, int offsetY, unsigned char* data)> fontTextureBufferData;
+		std::function<void()>																								  fontTextureBufferEnd;
+	};
 
 	struct KerningInformation
 	{
@@ -105,72 +105,70 @@ namespace LinaVG
 		Array<FontAtlas> m_createdAtlases;
 	};
 
+	namespace Text
+	{
+		extern LINAVG_API TextData	g_textData;
+		extern LINAVG_API Callbacks g_textCallbacks;
 
-namespace Text
-{
-    
-    extern LINAVG_API TextData g_textData;
-    extern LINAVG_API Callbacks g_textCallbacks;
-   /// <summary>
-   /// Call once during your app before loading any fonts to setup free type library.
-   /// </summary>
-    extern LINAVG_API bool Initialize();
-   
-   /// <summary>
-   /// Set these callbacks before you start loading any font to receive font atlas buffering data.
-   /// </summary>
-extern LINAVG_API Callbacks& GetCallbacks();
+		/// <summary>
+		/// Call once during your app before loading any fonts to setup free type library.
+		/// </summary>
+		extern LINAVG_API bool Initialize();
 
-   /// <summary>
-   /// Call before terminating the app, will clean up FreeType library.
-   /// </summary>
-    extern LINAVG_API void Terminate();
+		/// <summary>
+		/// Set these callbacks before you start loading any font to receive font atlas buffering data.
+		/// </summary>
+		extern LINAVG_API Callbacks& GetCallbacks();
 
-   /// <summary>
-   /// Loads the given font and generates textures based on given size.
-   /// You can load the same font with different sizes to achieve varying text scales.
-   /// Alternatively, you can use the scale modifier in TextOptions but it's not recommended to upscale.
-   /// Best quality would be achieved by loading fonts with bigger sizes and scaling them (slightly) down using TextOptions.
-   /// Its your responsibility to delete the returned font ptr.
-   /// </summary>
-   /// <param name="file">TTF or OTF file.</param>
-   /// <param name="loadAsSDF">Creates an SDF font.</param>
-   /// <param name="size">Font height, width will automatically adjust.</param>
-   /// <param name="customRanges">Send custom ranges in UTF32 encoding, e.g. 0x1F028, to load specific characters or sets.</param>
-   /// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
-   /// <param name="useKerningIfAvailable">If the font face contains a kern table this font will be drawn using kerning information. </param>
-   /// <returns></returns>
-    extern LINAVG_API LinaVGFont* LoadFont(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
+		/// <summary>
+		/// Call before terminating the app, will clean up FreeType library.
+		/// </summary>
+		extern LINAVG_API void Terminate();
 
-   /// <summary>
-   /// Loads the given font and generates textures based on given size.
-   /// You can load the same font with different sizes to achieve varying text scales.
-   /// Alternatively, you can use the scale modifier in TextOptions but it's not recommended to upscale.
-   /// Best quality would be achieved by loading fonts with bigger sizes and scaling them (slightly) down using TextOptions.
-   /// Its your responsibility to delete the returned font ptr.
-   /// </summary>
-   /// <param name="data">Binary font data.</param>
-   /// <param name="size">Binary font data size.</param>
-   /// <param name="loadAsSDF">Creates an SDF font.</param>
-   /// <param name="size">Font height, width will automatically adjust.</param>
-   /// <param name="customRanges">Send custom ranges in UTF32 encoding, e.g. 0x1F028, to load specific characters or sets.</param>
-   /// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
-   /// <param name="useKerningIfAvailable">If the font face contains a kern table this font will be drawn using kerning information. </param>
-   /// <returns></returns>
-    extern LINAVG_API LinaVGFont* LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
+		/// <summary>
+		/// Loads the given font and generates textures based on given size.
+		/// You can load the same font with different sizes to achieve varying text scales.
+		/// Alternatively, you can use the scale modifier in TextOptions but it's not recommended to upscale.
+		/// Best quality would be achieved by loading fonts with bigger sizes and scaling them (slightly) down using TextOptions.
+		/// Its your responsibility to delete the returned font ptr.
+		/// </summary>
+		/// <param name="file">TTF or OTF file.</param>
+		/// <param name="loadAsSDF">Creates an SDF font.</param>
+		/// <param name="size">Font height, width will automatically adjust.</param>
+		/// <param name="customRanges">Send custom ranges in UTF32 encoding, e.g. 0x1F028, to load specific characters or sets.</param>
+		/// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
+		/// <param name="useKerningIfAvailable">If the font face contains a kern table this font will be drawn using kerning information. </param>
+		/// <returns></returns>
+		extern LINAVG_API LinaVGFont* LoadFont(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
 
-   /// <summary>
-   /// Uses loaded face (from file or mem) to setup rest of the font data.
-   /// </summary>
-   extern LinaVGFont* SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable);
+		/// <summary>
+		/// Loads the given font and generates textures based on given size.
+		/// You can load the same font with different sizes to achieve varying text scales.
+		/// Alternatively, you can use the scale modifier in TextOptions but it's not recommended to upscale.
+		/// Best quality would be achieved by loading fonts with bigger sizes and scaling them (slightly) down using TextOptions.
+		/// Its your responsibility to delete the returned font ptr.
+		/// </summary>
+		/// <param name="data">Binary font data.</param>
+		/// <param name="size">Binary font data size.</param>
+		/// <param name="loadAsSDF">Creates an SDF font.</param>
+		/// <param name="size">Font height, width will automatically adjust.</param>
+		/// <param name="customRanges">Send custom ranges in UTF32 encoding, e.g. 0x1F028, to load specific characters or sets.</param>
+		/// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
+		/// <param name="useKerningIfAvailable">If the font face contains a kern table this font will be drawn using kerning information. </param>
+		/// <returns></returns>
+		extern LINAVG_API LinaVGFont* LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
 
-    /// <summary>
-    /// Returns the kerning vector between two given glphys.
-    /// </summary>
-    // LINAVG_API Vec2 GetKerning(LinaVGFont* font, int previousGlyph, int currentGlyph);
+		/// <summary>
+		/// Uses loaded face (from file or mem) to setup rest of the font data.
+		/// </summary>
+		extern LinaVGFont* SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable);
 
-   }
-	
+		/// <summary>
+		/// Returns the kerning vector between two given glphys.
+		/// </summary>
+		// LINAVG_API Vec2 GetKerning(LinaVGFont* font, int previousGlyph, int currentGlyph);
+
+	} // namespace Text
 
 }; // namespace LinaVG
 

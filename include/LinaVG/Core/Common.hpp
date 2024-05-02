@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -13,11 +13,11 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
    1. Redistributions of source code must retain the above copyright notice, this
-      list of conditions and the following disclaimer.
+	  list of conditions and the following disclaimer.
 
    2. Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
+	  this list of conditions and the following disclaimer in the documentation
+	  and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -433,8 +433,8 @@ namespace LinaVG
 			newLineSpacing	 = opts.newLineSpacing;
 			wrapWidth		 = opts.wrapWidth;
 			framebufferScale = opts.framebufferScale;
-            cpuClipping      = opts.cpuClipping;
-            wordWrap         = opts.wordWrap;
+			cpuClipping		 = opts.cpuClipping;
+			wordWrap		 = opts.wordWrap;
 		}
 
 		bool CheckColors(const Vec4& c1, const Vec4& c2)
@@ -458,22 +458,21 @@ namespace LinaVG
 
 			if (!CheckColors(color.start, opts.color.start))
 				return false;
-            
-            if (!CheckColors(color.end, opts.color.end))
-                return false;
 
-            if (!CheckColors(cpuClipping, opts.cpuClipping))
-                return false;
-            
-            if(wordWrap != opts.wordWrap)
-                return false;
-            
-            if (dropShadowOffset.x != 0.0f || dropShadowOffset.y != 0.0f)
+			if (!CheckColors(color.end, opts.color.end))
+				return false;
+
+			if (!CheckColors(cpuClipping, opts.cpuClipping))
+				return false;
+
+			if (wordWrap != opts.wordWrap)
+				return false;
+
+			if (dropShadowOffset.x != 0.0f || dropShadowOffset.y != 0.0f)
 			{
 				if (!CheckColors(dropShadowColor, opts.dropShadowColor))
 					return false;
 			}
-            
 
 			return alignment == opts.alignment && textScale == opts.textScale && spacing == opts.spacing && newLineSpacing == opts.newLineSpacing && wrapWidth == opts.wrapWidth;
 		}
@@ -519,11 +518,11 @@ namespace LinaVG
 		/// Text will wrap at, e.g. go to a new line when it reaches = position.x + wrapWidth
 		/// </summary>
 		float wrapWidth = 0.0f;
-        
-        /// <summary>
-        /// If wrapWidth != 0, wraps the text word by word. If false, it's per-character based.
-        /// </summary>
-        bool wordWrap = true;
+
+		/// <summary>
+		/// If wrapWidth != 0, wraps the text word by word. If false, it's per-character based.
+		/// </summary>
+		bool wordWrap = true;
 
 		/// <summary>
 		/// Drop shadow m_color, lol.
@@ -535,12 +534,11 @@ namespace LinaVG
 		/// Set to 0.0f, 0.0f to disable drop-shadows.
 		/// </summary>
 		Vec2 dropShadowOffset = Vec2(0.0f, 0.0f);
-        
-        /// <summary>
-        /// Defines custom clip rectangle for text vertices.
-        /// </summary>
-        Vec4 cpuClipping = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
-       
+
+		/// <summary>
+		/// Defines custom clip rectangle for text vertices.
+		/// </summary>
+		Vec4 cpuClipping = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	};
 
 	LINAVG_API struct SDFTextOptions : public TextOptions
@@ -561,8 +559,8 @@ namespace LinaVG
 			sdfThickness		   = opts.sdfThickness;
 			sdfDropShadowSoftness  = opts.sdfDropShadowSoftness;
 			framebufferScale	   = opts.framebufferScale;
-            cpuClipping            = opts.cpuClipping;
-            wordWrap               = opts.wordWrap;
+			cpuClipping			   = opts.cpuClipping;
+			wordWrap			   = opts.wordWrap;
 		}
 
 		/// <summary>
@@ -579,11 +577,11 @@ namespace LinaVG
 		/// 0.0f - 1.0f range, defines how strongly the outline is extruded.
 		/// </summary>
 		float sdfOutlineThickness = 0.0f;
-        
-        /// <summary>
-        /// Defines outline blurring/smoothing.
-        /// </summary>
-        float sdfOutlineSoftness = 0.1f;
+
+		/// <summary>
+		/// Defines outline blurring/smoothing.
+		/// </summary>
+		float sdfOutlineSoftness = 0.1f;
 
 		/// <summary>
 		/// Well, outline m_color.
@@ -956,8 +954,8 @@ namespace LinaVG
 		bool		  m_flipAlpha		 = false;
 		float		  m_thickness		 = 0.0f;
 		float		  m_softness		 = 0.0f;
-        float         m_outlineThickness = 0.0f;
-		float		  m_outlineSoftness = 0.0f;
+		float		  m_outlineThickness = 0.0f;
+		float		  m_outlineSoftness	 = 0.0f;
 		Vec4		  m_outlineColor	 = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		BackendHandle m_textureHandle	 = 0;
 	};

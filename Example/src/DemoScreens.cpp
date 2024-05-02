@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -13,11 +13,11 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
    1. Redistributions of source code must retain the above copyright notice, this
-      list of conditions and the following disclaimer.
+	  list of conditions and the following disclaimer.
 
    2. Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
+	  this list of conditions and the following disclaimer in the documentation
+	  and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -64,16 +64,16 @@ namespace LinaVG
 		LinaVGFont* fontDesc	= nullptr;
 		LinaVGFont* fontDemo	= nullptr;
 		LinaVGFont* fontSDF		= nullptr;
-    
+
 		void DemoScreens::Initialize()
 		{
-            ExampleApp::Get()->GetGLBackend()->SaveAPIState();
+			ExampleApp::Get()->GetGLBackend()->SaveAPIState();
 			fontDefault = LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 18);
 			fontTitle	= LinaVG::Text::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 52);
 			fontDesc	= LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
 			fontDemo	= LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
 			fontSDF		= LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
-            ExampleApp::Get()->GetGLBackend()->RestoreAPIState();
+			ExampleApp::Get()->GetGLBackend()->RestoreAPIState();
 
 			m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
 			m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
@@ -191,7 +191,7 @@ namespace LinaVG
 			TextOptions descText;
 			descText.font	   = fontDesc;
 			descText.wrapWidth = rectWidth * 0.45f;
-            const Vec2 sz = ExampleApp::Get()->GetLVGDrawer().CalculateTextSize(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), descText);
+			const Vec2 sz	   = ExampleApp::Get()->GetLVGDrawer().CalculateTextSize(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), descText);
 			ExampleApp::Get()->GetLVGDrawer().DrawTextNormal(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), Vec2(rectWidth * 0.25f, rectMin.y + sz.y + 10), descText, 0, 4);
 
 			// Draw version text.
@@ -819,11 +819,11 @@ namespace LinaVG
 
 			if (m_clippingEnabled)
 			{
-                
-                ExampleApp::Get()->GetLVGDrawer().SetClipPosX(static_cast<BackendHandle>(min.x));
-                ExampleApp::Get()->GetLVGDrawer().SetClipPosY(static_cast<BackendHandle>(min.y));
-                ExampleApp::Get()->GetLVGDrawer().SetClipSizeX(static_cast<BackendHandle>(size.x));
-                ExampleApp::Get()->GetLVGDrawer().SetClipSizeY(static_cast<BackendHandle>(size.y));
+
+				ExampleApp::Get()->GetLVGDrawer().SetClipPosX(static_cast<BackendHandle>(min.x));
+				ExampleApp::Get()->GetLVGDrawer().SetClipPosY(static_cast<BackendHandle>(min.y));
+				ExampleApp::Get()->GetLVGDrawer().SetClipSizeX(static_cast<BackendHandle>(size.x));
+				ExampleApp::Get()->GetLVGDrawer().SetClipSizeY(static_cast<BackendHandle>(size.y));
 			}
 
 			// Main rect.
@@ -841,10 +841,10 @@ namespace LinaVG
 			textOpts.font = fontDefault;
 			ExampleApp::Get()->GetLVGDrawer().DrawTextNormal("This text is clipped by the black rectangle.", Vec2(min.x - 50, min.y + 250), textOpts, 0.0f, 2);
 
-            ExampleApp::Get()->GetLVGDrawer().SetClipPosX(0);
-            ExampleApp::Get()->GetLVGDrawer().SetClipPosY(0);
-            ExampleApp::Get()->GetLVGDrawer().SetClipSizeX(0);
-            ExampleApp::Get()->GetLVGDrawer().SetClipSizeY(0);
+			ExampleApp::Get()->GetLVGDrawer().SetClipPosX(0);
+			ExampleApp::Get()->GetLVGDrawer().SetClipPosY(0);
+			ExampleApp::Get()->GetLVGDrawer().SetClipSizeX(0);
+			ExampleApp::Get()->GetLVGDrawer().SetClipSizeY(0);
 		}
 
 		void DemoScreens::ShowDemoScreen8_Animated()

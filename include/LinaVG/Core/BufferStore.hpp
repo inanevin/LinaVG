@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -13,11 +13,11 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
    1. Redistributions of source code must retain the above copyright notice, this
-      list of conditions and the following disclaimer.
+	  list of conditions and the following disclaimer.
 
    2. Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
+	  this list of conditions and the following disclaimer in the documentation
+	  and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -107,66 +107,60 @@ namespace LinaVG
 		SDFTextCache*		  CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf);
 	};
 
-    struct BufferStoreCallbacks
-    {
-        std::function<void(DrawBuffer* buf)> drawDefault;
-        std::function<void(GradientDrawBuffer* buf)> drawGradient;
-        std::function<void(TextureDrawBuffer* buf)> drawTextured;
-        std::function<void(SimpleTextDrawBuffer* buf)> drawSimpleText;
-        std::function<void(SDFTextDrawBuffer* buf)> drawSDFText;
-    };
+	struct BufferStoreCallbacks
+	{
+		std::function<void(DrawBuffer* buf)>		   drawDefault;
+		std::function<void(GradientDrawBuffer* buf)>   drawGradient;
+		std::function<void(TextureDrawBuffer* buf)>	   drawTextured;
+		std::function<void(SimpleTextDrawBuffer* buf)> drawSimpleText;
+		std::function<void(SDFTextDrawBuffer* buf)>	   drawSDFText;
+	};
 
-    class BufferStore
-    {
-    public:
-        
-        BufferStore();
-        ~BufferStore();
-        
-        /// <summary>
-        /// Clears up or shrinks (depending on gc interval) internal vertex/index buffers. Call each frame at the end of your draw commands, after Flushing.
-        /// </summary>
-        /// <returns></returns>
-        LINAVG_API void ResetFrame();
-        
-        /// <summary>
-        /// Call after you have submitted your draw commands, this will flush the buffers in batches to your callback functions.
-        /// </summary>
-        /// <returns></returns>
-        LINAVG_API void FlushBuffers();
-        
-        /// <summary>
-        /// Sets the scissors/clipping data.
-        /// </summary>
-        /// <returns></returns>
-        LINAVG_API void SetClipPosX(BackendHandle posX);
-        LINAVG_API void SetClipPosY(BackendHandle posY);
-        LINAVG_API void SetClipSizeX(BackendHandle sizeX);
-        LINAVG_API void SetClipSizeY(BackendHandle sizeY);
-        
-        /// <summary>
-        /// Erases all vertex & index data on all buffers.
-        /// </summary>
-        LINAVG_API void ClearAllBuffers();
-        
-        LINAVG_API inline BufferStoreData& GetData()
-        {
-            return m_data;
-        }
-        
-        inline BufferStoreCallbacks& GetCallbacks()
-        {
-            return m_callbacks;
-        }
-        
-    private:
-        void InitData();
-        
-    private:
-        BufferStoreData m_data;
-        BufferStoreCallbacks m_callbacks;
-    };
+	class BufferStore
+	{
+	public:
+		BufferStore();
+		~BufferStore();
 
-	
+		/// <summary>
+		/// Clears up or shrinks (depending on gc interval) internal vertex/index buffers. Call each frame at the end of your draw commands, after Flushing.
+		/// </summary>
+		/// <returns></returns>
+		LINAVG_API void ResetFrame();
+
+		/// <summary>
+		/// Call after you have submitted your draw commands, this will flush the buffers in batches to your callback functions.
+		/// </summary>
+		/// <returns></returns>
+		LINAVG_API void FlushBuffers();
+
+		/// <summary>
+		/// Sets the scissors/clipping data.
+		/// </summary>
+		/// <returns></returns>
+		LINAVG_API void SetClipPosX(BackendHandle posX);
+		LINAVG_API void SetClipPosY(BackendHandle posY);
+		LINAVG_API void SetClipSizeX(BackendHandle sizeX);
+		LINAVG_API void SetClipSizeY(BackendHandle sizeY);
+
+		/// <summary>
+		/// Erases all vertex & index data on all buffers.
+		/// </summary>
+		LINAVG_API void ClearAllBuffers();
+
+		LINAVG_API inline BufferStoreData& GetData()
+		{
+			return m_data;
+		}
+
+		inline BufferStoreCallbacks& GetCallbacks()
+		{
+			return m_callbacks;
+		}
+
+	private:
+		BufferStoreData		 m_data;
+		BufferStoreCallbacks m_callbacks;
+	};
 
 }; // namespace LinaVG

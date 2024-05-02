@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -13,11 +13,11 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
    1. Redistributions of source code must retain the above copyright notice, this
-      list of conditions and the following disclaimer.
+	  list of conditions and the following disclaimer.
 
    2. Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
+	  this list of conditions and the following disclaimer in the documentation
+	  and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -70,7 +70,7 @@ namespace LinaVG::Examples
 	{
 	public:
 		GLBackend();
-        virtual ~GLBackend() = default;
+		virtual ~GLBackend() = default;
 
 		struct GLState
 		{
@@ -88,20 +88,19 @@ namespace LinaVG::Examples
 			int	 m_unpackAlignment	  = 0;
 		};
 
-		
 		void		  StartFrame();
 		void		  DrawGradient(GradientDrawBuffer* buf);
-		void		  DrawTextured(TextureDrawBuffer* buf) ;
+		void		  DrawTextured(TextureDrawBuffer* buf);
 		void		  DrawDefault(DrawBuffer* buf);
 		void		  DrawSimpleText(SimpleTextDrawBuffer* buf);
-		void		  DrawSDFText(SDFTextDrawBuffer* buf) ;
+		void		  DrawSDFText(SDFTextDrawBuffer* buf);
 		void		  EndFrame();
-		void		  BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data) ;
-		void		  BufferEnded() {};
-		void		  BindFontTexture(BackendHandle texture) ;
+		void		  BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data);
+		void		  BufferEnded(){};
+		void		  BindFontTexture(BackendHandle texture);
 		void		  SaveAPIState();
 		void		  RestoreAPIState();
-		BackendHandle CreateFontTexture(int width, int height) ;
+		BackendHandle CreateFontTexture(int width, int height);
 
 		static unsigned int s_displayPosX;
 		static unsigned int s_displayPosY;
@@ -118,4 +117,4 @@ namespace LinaVG::Examples
 		BackendData m_backendData;
 	};
 
-} // namespace LinaVG::Backend
+} // namespace LinaVG::Examples

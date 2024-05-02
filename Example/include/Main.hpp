@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -13,11 +13,11 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
    1. Redistributions of source code must retain the above copyright notice, this
-      list of conditions and the following disclaimer.
+	  list of conditions and the following disclaimer.
 
    2. Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
+	  this list of conditions and the following disclaimer in the documentation
+	  and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -41,8 +41,8 @@ namespace LinaVG
 {
 	namespace Examples
 	{
-        class GLBackend;
-    
+		class GLBackend;
+
 		class ExampleApp
 		{
 		public:
@@ -99,16 +99,17 @@ namespace LinaVG
 			{
 				return m_currentDemoScreen;
 			}
-            
-            inline Drawer& GetLVGDrawer()
-            {
-                return m_lvgDrawer;
-            }
 
-            inline GLBackend* GetGLBackend()
-            {
-                return m_renderingBackend;
-            }
+			inline Drawer& GetLVGDrawer()
+			{
+				return m_lvgDrawer;
+			}
+
+			inline GLBackend* GetGLBackend()
+			{
+				return m_renderingBackend;
+			}
+
 		private:
 			DemoScreens		   m_demoScreens;
 			unsigned int	   m_linaTexture	   = 0;
@@ -120,8 +121,8 @@ namespace LinaVG
 			int				   m_fps			   = 0;
 			bool			   m_shouldClose	   = false;
 			static ExampleApp* s_exampleApp;
-            LinaVG::Drawer m_lvgDrawer;
-            GLBackend* m_renderingBackend = nullptr;
+			LinaVG::Drawer	   m_lvgDrawer;
+			GLBackend*		   m_renderingBackend = nullptr;
 		};
 	} // namespace Examples
 } // namespace LinaVG

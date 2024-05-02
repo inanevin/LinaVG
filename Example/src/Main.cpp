@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -13,11 +13,11 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
    1. Redistributions of source code must retain the above copyright notice, this
-      list of conditions and the following disclaimer.
+	  list of conditions and the following disclaimer.
 
    2. Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
+	  this list of conditions and the following disclaimer in the documentation
+	  and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -64,9 +64,9 @@ namespace LinaVG
 			window.InitWindow(static_cast<int>(sizeX), static_cast<int>(sizeY));
 
 			// Setup Lina VG config.
-			GLBackend::s_displayPosX	= 0;
-			GLBackend::s_displayPosY	= 0;
-			GLBackend::s_displayWidth	= sizeX;
+			GLBackend::s_displayPosX   = 0;
+			GLBackend::s_displayPosY   = 0;
+			GLBackend::s_displayWidth  = sizeX;
 			GLBackend::s_displayHeight = sizeY;
 
 			LinaVG::Config.errorCallback = [](const std::string& err) {
@@ -80,27 +80,26 @@ namespace LinaVG
 			LinaVG::Config.defaultBufferReserve = 100000;
 			LinaVG::Config.gcCollectInterval	= 20000;
 
-            
-            LinaVG::Text::Initialize();
-            
+			LinaVG::Text::Initialize();
+
 			m_checkeredTexture = window.CreateTexture("Resources/Textures/Checkered.png");
 			m_linaTexture	   = window.CreateTexture("Resources/Textures/Lina.png");
 
 			// Init LinaVG
-            m_renderingBackend = new GLBackend();
-	
-            LinaVG::Text::GetCallbacks().fontTextureBind = std::bind(&GLBackend::BindFontTexture, m_renderingBackend, std::placeholders::_1);
-            LinaVG::Text::GetCallbacks().fontTextureCreate = std::bind(&GLBackend::CreateFontTexture, m_renderingBackend, std::placeholders::_1, std::placeholders::_2);
-            LinaVG::Text::GetCallbacks().fontTextureBufferData =std::bind(&GLBackend::BufferFontTextureAtlas, m_renderingBackend, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
-            LinaVG::Text::GetCallbacks().fontTextureBufferEnd = std::bind(&GLBackend::BufferEnded, m_renderingBackend);
-            
-            m_lvgDrawer.GetCallbacks().drawDefault = std::bind(&GLBackend::DrawDefault, m_renderingBackend, std::placeholders::_1);
-            m_lvgDrawer.GetCallbacks().drawGradient = std::bind(&GLBackend::DrawGradient, m_renderingBackend, std::placeholders::_1);
-            m_lvgDrawer.GetCallbacks().drawTextured = std::bind(&GLBackend::DrawTextured, m_renderingBackend, std::placeholders::_1);
-            m_lvgDrawer.GetCallbacks().drawSimpleText = std::bind(&GLBackend::DrawSimpleText, m_renderingBackend, std::placeholders::_1);
-            m_lvgDrawer.GetCallbacks().drawSDFText = std::bind(&GLBackend::DrawSDFText, m_renderingBackend, std::placeholders::_1);
-            
-            m_demoScreens.Initialize();
+			m_renderingBackend = new GLBackend();
+
+			LinaVG::Text::GetCallbacks().fontTextureBind	   = std::bind(&GLBackend::BindFontTexture, m_renderingBackend, std::placeholders::_1);
+			LinaVG::Text::GetCallbacks().fontTextureCreate	   = std::bind(&GLBackend::CreateFontTexture, m_renderingBackend, std::placeholders::_1, std::placeholders::_2);
+			LinaVG::Text::GetCallbacks().fontTextureBufferData = std::bind(&GLBackend::BufferFontTextureAtlas, m_renderingBackend, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
+			LinaVG::Text::GetCallbacks().fontTextureBufferEnd  = std::bind(&GLBackend::BufferEnded, m_renderingBackend);
+
+			m_lvgDrawer.GetCallbacks().drawDefault	  = std::bind(&GLBackend::DrawDefault, m_renderingBackend, std::placeholders::_1);
+			m_lvgDrawer.GetCallbacks().drawGradient	  = std::bind(&GLBackend::DrawGradient, m_renderingBackend, std::placeholders::_1);
+			m_lvgDrawer.GetCallbacks().drawTextured	  = std::bind(&GLBackend::DrawTextured, m_renderingBackend, std::placeholders::_1);
+			m_lvgDrawer.GetCallbacks().drawSimpleText = std::bind(&GLBackend::DrawSimpleText, m_renderingBackend, std::placeholders::_1);
+			m_lvgDrawer.GetCallbacks().drawSDFText	  = std::bind(&GLBackend::DrawSDFText, m_renderingBackend, std::placeholders::_1);
+
+			m_demoScreens.Initialize();
 
 			float prevTime	  = window.GetTime();
 			float lastFPSTime = window.GetTime();
@@ -126,10 +125,9 @@ namespace LinaVG
 				window.Poll();
 				window.Clear();
 
-                
 				// Lina VG start frame.
-                m_renderingBackend->StartFrame();
-                
+				m_renderingBackend->StartFrame();
+
 				// Setup style.
 				StyleOptions style;
 				style.outlineOptions.thickness	   = 2.0f;
@@ -172,11 +170,11 @@ namespace LinaVG
 				m_demoScreens.m_screenMS = static_cast<float>(duration.count()) * 1e-6f;
 
 				// Flush everything we've drawn so far.
-                m_lvgDrawer.FlushBuffers();
-                m_lvgDrawer.ResetFrame();
+				m_lvgDrawer.FlushBuffers();
+				m_lvgDrawer.ResetFrame();
 
 				m_demoScreens.PreEndFrame();
-                m_renderingBackend->EndFrame();
+				m_renderingBackend->EndFrame();
 
 				// Backend window swap buffers.
 				window.SwapBuffers();
@@ -185,8 +183,8 @@ namespace LinaVG
 
 			// Terminate Lina VG & example exampleBackend.
 			m_demoScreens.Terminate();
-            delete m_renderingBackend;
-            LinaVG::Text::Terminate();
+			delete m_renderingBackend;
+			LinaVG::Text::Terminate();
 			window.Terminate();
 		}
 
@@ -242,7 +240,7 @@ namespace LinaVG
 
 		void ExampleApp::OnWindowResizeCallback(int width, int height)
 		{
-			GLBackend::s_displayWidth	= static_cast<BackendHandle>(width);
+			GLBackend::s_displayWidth  = static_cast<BackendHandle>(width);
 			GLBackend::s_displayHeight = static_cast<BackendHandle>(height);
 		}
 		void ExampleApp::OnWindowCloseCallback()
