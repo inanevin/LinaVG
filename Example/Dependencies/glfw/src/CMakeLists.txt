@@ -12,7 +12,7 @@ add_custom_target(update_mappings
     SOURCES mappings.h.in "${GLFW_SOURCE_DIR}/CMake/GenerateMappings.cmake"
     VERBATIM)
 
-set_target_properties(update_mappings PROPERTIES FOLDER "GLFW3")
+set_target_properties(update_mappings PROPERTIES FOLDER ${LINAVG_FOLDER_BASE}/Dependencies/GLFW3)
 
 if (_GLFW_COCOA)
     set(glfw_HEADERS ${common_HEADERS} cocoa_platform.h cocoa_joystick.h

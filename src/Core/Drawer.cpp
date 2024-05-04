@@ -3421,7 +3421,7 @@ namespace LinaVG
 	{
 		LINAVG_VEC<int32_t> codepoints;
 		const char*			p = str;
-		while (*p)
+		while (*p != '\0')
 		{
 			int32_t		  codepoint = 0;
 			unsigned char c			= *p;
