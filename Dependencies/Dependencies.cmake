@@ -17,6 +17,13 @@ if(NOT LINAVG_DISABLE_TEXT_SUPPORT)
     add_subdirectory(Dependencies/FreeType-2.12.1)
     target_link_libraries(${PROJECT_NAME} PUBLIC freetype)
     set_property(TARGET freetype PROPERTY FOLDER ${LINAVG_FOLDER_BASE}/Dependencies)
+
+    if(MSVC)
+        target_compile_options(freetype PRIVATE /W0)
+    else()
+        target_compile_options(freetype PRIVATE -w)
+    endif()
+
     message("LinaVG -> FreeType has been linked.")
 else()
     add_definitions(-DLINAVG_DISABLE_TEXT_SUPPORT=1)
