@@ -370,7 +370,7 @@ namespace LinaVG
 
 	TextCache* BufferStoreData::CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf)
 	{
-		const auto& it = m_textCache.find(sid);
+        auto it = m_textCache.find(sid);
 
 		if (it == m_textCache.end())
 			return nullptr;
