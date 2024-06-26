@@ -104,6 +104,11 @@ namespace LinaVG
 			{
 				return m_lvgDrawer;
 			}
+            
+            inline Text& GetLVGText()
+            {
+                return m_lvgText;
+            }
 
 			inline GLBackend* GetGLBackend()
 			{
@@ -122,6 +127,7 @@ namespace LinaVG
 			bool			   m_shouldClose	   = false;
 			static ExampleApp* s_exampleApp;
 			LinaVG::Drawer	   m_lvgDrawer;
+            LinaVG::Text m_lvgText;
 			GLBackend*		   m_renderingBackend = nullptr;
 		};
 	} // namespace Examples

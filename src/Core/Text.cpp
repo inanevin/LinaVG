@@ -39,14 +39,13 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LinaVG/Core/Math.hpp"
 #include <iostream>
 
-namespace LinaVG::Text
+namespace LinaVG
 {
-	TextData  g_textData;
-	Callbacks g_textCallbacks;
+    FT_Library g_ftLib;
 
-	bool Initialize()
+	bool InitializeText()
 	{
-		if (FT_Init_FreeType(&g_textData.m_ftlib))
+		if (FT_Init_FreeType(&g_ftLib))
 		{
 			if (Config.errorCallback)
 				Config.errorCallback("LinaVG: Error initializing FreeType Library");
@@ -56,21 +55,20 @@ namespace LinaVG::Text
 		return true;
 	}
 
-	void Terminate()
+	void TerminateText()
 	{
-		FT_Done_FreeType(g_textData.m_ftlib);
-		g_textData.m_createdAtlases.clear();
+		FT_Done_FreeType(g_ftLib);
 	}
 
-	Callbacks& GetCallbacks()
-	{
-		return g_textCallbacks;
-	}
+    Text::~Text()
+    {
+        m_textData.m_createdAtlases.clear();
+    }
 
-	LinaVGFont* LoadFont(const char* file, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
+	LinaVGFont* Text::LoadFont(const char* file, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
 	{
 		FT_Face face;
-		if (FT_New_Face(g_textData.m_ftlib, file, 0, &face))
+		if (FT_New_Face(g_ftLib, file, 0, &face))
 		{
 			if (Config.errorCallback)
 				Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
@@ -80,10 +78,10 @@ namespace LinaVG::Text
 		return SetupFont(face, loadAsSDF, size, customRanges, customRangesSize, useKerningIfAvailable);
 	}
 
-	LinaVGFont* LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
+	LinaVGFont* Text::LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
 	{
 		FT_Face face;
-		if (FT_New_Memory_Face(g_textData.m_ftlib, static_cast<FT_Byte*>(data), static_cast<FT_Long>(dataSize), 0, &face))
+		if (FT_New_Memory_Face(g_ftLib, static_cast<FT_Byte*>(data), static_cast<FT_Long>(dataSize), 0, &face))
 		{
 			if (Config.errorCallback)
 				Config.errorCallback("LinaVG: Freetype Error -> Failed to load the font!");
@@ -93,7 +91,7 @@ namespace LinaVG::Text
 		return SetupFont(face, loadAsSDF, size, customRanges, customRangesSize, useKerningIfAvailable);
 	}
 
-	LinaVGFont* SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
+	LinaVGFont* Text::SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
 	{
 		FT_Error err = FT_Set_Pixel_Sizes(face, 0, size);
 
@@ -235,16 +233,16 @@ namespace LinaVG::Text
 		h += rowh;
 
 		int availableAtlasIndex = -1;
-		for (int i = 0; i < g_textData.m_createdAtlases.m_size; i++)
+		for (int i = 0; i < m_textData.m_createdAtlases.m_size; i++)
 		{
-			FontAtlas& atlas = g_textData.m_createdAtlases[i];
+			FontAtlas& atlas = m_textData.m_createdAtlases[i];
 			// const int  totalSize = Config.maxFontAtlasSize - atlas.m_currentOffsetX + Config.maxFontAtlasSize - atlas.m_currentOffsetY;
 			if (Config.maxFontAtlasSize - atlas.m_currentOffsetY > h)
 			{
 				availableAtlasIndex = i;
 
-				if (g_textCallbacks.fontTextureBind)
-					g_textCallbacks.fontTextureBind(atlas.m_texture);
+				if (m_callbacks.fontTextureBind)
+					m_callbacks.fontTextureBind(atlas.m_texture);
 				else
 				{
 					if (Config.errorCallback)
@@ -264,26 +262,26 @@ namespace LinaVG::Text
 
 		if (availableAtlasIndex != -1)
 		{
-			offsetX				   = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetX;
-			offsetY				   = g_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetY;
-			availableAtlasRowSizeY = g_textData.m_createdAtlases[availableAtlasIndex].m_rowSizeY;
-			font->m_texture		   = g_textData.m_createdAtlases[availableAtlasIndex].m_texture;
+			offsetX				   = m_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetX;
+			offsetY				   = m_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetY;
+			availableAtlasRowSizeY = m_textData.m_createdAtlases[availableAtlasIndex].m_rowSizeY;
+			font->m_texture		   = m_textData.m_createdAtlases[availableAtlasIndex].m_texture;
 			usedAtlasIndex		   = availableAtlasIndex;
 		}
 		else
 		{
 			FontAtlas atlas;
 
-			if (g_textCallbacks.fontTextureCreate)
-				atlas.m_texture = g_textCallbacks.fontTextureCreate(w, h);
+			if (m_callbacks.fontTextureCreate)
+				atlas.m_texture = m_callbacks.fontTextureCreate(w, h);
 			else
 			{
 				if (Config.errorCallback)
 					Config.errorCallback("LinaVG: Callback FontTextureCreate is not set!");
 			}
 			font->m_texture = atlas.m_texture;
-			usedAtlasIndex	= g_textData.m_createdAtlases.m_size;
-			g_textData.m_createdAtlases.push_back(atlas);
+			usedAtlasIndex	= m_textData.m_createdAtlases.m_size;
+			m_textData.m_createdAtlases.push_back(atlas);
 		}
 
 		// TODO: figure out width as height issue
@@ -333,8 +331,8 @@ namespace LinaVG::Text
 
 			if (ch.second.m_buffer != nullptr)
 			{
-				if (g_textCallbacks.fontTextureBufferData)
-					g_textCallbacks.fontTextureBufferData(glyphWidth, glyphRows, offsetX, offsetY, ch.second.m_buffer);
+				if (m_callbacks.fontTextureBufferData)
+					m_callbacks.fontTextureBufferData(glyphWidth, glyphRows, offsetX, offsetY, ch.second.m_buffer);
 				else
 				{
 					if (Config.errorCallback)
@@ -349,14 +347,14 @@ namespace LinaVG::Text
 			ch.second.m_uv34   = uv34;
 
 			rowh												   = Math::Max(rowh, glyphRows);
-			g_textData.m_createdAtlases[usedAtlasIndex].m_rowSizeY = rowh;
+			m_textData.m_createdAtlases[usedAtlasIndex].m_rowSizeY = rowh;
 			offsetX += glyphWidth + bufferCharSpacing;
 		}
 
 		if (buffered)
 		{
-			if (g_textCallbacks.fontTextureBufferData)
-				g_textCallbacks.fontTextureBufferEnd();
+			if (m_callbacks.fontTextureBufferData)
+				m_callbacks.fontTextureBufferEnd();
 			else
 			{
 				if (Config.errorCallback)
@@ -366,8 +364,8 @@ namespace LinaVG::Text
 
 		if (usedAtlasIndex != -1)
 		{
-			g_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetX = offsetX;
-			g_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetY = offsetY;
+			m_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetX = offsetX;
+			m_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetY = offsetY;
 		}
 
 		font->m_spaceAdvance = characterMap[' '].m_advance.x;

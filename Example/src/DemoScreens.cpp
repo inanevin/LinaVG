@@ -68,11 +68,11 @@ namespace LinaVG
 		void DemoScreens::Initialize()
 		{
 			ExampleApp::Get()->GetGLBackend()->SaveAPIState();
-			fontDefault = LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 18);
-			fontTitle	= LinaVG::Text::LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 52);
-			fontDesc	= LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
-			fontDemo	= LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
-			fontSDF		= LinaVG::Text::LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
+			fontDefault = ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 18);
+			fontTitle	= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 52);
+			fontDesc	= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
+			fontDemo	= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
+			fontSDF		= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
 			ExampleApp::Get()->GetGLBackend()->RestoreAPIState();
 
 			m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");

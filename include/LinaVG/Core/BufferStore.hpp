@@ -96,11 +96,11 @@ namespace LinaVG
 		int					  GetBufferIndexInTextureArray(DrawBuffer* buf);
 		int					  GetBufferIndexInDefaultArray(DrawBuffer* buf);
 		int					  GetBufferIndexInCharArray(DrawBuffer* buf);
-		DrawBuffer&			  GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType);
-		GradientDrawBuffer&	  GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
-		TextureDrawBuffer&	  GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType);
-		SimpleTextDrawBuffer& GetSimpleTextBuffer(BackendHandle glyphHandle, int drawOrder, bool isDropShadow);
-		SDFTextDrawBuffer&	  GetSDFTextBuffer(BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow);
+		DrawBuffer&			  GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType);
+		GradientDrawBuffer&	  GetGradientBuffer(void* userData, Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
+		TextureDrawBuffer&	  GetTextureBuffer(void* userData, BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType);
+		SimpleTextDrawBuffer& GetSimpleTextBuffer(void* userData, BackendHandle glyphHandle, int drawOrder, bool isDropShadow);
+		SDFTextDrawBuffer&	  GetSDFTextBuffer(void* userData, BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow);
 		void				  AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart);
 		void				  AddSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart);
 		TextCache*			  CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf);

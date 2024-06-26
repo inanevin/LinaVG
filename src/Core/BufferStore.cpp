@@ -250,14 +250,14 @@ namespace LinaVG
 		m_data.m_clipSizeY = sizeY;
 	}
 
-	GradientDrawBuffer& BufferStoreData::GetGradientBuffer(Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)
+	GradientDrawBuffer& BufferStoreData::GetGradientBuffer(void* userData, Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)
 	{
 		const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
 
 		for (int i = 0; i < m_gradientBuffers.m_size; i++)
 		{
 			auto& buf = m_gradientBuffers[i];
-			if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.start, grad.start) && Math::IsEqual(buf.m_color.end, grad.end) && buf.m_color.gradientType == grad.gradientType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+			if (buf.userData == userData && buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.start, grad.start) && Math::IsEqual(buf.m_color.end, grad.end) && buf.m_color.gradientType == grad.gradientType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
 			{
 				if (grad.gradientType == GradientType::Radial || grad.gradientType == GradientType::RadialCorner)
 				{
@@ -274,69 +274,69 @@ namespace LinaVG
 
 		SetDrawOrderLimits(drawOrder);
 
-		m_gradientBuffers.push_back(GradientDrawBuffer(grad, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_gradientBuffers.push_back(GradientDrawBuffer(userData, grad, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
 		return m_gradientBuffers.last_ref();
 	}
 
-	DrawBuffer& BufferStoreData::GetDefaultBuffer(int drawOrder, DrawBufferShapeType shapeType)
+	DrawBuffer& BufferStoreData::GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType)
 	{
 		for (int i = 0; i < m_defaultBuffers.m_size; i++)
 		{
 			auto& buf = m_defaultBuffers[i];
-			if (m_defaultBuffers[i].m_drawOrder == drawOrder && buf.m_shapeType == shapeType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+			if (buf.userData == userData && buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
 				return m_defaultBuffers[i];
 		}
 
 		SetDrawOrderLimits(drawOrder);
 
-		m_defaultBuffers.push_back(DrawBuffer(drawOrder, DrawBufferType::Default, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_defaultBuffers.push_back(DrawBuffer(userData, drawOrder, DrawBufferType::Default, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
 		return m_defaultBuffers.last_ref();
 	}
 
-	TextureDrawBuffer& BufferStoreData::GetTextureBuffer(BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
+	TextureDrawBuffer& BufferStoreData::GetTextureBuffer(void* userData, BackendHandle textureHandle,const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
 	{
 		const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
 		for (int i = 0; i < m_textureBuffers.m_size; i++)
 		{
 			auto& buf = m_textureBuffers[i];
-			if (buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_tint, tint) && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+			if (buf.userData == userData && buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_tint, tint) && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
 				return m_textureBuffers[i];
 		}
 
 		SetDrawOrderLimits(drawOrder);
 
-		m_textureBuffers.push_back(TextureDrawBuffer(textureHandle, tiling, uvOffset, tint, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_textureBuffers.push_back(TextureDrawBuffer(userData, textureHandle, tiling, uvOffset, tint, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
 		return m_textureBuffers.last_ref();
 	}
 
-	SimpleTextDrawBuffer& BufferStoreData::GetSimpleTextBuffer(BackendHandle textureHandle, int drawOrder, bool isDropShadow)
+	SimpleTextDrawBuffer& BufferStoreData::GetSimpleTextBuffer(void* userData, BackendHandle textureHandle, int drawOrder, bool isDropShadow)
 	{
 		for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
 		{
 			auto& buf = m_simpleTextBuffers[i];
-			if (buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+			if (buf.userData == userData && buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
 				return m_simpleTextBuffers[i];
 		}
 
 		SetDrawOrderLimits(drawOrder);
 
-		m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(textureHandle, drawOrder, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(userData, textureHandle, drawOrder, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
 		return m_simpleTextBuffers.last_ref();
 	}
 
-	SDFTextDrawBuffer& BufferStoreData::GetSDFTextBuffer(BackendHandle textureHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow)
+	SDFTextDrawBuffer& BufferStoreData::GetSDFTextBuffer(void* userData, BackendHandle textureHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow)
 	{
 		for (int i = 0; i < m_sdfTextBuffers.m_size; i++)
 		{
 			auto& buf = m_sdfTextBuffers[i];
-			if (buf.m_isDropShadow == isDropShadow && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && Math::IsEqualMarg(buf.m_thickness, opts.sdfThickness) && Math::IsEqualMarg(buf.m_softness, opts.sdfSoftness) &&
+			if (buf.userData == userData && buf.m_isDropShadow == isDropShadow  && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && Math::IsEqualMarg(buf.m_thickness, opts.sdfThickness) && Math::IsEqualMarg(buf.m_softness, opts.sdfSoftness) &&
 				Math::IsEqualMarg(buf.m_outlineThickness, opts.sdfOutlineThickness) && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
 				return m_sdfTextBuffers[i];
 		}
 
 		SetDrawOrderLimits(drawOrder);
 
-		m_sdfTextBuffers.push_back(SDFTextDrawBuffer(textureHandle, drawOrder, opts, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_sdfTextBuffers.push_back(SDFTextDrawBuffer(userData, textureHandle, drawOrder, opts, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
 		return m_sdfTextBuffers.last_ref();
 	}
 

@@ -57,6 +57,7 @@ namespace LinaVG
 #define LVG_DEG2RAD	   0.0174533f
 #define LINAVG_API	   // TODO
 
+
 	typedef unsigned short Index;
 	typedef unsigned int   BackendHandle;
 	class LinaVGFont;
@@ -435,6 +436,7 @@ namespace LinaVG
 			framebufferScale = opts.framebufferScale;
 			cpuClipping		 = opts.cpuClipping;
 			wordWrap		 = opts.wordWrap;
+            userData = opts.userData;
 		}
 
 		bool CheckColors(const Vec4& c1, const Vec4& c2)
@@ -444,6 +446,9 @@ namespace LinaVG
 
 		bool IsSame(const TextOptions& opts)
 		{
+            if(userData != opts.userData)
+                return false;
+            
 			if (font != opts.font)
 				return false;
 
@@ -539,6 +544,11 @@ namespace LinaVG
 		/// Defines custom clip rectangle for text vertices.
 		/// </summary>
 		Vec4 cpuClipping = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        
+        /// <summary>
+        /// Use to store user data to be passed back to your call handler.
+        /// </summary>
+        void* userData = nullptr;
 	};
 
 	LINAVG_API struct SDFTextOptions : public TextOptions
@@ -561,6 +571,7 @@ namespace LinaVG
 			framebufferScale	   = opts.framebufferScale;
 			cpuClipping			   = opts.cpuClipping;
 			wordWrap			   = opts.wordWrap;
+            userData = opts.userData;
 		}
 
 		/// <summary>
@@ -626,6 +637,7 @@ namespace LinaVG
 			textureUVOffset = opts.textureUVOffset;
 			isFilled		= opts.isFilled;
 			aaEnabled		= opts.aaEnabled;
+            userData = opts.userData;
 		}
 
 		/// <summary>
@@ -694,6 +706,11 @@ namespace LinaVG
 		/// Fills inside the target shape, e.g. rect, tris, convex, circles, ngons, has no effect on lines.
 		/// </summary>
 		bool isFilled = true;
+        
+        /// <summary>
+        /// Use to store user data to be passed back to your call handler.
+        /// </summary>
+        void* userData = nullptr;
 	};
 
 	struct Vertex
@@ -858,8 +875,8 @@ namespace LinaVG
 	struct DrawBuffer
 	{
 		DrawBuffer(){};
-		DrawBuffer(int drawOrder, DrawBufferType type, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: m_drawOrder(drawOrder), m_drawBufferType(type), m_shapeType(shapeType)
+		DrawBuffer(void* userData, int drawOrder, DrawBufferType type, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+			: m_drawOrder(drawOrder), m_drawBufferType(type), m_shapeType(shapeType), userData(userData)
 		{
 			this->clipPosX	= clipPosX;
 			this->clipPosY	= clipPosY;
@@ -876,7 +893,8 @@ namespace LinaVG
 		BackendHandle		clipPosY		 = 0;
 		BackendHandle		clipSizeX		 = 0;
 		BackendHandle		clipSizeY		 = 0;
-
+        void* userData = nullptr;
+        
 		bool IsClipDifferent(BackendHandle cpx, BackendHandle cpy, BackendHandle csx, BackendHandle csy)
 		{
 			return (this->clipPosX != cpx || this->clipPosY != cpy || this->clipSizeX != csx || this->clipSizeY != csy);
@@ -913,8 +931,8 @@ namespace LinaVG
 	struct GradientDrawBuffer : public DrawBuffer
 	{
 		GradientDrawBuffer(){};
-		GradientDrawBuffer(const Vec4Grad& g, int drawOrder, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: DrawBuffer(drawOrder, DrawBufferType::Gradient, shapeType, clipPosX, clipPosY, clipSizeX, clipSizeY), m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_color(g){};
+		GradientDrawBuffer(void* userData, const Vec4Grad& g, int drawOrder, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+			: DrawBuffer(userData, drawOrder, DrawBufferType::Gradient, shapeType, clipPosX, clipPosY, clipSizeX, clipSizeY), m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_color(g){};
 
 		bool	 m_isAABuffer = false;
 		Vec4Grad m_color	  = Vec4(1, 1, 1, 1);
@@ -923,8 +941,8 @@ namespace LinaVG
 	struct TextureDrawBuffer : public DrawBuffer
 	{
 		TextureDrawBuffer(){};
-		TextureDrawBuffer(BackendHandle h, const Vec2& tiling, const Vec2& offset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: DrawBuffer(drawOrder, DrawBufferType::Textured, shapeType, clipPosX, clipPosY, clipSizeX, clipSizeY), m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset), m_tint(tint){};
+		TextureDrawBuffer(void* userData, BackendHandle h, const Vec2& tiling, const Vec2& offset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+			: DrawBuffer(userData, drawOrder, DrawBufferType::Textured, shapeType, clipPosX, clipPosY, clipSizeX, clipSizeY), m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset), m_tint(tint){};
 
 		bool		  m_isAABuffer		= false;
 		BackendHandle m_textureHandle	= 0;
@@ -936,8 +954,8 @@ namespace LinaVG
 	struct SimpleTextDrawBuffer : public DrawBuffer
 	{
 		SimpleTextDrawBuffer(){};
-		SimpleTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: DrawBuffer(drawOrder, DrawBufferType::SimpleText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY), m_textureHandle(glyphHandle), m_isDropShadow(isDropShadow){};
+		SimpleTextDrawBuffer(void* userData, BackendHandle glyphHandle, int drawOrder, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+			: DrawBuffer(userData, drawOrder, DrawBufferType::SimpleText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY), m_textureHandle(glyphHandle), m_isDropShadow(isDropShadow){};
 
 		BackendHandle m_textureHandle = 0;
 		bool		  m_isDropShadow  = false;
@@ -946,9 +964,9 @@ namespace LinaVG
 	struct SDFTextDrawBuffer : public DrawBuffer
 	{
 		SDFTextDrawBuffer(){};
-		SDFTextDrawBuffer(BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: DrawBuffer(drawOrder, DrawBufferType::SDFText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY),
-			  m_isDropShadow(isDropShadow), m_flipAlpha(opts.flipAlpha), m_thickness(opts.sdfThickness), m_softness(opts.sdfSoftness), m_outlineThickness(opts.sdfOutlineThickness), m_outlineSoftness(opts.sdfOutlineSoftness), m_outlineColor(opts.sdfOutlineColor), m_textureHandle(glyphHandle){};
+		SDFTextDrawBuffer(void* userData, BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+			: DrawBuffer(userData, drawOrder, DrawBufferType::SDFText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY),
+			  m_isDropShadow(isDropShadow), m_flipAlpha(opts.flipAlpha), m_thickness(opts.sdfThickness), m_softness(opts.sdfSoftness), m_outlineThickness(opts.sdfOutlineThickness), m_outlineSoftness(opts.sdfOutlineSoftness), m_outlineColor(opts.sdfOutlineColor),  m_textureHandle(glyphHandle){};
 
 		bool		  m_isDropShadow	 = false;
 		bool		  m_flipAlpha		 = false;

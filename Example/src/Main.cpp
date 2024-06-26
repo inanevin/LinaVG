@@ -80,7 +80,7 @@ namespace LinaVG
 			LinaVG::Config.defaultBufferReserve = 100000;
 			LinaVG::Config.gcCollectInterval	= 20000;
 
-			LinaVG::Text::Initialize();
+            LinaVG::InitializeText();
 
 			m_checkeredTexture = window.CreateTexture("Resources/Textures/Checkered.png");
 			m_linaTexture	   = window.CreateTexture("Resources/Textures/Lina.png");
@@ -88,10 +88,10 @@ namespace LinaVG
 			// Init LinaVG
 			m_renderingBackend = new GLBackend();
 
-			LinaVG::Text::GetCallbacks().fontTextureBind	   = std::bind(&GLBackend::BindFontTexture, m_renderingBackend, std::placeholders::_1);
-			LinaVG::Text::GetCallbacks().fontTextureCreate	   = std::bind(&GLBackend::CreateFontTexture, m_renderingBackend, std::placeholders::_1, std::placeholders::_2);
-			LinaVG::Text::GetCallbacks().fontTextureBufferData = std::bind(&GLBackend::BufferFontTextureAtlas, m_renderingBackend, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
-			LinaVG::Text::GetCallbacks().fontTextureBufferEnd  = std::bind(&GLBackend::BufferEnded, m_renderingBackend);
+			m_lvgText.GetCallbacks().fontTextureBind	   = std::bind(&GLBackend::BindFontTexture, m_renderingBackend, std::placeholders::_1);
+			m_lvgText.GetCallbacks().fontTextureCreate	   = std::bind(&GLBackend::CreateFontTexture, m_renderingBackend, std::placeholders::_1, std::placeholders::_2);
+			m_lvgText.GetCallbacks().fontTextureBufferData = std::bind(&GLBackend::BufferFontTextureAtlas, m_renderingBackend, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
+			m_lvgText.GetCallbacks().fontTextureBufferEnd  = std::bind(&GLBackend::BufferEnded, m_renderingBackend);
 
 			m_lvgDrawer.GetCallbacks().drawDefault	  = std::bind(&GLBackend::DrawDefault, m_renderingBackend, std::placeholders::_1);
 			m_lvgDrawer.GetCallbacks().drawGradient	  = std::bind(&GLBackend::DrawGradient, m_renderingBackend, std::placeholders::_1);
@@ -184,7 +184,7 @@ namespace LinaVG
 			// Terminate Lina VG & example exampleBackend.
 			m_demoScreens.Terminate();
 			delete m_renderingBackend;
-			LinaVG::Text::Terminate();
+            LinaVG::TerminateText();
 			window.Terminate();
 		}
 
