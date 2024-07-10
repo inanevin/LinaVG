@@ -377,4 +377,18 @@ namespace LinaVG
 		Vec2  c2 = Vec2(val2.x * amt, val2.y * amt);
 		return Vec2(c1.x + c2.x, c1.y + c2.y);
 	}
+
+    int Math::CustomRound(float value)
+    {
+        const float floorValue = std::floor(value);
+        const float ceilValue = std::ceil(value);  
+        const float decimalPart = value - floorValue;
+        
+        if (decimalPart >= 0.75 && decimalPart <= 1.25)
+            return static_cast<int>(ceilValue);
+       else if (decimalPart >= 0.25 && decimalPart < 0.75)
+            return static_cast<int>(floorValue);
+        else
+            return static_cast<int>(std::round(value));
+    }
 } // namespace LinaVG

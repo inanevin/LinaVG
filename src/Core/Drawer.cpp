@@ -706,8 +706,8 @@ namespace LinaVG
 			for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
 			{
 				auto& vtx = buf->m_vertexBuffer[i];
-				vtx.pos.x += static_cast<float>(static_cast<int>(position.x));
-				vtx.pos.y += static_cast<float>(static_cast<int>(position.y));
+				vtx.pos.x += static_cast<float>(Math::CustomRound(position.x));
+				vtx.pos.y += static_cast<float>(Math::CustomRound(position.y));
 			}
 		}
 
@@ -757,8 +757,8 @@ namespace LinaVG
 			for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
 			{
 				auto& vtx = buf->m_vertexBuffer[i];
-				vtx.pos.x += static_cast<float>(static_cast<int>(position.x));
-				vtx.pos.y += static_cast<float>(static_cast<int>(position.y));
+				vtx.pos.x += static_cast<float>(Math::CustomRound(position.x));
+				vtx.pos.y += static_cast<float>(Math::CustomRound(position.y));
 			}
 		}
 
@@ -3289,8 +3289,8 @@ namespace LinaVG
 		int	 characterCount = 0;
 		// bool		   first			   = true;
 
-		pos.x = static_cast<float>(static_cast<int>(pos.x));
-		pos.y = static_cast<float>(static_cast<int>(pos.y));
+		pos.x = static_cast<float>(Math::CustomRound(pos.x));
+		pos.y = static_cast<float>(Math::CustomRound(pos.y));
 
 		GlyphEncoding previousCharacter = 0;
 

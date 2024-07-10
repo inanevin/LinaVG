@@ -62,7 +62,8 @@ namespace LinaVG
 		static Vec2	 GetVertexNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw = true);
 		static Vec2	 GetVertexNormalFlatCheck(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw = true);
 		static float InverseLerp(float a, float b, float v);
-
+        static int CustomRound(float val);
+        
 		/// <summary>
 		/// Returns the centroid of a given polygon.
 		/// https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon
