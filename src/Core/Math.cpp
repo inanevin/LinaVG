@@ -254,6 +254,31 @@ namespace LinaVG
 		return Math::Normalized(Vec2(toNextNormal.x + fromPreviousNormal.x, toNextNormal.y + fromPreviousNormal.y));
 	}
 
+    Vec2 Math::GetExtrudedFromNormal(const Vec2 &point, const Vec2 &previousPoint, const Vec2 &nextPoint, float thickness, bool ccw)
+    {
+        if(Math::IsEqualMarg(previousPoint.x, -1.0f) && Math::IsEqualMarg(previousPoint.y, -1.0f))
+        {
+            const Vec2 toNext = Math::Normalized(Vec2(nextPoint.x - point.x, nextPoint.y - point.y));
+            const Vec2 norm = Math::Rotate90(toNext, ccw);
+            return Vec2(point.x + norm.x * thickness, point.y + norm.y * thickness);
+        }
+        
+        if(Math::IsEqualMarg(nextPoint.x, -1.0f) && Math::IsEqualMarg(nextPoint.y, -1.0f))
+        {
+            const Vec2 fromPrev = Math::Normalized(Vec2(point.x - previousPoint.x, point.y - previousPoint.y));
+            const Vec2 norm = Math::Rotate90(fromPrev, ccw);
+            return Vec2(point.x + norm.x * thickness, point.y + norm.y * thickness);
+        }
+        
+        const Vec2 toNext    = Math::Normalized(Vec2(nextPoint.x - point.x, nextPoint.y - point.y));
+        const Vec2 fromPrev = Math::Normalized(Vec2(point.x - previousPoint.x, point.y - previousPoint.y));
+
+        const Vec2 toNextNormal          = Math::Rotate90(toNext, ccw);
+        const Vec2 fromPreviousNormal = Math::Rotate90(fromPrev, ccw);
+        
+        return Vec2(point.x + toNextNormal.x * thickness + fromPreviousNormal.x * thickness, point.y + toNextNormal.y * thickness + fromPreviousNormal.y * thickness);
+    }
+
 	Vec2 Math::GetVertexNormalFlatCheck(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw)
 	{
 		const Vec2 toNext	= Math::Normalized(Vec2(nextPoint.x - point.x, nextPoint.y - point.y));
@@ -268,6 +293,23 @@ namespace LinaVG
 		const Vec2 fromPreviousNormal = Math::Rotate90(fromPrev, ccw);
 		return Math::Normalized(Vec2(toNextNormal.x + fromPreviousNormal.x, toNextNormal.y + fromPreviousNormal.y));
 	}
+
+    Vec2 Math::GetExtrudedFromNormalFlatCheck(const Vec2 &point, const Vec2 &previousPoint, const Vec2 &nextPoint, float thickness, bool ccw)
+    {
+        const Vec2 toNext    = Math::Normalized(Vec2(nextPoint.x - point.x, nextPoint.y - point.y));
+        const Vec2 fromPrev = Math::Normalized(Vec2(point.x - previousPoint.x, point.y - previousPoint.y));
+
+        if (Math::IsEqualMarg(toNext, fromPrev))
+        {
+            const Vec2 fromPreviousNormal = Math::Rotate90(fromPrev, ccw);
+           // const Vec2 normal = Math::Normalized(Vec2(toNext.x + fromPreviousNormal.x, toNext.y + fromPreviousNormal.y));
+            return Vec2(point.x + toNext.x * thickness + fromPreviousNormal.x * thickness, point.y + toNext.y * thickness + fromPreviousNormal.y * thickness);
+        }
+        const Vec2 toNextNormal          = Math::Rotate90(toNext, ccw);
+        const Vec2 fromPreviousNormal = Math::Rotate90(fromPrev, ccw);
+        // const Vec2 normal = Math::Normalized(Vec2(toNextNormal.x + fromPreviousNormal.x, toNextNormal.y + fromPreviousNormal.y));
+        return Vec2(point.x + toNextNormal.x * thickness + fromPreviousNormal.x * thickness, point.y + toNextNormal.y * thickness + fromPreviousNormal.y * thickness);
+    }
 
 	float Math::InverseLerp(float a, float b, float v)
 	{

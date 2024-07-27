@@ -60,7 +60,9 @@ namespace LinaVG
 		static Vec2	 ScalePoint(const Vec2& p, const Vec2& center, float scale);
 		static Vec2	 GetVertexAverage(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint);
 		static Vec2	 GetVertexNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw = true);
-		static Vec2	 GetVertexNormalFlatCheck(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw = true);
+        static Vec2  GetExtrudedFromNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, float thickness = 1.0f, bool ccw = true);
+        static Vec2     GetVertexNormalFlatCheck(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw = true);
+		static Vec2	 GetExtrudedFromNormalFlatCheck(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, float thickness, bool ccw = true);
 		static float InverseLerp(float a, float b, float v);
         static int CustomRound(float val);
         

@@ -121,12 +121,13 @@ namespace LinaVG
 			const Vec2	 screenSize = Vec2(static_cast<float>(GLBackend::s_displayWidth), static_cast<float>(GLBackend::s_displayHeight));
 			StyleOptions style;
 
+        
 			// Draw background gradient.
-			style.color	   = Utility::HexToVec4(0x818D92);
+            style.color	   = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
 			style.isFilled = true;
 			ExampleApp::Get()->GetLVGDrawer().DrawRect(Vec2(0.0f, 0.0f), screenSize, style, 0.0f, 0);
-
-			// Draw stats window.
+			
+            // Draw stats window.
 			if (m_statsWindowOn)
 			{
 				const float statsWindowX = screenSize.x - screenSize.x * 0.18f;
@@ -217,6 +218,18 @@ namespace LinaVG
 
 		void DemoScreens::ShowDemoScreen1_Shapes()
 		{
+            
+            //LinaVG::StyleOptions rstyle;
+            //rstyle.color = Vec4(0.1f, 0.1f, 0.1f, 1.0f);
+            //rstyle.outlineOptions.thickness = 2.0f;
+            //rstyle.outlineOptions.color = Vec4(0.4, 0.4, 0.4f, 1.0f);
+            //rstyle.rounding = 0.0f;
+           //
+            //Vec2 rmin = Vec2(153, 152.152954f);
+            //Vec2 rmax = Vec2(rmin.x + 500,  rmin.y + 24);
+            //
+            //ExampleApp::Get()->GetLVGDrawer().DrawRect(rmin, rmax, rstyle);
+            //return;
 			const Vec2 screenSize = Vec2(static_cast<float>(GLBackend::s_displayWidth), static_cast<float>(GLBackend::s_displayHeight));
 
 			StyleOptions defaultStyle;

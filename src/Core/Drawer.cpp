@@ -1929,8 +1929,9 @@ namespace LinaVG
 			}
 			else
 			{
-				const Vec2 vertexNormalAverage = Math::GetVertexNormal(buf->m_vertexBuffer[i].pos, buf->m_vertexBuffer[previous].pos, buf->m_vertexBuffer[next].pos);
-				v.pos						   = Vec2(buf->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, buf->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+				//const Vec2 vertexNormalAverage = Math::GetVertexNormal(buf->m_vertexBuffer[i].pos, buf->m_vertexBuffer[previous].pos, buf->m_vertexBuffer[next].pos);
+				//v.pos						   = Vec2(buf->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, buf->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+                v.pos = Math::GetExtrudedFromNormal(buf->m_vertexBuffer[i].pos, buf->m_vertexBuffer[previous].pos, buf->m_vertexBuffer[next].pos, thickness);
 			}
 
 			buf->PushVertex(v);
@@ -2621,8 +2622,9 @@ namespace LinaVG
 
 			const Vec2 prevP			   = destBuf->m_vertexBuffer[prev].pos;
 			const Vec2 nextP			   = destBuf->m_vertexBuffer[next].pos;
-			const Vec2 vertexNormalAverage = Math::GetVertexNormalFlatCheck(destBuf->m_vertexBuffer[current].pos, prevP, nextP, ccw);
-			v.pos						   = Vec2(destBuf->m_vertexBuffer[current].pos.x + vertexNormalAverage.x * thickness, destBuf->m_vertexBuffer[current].pos.y + vertexNormalAverage.y * thickness);
+			//const Vec2 vertexNormalAverage = Math::GetVertexNormalFlatCheck(destBuf->m_vertexBuffer[current].pos, prevP, nextP, ccw);
+			//v.pos						   = Vec2(destBuf->m_vertexBuffer[current].pos.x + vertexNormalAverage.x * thickness, destBuf->m_vertexBuffer[current].pos.y + vertexNormalAverage.y * thickness);
+            v.pos = Math::GetExtrudedFromNormalFlatCheck(destBuf->m_vertexBuffer[current].pos, prevP, nextP, thickness, ccw);
 
 			if (opts.aaEnabled && !isAAOutline)
 				extrudedVerticesOrder.push_back(destBuf->m_vertexBuffer.m_size);
@@ -2784,21 +2786,24 @@ namespace LinaVG
 				if (skipEnds && i == startIndex)
 				{
 					const Vec2 nextP			   = sourceBuffer->m_vertexBuffer[next].pos;
-					const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, Vec2(-1, -1), nextP);
-					v.pos						   = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+					// const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, Vec2(-1, -1), nextP);
+                    v.pos = Math::GetExtrudedFromNormal(sourceBuffer->m_vertexBuffer[i].pos, Vec2(-1, -1), nextP, thickness);
+					//v.pos						   = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
 				}
 				else if (skipEnds && i == endIndex)
 				{
 					const Vec2 prevP			   = sourceBuffer->m_vertexBuffer[previous].pos;
-					const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, Vec2(-1, -1));
-					v.pos						   = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+                    // const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, Vec2(-1, -1));
+					v.pos = Math::GetExtrudedFromNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, Vec2(-1, -1), thickness);
+					//v.pos						   = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
 				}
 				else
 				{
 					const Vec2 prevP			   = sourceBuffer->m_vertexBuffer[previous].pos;
 					const Vec2 nextP			   = sourceBuffer->m_vertexBuffer[next].pos;
-					const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, nextP);
-					v.pos						   = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+                    v.pos = Math::GetExtrudedFromNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, nextP, thickness);
+					//const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, nextP);
+					//v.pos						   = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
 				}
 				destBuf->PushVertex(v);
 			}
