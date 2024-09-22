@@ -115,6 +115,7 @@ namespace LinaVG
             if(slice->height <= font->m_atlasRectHeight)
                 continue;
             
+            font->m_atlasRectPos = slice->pos;
 
             unsigned int startX = 0;
             unsigned int startY = slice->pos;
