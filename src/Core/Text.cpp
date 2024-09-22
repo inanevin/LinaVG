@@ -110,61 +110,75 @@ namespace LinaVG
         
         font->m_atlas = this;
 
+        unsigned int bestSliceDiff = m_size.y;
+        Slice* bestSlice = nullptr;
+        
         for(Slice* slice : m_availableSlices)
         {
-            if(slice->height <= font->m_atlasRectHeight)
+            if(slice->height < font->m_atlasRectHeight)
                 continue;
             
-            font->m_atlasRectPos = slice->pos;
-
-            unsigned int startX = 0;
-            unsigned int startY = slice->pos;
-            unsigned int maxHeight = 0;
-            
-            for(auto& [glyph, charData] : font->m_characterGlyphs)
+            const unsigned int diff = slice->height - font->m_atlasRectHeight;
+            if(diff < bestSliceDiff)
             {
-                const Vec2ui sz = Vec2ui(static_cast<unsigned int>(charData.m_size.x), static_cast<unsigned int>(charData.m_size.y));
- 
-                if(startX + sz.x >= m_size.x)
-                {
-                    startX = 0;
-                    startY += maxHeight + 1;
-                    maxHeight = 0;
-                }
-                
-                unsigned int startOffset = startY * m_size.x + startX;
-                                
-                const Vec2 uv1 = Vec2(static_cast<float>(startX) / static_cast<float>(m_size.x), static_cast<float>(startY) / m_size.y);
-                const Vec2 uv2 = Vec2(static_cast<float>(startX + sz.x) / static_cast<float>(m_size.x), static_cast<float>(startY) / m_size.y);
-                const Vec2 uv3 = Vec2(static_cast<float>(startX + sz.x) / static_cast<float>(m_size.x), static_cast<float>(startY + sz.y) / m_size.y);
-                const Vec2 uv4 = Vec2(static_cast<float>(startX) / static_cast<float>(m_size.x), static_cast<float>(startY + sz.y) / m_size.y);
-                charData.m_uv12 = Vec4(uv1.x, uv1.y, uv2.x, uv2.y);
-                charData.m_uv34 = Vec4(uv3.x, uv3.y, uv4.x, uv4.y);
-                
-                const size_t width = static_cast<size_t>(charData.m_size.x);
-    
-                for(unsigned int row = 0; row < sz.y; row++)
-                {
-                    LINAVG_MEMCPY(m_data + startOffset, &charData.m_buffer[width * row], width);
-                    startOffset += m_size.x;
-                }
-                
-                maxHeight = Math::Max(maxHeight, static_cast<unsigned int>(charData.m_size.y));
-                startX += static_cast<unsigned int>(charData.m_size.x) + 1;
-            
+                bestSliceDiff = diff;
+                bestSlice = slice;
             }
-            
-            Slice* newSlice = new Slice(slice->pos + font->m_atlasRectHeight, slice->height - font->m_atlasRectHeight);
-            m_availableSlices.push_back(newSlice);
-            auto it = std::find_if(m_availableSlices.begin(), m_availableSlices.end(), [slice](Slice* s) -> bool { return s == slice; });
-            m_availableSlices.erase(it);
-            delete slice;
-            
-            m_updateFunc(this);
-            return true;
         }
         
-        return false;
+        if(bestSlice == nullptr)
+            return false;
+        
+        font->m_atlasRectPos = bestSlice->pos;
+
+        unsigned int startX = 0;
+        unsigned int startY = bestSlice->pos;
+        unsigned int maxHeight = 0;
+        
+        for(auto& [glyph, charData] : font->m_characterGlyphs)
+        {
+            const Vec2ui sz = Vec2ui(static_cast<unsigned int>(charData.m_size.x), static_cast<unsigned int>(charData.m_size.y));
+
+            if(startX + sz.x >= m_size.x)
+            {
+                startX = 0;
+                startY += maxHeight + 1;
+                maxHeight = 0;
+            }
+            
+            unsigned int startOffset = startY * m_size.x + startX;
+                            
+            const Vec2 uv1 = Vec2(static_cast<float>(startX) / static_cast<float>(m_size.x), static_cast<float>(startY) / m_size.y);
+            const Vec2 uv2 = Vec2(static_cast<float>(startX + sz.x) / static_cast<float>(m_size.x), static_cast<float>(startY) / m_size.y);
+            const Vec2 uv3 = Vec2(static_cast<float>(startX + sz.x) / static_cast<float>(m_size.x), static_cast<float>(startY + sz.y) / m_size.y);
+            const Vec2 uv4 = Vec2(static_cast<float>(startX) / static_cast<float>(m_size.x), static_cast<float>(startY + sz.y) / m_size.y);
+            charData.m_uv12 = Vec4(uv1.x, uv1.y, uv2.x, uv2.y);
+            charData.m_uv34 = Vec4(uv3.x, uv3.y, uv4.x, uv4.y);
+            
+            const size_t width = static_cast<size_t>(charData.m_size.x);
+
+            for(unsigned int row = 0; row < sz.y; row++)
+            {
+                LINAVG_MEMCPY(m_data + startOffset, &charData.m_buffer[width * row], width);
+                startOffset += m_size.x;
+            }
+            
+            maxHeight = Math::Max(maxHeight, static_cast<unsigned int>(charData.m_size.y));
+            startX += static_cast<unsigned int>(charData.m_size.x) + 1;
+        
+        }
+        
+        if(bestSlice->height > font->m_atlasRectHeight)
+        {
+            Slice* newSlice = new Slice(bestSlice->pos + font->m_atlasRectHeight, bestSlice->height - font->m_atlasRectHeight);
+            m_availableSlices.push_back(newSlice);
+        }
+     
+        auto it = std::find_if(m_availableSlices.begin(), m_availableSlices.end(), [bestSlice](Slice* s) -> bool { return s == bestSlice; });
+        m_availableSlices.erase(it);
+        delete bestSlice;
+        m_updateFunc(this);
+        return true;
     }
 
 
@@ -172,6 +186,11 @@ namespace LinaVG
     {
         Slice* slice = new Slice(font->m_atlasRectPos, font->m_atlasRectHeight);
         m_availableSlices.push_back(slice);
+        
+        const size_t start = static_cast<size_t>(slice->pos * m_size.x);
+        LINAVG_MEMSET(m_data + start, 0, m_size.x * slice->height);
+        m_updateFunc(this);
+
     }
 
 	Font* Text::LoadFont(const char* file, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
