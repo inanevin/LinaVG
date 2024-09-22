@@ -50,6 +50,7 @@ namespace LinaVG
 #define LINAVG_MAP	   std::unordered_map
 #define LINAVG_VEC	   std::vector
 #define LINAVG_MEMCPY  std::memcpy
+#define LINAVG_MEMSET  std::memset
 #define LINAVG_MEMMOVE std::memmove
 #define LINAVG_MALLOC  std::malloc
 #define LINAVG_FREE	   std::free
