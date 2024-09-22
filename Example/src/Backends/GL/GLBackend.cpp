@@ -48,6 +48,9 @@ namespace LinaVG::Examples
 	unsigned int GLBackend::s_displayWidth	= 0;
 	unsigned int GLBackend::s_displayHeight = 0;
 
+#define FONT_ATLAS_WIDTH 2048
+#define FONT_ATLAS_HEIGHT 2048
+
 	GLBackend::GLBackend()
 	{
 		m_backendData.m_defaultVtxShader = "#version 330 core\n"
@@ -343,7 +346,7 @@ namespace LinaVG::Examples
 		glUniform4f(data.m_uniformMap["tint"], (GLfloat)buf->m_tint.x, (GLfloat)buf->m_tint.y, (GLfloat)buf->m_tint.z, (GLfloat)buf->m_tint.w);
 		glUniform1i(data.m_uniformMap["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
+        glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
 		glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
@@ -395,7 +398,7 @@ namespace LinaVG::Examples
 
 		glUniform1i(data.m_uniformMap["diffuse"], 0);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
+        glBindTexture(GL_TEXTURE_2D, m_fontTexture);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
 		glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
@@ -431,7 +434,7 @@ namespace LinaVG::Examples
 		glUniform1f(data.m_uniformMap["outlineThickness"], outlineThickness);
 		glUniform4f(data.m_uniformMap["outlineColor"], buf->m_outlineColor.x, buf->m_outlineColor.y, buf->m_outlineColor.z, buf->m_outlineColor.w);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
+        glBindTexture(GL_TEXTURE_2D, m_fontTexture);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
 		glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
@@ -636,33 +639,35 @@ namespace LinaVG::Examples
 		}
 	}
 
-	BackendHandle GLBackend::CreateFontTexture(int width, int height)
-	{
-		GLuint tex;
-		glActiveTexture(GL_TEXTURE0);
-		glGenTextures(1, &tex);
-		glBindTexture(GL_TEXTURE_2D, tex);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+    void GLBackend::CreateFontTexture(unsigned int width, unsigned int height)
+    {
+        GLuint tex;
+        glActiveTexture(GL_TEXTURE0);
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
 
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		return tex;
-	}
-
-	void GLBackend::BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data)
-	{
-		glTexSubImage2D(GL_TEXTURE_2D, 0, offsetX, offsetY, width, height, GL_RED, GL_UNSIGNED_BYTE, data);
-	}
-
-	void GLBackend::BindFontTexture(BackendHandle texture)
-	{
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	}
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        m_fontTexture = static_cast<uint32_t>(tex);
+        m_fontTextureCreated = true;
+    }
+    
+    void GLBackend::OnAtlasUpdate(Atlas *atlas)
+    {
+        SaveAPIState();
+        if(!m_fontTextureCreated)
+            CreateFontTexture(atlas->GetSize().x, atlas->GetSize().y);
+        
+        glBindTexture(GL_TEXTURE_2D, m_fontTexture);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, atlas->GetSize().x, atlas->GetSize().y, GL_RED, GL_UNSIGNED_BYTE, atlas->GetData());
+        RestoreAPIState();
+    }
 
 } // namespace LinaVG::Examples

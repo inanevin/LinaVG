@@ -59,21 +59,19 @@ namespace LinaVG
 
 		std::vector<StarData> stars;
 
-		LinaVGFont* fontDefault = nullptr;
-		LinaVGFont* fontTitle	= nullptr;
-		LinaVGFont* fontDesc	= nullptr;
-		LinaVGFont* fontDemo	= nullptr;
-		LinaVGFont* fontSDF		= nullptr;
+		Font* fontDefault = nullptr;
+		Font* fontTitle	= nullptr;
+		Font* fontDesc	= nullptr;
+		Font* fontDemo	= nullptr;
+		Font* fontSDF		= nullptr;
 
 		void DemoScreens::Initialize()
 		{
-			ExampleApp::Get()->GetGLBackend()->SaveAPIState();
 			fontDefault = ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 18);
 			fontTitle	= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 52);
 			fontDesc	= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
 			fontDemo	= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
 			fontSDF		= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
-			ExampleApp::Get()->GetGLBackend()->RestoreAPIState();
 
 			m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
 			m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
@@ -121,7 +119,6 @@ namespace LinaVG
 			const Vec2	 screenSize = Vec2(static_cast<float>(GLBackend::s_displayWidth), static_cast<float>(GLBackend::s_displayHeight));
 			StyleOptions style;
 
-        
 			// Draw background gradient.
             style.color	   = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
 			style.isFilled = true;
@@ -218,18 +215,6 @@ namespace LinaVG
 
 		void DemoScreens::ShowDemoScreen1_Shapes()
 		{
-            
-            //LinaVG::StyleOptions rstyle;
-            //rstyle.color = Vec4(0.1f, 0.1f, 0.1f, 1.0f);
-            //rstyle.outlineOptions.thickness = 2.0f;
-            //rstyle.outlineOptions.color = Vec4(0.4, 0.4, 0.4f, 1.0f);
-            //rstyle.rounding = 0.0f;
-           //
-            //Vec2 rmin = Vec2(153, 152.152954f);
-            //Vec2 rmax = Vec2(rmin.x + 500,  rmin.y + 24);
-            //
-            //ExampleApp::Get()->GetLVGDrawer().DrawRect(rmin, rmax, rstyle);
-            //return;
 			const Vec2 screenSize = Vec2(static_cast<float>(GLBackend::s_displayWidth), static_cast<float>(GLBackend::s_displayHeight));
 
 			StyleOptions defaultStyle;

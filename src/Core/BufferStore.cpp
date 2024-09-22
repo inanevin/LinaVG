@@ -309,34 +309,34 @@ namespace LinaVG
 		return m_textureBuffers.last_ref();
 	}
 
-	SimpleTextDrawBuffer& BufferStoreData::GetSimpleTextBuffer(void* userData, BackendHandle textureHandle, int drawOrder, bool isDropShadow)
+	SimpleTextDrawBuffer& BufferStoreData::GetSimpleTextBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow)
 	{
 		for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
 		{
 			auto& buf = m_simpleTextBuffers[i];
-			if (buf.userData == userData && buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+			if (buf.userData == userData && buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_font == font && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
 				return m_simpleTextBuffers[i];
 		}
 
 		SetDrawOrderLimits(drawOrder);
 
-		m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(userData, textureHandle, drawOrder, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(userData, font, drawOrder, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
 		return m_simpleTextBuffers.last_ref();
 	}
 
-	SDFTextDrawBuffer& BufferStoreData::GetSDFTextBuffer(void* userData, BackendHandle textureHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow)
+	SDFTextDrawBuffer& BufferStoreData::GetSDFTextBuffer(void* userData, Font* font, int drawOrder, const SDFTextOptions& opts, bool isDropShadow)
 	{
 		for (int i = 0; i < m_sdfTextBuffers.m_size; i++)
 		{
 			auto& buf = m_sdfTextBuffers[i];
-			if (buf.userData == userData && buf.m_isDropShadow == isDropShadow  && buf.m_textureHandle == textureHandle && buf.m_drawOrder == drawOrder && Math::IsEqualMarg(buf.m_thickness, opts.sdfThickness) && Math::IsEqualMarg(buf.m_softness, opts.sdfSoftness) &&
+			if (buf.userData == userData && buf.m_isDropShadow == isDropShadow  && buf.m_font == font && buf.m_drawOrder == drawOrder && Math::IsEqualMarg(buf.m_thickness, opts.sdfThickness) && Math::IsEqualMarg(buf.m_softness, opts.sdfSoftness) &&
 				Math::IsEqualMarg(buf.m_outlineThickness, opts.sdfOutlineThickness) && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
 				return m_sdfTextBuffers[i];
 		}
 
 		SetDrawOrderLimits(drawOrder);
 
-		m_sdfTextBuffers.push_back(SDFTextDrawBuffer(userData, textureHandle, drawOrder, opts, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_sdfTextBuffers.push_back(SDFTextDrawBuffer(userData, font, drawOrder, opts, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
 		return m_sdfTextBuffers.last_ref();
 	}
 

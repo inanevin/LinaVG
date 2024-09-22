@@ -78,7 +78,8 @@ namespace LinaVG
 			};
 
 			LinaVG::Config.defaultBufferReserve = 100000;
-			LinaVG::Config.gcCollectInterval	= 20000;
+            LinaVG::Config.gcCollectInterval    = 20000;
+            LinaVG::Config.maxFontAtlasSize = 1024;
 
             LinaVG::InitializeText();
 
@@ -88,17 +89,12 @@ namespace LinaVG
 			// Init LinaVG
 			m_renderingBackend = new GLBackend();
 
-			m_lvgText.GetCallbacks().fontTextureBind	   = std::bind(&GLBackend::BindFontTexture, m_renderingBackend, std::placeholders::_1);
-			m_lvgText.GetCallbacks().fontTextureCreate	   = std::bind(&GLBackend::CreateFontTexture, m_renderingBackend, std::placeholders::_1, std::placeholders::_2);
-			m_lvgText.GetCallbacks().fontTextureBufferData = std::bind(&GLBackend::BufferFontTextureAtlas, m_renderingBackend, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
-			m_lvgText.GetCallbacks().fontTextureBufferEnd  = std::bind(&GLBackend::BufferEnded, m_renderingBackend);
-
 			m_lvgDrawer.GetCallbacks().drawDefault	  = std::bind(&GLBackend::DrawDefault, m_renderingBackend, std::placeholders::_1);
 			m_lvgDrawer.GetCallbacks().drawGradient	  = std::bind(&GLBackend::DrawGradient, m_renderingBackend, std::placeholders::_1);
 			m_lvgDrawer.GetCallbacks().drawTextured	  = std::bind(&GLBackend::DrawTextured, m_renderingBackend, std::placeholders::_1);
 			m_lvgDrawer.GetCallbacks().drawSimpleText = std::bind(&GLBackend::DrawSimpleText, m_renderingBackend, std::placeholders::_1);
 			m_lvgDrawer.GetCallbacks().drawSDFText	  = std::bind(&GLBackend::DrawSDFText, m_renderingBackend, std::placeholders::_1);
-
+            m_lvgText.GetCallbacks().atlasNeedsUpdate  = std::bind(&GLBackend::OnAtlasUpdate, m_renderingBackend, std::placeholders::_1);
 			m_demoScreens.Initialize();
 
 			float prevTime	  = window.GetTime();

@@ -62,48 +62,77 @@ namespace LinaVG
 		unsigned char* m_buffer = nullptr;
 	};
 
-	struct Callbacks
-	{
-		std::function<void(BackendHandle)>																					  fontTextureBind;
-		std::function<BackendHandle(unsigned int width, unsigned int height)>												  fontTextureCreate;
-		std::function<void(unsigned int glyphWidth, unsigned int glyphHeight, int offsetX, int offsetY, unsigned char* data)> fontTextureBufferData;
-		std::function<void()>																								  fontTextureBufferEnd;
-	};
-
 	struct KerningInformation
 	{
 		LINAVG_MAP<unsigned long, unsigned long> xAdvances;
 	};
 
-	class LinaVGFont
+    class Atlas;
+    
+	class Font
 	{
 	public:
-		BackendHandle								  m_texture			= 0;
 		int											  m_size			= 0;
 		float										  m_newLineHeight	= 0.0f;
 		float										  m_spaceAdvance	= 0.0f;
 		bool										  m_supportsUnicode = false;
 		bool										  m_isSDF			= false;
 		bool										  m_supportsKerning = false;
+        unsigned int m_atlasRectHeight = 0;
+        unsigned int m_atlasRectPos = 0;
 		LINAVG_MAP<GlyphEncoding, TextCharacter>	  m_characterGlyphs;
 		LINAVG_MAP<unsigned long, KerningInformation> m_kerningTable;
+        Atlas* m_atlas = nullptr;
+        
+        void DestroyBuffers();
+        
+        ~Font()
+        {
+            DestroyBuffers();
+        }
 	};
 
-	struct FontAtlas
-	{
-		BackendHandle m_texture		   = 0;
-		unsigned int  m_currentOffsetX = 0;
-		unsigned int  m_currentOffsetY = 0;
-		unsigned int  m_rowSizeY	   = 0;
-	};
+    class Atlas
+    {
+    public:
+        
+        struct Slice
+        {
+            Slice(unsigned int posY, unsigned int h) : pos(posY), height(h){};
+            unsigned int pos = 0;
+            unsigned int height = 0;
+        };
+        
+        Atlas(const Vec2ui& size, std::function<void(Atlas* atlas)> updateFunc);
+        ~Atlas();
+        
+        void Destroy();
+        bool AddFont(Font* font);
+        void RemoveFont(Font* font);
+        
+        inline const Vec2ui& GetSize() const
+        {
+            return m_size;
+        }
+        
+        inline uint8_t* GetData() const
+        {
+            return m_data;
+        }
+        
+    private:
+        std::function<void(Atlas* atlas)> m_updateFunc;
+        LINAVG_VEC<Slice*> m_availableSlices;
+        Vec2ui m_size = Vec2ui();
+        uint8_t* m_data = nullptr;
+    };
 
-	/// <summary>
-	/// Management for text rendering.
-	/// </summary>
-	struct TextData
-	{
-		Array<FontAtlas> m_createdAtlases;
-	};
+
+    struct Callbacks
+    {
+        std::function<void(Atlas* atlas)> atlasNeedsUpdate;
+    };
+
 
     extern LINAVG_API FT_Library g_ftLib;
 
@@ -122,12 +151,7 @@ namespace LinaVG
     public:
         
         ~Text();
-        
-		/// <summary>
-		/// Set these callbacks before you start loading any font to receive font atlas buffering data.
-		/// </summary>
-        LINAVG_API Callbacks& GetCallbacks() { return m_callbacks; }
-	
+   
 		/// <summary>
 		/// Loads the given font and generates textures based on given size.
 		/// You can load the same font with different sizes to achieve varying text scales.
@@ -142,7 +166,7 @@ namespace LinaVG
 		/// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
 		/// <param name="useKerningIfAvailable">If the font face contains a kern table this font will be drawn using kerning information. </param>
 		/// <returns></returns>
-		LINAVG_API LinaVGFont* LoadFont(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
+		LINAVG_API Font* LoadFont(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
 
 		/// <summary>
 		/// Loads the given font and generates textures based on given size.
@@ -159,22 +183,26 @@ namespace LinaVG
 		/// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
 		/// <param name="useKerningIfAvailable">If the font face contains a kern table this font will be drawn using kerning information. </param>
 		/// <returns></returns>
-		LINAVG_API LinaVGFont* LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
+		LINAVG_API Font* LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
 
 		/// <summary>
 		/// Uses loaded face (from file or mem) to setup rest of the font data.
 		/// </summary>
-        LINAVG_API LinaVGFont* SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable);
+        LINAVG_API Font* SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable);
 
 		/// <summary>
 		/// Returns the kerning vector between two given glphys.
 		/// </summary>
-		// LINAVG_API Vec2 GetKerning(LinaVGFont* font, int previousGlyph, int currentGlyph);
+		// LINAVG_API Vec2 GetKerning(Font* font, int previousGlyph, int currentGlyph);
         
+        inline Callbacks& GetCallbacks()
+        {
+            return m_callbacks;
+        }
     private:
         
+        LINAVG_VEC<Atlas*> m_atlases;
         Callbacks m_callbacks;
-        TextData m_textData;
 
     }; // namespace Text
 

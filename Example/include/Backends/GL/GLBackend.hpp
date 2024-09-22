@@ -95,12 +95,9 @@ namespace LinaVG::Examples
 		void		  DrawSimpleText(SimpleTextDrawBuffer* buf);
 		void		  DrawSDFText(SDFTextDrawBuffer* buf);
 		void		  EndFrame();
-		void		  BufferFontTextureAtlas(int width, int height, int offsetX, int offsetY, unsigned char* data);
-		void		  BufferEnded(){};
-		void		  BindFontTexture(BackendHandle texture);
 		void		  SaveAPIState();
 		void		  RestoreAPIState();
-		BackendHandle CreateFontTexture(int width, int height);
+        void OnAtlasUpdate(Atlas* atlas);
 
 		static unsigned int s_displayPosX;
 		static unsigned int s_displayPosY;
@@ -111,10 +108,13 @@ namespace LinaVG::Examples
 		void SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height);
 		void AddShaderUniforms(ShaderData& data);
 		void CreateShader(ShaderData& data, const char* vert, const char* frag);
-
+        void CreateFontTexture(unsigned int width, unsigned int height);
+        
 	private:
 		GLState		m_glState;
 		BackendData m_backendData;
+        uint32_t m_fontTexture = 0;
+        bool m_fontTextureCreated = false;
 	};
 
 } // namespace LinaVG::Examples

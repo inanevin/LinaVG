@@ -74,4 +74,19 @@ namespace LinaVG
 		float y = 0.0f;
 	};
 
+    struct Vec2ui
+    {
+        Vec2ui(){};
+        Vec2ui(unsigned int x, unsigned int y)
+            : x(x), y(y){};
+        Vec2ui(const Vec2ui& v)
+        {
+            x = v.x;
+            y = v.y;
+        }
+        
+        unsigned int x = 0;
+        unsigned int y = 0;
+    };
+
 } // namespace LinaVG

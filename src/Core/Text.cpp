@@ -62,10 +62,118 @@ namespace LinaVG
 
     Text::~Text()
     {
-        m_textData.m_createdAtlases.clear();
+        for(Atlas* atlas : m_atlases)
+            delete atlas;
     }
 
-	LinaVGFont* Text::LoadFont(const char* file, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
+    void Font::DestroyBuffers()
+    {
+        for(auto& [glyph, textChar] : m_characterGlyphs)
+            LINAVG_FREE(textChar.m_buffer);
+        m_characterGlyphs.clear();
+        m_atlas->RemoveFont(this);
+    }
+
+    Atlas::Atlas(const Vec2ui& size, std::function<void(Atlas* atlas)> updateFunc)
+    {
+        m_updateFunc = updateFunc;
+        m_size = size;
+        m_data = new uint8_t[size.x * size.y];
+        memset(m_data, 0, size.x * size.y);
+        m_availableSlices.push_back(new Slice(0, size.y));
+    }
+
+    Atlas::~Atlas(){
+        Destroy();
+    };
+
+    void Atlas::Destroy()
+    {
+        if(m_data != nullptr)
+            delete[] m_data;
+        m_data = nullptr;
+        
+        for(Slice* slice : m_availableSlices)
+            delete slice;
+        m_availableSlices.clear();
+    }
+
+    bool Atlas::AddFont(Font *font)
+    {
+        if(font->m_atlasRectHeight > m_size.y)
+        {
+            if (Config.errorCallback)
+                Config.errorCallback("LinaVG: Font exceeds atlas size! Increase the max atlas size from config.");
+            
+            return;
+        }
+        
+        font->m_atlas = this;
+
+        for(Slice* slice : m_availableSlices)
+        {
+            if(slice->height <= font->m_atlasRectHeight)
+                continue;
+            
+
+            unsigned int startX = 0;
+            unsigned int startY = slice->pos;
+            unsigned int maxHeight = 0;
+            
+            for(auto& [glyph, charData] : font->m_characterGlyphs)
+            {
+                const Vec2ui sz = Vec2ui(static_cast<unsigned int>(charData.m_size.x), static_cast<unsigned int>(charData.m_size.y));
+ 
+                if(startX + sz.x >= m_size.x)
+                {
+                    startX = 0;
+                    startY += maxHeight + 1;
+                    maxHeight = 0;
+                }
+                
+                unsigned int startOffset = startY * m_size.x + startX;
+                                
+                const Vec2 uv1 = Vec2(static_cast<float>(startX) / static_cast<float>(m_size.x), static_cast<float>(startY) / m_size.y);
+                const Vec2 uv2 = Vec2(static_cast<float>(startX + sz.x) / static_cast<float>(m_size.x), static_cast<float>(startY) / m_size.y);
+                const Vec2 uv3 = Vec2(static_cast<float>(startX + sz.x) / static_cast<float>(m_size.x), static_cast<float>(startY + sz.y) / m_size.y);
+                const Vec2 uv4 = Vec2(static_cast<float>(startX) / static_cast<float>(m_size.x), static_cast<float>(startY + sz.y) / m_size.y);
+                charData.m_uv12 = Vec4(uv1.x, uv1.y, uv2.x, uv2.y);
+                charData.m_uv34 = Vec4(uv3.x, uv3.y, uv4.x, uv4.y);
+                
+                const size_t width = static_cast<size_t>(charData.m_size.x);
+    
+                for(unsigned int row = 0; row < sz.y; row++)
+                {
+                    LINAVG_MEMCPY(m_data + startOffset, &charData.m_buffer[width * row], width);
+                    startOffset += m_size.x;
+                }
+                
+                maxHeight = Math::Max(maxHeight, static_cast<unsigned int>(charData.m_size.y));
+                startX += static_cast<unsigned int>(charData.m_size.x) + 1;
+            
+            }
+            
+            Slice* newSlice = new Slice(slice->pos + font->m_atlasRectHeight, slice->height - font->m_atlasRectHeight);
+            m_availableSlices.push_back(newSlice);
+            auto it = std::find_if(m_availableSlices.begin(), m_availableSlices.end(), [slice](Slice* s) -> bool { return s == slice; });
+            m_availableSlices.erase(it);
+            delete slice;
+            
+            m_updateFunc(this);
+            return true;
+        }
+        
+        return false;
+    }
+
+
+    void Atlas::RemoveFont(Font *font)
+    {
+        Slice* slice = new Slice(font->m_atlasRectPos, font->m_atlasRectHeight);
+        m_availableSlices.push_back(slice);
+    }
+
+	Font* Text::LoadFont(const char* file, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
 	{
 		FT_Face face;
 		if (FT_New_Face(g_ftLib, file, 0, &face))
@@ -78,7 +186,7 @@ namespace LinaVG
 		return SetupFont(face, loadAsSDF, size, customRanges, customRangesSize, useKerningIfAvailable);
 	}
 
-	LinaVGFont* Text::LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
+	Font* Text::LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
 	{
 		FT_Face face;
 		if (FT_New_Memory_Face(g_ftLib, static_cast<FT_Byte*>(data), static_cast<FT_Long>(dataSize), 0, &face))
@@ -91,7 +199,7 @@ namespace LinaVG
 		return SetupFont(face, loadAsSDF, size, customRanges, customRangesSize, useKerningIfAvailable);
 	}
 
-	LinaVGFont* Text::SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
+	Font* Text::SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable)
 	{
 		FT_Error err = FT_Set_Pixel_Sizes(face, 0, size);
 
@@ -103,7 +211,7 @@ namespace LinaVG
 		if (err)
 			Config.errorCallback("LinaVG: Error on FT_Select_Charmap!");
 
-		LinaVGFont* font		= new LinaVGFont();
+		Font* font		= new Font();
 		font->m_supportsUnicode = customRanges != nullptr;
 		font->m_size			= size;
 		font->m_isSDF			= loadAsSDF;
@@ -112,13 +220,11 @@ namespace LinaVG
 
 		// int		 maxHeight		   = 0;
 		auto&		 characterMap	   = font->m_characterGlyphs;
-		unsigned int roww			   = 0;
-		unsigned int rowh			   = 0;
-		int			 bufferCharSpacing = 5;
-		unsigned int w				   = bufferCharSpacing;
-		unsigned int h				   = bufferCharSpacing;
 		FT_GlyphSlot slot			   = face->glyph;
 
+        unsigned int sizeCtrX = 0;
+        unsigned int sizeCtrY = 0;
+        
 		auto setSizes = [&](FT_ULong c) {
 			auto i = FT_Get_Char_Index(face, c);
 
@@ -153,20 +259,11 @@ namespace LinaVG
 			const unsigned int glyphWidth = slot->bitmap.width;
 			const unsigned int glyphRows  = slot->bitmap.rows;
 
-			if (roww + glyphWidth + bufferCharSpacing >= Config.maxFontAtlasSize)
-			{
-				w = Math::Max(w, roww);
-				h += rowh + bufferCharSpacing;
-				roww = bufferCharSpacing;
-				rowh = 0;
-			}
-
 			const size_t bufSize = static_cast<size_t>(glyphWidth * glyphRows);
 
 			if (slot->bitmap.buffer != nullptr)
 			{
 				ch.m_buffer = (unsigned char*)LINAVG_MALLOC(bufSize);
-
 				if (ch.m_buffer != 0)
 					LINAVG_MEMCPY(ch.m_buffer, slot->bitmap.buffer, bufSize);
 			}
@@ -175,8 +272,16 @@ namespace LinaVG
 			ch.m_bearing = Vec2(static_cast<float>(slot->bitmap_left), static_cast<float>(slot->bitmap_top));
 			ch.m_advance = Vec2(static_cast<float>(slot->advance.x >> 6), static_cast<float>(slot->advance.y >> 6));
 
-			roww += glyphWidth + bufferCharSpacing;
-			rowh = Math::Max(rowh, glyphRows);
+            sizeCtrY = Math::Max(sizeCtrY, glyphRows);
+            
+            if(sizeCtrX + glyphWidth >= Config.maxFontAtlasSize)
+            {
+                sizeCtrX = 0;
+                font->m_atlasRectHeight += sizeCtrY + 1;
+            }
+            
+            sizeCtrX += glyphWidth + 1;
+            
 			return true;
 		};
 
@@ -196,7 +301,6 @@ namespace LinaVG
 		for (FT_ULong c = 32; c < 128; c++)
 		{
 			setSizes(c);
-
 			if (font->m_supportsKerning)
 			{
 				for (FT_ULong a = 32; a < c; a++)
@@ -229,6 +333,35 @@ namespace LinaVG
 			}
 		}
 
+        font->m_atlasRectHeight += sizeCtrY + 1;
+        
+        font->m_spaceAdvance = characterMap[' '].m_advance.x;
+      
+        Atlas* foundAtlas = nullptr;
+        
+        for(Atlas* atlas : m_atlases)
+        {
+            if(atlas->AddFont(font))
+            {
+                foundAtlas = atlas;
+                break;
+            }
+        }
+        
+        if(foundAtlas == nullptr)
+        {
+            Atlas* newAtlas = new Atlas(Vec2ui(Config.maxFontAtlasSize, Config.maxFontAtlasSize), m_callbacks.atlasNeedsUpdate);
+            
+            if(!newAtlas->AddFont(font))
+            {
+                if (Config.errorCallback)
+                    Config.errorCallback("LinaVG: Could not fit font!");
+            }
+            
+            m_atlases.push_back(newAtlas);
+        }
+
+        /*
 		w = Math::Max(w, roww);
 		h += rowh;
 
@@ -284,7 +417,6 @@ namespace LinaVG
 			m_textData.m_createdAtlases.push_back(atlas);
 		}
 
-		// TODO: figure out width as height issue
 		rowh = 0;
 
 		bool firstRow = true;
@@ -318,13 +450,6 @@ namespace LinaVG
 			Vec2		uv2		   = Vec2(xx + size.x / fontWidth, yy);
 			Vec2		uv3		   = Vec2(xx + size.x / fontWidth, yy + size.y / fontHeight);
 			Vec2		uv4		   = Vec2(xx, yy + size.y / fontHeight);
-
-			// Vec2       points[] = {uv1, uv2, uv3, uv4};
-			// const Vec2 avg      = Math::GetPolygonCentroidFast(points, 4);
-			// uv1                 = Math::ScalePoint(points[0], avg, 1.1f);
-			// uv2                 = Math::ScalePoint(points[1], avg, 1.1f);
-			// uv3                 = Math::ScalePoint(points[2], avg, 1.1f);
-			// uv4                 = Math::ScalePoint(points[3], avg, 1.1f);
 
 			const Vec4 uv12 = Vec4(uv1.x, uv1.y, uv2.x, uv2.y);
 			const Vec4 uv34 = Vec4(uv3.x, uv3.y, uv4.x, uv4.y);
@@ -367,13 +492,11 @@ namespace LinaVG
 			m_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetX = offsetX;
 			m_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetY = offsetY;
 		}
-
-		font->m_spaceAdvance = characterMap[' '].m_advance.x;
+*/
+        
 		err					 = FT_Done_Face(face);
-
 		if (err)
 			Config.errorCallback("LinaVG: Error on FT_Done_Face!");
-
 		Config.logCallback("LinaVG: Successfuly loaded font!");
 		return font;
 	}

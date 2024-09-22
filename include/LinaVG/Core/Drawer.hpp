@@ -39,7 +39,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace LinaVG
 {
-	class LinaVGFont;
+	class Font;
 
 	struct LineTriangle
 	{
@@ -456,39 +456,39 @@ namespace LinaVG
 		/// <summary>
 		/// Break down text into words, with each word having calculated size properties.
 		/// </summary>
-		void ParseTextIntoWords(Array<TextPart*>& arr, const char* text, LinaVGFont* font, float scale, float spacing);
+		void ParseTextIntoWords(Array<TextPart*>& arr, const char* text, Font* font, float scale, float spacing);
 
 		/// <summary>
 		/// Converts the given words into a set of lines based on wrapping.
 		/// </summary>
-		void ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, LinaVGFont* font, float scale, float spacing, float wrapWidth, float sdfThickness);
+		void ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, Font* font, float scale, float spacing, float wrapWidth, float sdfThickness);
 
 		/// <summary>
 		/// Process, parse & draw text according to options.
 		/// </summary>
-		void ProcessText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData, const Vec4& clip, bool wordWrap);
+		void ProcessText(DrawBuffer* buf, Font* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData, const Vec4& clip, bool wordWrap);
 
 		/// <summary>
 		/// DrawText implementation.
 		/// </summary>
-		void DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, TextOutData* outData, const Vec4& clip);
+		void DrawText(DrawBuffer* buf, Font* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, TextOutData* outData, const Vec4& clip);
 
 		/// <summary>
 		/// Returns the total text size for non-wrapped text.
 		/// </summary>
 		/// <returns></returns>
-		Vec2 CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing, float sdfThickness);
+		Vec2 CalcTextSize(const char* text, Font* font, float scale, float spacing, float sdfThickness);
 
 		/// <summary>
 		/// Max character offset from the quad corners for SDF characters.
 		/// </summary>
 		/// <returns></returns>
-		Vec2 CalcMaxCharOffset(const char* text, LinaVGFont* font, float scale);
+		Vec2 CalcMaxCharOffset(const char* text, Font* font, float scale);
 
 		/// <summary>
 		/// Returns the total text size for wrapped text.
 		/// </summary>
-		Vec2 CalcTextSizeWrapped(const char* text, LinaVGFont*, float newLineSpacing, float wrapping, float scale, float spacing, float sdfThickness, bool wordWrap);
+		Vec2 CalcTextSizeWrapped(const char* text, Font*, float newLineSpacing, float wrapping, float scale, float spacing, float sdfThickness, bool wordWrap);
 
 		/// <summary>
 		/// For processing UTf8 texts.
@@ -498,7 +498,7 @@ namespace LinaVG
 		/// <summary>
 		/// Parse text into wrapped lines.
 		/// </summary>
-		void WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth, bool wordWrap);
+		void WrapText(LINAVG_VEC<TextPart>& lines, Font* font, const char* text, float spacing, float scale, float wrapWidth, bool wordWrap);
 
 #endif
 

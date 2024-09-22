@@ -60,7 +60,7 @@ namespace LinaVG
 
 	typedef unsigned short Index;
 	typedef unsigned int   BackendHandle;
-	class LinaVGFont;
+	class Font;
 
 	LINAVG_API enum class GradientType
 	{
@@ -485,7 +485,7 @@ namespace LinaVG
 		/// <summary>
 		/// Font to use while drawing this text. Handles are achieved through LoadFont() method.
 		/// </summary>
-		LinaVGFont* font = nullptr;
+		Font* font = nullptr;
 
 		/// <summary>
 		/// Text m_color, only flat m_color, horizontal or vertical gradients are supported.
@@ -954,9 +954,10 @@ namespace LinaVG
 	struct SimpleTextDrawBuffer : public DrawBuffer
 	{
 		SimpleTextDrawBuffer(){};
-		SimpleTextDrawBuffer(void* userData, BackendHandle glyphHandle, int drawOrder, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: DrawBuffer(userData, drawOrder, DrawBufferType::SimpleText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY), m_textureHandle(glyphHandle), m_isDropShadow(isDropShadow){};
+		SimpleTextDrawBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+			: DrawBuffer(userData, drawOrder, DrawBufferType::SimpleText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY), m_font(font), m_isDropShadow(isDropShadow){};
 
+        Font* m_font = nullptr;
 		BackendHandle m_textureHandle = 0;
 		bool		  m_isDropShadow  = false;
 	};
@@ -964,9 +965,9 @@ namespace LinaVG
 	struct SDFTextDrawBuffer : public DrawBuffer
 	{
 		SDFTextDrawBuffer(){};
-		SDFTextDrawBuffer(void* userData, BackendHandle glyphHandle, int drawOrder, const SDFTextOptions& opts, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+		SDFTextDrawBuffer(void* userData, Font* font, int drawOrder, const SDFTextOptions& opts, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
 			: DrawBuffer(userData, drawOrder, DrawBufferType::SDFText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY),
-			  m_isDropShadow(isDropShadow), m_flipAlpha(opts.flipAlpha), m_thickness(opts.sdfThickness), m_softness(opts.sdfSoftness), m_outlineThickness(opts.sdfOutlineThickness), m_outlineSoftness(opts.sdfOutlineSoftness), m_outlineColor(opts.sdfOutlineColor),  m_textureHandle(glyphHandle){};
+			  m_isDropShadow(isDropShadow), m_flipAlpha(opts.flipAlpha), m_thickness(opts.sdfThickness), m_softness(opts.sdfSoftness), m_outlineThickness(opts.sdfOutlineThickness), m_outlineSoftness(opts.sdfOutlineSoftness), m_outlineColor(opts.sdfOutlineColor), m_font(font){};
 
 		bool		  m_isDropShadow	 = false;
 		bool		  m_flipAlpha		 = false;
@@ -975,7 +976,7 @@ namespace LinaVG
 		float		  m_outlineThickness = 0.0f;
 		float		  m_outlineSoftness	 = 0.0f;
 		Vec4		  m_outlineColor	 = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		BackendHandle m_textureHandle	 = 0;
+        Font* m_font = nullptr;
 	};
 
 } // namespace LinaVG

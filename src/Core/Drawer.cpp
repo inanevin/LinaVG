@@ -676,7 +676,7 @@ namespace LinaVG
 		if (text == NULL || text[0] == '\0')
 			return;
 
-		LinaVGFont* font = opts.font;
+		Font* font = opts.font;
 
 		if (!font->m_isSDF)
 		{
@@ -686,7 +686,7 @@ namespace LinaVG
 		}
 
 		const float scale	   = opts.textScale;
-		DrawBuffer* buf		   = &m_bufferStore.GetData().GetSDFTextBuffer(opts.userData, font->m_texture, drawOrder, opts, false);
+		DrawBuffer* buf		   = &m_bufferStore.GetData().GetSDFTextBuffer(opts.userData, font, drawOrder, opts, false);
 		const bool	isGradient = !Math::IsEqual(opts.color.start, opts.color.end);
 		const int	vtxStart   = buf->m_vertexBuffer.m_size;
 		const int	indexStart = buf->m_indexBuffer.m_size;
@@ -716,7 +716,7 @@ namespace LinaVG
 			SDFTextOptions usedOpts = SDFTextOptions(opts);
 			usedOpts.sdfThickness	= opts.sdfDropShadowThickness;
 			usedOpts.sdfSoftness	= opts.sdfDropShadowSoftness;
-			DrawBuffer* dsBuf		= &m_bufferStore.GetData().GetSDFTextBuffer(opts.userData, font->m_texture, drawOrder, usedOpts, true);
+			DrawBuffer* dsBuf		= &m_bufferStore.GetData().GetSDFTextBuffer(opts.userData, font, drawOrder, usedOpts, true);
 			// const int	dsStart		= buf->m_vertexBuffer.m_size;
 			ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness, outData, opts.cpuClipping, opts.wordWrap);
 		}
@@ -727,7 +727,7 @@ namespace LinaVG
 		if (text == NULL || text[0] == '\0')
 			return;
 
-		LinaVGFont* font = opts.font;
+		Font* font = opts.font;
 
 		if (font->m_isSDF)
 		{
@@ -737,7 +737,7 @@ namespace LinaVG
 		}
 
 		const float scale	   = opts.textScale;
-		DrawBuffer* buf		   = &m_bufferStore.GetData().GetSimpleTextBuffer(opts.userData, font->m_texture, drawOrder, false);
+		DrawBuffer* buf		   = &m_bufferStore.GetData().GetSimpleTextBuffer(opts.userData, font, drawOrder, false);
 		const bool	isGradient = !Math::IsEqual(opts.color.start, opts.color.end);
 		const int	vtxStart   = buf->m_vertexBuffer.m_size;
 		const int	indexStart = buf->m_indexBuffer.m_size;
@@ -765,14 +765,14 @@ namespace LinaVG
 		// Drop-shadow texts don't support caching yet.
 		if (!Math::IsEqualMarg(opts.dropShadowOffset.x, 0.0f) || !Math::IsEqualMarg(opts.dropShadowOffset.y, 0.0f))
 		{
-			DrawBuffer* dsBuf = &m_bufferStore.GetData().GetSimpleTextBuffer(opts.userData, font->m_texture, drawOrder, true);
+			DrawBuffer* dsBuf = &m_bufferStore.GetData().GetSimpleTextBuffer(opts.userData, font, drawOrder, true);
 			ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping, opts.wordWrap);
 		}
 	}
 
 	LINAVG_API Vec2 Drawer::CalculateTextSize(const char* text, TextOptions& opts)
 	{
-		LinaVGFont* font  = opts.font;
+		Font* font  = opts.font;
 		const float scale = opts.textScale;
 
 		if (Math::IsEqualMarg(opts.wrapWidth, 0.0f, 0.1f))
@@ -783,7 +783,7 @@ namespace LinaVG
 
 	LINAVG_API Vec2 Drawer::CalculateTextSize(const char* text, SDFTextOptions& opts)
 	{
-		LinaVGFont* font  = opts.font;
+		Font* font  = opts.font;
 		const float scale = opts.textScale;
 
 		if (Math::IsEqualMarg(opts.wrapWidth, 0.0f, 0.1f))
@@ -2950,7 +2950,7 @@ namespace LinaVG
 
 #ifndef LINAVG_DISABLE_TEXT_SUPPORT
 
-	void Drawer::ParseTextIntoWords(Array<TextPart*>& arr, const char* text, LinaVGFont* font, float scale, float spacing)
+	void Drawer::ParseTextIntoWords(Array<TextPart*>& arr, const char* text, Font* font, float scale, float spacing)
 	{
 		bool		  added	 = false;
 		Vec2		  size	 = Vec2(0.0f, 0.0f);
@@ -2988,7 +2988,7 @@ namespace LinaVG
 		arr.push_back(w);
 	}
 
-	void Drawer::ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, LinaVGFont* font, float scale, float spacing, float wrapWidth, float sdfThickness)
+	void Drawer::ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, Font* font, float scale, float spacing, float wrapWidth, float sdfThickness)
 	{
 		const float	  spaceAdvance = font->m_spaceAdvance * scale + spacing;
 		float		  maxHeight	   = 0.0f;
@@ -3064,7 +3064,7 @@ namespace LinaVG
 		}
 	}
 
-	void Drawer::WrapText(LINAVG_VEC<TextPart>& lines, LinaVGFont* font, const char* text, float spacing, float scale, float wrapWidth, bool wordWrap)
+	void Drawer::WrapText(LINAVG_VEC<TextPart>& lines, Font* font, const char* text, float spacing, float scale, float wrapWidth, bool wordWrap)
 	{
 		TextPart line = {};
 		TextPart word = {};
@@ -3177,7 +3177,7 @@ namespace LinaVG
 		}
 	}
 
-	void Drawer::ProcessText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData, const Vec4& clip, bool wordWrap)
+	void Drawer::ProcessText(DrawBuffer* buf, Font* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData, const Vec4& clip, bool wordWrap)
 	{
 		const int  bufStart = buf->m_vertexBuffer.m_size;
 		const Vec2 size		= CalcTextSize(text, font, scale, spacing, sdfThickness);
@@ -3261,7 +3261,7 @@ namespace LinaVG
 		}
 	}
 
-	Vec2 Drawer::CalcMaxCharOffset(const char* text, LinaVGFont* font, float scale)
+	Vec2 Drawer::CalcMaxCharOffset(const char* text, Font* font, float scale)
 	{
 		const uint8_t* c;
 		Vec2		   offset  = Vec2(0.0f, 0.0f);
@@ -3284,7 +3284,7 @@ namespace LinaVG
 		return offset;
 	}
 
-	void Drawer::DrawText(DrawBuffer* buf, LinaVGFont* font, const char* text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, TextOutData* outData, const Vec4& clip)
+	void Drawer::DrawText(DrawBuffer* buf, Font* font, const char* text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, TextOutData* outData, const Vec4& clip)
 	{
 		const uint8_t* c;
 		const int	   totalCharacterCount = Utility::GetTextCharacterSize(text);
@@ -3456,7 +3456,7 @@ namespace LinaVG
 		return codepoints;
 	}
 
-	Vec2 Drawer::CalcTextSize(const char* text, LinaVGFont* font, float scale, float spacing, float sdfSoftness)
+	Vec2 Drawer::CalcTextSize(const char* text, Font* font, float scale, float spacing, float sdfSoftness)
 	{
 		float		   maxCharacterHeight = 0.0f;
 		float		   totalWidth		  = 0.0f;
@@ -3524,7 +3524,7 @@ namespace LinaVG
 		return Vec2(totalWidth, maxCharacterHeight);
 	}
 
-	Vec2 Drawer::CalcTextSizeWrapped(const char* text, LinaVGFont* font, float newLineSpacing, float wrapWidth, float scale, float spacing, float sdfThickness, bool wordWrap)
+	Vec2 Drawer::CalcTextSizeWrapped(const char* text, Font* font, float newLineSpacing, float wrapWidth, float scale, float spacing, float sdfThickness, bool wordWrap)
 	{
 		LINAVG_VEC<TextPart> lines;
 		lines.reserve(15);
