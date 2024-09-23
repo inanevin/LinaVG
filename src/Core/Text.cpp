@@ -224,12 +224,22 @@ namespace LinaVG
 		FT_Error err = FT_Set_Pixel_Sizes(face, 0, size);
 
 		if (err)
-			Config.errorCallback("LinaVG: Error on FT_Set_Pixel_Sizes!");
+        {
+            if(Config.errorCallback)
+                Config.errorCallback("LinaVG: Error on FT_Set_Pixel_Sizes!");
+            
+            return nullptr;
+        }
 
 		err = FT_Select_Charmap(face, ft_encoding_unicode);
 
 		if (err)
-			Config.errorCallback("LinaVG: Error on FT_Select_Charmap!");
+        {
+            if(Config.errorCallback)
+                Config.errorCallback("LinaVG: Error on FT_Select_Charmap!");
+            
+            return nullptr;
+        }
 
 		Font* font		= new Font();
 		font->m_supportsUnicode = customRanges != nullptr;
@@ -354,7 +364,6 @@ namespace LinaVG
 		}
 
         font->m_atlasRectHeight += sizeCtrY + 1;
-        
         font->m_spaceAdvance = characterMap[' '].m_advance.x;
       
         Atlas* foundAtlas = nullptr;
@@ -376,147 +385,22 @@ namespace LinaVG
             {
                 if (Config.errorCallback)
                     Config.errorCallback("LinaVG: Could not fit font!");
+                
+                delete font;
+                FT_Done_Face(face);
+                return nullptr;
             }
             
             m_atlases.push_back(newAtlas);
         }
 
-        /*
-		w = Math::Max(w, roww);
-		h += rowh;
-
-		int availableAtlasIndex = -1;
-		for (int i = 0; i < m_textData.m_createdAtlases.m_size; i++)
-		{
-			FontAtlas& atlas = m_textData.m_createdAtlases[i];
-			// const int  totalSize = Config.maxFontAtlasSize - atlas.m_currentOffsetX + Config.maxFontAtlasSize - atlas.m_currentOffsetY;
-			if (Config.maxFontAtlasSize - atlas.m_currentOffsetY > h)
-			{
-				availableAtlasIndex = i;
-
-				if (m_callbacks.fontTextureBind)
-					m_callbacks.fontTextureBind(atlas.m_texture);
-				else
-				{
-					if (Config.errorCallback)
-						Config.errorCallback("LinaVG: Callback FontTextureBind is not set!");
-				}
-				break;
-			}
-		}
-
-		int offsetX = bufferCharSpacing;
-		int offsetY = bufferCharSpacing;
-
-		int usedAtlasIndex = -1;
-		w = h = Config.maxFontAtlasSize;
-
-		unsigned int availableAtlasRowSizeY = 0;
-
-		if (availableAtlasIndex != -1)
-		{
-			offsetX				   = m_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetX;
-			offsetY				   = m_textData.m_createdAtlases[availableAtlasIndex].m_currentOffsetY;
-			availableAtlasRowSizeY = m_textData.m_createdAtlases[availableAtlasIndex].m_rowSizeY;
-			font->m_texture		   = m_textData.m_createdAtlases[availableAtlasIndex].m_texture;
-			usedAtlasIndex		   = availableAtlasIndex;
-		}
-		else
-		{
-			FontAtlas atlas;
-
-			if (m_callbacks.fontTextureCreate)
-				atlas.m_texture = m_callbacks.fontTextureCreate(w, h);
-			else
-			{
-				if (Config.errorCallback)
-					Config.errorCallback("LinaVG: Callback FontTextureCreate is not set!");
-			}
-			font->m_texture = atlas.m_texture;
-			usedAtlasIndex	= m_textData.m_createdAtlases.m_size;
-			m_textData.m_createdAtlases.push_back(atlas);
-		}
-
-		rowh = 0;
-
-		bool firstRow = true;
-		bool buffered = false;
-
-		for (auto& ch : characterMap)
-		{
-			const unsigned int glyphWidth = static_cast<unsigned int>(ch.second.m_size.x);
-			const unsigned int glyphRows  = static_cast<unsigned int>(ch.second.m_size.y);
-
-			if (offsetX + glyphWidth + bufferCharSpacing >= Config.maxFontAtlasSize)
-			{
-				if (availableAtlasIndex != -1 && firstRow)
-				{
-					offsetY += bufferCharSpacing + Math::Max(rowh, availableAtlasRowSizeY);
-					firstRow = false;
-				}
-				else
-					offsetY += rowh + bufferCharSpacing;
-
-				rowh	= 0;
-				offsetX = bufferCharSpacing;
-			}
-
-			const Vec2	size	   = Vec2(static_cast<float>(glyphWidth), static_cast<float>(glyphRows));
-			const float fontWidth  = static_cast<float>(w);
-			const float fontHeight = static_cast<float>(h);
-			const float xx		   = (float)offsetX / fontWidth;
-			const float yy		   = (float)offsetY / fontHeight;
-			Vec2		uv1		   = Vec2(xx, yy);
-			Vec2		uv2		   = Vec2(xx + size.x / fontWidth, yy);
-			Vec2		uv3		   = Vec2(xx + size.x / fontWidth, yy + size.y / fontHeight);
-			Vec2		uv4		   = Vec2(xx, yy + size.y / fontHeight);
-
-			const Vec4 uv12 = Vec4(uv1.x, uv1.y, uv2.x, uv2.y);
-			const Vec4 uv34 = Vec4(uv3.x, uv3.y, uv4.x, uv4.y);
-
-			if (ch.second.m_buffer != nullptr)
-			{
-				if (m_callbacks.fontTextureBufferData)
-					m_callbacks.fontTextureBufferData(glyphWidth, glyphRows, offsetX, offsetY, ch.second.m_buffer);
-				else
-				{
-					if (Config.errorCallback)
-						Config.errorCallback("LinaVG: Callback FontTextureBufferData is not set!");
-				}
-				buffered = true;
-				LINAVG_FREE(ch.second.m_buffer);
-			}
-
-			ch.second.m_buffer = nullptr;
-			ch.second.m_uv12   = uv12;
-			ch.second.m_uv34   = uv34;
-
-			rowh												   = Math::Max(rowh, glyphRows);
-			m_textData.m_createdAtlases[usedAtlasIndex].m_rowSizeY = rowh;
-			offsetX += glyphWidth + bufferCharSpacing;
-		}
-
-		if (buffered)
-		{
-			if (m_callbacks.fontTextureBufferData)
-				m_callbacks.fontTextureBufferEnd();
-			else
-			{
-				if (Config.errorCallback)
-					Config.errorCallback("LinaVG: Callback FontTextureBufferEnd is not set!");
-			}
-		}
-
-		if (usedAtlasIndex != -1)
-		{
-			m_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetX = offsetX;
-			m_textData.m_createdAtlases[usedAtlasIndex].m_currentOffsetY = offsetY;
-		}
-*/
-        
 		err					 = FT_Done_Face(face);
 		if (err)
-			Config.errorCallback("LinaVG: Error on FT_Done_Face!");
+        {
+            if(Config.errorCallback)
+                Config.errorCallback("LinaVG: Error on FT_Done_Face!");
+        }
+        
 		Config.logCallback("LinaVG: Successfuly loaded font!");
 		return font;
 	}
