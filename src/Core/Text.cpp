@@ -105,7 +105,7 @@ namespace LinaVG
             if (Config.errorCallback)
                 Config.errorCallback("LinaVG: Font exceeds atlas size! Increase the max atlas size from config.");
             
-            return;
+            return false;
         }
         
         font->m_atlas = this;
