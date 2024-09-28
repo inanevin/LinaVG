@@ -535,7 +535,7 @@ namespace LinaVG
 			defaultStyle.thickness					  = 8.0f;
 			defaultStyle.outlineOptions.color		  = Vec4(0, 0, 0, 1);
 			defaultStyle.outlineOptions.thickness	  = 2.0f;
-			defaultStyle.outlineOptions.textureHandle = 0;
+			defaultStyle.outlineOptions.textureHandle = NULL_TEXTURE;
 			defaultStyle.color						  = Vec4(1, 1, 1, 1);
 			ExampleApp::Get()->GetLVGDrawer().DrawCircle(Vec2(startPos.x + 75, startPos.y + 75), 75, defaultStyle, 36, m_rotateAngle, 0.0f, 360.0f, 1);
 
@@ -645,7 +645,7 @@ namespace LinaVG
 			defaultStyle.color.start			  = Vec4(0.5f, 1.0f, 1.0f, 1.0f);
 			defaultStyle.color.end				  = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
 			defaultStyle.outlineOptions.thickness = 0.0f;
-			defaultStyle.textureHandle			  = 0;
+			defaultStyle.textureHandle			  = NULL_TEXTURE;
 			defaultStyle.thickness.start		  = 2.0f;
 			defaultStyle.thickness.end			  = 16.0f;
 			ExampleApp::Get()->GetLVGDrawer().DrawBezier(startPos, Vec2(startPos.x + 200, startPos.y + 200), Vec2(startPos.x + 500, startPos.y - 200), Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, jointType, 1, 100);
@@ -656,7 +656,7 @@ namespace LinaVG
 			lineCap									  = LineCapDirection::None;
 			defaultStyle.outlineOptions.color		  = Vec4(1, 1, 1, 1);
 			defaultStyle.outlineOptions.textureHandle = ExampleApp::Get()->GetCheckeredTexture();
-			defaultStyle.textureHandle				  = 0;
+			defaultStyle.textureHandle				  = NULL_TEXTURE;
 			defaultStyle.outlineOptions.thickness	  = 7.0f;
 			defaultStyle.thickness					  = 15.0f;
 
@@ -863,7 +863,7 @@ namespace LinaVG
 				jointType					 = LineJointType::Miter;
 				defaultStyle.color.start	 = Vec4(0.5f, 1.0f, 1.0f, 1.0f);
 				defaultStyle.color.end		 = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
-				defaultStyle.textureHandle	 = 0;
+				defaultStyle.textureHandle	 = NULL_TEXTURE;
 				defaultStyle.thickness.start = 2.0f;
 				defaultStyle.thickness.end	 = 16.0f;
 				ExampleApp::Get()->GetLVGDrawer().DrawBezier(pos, Vec2(pos.x + 200, pos.y + controlPos1Y), Vec2(pos.x + 400, pos.y + controlPos2Y), Vec2(pos.x + 600, pos.y), defaultStyle, lineCap, jointType, 1, 100);

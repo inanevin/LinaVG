@@ -109,7 +109,7 @@ namespace LinaVG
 		StyleOptions style = StyleOptions(opts);
 		style.isFilled	   = true;
 
-		const bool useTextureBuffer = style.textureHandle != 0;
+		const bool useTextureBuffer = style.textureHandle != NULL_TEXTURE;
 		const bool isGradient		= !Math::IsEqual(style.color.start, style.color.end);
 		const bool useGradBuffer	= !useTextureBuffer && isGradient;
 
@@ -290,7 +290,7 @@ namespace LinaVG
 		lines.clear();
 	}
 
-	void Drawer::DrawImage(BackendHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint, float rotateAngle, int drawOrder, Vec2 uvTiling, Vec2 uvOffset, Vec2 uvTL, Vec2 uvBR)
+	void Drawer::DrawImage(TextureHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint, float rotateAngle, int drawOrder, Vec2 uvTiling, Vec2 uvOffset, Vec2 uvTL, Vec2 uvBR)
 	{
 		StyleOptions style;
 		style.aaEnabled		  = false;
@@ -322,7 +322,7 @@ namespace LinaVG
 		{
 			if (Math::IsEqual(style.color.start, style.color.end))
 			{
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 					FillTri_NoRound_SC(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.start, style, drawOrder);
 				else
 				{
@@ -336,7 +336,7 @@ namespace LinaVG
 				if (style.color.gradientType == GradientType::Horizontal)
 				{
 					// Horizontal, non rounded
-					if (style.textureHandle == 0)
+					if (style.textureHandle == NULL_TEXTURE)
 						FillTri_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.start, style.color.end, style.color.end, style, drawOrder);
 					else
 					{
@@ -347,7 +347,7 @@ namespace LinaVG
 				else if (style.color.gradientType == GradientType::Vertical)
 				{
 					// Vertical, non rounded
-					if (style.textureHandle == 0)
+					if (style.textureHandle == NULL_TEXTURE)
 						FillTri_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.end, style.color.end, style.color.start, style, drawOrder);
 					else
 					{
@@ -358,7 +358,7 @@ namespace LinaVG
 				else if (style.color.gradientType == GradientType::Radial || style.color.gradientType == GradientType::RadialCorner)
 				{
 					// Radial, non rounded
-					if (style.textureHandle == 0)
+					if (style.textureHandle == NULL_TEXTURE)
 					{
 						GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
 						FillTri_NoRound_RadialGra(&buf, rotateAngle, top, right, left, style.color.start, style.color.end, style, drawOrder);
@@ -376,7 +376,7 @@ namespace LinaVG
 			if (Math::IsEqual(style.color.start, style.color.end))
 			{
 				// Rounded, single m_color.
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 					FillTri_Round(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.color.start, style.rounding, style, drawOrder);
 				else
 				{
@@ -387,7 +387,7 @@ namespace LinaVG
 			else
 			{
 				// Rounded, gradient.
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 				{
 					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
 					FillTri_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.color.start, style.rounding, style, drawOrder);
@@ -408,7 +408,7 @@ namespace LinaVG
 			// Single m_color
 			if (Math::IsEqual(style.color.start, style.color.end))
 			{
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 					FillRect_NoRound_SC(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max, style.color.start, style, drawOrder);
 				else
 				{
@@ -421,7 +421,7 @@ namespace LinaVG
 				if (style.color.gradientType == GradientType::Horizontal)
 				{
 					// Horizontal, non rounded
-					if (style.textureHandle == 0)
+					if (style.textureHandle == NULL_TEXTURE)
 					{
 						FillRect_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max,
 												   style.color.start, style.color.end, style.color.end, style.color.start, style, drawOrder);
@@ -436,7 +436,7 @@ namespace LinaVG
 				else if (style.color.gradientType == GradientType::Vertical)
 				{
 					// Vertical, non rounded
-					if (style.textureHandle == 0)
+					if (style.textureHandle == NULL_TEXTURE)
 					{
 						FillRect_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max,
 												   style.color.start, style.color.start, style.color.end, style.color.end, style, drawOrder);
@@ -451,7 +451,7 @@ namespace LinaVG
 				else if (style.color.gradientType == GradientType::Radial || style.color.gradientType == GradientType::RadialCorner)
 				{
 					// Radial, non rounded
-					if (style.textureHandle == 0)
+					if (style.textureHandle == NULL_TEXTURE)
 					{
 						GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
 						FillRect_NoRound_RadialGra(&buf, rotateAngle, min, max, style.color.start, style.color.end, style, drawOrder);
@@ -469,7 +469,7 @@ namespace LinaVG
 			if (Math::IsEqual(style.color.start, style.color.end))
 			{
 				// Rounded, single m_color.
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 				{
 					FillRect_Round(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), style.onlyRoundTheseCorners, rotateAngle, min, max, style.color.start, style.rounding, style, drawOrder);
 				}
@@ -481,7 +481,7 @@ namespace LinaVG
 			}
 			else
 			{
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 				{
 					// Rounded, gradient.
 					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
@@ -501,7 +501,7 @@ namespace LinaVG
 	{
 		if (Math::IsEqual(style.color.start, style.color.end))
 		{
-			if (style.textureHandle == 0)
+			if (style.textureHandle == NULL_TEXTURE)
 				FillNGon_SC(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style, drawOrder);
 			else
 			{
@@ -514,7 +514,7 @@ namespace LinaVG
 			if (style.color.gradientType == GradientType::Horizontal)
 			{
 				// Horizontal, non rounded
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 					FillNGon_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style.color.end, true, style, drawOrder);
 				else
 				{
@@ -525,7 +525,7 @@ namespace LinaVG
 			else if (style.color.gradientType == GradientType::Vertical)
 			{
 				// Vertical, non rounded
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 					FillNGon_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style.color.end, false, style, drawOrder);
 				else
 				{
@@ -536,7 +536,7 @@ namespace LinaVG
 			else if (style.color.gradientType == GradientType::Radial || style.color.gradientType == GradientType::RadialCorner)
 			{
 				// // Radial, non rounded
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 				{
 					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
 					FillNGon_RadialGra(&buf, rotateAngle, center, radius, n, style.color.start, style.color.end, style, drawOrder);
@@ -563,7 +563,7 @@ namespace LinaVG
 
 		if (Math::IsEqual(style.color.start, style.color.end))
 		{
-			if (style.textureHandle == 0)
+			if (style.textureHandle == NULL_TEXTURE)
 				FillConvex_SC(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style, drawOrder);
 			else
 			{
@@ -576,7 +576,7 @@ namespace LinaVG
 			if (style.color.gradientType == GradientType::Horizontal)
 			{
 				// Horizontal, non rounded
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 					FillConvex_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style.color.end, true, style, drawOrder);
 				else
 				{
@@ -587,7 +587,7 @@ namespace LinaVG
 			else if (style.color.gradientType == GradientType::Vertical)
 			{
 				// Vertical, non rounded
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 					FillConvex_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style.color.end, false, style, drawOrder);
 				else
 				{
@@ -598,7 +598,7 @@ namespace LinaVG
 			else if (style.color.gradientType == GradientType::Radial || style.color.gradientType == GradientType::RadialCorner)
 			{
 				// // Radial, non rounded
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 				{
 					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
 					FillConvex_RadialGra(&buf, rotateAngle, points, size, avgCenter, style.color.start, style.color.end, style, drawOrder);
@@ -620,7 +620,7 @@ namespace LinaVG
 		}
 		if (Math::IsEqual(style.color.start, style.color.end))
 		{
-			if (style.textureHandle == 0)
+			if (style.textureHandle == NULL_TEXTURE)
 				FillCircle_SC(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, startAngle, endAngle, style, drawOrder);
 			else
 			{
@@ -633,7 +633,7 @@ namespace LinaVG
 			if (style.color.gradientType == GradientType::Horizontal)
 			{
 				// Horizontal, non rounded
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 					FillCircle_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, style.color.end, true, startAngle, endAngle, style, drawOrder);
 				else
 				{
@@ -644,7 +644,7 @@ namespace LinaVG
 			else if (style.color.gradientType == GradientType::Vertical)
 			{
 				// Vertical, non rounded
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 					FillCircle_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, style.color.end, false, startAngle, endAngle, style, drawOrder);
 				else
 				{
@@ -655,7 +655,7 @@ namespace LinaVG
 			else if (style.color.gradientType == GradientType::Radial || style.color.gradientType == GradientType::RadialCorner)
 			{
 				// // Radial, non rounded
-				if (style.textureHandle == 0)
+				if (style.textureHandle == NULL_TEXTURE)
 				{
 					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
 					FillCircle_RadialGra(&buf, rotateAngle, center, radius, segments, style.color.start, style.color.end, startAngle, endAngle, style, drawOrder);
@@ -2545,7 +2545,7 @@ namespace LinaVG
 		else
 			isGradient = !Math::IsEqual(opts.outlineOptions.color.start, opts.outlineOptions.color.end);
 
-		bool	   useTextureBuffer = outlineType == OutlineCallType::AA ? (opts.textureHandle != 0) : (opts.outlineOptions.textureHandle != 0);
+		bool	   useTextureBuffer = outlineType == OutlineCallType::AA ? (opts.textureHandle != NULL_TEXTURE) : (opts.outlineOptions.textureHandle != NULL_TEXTURE);
 		const bool useGradBuffer	= !useTextureBuffer && isGradient;
 
 		// Determine which buffer to use.
@@ -2555,7 +2555,7 @@ namespace LinaVG
 		if (useTextureBuffer)
 		{
 			const int			sourceIndex = m_bufferStore.GetData().GetBufferIndexInTextureArray(sourceBuffer);
-			const BackendHandle handle		= outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle;
+			const TextureHandle handle		= outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle;
 			const Vec2			uvOffset	= outlineType == OutlineCallType::AA ? opts.textureUVOffset : opts.outlineOptions.textureUVOffset;
 			const Vec2			uvTiling	= outlineType == OutlineCallType::AA ? opts.textureUVTiling : opts.outlineOptions.textureUVTiling;
 			destBuf							= &m_bufferStore.GetData().GetTextureBuffer(opts.userData, handle, uvTiling, uvOffset, opts.outlineOptions.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
@@ -2685,7 +2685,7 @@ namespace LinaVG
 		if (useTextureBuffer)
 		{
 			const int			sourceIndex = m_bufferStore.GetData().GetBufferIndexInTextureArray(sourceBuffer);
-			const BackendHandle handle		= outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle;
+			const TextureHandle handle		= outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle;
 			const Vec2			uvOffset	= outlineType == OutlineCallType::AA ? opts.textureUVOffset : opts.outlineOptions.textureUVOffset;
 			const Vec2			uvTiling	= outlineType == OutlineCallType::AA ? opts.textureUVTiling : opts.outlineOptions.textureUVTiling;
 			destBuf							= &m_bufferStore.GetData().GetTextureBuffer(opts.userData, handle, uvTiling, uvOffset, opts.outlineOptions.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);

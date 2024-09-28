@@ -40,6 +40,10 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <stdio.h>
 
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "Utility/stb_image.h"
+
 namespace LinaVG::Examples
 {
 
@@ -346,7 +350,7 @@ namespace LinaVG::Examples
 		glUniform4f(data.m_uniformMap["tint"], (GLfloat)buf->m_tint.x, (GLfloat)buf->m_tint.y, (GLfloat)buf->m_tint.z, (GLfloat)buf->m_tint.w);
 		glUniform1i(data.m_uniformMap["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
 		glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, buf->m_textureHandle);
+        glBindTexture(GL_TEXTURE_2D, static_cast<Texture*>(buf->m_textureHandle)->handle);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
 		glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
@@ -668,6 +672,34 @@ namespace LinaVG::Examples
         
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, atlas->GetSize().x, atlas->GetSize().y, GL_RED, GL_UNSIGNED_BYTE, atlas->GetData());
         RestoreAPIState();
+    }
+
+    Texture* GLBackend::LoadTexture(const char *file)
+    {
+        Texture* txt = new Texture();
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        // set the texture wrapping/filtering options (on the currently bound texture object)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // load and generate the texture
+        int               width, height, nrChannels;
+        unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 4);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
+        else
+        {
+            std::cout << "Failed to load texture" << std::endl;
+        }
+        stbi_image_free(data);
+        txt->handle = texture;
+        return txt;
     }
 
 } // namespace LinaVG::Examples

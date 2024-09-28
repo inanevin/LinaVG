@@ -293,7 +293,7 @@ namespace LinaVG
 		return m_defaultBuffers.last_ref();
 	}
 
-	TextureDrawBuffer& BufferStoreData::GetTextureBuffer(void* userData, BackendHandle textureHandle,const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
+	TextureDrawBuffer& BufferStoreData::GetTextureBuffer(void* userData, TextureHandle textureHandle,const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
 	{
 		const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
 		for (int i = 0; i < m_textureBuffers.m_size; i++)

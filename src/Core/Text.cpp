@@ -71,7 +71,9 @@ namespace LinaVG
         for(auto& [glyph, textChar] : m_characterGlyphs)
             LINAVG_FREE(textChar.m_buffer);
         m_characterGlyphs.clear();
-        m_atlas->RemoveFont(this);
+        
+        if(m_atlas != nullptr)
+            m_atlas->RemoveFont(this);
     }
 
     Atlas::Atlas(const Vec2ui& size, std::function<void(Atlas* atlas)> updateFunc)
@@ -105,7 +107,7 @@ namespace LinaVG
             if (Config.errorCallback)
                 Config.errorCallback("LinaVG: Font exceeds atlas size! Increase the max atlas size from config.");
             
-            return;
+            return false;
         }
         
         font->m_atlas = this;

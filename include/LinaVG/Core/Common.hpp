@@ -61,7 +61,10 @@ namespace LinaVG
 
 	typedef unsigned short Index;
 	typedef unsigned int   BackendHandle;
+    typedef void* TextureHandle;
 	class Font;
+
+#define NULL_TEXTURE nullptr
 
 	LINAVG_API enum class GradientType
 	{
@@ -338,7 +341,7 @@ namespace LinaVG
 		/// <summary>
 		/// Set this to a texture handle you've created on your program to draw a texture on the outline. Set to 0 to clear.
 		/// </summary>
-		BackendHandle textureHandle = 0;
+		TextureHandle textureHandle = 0;
 
 		/// <summary>
 		/// Defines the texture repetition.
@@ -691,7 +694,7 @@ namespace LinaVG
 		/// <summary>
 		/// Set this to a texture handle you've created on your program to draw a texture on the shape/line. Set to 0 to clear.
 		/// </summary>
-		BackendHandle textureHandle = 0;
+		TextureHandle textureHandle = 0;
 
 		/// <summary>
 		/// Defines the texture repetition.
@@ -942,11 +945,11 @@ namespace LinaVG
 	struct TextureDrawBuffer : public DrawBuffer
 	{
 		TextureDrawBuffer(){};
-		TextureDrawBuffer(void* userData, BackendHandle h, const Vec2& tiling, const Vec2& offset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+		TextureDrawBuffer(void* userData, TextureHandle h, const Vec2& tiling, const Vec2& offset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
 			: DrawBuffer(userData, drawOrder, DrawBufferType::Textured, shapeType, clipPosX, clipPosY, clipSizeX, clipSizeY), m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset), m_tint(tint){};
 
 		bool		  m_isAABuffer		= false;
-		BackendHandle m_textureHandle	= 0;
+        TextureHandle m_textureHandle	= NULL_TEXTURE;
 		Vec2		  m_textureUVTiling = Vec2(1.0f, 1.0f);
 		Vec2		  m_textureUVOffset = Vec2(0.0f, 0.0f);
 		Vec4		  m_tint			= Vec4(1.0f, 1.0f, 1.0f, 1.0f);

@@ -98,7 +98,7 @@ namespace LinaVG
 		int					  GetBufferIndexInCharArray(DrawBuffer* buf);
 		DrawBuffer&			  GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType);
 		GradientDrawBuffer&	  GetGradientBuffer(void* userData, Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
-		TextureDrawBuffer&	  GetTextureBuffer(void* userData, BackendHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType);
+		TextureDrawBuffer&	  GetTextureBuffer(void* userData, TextureHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType);
 		SimpleTextDrawBuffer& GetSimpleTextBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow);
 		SDFTextDrawBuffer&	  GetSDFTextBuffer(void* userData, Font* font, int drawOrder, const SDFTextOptions& opts, bool isDropShadow);
 		void				  AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart);

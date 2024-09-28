@@ -42,7 +42,8 @@ namespace LinaVG
 	namespace Examples
 	{
 		class GLBackend;
-
+        struct Texture;
+    
 		class ExampleApp
 		{
 		public:
@@ -85,12 +86,12 @@ namespace LinaVG
 				return m_elapsedTime;
 			}
 
-			inline unsigned int GetLinaLogoTexture()
+			inline Texture* GetLinaLogoTexture()
 			{
 				return m_linaTexture;
 			}
 
-			inline unsigned int GetCheckeredTexture()
+			inline Texture* GetCheckeredTexture()
 			{
 				return m_checkeredTexture;
 			}
@@ -117,8 +118,8 @@ namespace LinaVG
 
 		private:
 			DemoScreens		   m_demoScreens;
-			unsigned int	   m_linaTexture	   = 0;
-			unsigned int	   m_checkeredTexture  = 0;
+			Texture*	   m_linaTexture	   = nullptr;
+			Texture*	   m_checkeredTexture  = nullptr;
 			int				   m_currentDemoScreen = 1;
 			float			   m_deltaTime		   = 0.0f;
 			float			   m_deltaTimeRead	   = 0.0f;

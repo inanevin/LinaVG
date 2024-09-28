@@ -83,8 +83,8 @@ namespace LinaVG
 
             LinaVG::InitializeText();
 
-			m_checkeredTexture = window.CreateTexture("Resources/Textures/Checkered.png");
-			m_linaTexture	   = window.CreateTexture("Resources/Textures/Lina.png");
+			m_checkeredTexture = GLBackend::LoadTexture("Resources/Textures/Checkered.png");
+			m_linaTexture	   =  GLBackend::LoadTexture("Resources/Textures/Lina.png");
 
 			// Init LinaVG
 			m_renderingBackend = new GLBackend();
@@ -177,11 +177,14 @@ namespace LinaVG
 				frameCount++;
 			}
 
+            delete m_linaTexture;
+            delete m_checkeredTexture;
 			// Terminate Lina VG & example exampleBackend.
 			m_demoScreens.Terminate();
 			delete m_renderingBackend;
             LinaVG::TerminateText();
 			window.Terminate();
+            
 		}
 
 		void ExampleApp::OnHorizontalKeyCallback(float input)

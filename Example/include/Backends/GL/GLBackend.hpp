@@ -66,6 +66,12 @@ namespace LinaVG::Examples
 		bool		  m_skipDraw				  = false;
 	};
 
+
+struct Texture
+{
+    unsigned int handle = 0;
+};
+
 	class GLBackend
 	{
 	public:
@@ -98,6 +104,7 @@ namespace LinaVG::Examples
 		void		  SaveAPIState();
 		void		  RestoreAPIState();
         void OnAtlasUpdate(Atlas* atlas);
+        static Texture* LoadTexture(const char* file);
 
 		static unsigned int s_displayPosX;
 		static unsigned int s_displayPosY;
