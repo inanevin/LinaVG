@@ -1919,13 +1919,13 @@ namespace LinaVG
 			{
 				const Vec2 toNext  = Math::Normalized(Vec2(buf->m_vertexBuffer[next].pos.x - buf->m_vertexBuffer[i].pos.x, buf->m_vertexBuffer[next].pos.y - buf->m_vertexBuffer[i].pos.y));
 				const Vec2 rotated = Math::Rotate90(toNext, true);
-				v.pos			   = Vec2(buf->m_vertexBuffer[i].pos.x + rotated.x * thickness, buf->m_vertexBuffer[i].pos.y + rotated.y * thickness);
+				v.pos			   = Vec2(buf->m_vertexBuffer[i].pos.x + rotated.x * thickness * 2, buf->m_vertexBuffer[i].pos.y + rotated.y * thickness * 2);
 			}
 			else if (skipEndClosing && i == endIndex)
 			{
 				const Vec2 fromPrev = Math::Normalized(Vec2(buf->m_vertexBuffer[i].pos.x - buf->m_vertexBuffer[previous].pos.x, buf->m_vertexBuffer[i].pos.y - buf->m_vertexBuffer[previous].pos.y));
 				const Vec2 rotated	= Math::Rotate90(fromPrev, true);
-				v.pos				= Vec2(buf->m_vertexBuffer[i].pos.x + rotated.x * thickness, buf->m_vertexBuffer[i].pos.y + rotated.y * thickness);
+				v.pos				= Vec2(buf->m_vertexBuffer[i].pos.x + rotated.x * thickness * 2, buf->m_vertexBuffer[i].pos.y + rotated.y * thickness * 2);
 			}
 			else
 			{
