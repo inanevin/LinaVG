@@ -99,7 +99,7 @@ struct Texture
 
 		void		  StartFrame();
 		void		  DrawDefault(DrawBuffer* buf);
-		void		  DrawSimpleText(DrawBufferText* buf);
+		void		  DrawText(DrawBufferText* buf);
 		void		  EndFrame();
 		void		  SaveAPIState();
 		void		  RestoreAPIState();

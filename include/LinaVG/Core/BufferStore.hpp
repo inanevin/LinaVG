@@ -92,7 +92,7 @@ namespace LinaVG
 	struct BufferStoreCallbacks
 	{
 		std::function<void(DrawBuffer* buf)>		   drawDefault;
-		std::function<void(DrawBufferText* buf)> drawSimpleText;
+		std::function<void(DrawBufferText* buf)> drawText;
 	};
 
 	class BufferStore

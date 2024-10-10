@@ -129,8 +129,8 @@ namespace LinaVG
 
 				if (buf.drawOrder == drawOrder && buf.shapeType == shapeType && buf.vertexBuffer.m_size != 0 && buf.indexBuffer.m_size != 0)
 				{
-					if (m_callbacks.drawSimpleText)
-						m_callbacks.drawSimpleText(&buf);
+					if (m_callbacks.drawText)
+						m_callbacks.drawText(&buf);
 					else
 					{
 						if (LinaVG::Config.logCallback)
