@@ -68,7 +68,7 @@ namespace LinaVG
 	struct BufferStoreData
 	{
 		Array<DrawBuffer>				   m_defaultBuffers;
-		Array<SimpleTextDrawBuffer>		   m_simpleTextBuffers;
+		Array<DrawBufferText>		   m_simpleTextBuffers;
 		Array<int>						   m_drawOrders;
 		LINAVG_MAP<uint32_t, TextCache>	   m_textCache;
 		int								   m_gcFrameCounter		   = 0;
@@ -84,7 +84,7 @@ namespace LinaVG
 		int					  GetBufferIndexInDefaultArray(DrawBuffer* buf);
 		int					  GetBufferIndexInCharArray(DrawBuffer* buf);
 		DrawBuffer&			  GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& textureUV);
-		SimpleTextDrawBuffer& GetSimpleTextBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow, bool isSDF);
+		DrawBufferText& GetSimpleTextBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow, bool isSDF);
 		void				  AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart);
 		TextCache*			  CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf);
 	};
@@ -92,7 +92,7 @@ namespace LinaVG
 	struct BufferStoreCallbacks
 	{
 		std::function<void(DrawBuffer* buf)>		   drawDefault;
-		std::function<void(SimpleTextDrawBuffer* buf)> drawSimpleText;
+		std::function<void(DrawBufferText* buf)> drawSimpleText;
 	};
 
 	class BufferStore

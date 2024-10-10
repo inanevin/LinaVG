@@ -285,7 +285,7 @@ namespace LinaVG::Examples
 		Config.debugCurrentVertexCount += buf->vertexBuffer.m_size;
 	}
 
-	void GLBackend::DrawSimpleText(SimpleTextDrawBuffer* buf)
+	void GLBackend::DrawSimpleText(DrawBufferText* buf)
 	{
 		if (m_backendData.m_skipDraw)
 			return;

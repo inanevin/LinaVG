@@ -125,7 +125,7 @@ namespace LinaVG
 
 			for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
 			{
-				SimpleTextDrawBuffer& buf = m_data.m_simpleTextBuffers[i];
+				DrawBufferText& buf = m_data.m_simpleTextBuffers[i];
 
 				if (buf.drawOrder == drawOrder && buf.shapeType == shapeType && buf.vertexBuffer.m_size != 0 && buf.indexBuffer.m_size != 0)
 				{
@@ -186,7 +186,7 @@ namespace LinaVG
 		return m_defaultBuffers.last_ref();
 	}
 
-	SimpleTextDrawBuffer& BufferStoreData::GetSimpleTextBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow, bool isSDF)
+	DrawBufferText& BufferStoreData::GetSimpleTextBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow, bool isSDF)
 	{
 		for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
 		{
@@ -197,7 +197,7 @@ namespace LinaVG
 
 		SetDrawOrderLimits(drawOrder);
 
-		m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(userData, font, drawOrder, isDropShadow, isSDF, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_simpleTextBuffers.push_back(DrawBufferText(userData, font, drawOrder, isDropShadow, isSDF, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
 		return m_simpleTextBuffers.last_ref();
 	}
 

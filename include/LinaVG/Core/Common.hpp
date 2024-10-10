@@ -805,10 +805,10 @@ namespace LinaVG
 		}
 	};
 
-	struct SimpleTextDrawBuffer : public DrawBuffer
+	struct DrawBufferText : public DrawBuffer
 	{
-		SimpleTextDrawBuffer(){};
-		SimpleTextDrawBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow, bool sdf, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+		DrawBufferText(){};
+		DrawBufferText(void* userData, Font* font, int drawOrder, bool isDropShadow, bool sdf, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
         : DrawBuffer(userData, drawOrder, DrawBufferType::SimpleText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, 0, Vec4(), clipPosX, clipPosY, clipSizeX, clipSizeY), font(font), isDropShadow(isDropShadow), isSDF(sdf){};
 
         Font* font = nullptr;
