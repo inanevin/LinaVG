@@ -90,10 +90,7 @@ namespace LinaVG
 			m_renderingBackend = new GLBackend();
 
 			m_lvgDrawer.GetCallbacks().drawDefault	  = std::bind(&GLBackend::DrawDefault, m_renderingBackend, std::placeholders::_1);
-			m_lvgDrawer.GetCallbacks().drawGradient	  = std::bind(&GLBackend::DrawGradient, m_renderingBackend, std::placeholders::_1);
-			m_lvgDrawer.GetCallbacks().drawTextured	  = std::bind(&GLBackend::DrawTextured, m_renderingBackend, std::placeholders::_1);
 			m_lvgDrawer.GetCallbacks().drawSimpleText = std::bind(&GLBackend::DrawSimpleText, m_renderingBackend, std::placeholders::_1);
-			m_lvgDrawer.GetCallbacks().drawSDFText	  = std::bind(&GLBackend::DrawSDFText, m_renderingBackend, std::placeholders::_1);
             m_lvgText.GetCallbacks().atlasNeedsUpdate  = std::bind(&GLBackend::OnAtlasUpdate, m_renderingBackend, std::placeholders::_1);
 			m_demoScreens.Initialize();
 
@@ -135,8 +132,7 @@ namespace LinaVG
 
 				// Same options as style.m_textureXXX
 				style.outlineOptions.textureHandle	 = ExampleApp::Get()->GetCheckeredTexture();
-				style.outlineOptions.textureUVOffset = Vec2(0.0f, 0.0f);
-				style.outlineOptions.textureUVTiling = Vec2(1.0f, 1.0f);
+				style.outlineOptions.textureTilingAndOffset = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
 				m_demoScreens.ShowBackground();
 

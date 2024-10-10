@@ -70,8 +70,7 @@ namespace LinaVG
 	{
 		Horizontal	 = 0,
 		Vertical	 = 1,
-		Radial		 = 2,
-		RadialCorner = 3
+        None = 4,
 	};
 
 	LINAVG_API struct Vec4Grad
@@ -86,7 +85,6 @@ namespace LinaVG
 		Vec4		 start		  = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
 		Vec4		 end		  = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		GradientType gradientType = GradientType::Horizontal;
-		float		 radialSize	  = 1.0f;
 	};
 
 	LINAVG_API struct ThicknessGrad
@@ -344,14 +342,10 @@ namespace LinaVG
 		TextureHandle textureHandle = 0;
 
 		/// <summary>
-		/// Defines the texture repetition.
+		/// Defines the texture uv and offset.
 		/// </summary>
-		Vec2 textureUVTiling = Vec2(1.0f, 1.0f);
+		Vec4 textureTilingAndOffset = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
-		/// <summary>
-		/// Defines the texture offset.
-		/// </summary>
-		Vec2 textureUVOffset = Vec2(0.0f, 0.0f);
 	};
 
 	enum class TextAlignment
@@ -417,11 +411,11 @@ namespace LinaVG
 		}
 	};
 
+
 	/// <summary>
 	/// Text styling, DrawText will render the given text as normal or via signed-distance-field (SDF) methods.
 	/// This depends on the font handle given with options (or default font if not-provided).
 	/// If you DrawText() using a font handle which was generated with SDF option, it's gonna use SDF rendering.
-	/// m_thickness, softness, drop shadow and outline options are only available on SDF rendering.
 	/// </summary>
 	LINAVG_API struct TextOptions
 	{
@@ -437,7 +431,6 @@ namespace LinaVG
 			spacing			 = opts.spacing;
 			newLineSpacing	 = opts.newLineSpacing;
 			wrapWidth		 = opts.wrapWidth;
-			framebufferScale = opts.framebufferScale;
 			cpuClipping		 = opts.cpuClipping;
 			wordWrap		 = opts.wordWrap;
             userData = opts.userData;
@@ -458,12 +451,6 @@ namespace LinaVG
 
 			if (color.gradientType != opts.color.gradientType)
 				return false;
-
-			if (color.gradientType == GradientType::Radial || color.gradientType == GradientType::RadialCorner)
-			{
-				if (color.radialSize != opts.color.radialSize)
-					return false;
-			}
 
 			if (!CheckColors(color.start, opts.color.start))
 				return false;
@@ -508,12 +495,6 @@ namespace LinaVG
 		float textScale = 1.0f;
 
 		/// <summary>
-		/// Used as an additional scale on outline and AA thickness.
-		/// Normally you can set this to whatever your OS' display scale is, e.g. OS scaling factor on high-dpi monitors.
-		/// </summary>
-		float framebufferScale = 1.0f;
-
-		/// <summary>
 		/// Defines extra spacing between each letter.
 		/// </summary>
 		float spacing = 0.0f;
@@ -555,70 +536,7 @@ namespace LinaVG
         void* userData = nullptr;
 	};
 
-	LINAVG_API struct SDFTextOptions : public TextOptions
-	{
-		SDFTextOptions()
-			: TextOptions(){};
-		SDFTextOptions(const SDFTextOptions& opts)
-		{
-			font				   = opts.font;
-			color				   = opts.color;
-			textScale			   = opts.textScale;
-			dropShadowColor		   = opts.dropShadowColor;
-			dropShadowOffset	   = opts.dropShadowOffset;
-			sdfDropShadowThickness = opts.sdfDropShadowThickness;
-			sdfOutlineColor		   = opts.sdfOutlineColor;
-			sdfOutlineThickness	   = opts.sdfOutlineThickness;
-			sdfSoftness			   = opts.sdfSoftness;
-			sdfThickness		   = opts.sdfThickness;
-			sdfDropShadowSoftness  = opts.sdfDropShadowSoftness;
-			framebufferScale	   = opts.framebufferScale;
-			cpuClipping			   = opts.cpuClipping;
-			wordWrap			   = opts.wordWrap;
-            userData = opts.userData;
-		}
 
-		/// <summary>
-		/// 0.0f - 1.0f range, defines how strongly the text is extruded.
-		/// </summary>
-		float sdfThickness = 0.5f;
-
-		/// <summary>
-		/// Defines text blurring/smoothing.
-		/// </summary>
-		float sdfSoftness = 0.0f;
-
-		/// <summary>
-		/// 0.0f - 1.0f range, defines how strongly the outline is extruded.
-		/// </summary>
-		float sdfOutlineThickness = 0.0f;
-
-		/// <summary>
-		/// Defines outline blurring/smoothing.
-		/// </summary>
-		float sdfOutlineSoftness = 0.1f;
-
-		/// <summary>
-		/// Well, outline m_color.
-		/// </summary>
-		Vec4 sdfOutlineColor = Vec4(1, 1, 1, 1);
-
-		/// <summary>
-		/// 0.0f - 1.0f range, defines how strongly the drop shadow is extruded.
-		/// </summary>
-		float sdfDropShadowThickness = 0.0f;
-
-		/// <summary>
-		/// Defines drop shadow blurring/smoothing. 0.0f - 1.0f range
-		/// </summary>
-		float sdfDropShadowSoftness = 0.02f;
-
-		/// <summary>
-		/// Flips the alpha mask in-out, can be used to create create cut-out font rendering, e.g. letter is transparent, surrounding
-		/// quad is colored.
-		/// </summary>
-		bool flipAlpha = false;
-	};
 	/// <summary>
 	/// Style options used to draw various effects around the target shape.
 	/// </summary>
@@ -632,13 +550,10 @@ namespace LinaVG
 			thickness		 = opts.thickness;
 			rounding		 = opts.rounding;
 			aaMultiplier	 = opts.aaMultiplier;
-			framebufferScale = opts.framebufferScale;
-
 			onlyRoundTheseCorners.from(opts.onlyRoundTheseCorners);
 			outlineOptions	= opts.outlineOptions;
 			textureHandle	= opts.textureHandle;
-			textureUVTiling = opts.textureUVTiling;
-			textureUVOffset = opts.textureUVOffset;
+			textureTilingAndOffset = opts.textureTilingAndOffset;
 			isFilled		= opts.isFilled;
 			aaEnabled		= opts.aaEnabled;
             userData = opts.userData;
@@ -676,12 +591,6 @@ namespace LinaVG
 		float aaMultiplier = 1.0f;
 
 		/// <summary>
-		/// Used as an additional scale on outline and AA thickness.
-		/// Normally you can set this to whatever your OS' display scale is, e.g. OS scaling factor on high-dpi monitors.
-		/// </summary>
-		float framebufferScale = 1.0f;
-
-		/// <summary>
 		/// If rounding is to be applied, you can fill this array to only apply rounding to specific corners of the shape (only for shapes, not lines).
 		/// </summary>
 		Array<int> onlyRoundTheseCorners;
@@ -696,15 +605,10 @@ namespace LinaVG
 		/// </summary>
 		TextureHandle textureHandle = 0;
 
-		/// <summary>
-		/// Defines the texture repetition.
-		/// </summary>
-		Vec2 textureUVTiling = Vec2(1.0f, 1.0f);
-
-		/// <summary>
-		/// Defines the texture offset.
-		/// </summary>
-		Vec2 textureUVOffset = Vec2(0.0f, 0.0f);
+        /// <summary>
+        /// Defines the texture uv and offset.
+        /// </summary>
+        Vec4 textureTilingAndOffset = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
 		/// <summary>
 		/// Fills inside the target shape, e.g. rect, tris, convex, circles, ngons, has no effect on lines.
@@ -726,13 +630,6 @@ namespace LinaVG
 
 	LINAVG_API struct Configuration
 	{
-		/// <summary>
-		/// Used as an additional scale on outline and AA thickness.
-		/// Normally you can set this to whatever your OS' display scale is, e.g. OS scaling factor on high-dpi monitors.
-		/// All Text and Style options also have their own/local framebuffer scale, which is multiplied by this value.
-		/// </summary>
-		float globalFramebufferScale = 1.0f;
-
 		/// <summary>
 		/// Used as an additional scale on AA thickness.
 		/// All Style options also have their own/local framebuffer scale, which is multiplied by this value.
@@ -763,22 +660,11 @@ namespace LinaVG
 		/// This amount of default buffers are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
 		/// </summary>
 		int defaultBufferReserve = 10;
-
-		/// <summary>
-		/// This amount of gradient buffers are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
-		/// </summary>
-		int gradientBufferReserve = 5;
-
-		/// <summary>
-		/// This amount of texture buffers are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
-		/// </summary>
-		int textureBufferReserve = 5;
-
-		/// <summary>
-		/// This amount of text buffers for text rendering are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
-		/// General idea is that each font you load create a new buffer, so you can reserve the same amount of fonts you plan on using on your application.
-		/// </summary>
-		int textBuffersReserve = 10;
+        
+        /// <summary>
+        /// This amount of default buffers are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
+        /// </summary>
+        int textBuffersReserve = 10;
 
 		/// <summary>
 		/// Set this to your own function to receive error callbacks from LinaVG.
@@ -828,7 +714,7 @@ namespace LinaVG
 
 		/// <summary>
 		/// Enabling caching allows faster text rendering in exchange for more memory consumption.
-		/// On average, more than 200-300 DrawTextNormal commands per frame is a valid reason to enable caching.
+        /// Note: dynamic texts you render will not benefit from this.
 		/// </summary>
 		bool textCachingEnabled = false;
 
@@ -836,17 +722,6 @@ namespace LinaVG
 		/// Initial reserve for normal text cache, will grow if needed.
 		/// </summary>
 		int textCacheReserve = 300;
-
-		/// <summary>
-		/// Enabling caching allows faster text rendering in exchange for more memory consumption.
-		/// Caching on SDF texts are usually unnecessary since amount of SDF texts rendered shouldn't be too much.
-		/// </summary>
-		bool textCachingSDFEnabled = false;
-
-		/// <summary>
-		/// Initial reserve for SDF text cache, will grow if needed.
-		/// </summary>
-		int textCacheSDFReserve = 20;
 
 		/// <summary>
 		/// Every this amount of ticks the text caches will be cleared up to prevent memory bloating.
@@ -862,25 +737,21 @@ namespace LinaVG
 	enum class DrawBufferType
 	{
 		Default,
-		Gradient,
-		Textured,
 		SimpleText,
-		SDFText,
 	};
 
 	enum class DrawBufferShapeType
 	{
 		DropShadow,
 		Shape,
-		Outline,
 		AA,
 	};
 
 	struct DrawBuffer
 	{
 		DrawBuffer(){};
-		DrawBuffer(void* userData, int drawOrder, DrawBufferType type, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: m_drawOrder(drawOrder), m_drawBufferType(type), m_shapeType(shapeType), userData(userData)
+        DrawBuffer(void* userData, int drawOrder, DrawBufferType type, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& txtUV, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+			: drawOrder(drawOrder), drawBufferType(type), shapeType(shapeType), userData(userData), textureHandle(txtHandle), textureUV(txtUV)
 		{
 			this->clipPosX	= clipPosX;
 			this->clipPosY	= clipPosY;
@@ -888,17 +759,19 @@ namespace LinaVG
 			this->clipSizeY = clipSizeY;
 		};
 
-		Array<Vertex>		m_vertexBuffer;
-		Array<Index>		m_indexBuffer;
-		int					m_drawOrder		 = -1;
-		DrawBufferType		m_drawBufferType = DrawBufferType::Default;
-		DrawBufferShapeType m_shapeType		 = DrawBufferShapeType::Shape;
+		Array<Vertex>		vertexBuffer;
+		Array<Index>		indexBuffer;
+		DrawBufferType		drawBufferType = DrawBufferType::Default;
+		DrawBufferShapeType shapeType		 = DrawBufferShapeType::Shape;
+        TextureHandle       textureHandle    = NULL_TEXTURE;
+        Vec4                textureUV = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
 		BackendHandle		clipPosX		 = 0;
 		BackendHandle		clipPosY		 = 0;
 		BackendHandle		clipSizeX		 = 0;
 		BackendHandle		clipSizeY		 = 0;
-        void* userData = nullptr;
-        
+        void*               userData = nullptr;
+        int                 drawOrder         = -1;
+
 		bool IsClipDifferent(BackendHandle cpx, BackendHandle cpy, BackendHandle csx, BackendHandle csy)
 		{
 			return (this->clipPosX != cpx || this->clipPosY != cpy || this->clipSizeX != csx || this->clipSizeY != csy);
@@ -906,81 +779,42 @@ namespace LinaVG
 
 		inline void Clear()
 		{
-			m_vertexBuffer.clear();
-			m_indexBuffer.clear();
+			vertexBuffer.clear();
+			indexBuffer.clear();
 		}
 
 		inline void ShrinkZero()
 		{
-			m_vertexBuffer.shrink(0);
-			m_indexBuffer.shrink(0);
+			vertexBuffer.shrink(0);
+			indexBuffer.shrink(0);
 		}
 
 		inline void PushVertex(const Vertex& v)
 		{
-			m_vertexBuffer.push_back(v);
+			vertexBuffer.push_back(v);
 		}
 
 		inline void PushIndex(Index i)
 		{
-			m_indexBuffer.push_back(i);
+			indexBuffer.push_back(i);
 		}
 
 		inline Vertex* LastVertex()
 		{
-			return m_vertexBuffer.last();
+			return vertexBuffer.last();
 		}
-	};
-
-	struct GradientDrawBuffer : public DrawBuffer
-	{
-		GradientDrawBuffer(){};
-		GradientDrawBuffer(void* userData, const Vec4Grad& g, int drawOrder, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: DrawBuffer(userData, drawOrder, DrawBufferType::Gradient, shapeType, clipPosX, clipPosY, clipSizeX, clipSizeY), m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_color(g){};
-
-		bool	 m_isAABuffer = false;
-		Vec4Grad m_color	  = Vec4(1, 1, 1, 1);
-	};
-
-	struct TextureDrawBuffer : public DrawBuffer
-	{
-		TextureDrawBuffer(){};
-		TextureDrawBuffer(void* userData, TextureHandle h, const Vec2& tiling, const Vec2& offset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: DrawBuffer(userData, drawOrder, DrawBufferType::Textured, shapeType, clipPosX, clipPosY, clipSizeX, clipSizeY), m_isAABuffer(shapeType == DrawBufferShapeType::AA), m_textureHandle(h), m_textureUVTiling(tiling), m_textureUVOffset(offset), m_tint(tint){};
-
-		bool		  m_isAABuffer		= false;
-        TextureHandle m_textureHandle	= NULL_TEXTURE;
-		Vec2		  m_textureUVTiling = Vec2(1.0f, 1.0f);
-		Vec2		  m_textureUVOffset = Vec2(0.0f, 0.0f);
-		Vec4		  m_tint			= Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 	};
 
 	struct SimpleTextDrawBuffer : public DrawBuffer
 	{
 		SimpleTextDrawBuffer(){};
-		SimpleTextDrawBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: DrawBuffer(userData, drawOrder, DrawBufferType::SimpleText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY), m_font(font), m_isDropShadow(isDropShadow){};
+		SimpleTextDrawBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow, bool sdf, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+        : DrawBuffer(userData, drawOrder, DrawBufferType::SimpleText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, 0, Vec4(), clipPosX, clipPosY, clipSizeX, clipSizeY), font(font), isDropShadow(isDropShadow), isSDF(sdf){};
 
-        Font* m_font = nullptr;
-		BackendHandle m_textureHandle = 0;
-		bool		  m_isDropShadow  = false;
+        Font* font = nullptr;
+		bool  isDropShadow  = false;
+        bool isSDF = false;
 	};
 
-	struct SDFTextDrawBuffer : public DrawBuffer
-	{
-		SDFTextDrawBuffer(){};
-		SDFTextDrawBuffer(void* userData, Font* font, int drawOrder, const SDFTextOptions& opts, bool isDropShadow, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: DrawBuffer(userData, drawOrder, DrawBufferType::SDFText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, clipPosX, clipPosY, clipSizeX, clipSizeY),
-			  m_isDropShadow(isDropShadow), m_flipAlpha(opts.flipAlpha), m_thickness(opts.sdfThickness), m_softness(opts.sdfSoftness), m_outlineThickness(opts.sdfOutlineThickness), m_outlineSoftness(opts.sdfOutlineSoftness), m_outlineColor(opts.sdfOutlineColor), m_font(font){};
-
-		bool		  m_isDropShadow	 = false;
-		bool		  m_flipAlpha		 = false;
-		float		  m_thickness		 = 0.0f;
-		float		  m_softness		 = 0.0f;
-		float		  m_outlineThickness = 0.0f;
-		float		  m_outlineSoftness	 = 0.0f;
-		Vec4		  m_outlineColor	 = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        Font* m_font = nullptr;
-	};
 
 } // namespace LinaVG

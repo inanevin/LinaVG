@@ -68,12 +68,12 @@ namespace LinaVG
 
     void Font::DestroyBuffers()
     {
-        for(auto& [glyph, textChar] : m_characterGlyphs)
+        for(auto& [glyph, textChar] : glyphs)
             LINAVG_FREE(textChar.m_buffer);
-        m_characterGlyphs.clear();
+        glyphs.clear();
         
-        if(m_atlas != nullptr)
-            m_atlas->RemoveFont(this);
+        if(atlas != nullptr)
+            atlas->RemoveFont(this);
     }
 
     Atlas::Atlas(const Vec2ui& size, std::function<void(Atlas* atlas)> updateFunc)
@@ -102,7 +102,7 @@ namespace LinaVG
 
     bool Atlas::AddFont(Font *font)
     {
-        if(font->m_atlasRectHeight > m_size.y)
+        if(font->atlasRectHeight > m_size.y)
         {
             if (Config.errorCallback)
                 Config.errorCallback("LinaVG: Font exceeds atlas size! Increase the max atlas size from config.");
@@ -110,17 +110,17 @@ namespace LinaVG
             return false;
         }
         
-        font->m_atlas = this;
+        font->atlas = this;
 
         unsigned int bestSliceDiff = m_size.y;
         Slice* bestSlice = nullptr;
         
         for(Slice* slice : m_availableSlices)
         {
-            if(slice->height < font->m_atlasRectHeight)
+            if(slice->height < font->atlasRectHeight)
                 continue;
             
-            const unsigned int diff = slice->height - font->m_atlasRectHeight;
+            const unsigned int diff = slice->height - font->atlasRectHeight;
             if(diff < bestSliceDiff)
             {
                 bestSliceDiff = diff;
@@ -131,13 +131,13 @@ namespace LinaVG
         if(bestSlice == nullptr)
             return false;
         
-        font->m_atlasRectPos = bestSlice->pos;
+        font->atlasRectPos = bestSlice->pos;
 
         unsigned int startX = 0;
         unsigned int startY = bestSlice->pos;
         unsigned int maxHeight = 0;
         
-        for(auto& [glyph, charData] : font->m_characterGlyphs)
+        for(auto& [glyph, charData] : font->glyphs)
         {
             const Vec2ui sz = Vec2ui(static_cast<unsigned int>(charData.m_size.x), static_cast<unsigned int>(charData.m_size.y));
 
@@ -170,9 +170,9 @@ namespace LinaVG
         
         }
         
-        if(bestSlice->height > font->m_atlasRectHeight)
+        if(bestSlice->height > font->atlasRectHeight)
         {
-            Slice* newSlice = new Slice(bestSlice->pos + font->m_atlasRectHeight, bestSlice->height - font->m_atlasRectHeight);
+            Slice* newSlice = new Slice(bestSlice->pos + font->atlasRectHeight, bestSlice->height - font->atlasRectHeight);
             m_availableSlices.push_back(newSlice);
         }
      
@@ -186,7 +186,7 @@ namespace LinaVG
 
     void Atlas::RemoveFont(Font *font)
     {
-        Slice* slice = new Slice(font->m_atlasRectPos, font->m_atlasRectHeight);
+        Slice* slice = new Slice(font->atlasRectPos, font->atlasRectHeight);
         m_availableSlices.push_back(slice);
         
         const size_t start = static_cast<size_t>(slice->pos * m_size.x);
@@ -244,14 +244,14 @@ namespace LinaVG
         }
 
 		Font* font		= new Font();
-		font->m_supportsUnicode = customRanges != nullptr;
-		font->m_size			= size;
-		font->m_isSDF			= loadAsSDF;
-		font->m_newLineHeight	= static_cast<float>(face->size->metrics.height) / 64.0f;
-		font->m_supportsKerning = useKerningIfAvailable && FT_HAS_KERNING(face) != 0;
+		font->supportsUnicode = customRanges != nullptr;
+		font->size			= size;
+		font->isSDF			= loadAsSDF;
+		font->newLineHeight	= static_cast<float>(face->size->metrics.height) / 64.0f;
+		font->supportsKerning = useKerningIfAvailable && FT_HAS_KERNING(face) != 0;
 
 		// int		 maxHeight		   = 0;
-		auto&		 characterMap	   = font->m_characterGlyphs;
+		auto&		 characterMap	   = font->glyphs;
 		FT_GlyphSlot slot			   = face->glyph;
 
         unsigned int sizeCtrX = 0;
@@ -309,7 +309,7 @@ namespace LinaVG
             if(sizeCtrX + glyphWidth >= Config.maxFontAtlasSize)
             {
                 sizeCtrX = 0;
-                font->m_atlasRectHeight += sizeCtrY + 1;
+                font->atlasRectHeight += sizeCtrY + 1;
             }
             
             sizeCtrX += glyphWidth + 1;
@@ -327,13 +327,13 @@ namespace LinaVG
 			if (err)
 				Config.errorCallback("LinaVG: Error on FT_Get_Kerning!");
 
-			font->m_kerningTable[first].xAdvances[second] = delta.x;
+			font->kerningTable[first].xAdvances[second] = delta.x;
 		};
 
 		for (FT_ULong c = 32; c < 128; c++)
 		{
 			setSizes(c);
-			if (font->m_supportsKerning)
+			if (font->supportsKerning)
 			{
 				for (FT_ULong a = 32; a < c; a++)
 					storeKerning(a, c);
@@ -365,8 +365,8 @@ namespace LinaVG
 			}
 		}
 
-        font->m_atlasRectHeight += sizeCtrY + 1;
-        font->m_spaceAdvance = characterMap[' '].m_advance.x;
+        font->atlasRectHeight += sizeCtrY + 1;
+        font->spaceAdvance = characterMap[' '].m_advance.x;
       
         Atlas* foundAtlas = nullptr;
         

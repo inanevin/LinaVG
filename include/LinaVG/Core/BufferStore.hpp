@@ -46,13 +46,6 @@ namespace LinaVG
 		Array<Index>  indxBuffer;
 	};
 
-	struct SDFTextCache
-	{
-		SDFTextOptions opts;
-		Array<Vertex>  vtxBuffer;
-		Array<Index>   indxBuffer;
-	};
-
 	struct RectOverrideData
 	{
 		bool overrideRectPositions = false;
@@ -75,13 +68,9 @@ namespace LinaVG
 	struct BufferStoreData
 	{
 		Array<DrawBuffer>				   m_defaultBuffers;
-		Array<GradientDrawBuffer>		   m_gradientBuffers;
-		Array<TextureDrawBuffer>		   m_textureBuffers;
 		Array<SimpleTextDrawBuffer>		   m_simpleTextBuffers;
-		Array<SDFTextDrawBuffer>		   m_sdfTextBuffers;
 		Array<int>						   m_drawOrders;
 		LINAVG_MAP<uint32_t, TextCache>	   m_textCache;
-		LINAVG_MAP<uint32_t, SDFTextCache> m_sdfTextCache;
 		int								   m_gcFrameCounter		   = 0;
 		int								   m_textCacheFrameCounter = 0;
 		RectOverrideData				   m_rectOverrideData;
@@ -92,28 +81,18 @@ namespace LinaVG
 		BackendHandle					   m_clipSizeY = 0;
 
 		void				  SetDrawOrderLimits(int drawOrder);
-		int					  GetBufferIndexInGradientArray(DrawBuffer* buf);
-		int					  GetBufferIndexInTextureArray(DrawBuffer* buf);
 		int					  GetBufferIndexInDefaultArray(DrawBuffer* buf);
 		int					  GetBufferIndexInCharArray(DrawBuffer* buf);
-		DrawBuffer&			  GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType);
-		GradientDrawBuffer&	  GetGradientBuffer(void* userData, Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType);
-		TextureDrawBuffer&	  GetTextureBuffer(void* userData, TextureHandle textureHandle, const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType);
-		SimpleTextDrawBuffer& GetSimpleTextBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow);
-		SDFTextDrawBuffer&	  GetSDFTextBuffer(void* userData, Font* font, int drawOrder, const SDFTextOptions& opts, bool isDropShadow);
+		DrawBuffer&			  GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& textureUV);
+		SimpleTextDrawBuffer& GetSimpleTextBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow, bool isSDF);
 		void				  AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart);
-		void				  AddSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart);
 		TextCache*			  CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf);
-		SDFTextCache*		  CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf);
 	};
 
 	struct BufferStoreCallbacks
 	{
 		std::function<void(DrawBuffer* buf)>		   drawDefault;
-		std::function<void(GradientDrawBuffer* buf)>   drawGradient;
-		std::function<void(TextureDrawBuffer* buf)>	   drawTextured;
 		std::function<void(SimpleTextDrawBuffer* buf)> drawSimpleText;
-		std::function<void(SDFTextDrawBuffer* buf)>	   drawSDFText;
 	};
 
 	class BufferStore

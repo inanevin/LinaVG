@@ -44,8 +44,7 @@ namespace LinaVG
 		OutlineOptions o;
 		o.color			  = opts.color;
 		o.textureHandle	  = opts.textureHandle;
-		o.textureUVOffset = opts.textureUVOffset;
-		o.textureUVTiling = opts.textureUVTiling;
+		o.textureTilingAndOffset = opts.textureTilingAndOffset;
 		o.drawDirection	  = drawDir;
 		return o;
 	}

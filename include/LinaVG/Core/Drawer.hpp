@@ -156,11 +156,10 @@ namespace LinaVG
 		/// <param name="size">Size of the draw rect, should be same aspect ratio to prevent stretching.</param>
 		/// <param name="rotateAngle">Rotates the whole image by the given angle (degrees).</param>
 		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-		/// <param name="uvTiling">Texture tiling.</param>
-		/// <param name="uvOffset">Texture UV offset.</param>
+		/// <param name="uvTilingAndOffset">Texture tiling and offset..</param>
 		/// <param name="uvTL">Top-left UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
 		/// <param name="uvBR">Bottom-right UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
-		LINAVG_API void DrawImage(TextureHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint = Vec4(1, 1, 1, 1), float rotateAngle = 0.0f, int drawOrder = 0, Vec2 uvTiling = Vec2(1, 1), Vec2 uvOffset = Vec2(0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
+		LINAVG_API void DrawImage(TextureHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint = Vec4(1, 1, 1, 1), float rotateAngle = 0.0f, int drawOrder = 0, Vec4 uvTilingAndOffset = Vec4(1,1, 0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
 
 		/// <summary>
 		/// Your points for the triangle must follow the given parameter order -- left, right and top edges.
@@ -225,7 +224,7 @@ namespace LinaVG
 #ifndef LINAVG_DISABLE_TEXT_SUPPORT
 
 		/// <summary>
-		/// Draws the given text at position. The font used in Text Options must be loaded as normal font, e.g. non-sdf.
+		/// Draws the given text at position.
 		/// Given position will be upper-left corner of the text. Use CalculateTextSize to offset the text, e.g. center.
 		/// </summary>
 		/// <param name="text">Text to draw.</param>
@@ -236,23 +235,7 @@ namespace LinaVG
 		/// <param name="skipCache">Even if text caching is enabled globally, setting this to true will skip it for this call. Best used for dynamically changing text such as number counters. </param>
 		/// <param name="outData"> Fill character related information if not nullptr. </param>
 		/// <returns></returns>
-		LINAVG_API void DrawTextNormal(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
-
-		/// <summary>
-		/// Draws the given text at position as an SDF text, which produces a lot more high-quality results than normal text, regardless
-		/// of scaling & rotation. Also SDF texts has a lot more styling options, such as outlines and more paramaterized drop shadows.
-		/// The font used in Text Options must be loaded as an SDF-font.
-		/// Given position will be upper-left corner of the text. Use CalculateTextSize to offset the text, e.g. center.
-		/// </summary>
-		/// <param name="text">Text to draw.</param>
-		/// <param name="position">Screen-space position.</param>
-		/// <param name="style">Style options.</param>
-		/// <param name="rotateAngle">Rotates the whole shape by the given angle (degrees).</param>
-		/// <param name="drawOrder">Shapes with lower draw order is drawn first, resulting at the very bottom Z layer.</param>
-		/// <param name="skipCache">Even if text caching is enabled globally, setting this to true will skip it for this call. Best used for dynamically changing text such as number counters. </param>
-		/// <param name="outData"> Fill character related information if not nullptr. </param>
-		/// <returns></returns>
-		LINAVG_API void DrawTextSDF(const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
+		LINAVG_API void DrawText(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
 
 		/// <summary>
 		/// Returns a Vec2 containing max width and height this text will occupy.
@@ -262,15 +245,6 @@ namespace LinaVG
 		/// <param name="opts">Style options used to draw the text.</param>
 		/// <returns></returns>
 		LINAVG_API Vec2 CalculateTextSize(const char* text, TextOptions& opts);
-
-		/// <summary>
-		/// Returns a Vec2 containing max width and height this text will occupy.
-		/// Takes spacing and wrapping into account.
-		/// </summary>
-		/// <param name="text">Text, lol.</param>
-		/// <param name="opts">Style options used to draw the text.</param>
-		/// <returns></returns>
-		LINAVG_API Vec2 CalculateTextSize(const char* text, SDFTextOptions& opts);
 
 #endif
 
@@ -317,68 +291,38 @@ namespace LinaVG
 			OutlineAA
 		};
 
-		// No rounding, vertical or horizontal gradient
-		void FillRect_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts, int drawOrder);
-
 		// No rounding, single color
-		void FillRect_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& color, StyleOptions& opts, int drawOrder);
-
-		// No rounding, radial gradient
-		void FillRect_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& startcolor, const Vec4& endColor, StyleOptions& opts, int drawOrder);
+		void FillRect_NoRound(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, StyleOptions& opts, int drawOrder);
 
 		// Rounding
-		void FillRect_Round(DrawBuffer* buf, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& col, float rounding, StyleOptions& opts, int drawOrder);
+		void FillRect_Round(DrawBuffer* buf, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, float rounding, StyleOptions& opts, int drawOrder);
 
 		// Fill rect impl.
 		void FillRectData(Vertex* vertArray, bool hasCenter, const Vec2& min, const Vec2& max);
 
-		// No rounding, vertical or horizontal gradient
-		void FillTri_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts, int drawOrder);
-
 		// No rounding, single color
-		void FillTri_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& color, StyleOptions& opts, int drawOrder);
-
-		// No rounding, radial gradient
-		void FillTri_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts, int drawOrder);
+		void FillTri_NoRound(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, StyleOptions& opts, int drawOrder);
 
 		// Rounding
-		void FillTri_Round(DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& col, float rounding, StyleOptions& opts, int drawOrder);
+		void FillTri_Round(DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, float rounding, StyleOptions& opts, int drawOrder);
 
 		// Fill rect impl.
-		void FillTriData(Vertex* vertArray, bool hasCenter, bool calculateUV, const Vec2& p1, const Vec2& p2, const Vec2& p3);
+		void FillTriData(Vertex* vertArray, bool hasCenter, const Vec2& p1, const Vec2& p2, const Vec2& p3);
 
 		// No rounding, single color
-		void FillNGon_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color, StyleOptions& opts, int drawOrder);
-
-		// No rounding, horizontal or vertical gradient
-		void FillNGon_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts, int drawOrder);
-
-		// No rounding, radial gradient
-		void FillNGon_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts, int drawOrder);
+		void FillNGon(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, StyleOptions& opts, int drawOrder);
 
 		// Fill NGon imp
 		void FillNGonData(Array<Vertex>&, bool hasCenter, const Vec2& center, float radius, int n);
 
 		// Single color
-		void FillCircle_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
-
-		// Vertical or horizontal gradinet.
-		void FillCircle_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
-
-		// Radial gradient
-		void FillCircle_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
+		void FillCircle(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, float startAngle, float endAngle, StyleOptions& opts, int drawOrder);
 
 		// Fill circle impl
 		void FillCircleData(Array<Vertex>& v, bool hasCenter, const Vec2& center, float radius, int segments, float startAngle, float endAngle);
 
 		// Single color
-		void FillConvex_SC(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& color, StyleOptions& opts, int drawOrder);
-
-		// Vertical horizontal gradient
-		void FillConvex_VerHorGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts, int drawOrder);
-
-		// Radial gradient.
-		void FillConvex_RadialGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts, int drawOrder);
+		void FillConvex(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, StyleOptions& opts, int drawOrder);
 
 		/// Triangle bounding box.
 		void GetTriangleBoundingBox(const Vec2& p1, const Vec2& p2, const Vec2& p3, Vec2& outMin, Vec2& outMax);
@@ -461,26 +405,26 @@ namespace LinaVG
 		/// <summary>
 		/// Converts the given words into a set of lines based on wrapping.
 		/// </summary>
-		void ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, Font* font, float scale, float spacing, float wrapWidth, float sdfThickness);
+		void ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, Font* font, float scale, float spacing, float wrapWidth);
 
 		/// <summary>
 		/// Process, parse & draw text according to options.
 		/// </summary>
-		void ProcessText(DrawBuffer* buf, Font* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData, const Vec4& clip, bool wordWrap);
+		void ProcessText(DrawBuffer* buf, Font* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, const TextOptions& opts, float rotateAngle, TextOutData* outData);
 
 		/// <summary>
 		/// DrawText implementation.
 		/// </summary>
-		void DrawText(DrawBuffer* buf, Font* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, TextOutData* outData, const Vec4& clip);
+		void DrawText(DrawBuffer* buf, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, const TextOptions& opts, TextOutData* outData);
 
 		/// <summary>
 		/// Returns the total text size for non-wrapped text.
 		/// </summary>
 		/// <returns></returns>
-		Vec2 CalcTextSize(const char* text, Font* font, float scale, float spacing, float sdfThickness);
+		Vec2 CalcTextSize(const char* text, const TextOptions& opts);
 
 		/// <summary>
-		/// Max character offset from the quad corners for SDF characters.
+		/// Max character offset from the quad corners.
 		/// </summary>
 		/// <returns></returns>
 		Vec2 CalcMaxCharOffset(const char* text, Font* font, float scale);
@@ -488,7 +432,7 @@ namespace LinaVG
 		/// <summary>
 		/// Returns the total text size for wrapped text.
 		/// </summary>
-		Vec2 CalcTextSizeWrapped(const char* text, Font*, float newLineSpacing, float wrapping, float scale, float spacing, float sdfThickness, bool wordWrap);
+		Vec2 CalcTextSizeWrapped(const char* text, const TextOptions& opts);
 
 		/// <summary>
 		/// For processing UTf8 texts.
@@ -498,7 +442,7 @@ namespace LinaVG
 		/// <summary>
 		/// Parse text into wrapped lines.
 		/// </summary>
-		void WrapText(LINAVG_VEC<TextPart>& lines, Font* font, const char* text, float spacing, float scale, float wrapWidth, bool wordWrap);
+		void WrapText(LINAVG_VEC<TextPart>& lines, const char* text, const TextOptions& opts);
 
 #endif
 

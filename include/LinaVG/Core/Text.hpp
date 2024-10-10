@@ -72,17 +72,18 @@ namespace LinaVG
 	class Font
 	{
 	public:
-		int											  m_size			= 0;
-		float										  m_newLineHeight	= 0.0f;
-		float										  m_spaceAdvance	= 0.0f;
-		bool										  m_supportsUnicode = false;
-		bool										  m_isSDF			= false;
-		bool										  m_supportsKerning = false;
-        unsigned int m_atlasRectHeight = 0;
-        unsigned int m_atlasRectPos = 0;
-		LINAVG_MAP<GlyphEncoding, TextCharacter>	  m_characterGlyphs;
-		LINAVG_MAP<unsigned long, KerningInformation> m_kerningTable;
-        Atlas* m_atlas = nullptr;
+		int	    size			= 0;
+		float   newLineHeight	= 0.0f;
+		float   spaceAdvance	= 0.0f;
+		bool    supportsUnicode = false;
+		bool    isSDF			= false;
+		bool    supportsKerning = false;
+        unsigned int atlasRectHeight = 0;
+        unsigned int atlasRectPos = 0;
+        Atlas* atlas = nullptr;
+        
+		LINAVG_MAP<GlyphEncoding, TextCharacter>	  glyphs;
+		LINAVG_MAP<unsigned long, KerningInformation> kerningTable;
         
         void DestroyBuffers();
         

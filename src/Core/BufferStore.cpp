@@ -47,16 +47,10 @@ namespace LinaVG
 	BufferStore::BufferStore()
 	{
 		m_data.m_defaultBuffers.reserve(Config.defaultBufferReserve);
-		m_data.m_gradientBuffers.reserve(Config.gradientBufferReserve);
-		m_data.m_textureBuffers.reserve(Config.textureBufferReserve);
 		m_data.m_simpleTextBuffers.reserve(Config.textBuffersReserve);
-		m_data.m_sdfTextBuffers.reserve(Config.textBuffersReserve);
 
 		if (Config.textCachingEnabled)
 			m_data.m_textCache.reserve(Config.textCacheReserve);
-
-		if (Config.textCachingSDFEnabled)
-			m_data.m_sdfTextCache.reserve(Config.textCacheSDFReserve);
 	}
 
 	BufferStore::~BufferStore()
@@ -68,16 +62,6 @@ namespace LinaVG
 	{
 		m_data.m_gcFrameCounter = 0;
 
-		for (int i = 0; i < m_data.m_gradientBuffers.m_size; i++)
-			m_data.m_gradientBuffers[i].Clear();
-
-		m_data.m_gradientBuffers.clear();
-
-		for (int i = 0; i < m_data.m_textureBuffers.m_size; i++)
-			m_data.m_textureBuffers[i].Clear();
-
-		m_data.m_textureBuffers.clear();
-
 		for (int i = 0; i < m_data.m_defaultBuffers.m_size; i++)
 			m_data.m_defaultBuffers[i].Clear();
 
@@ -88,10 +72,6 @@ namespace LinaVG
 
 		m_data.m_simpleTextBuffers.clear();
 
-		for (int i = 0; i < m_data.m_sdfTextBuffers.m_size; i++)
-			m_data.m_sdfTextBuffers[i].Clear();
-
-		m_data.m_sdfTextBuffers.clear();
 		m_data.m_drawOrders.clear();
 	}
 
@@ -105,31 +85,21 @@ namespace LinaVG
 		}
 		else
 		{
-			for (int i = 0; i < m_data.m_gradientBuffers.m_size; i++)
-				m_data.m_gradientBuffers[i].ShrinkZero();
-
-			for (int i = 0; i < m_data.m_textureBuffers.m_size; i++)
-				m_data.m_textureBuffers[i].ShrinkZero();
-
 			for (int i = 0; i < m_data.m_defaultBuffers.m_size; i++)
 				m_data.m_defaultBuffers[i].ShrinkZero();
 
 			for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
 				m_data.m_simpleTextBuffers[i].ShrinkZero();
 
-			for (int i = 0; i < m_data.m_sdfTextBuffers.m_size; i++)
-				m_data.m_sdfTextBuffers[i].ShrinkZero();
 		}
 
-		// SDF
-		if (Config.textCachingEnabled || Config.textCachingSDFEnabled)
+		if (Config.textCachingEnabled)
 			m_data.m_textCacheFrameCounter++;
 
 		if (m_data.m_textCacheFrameCounter > Config.textCacheExpireInterval)
 		{
 			m_data.m_textCacheFrameCounter = 0;
 			m_data.m_textCache.clear();
-			m_data.m_sdfTextCache.clear();
 		}
 	}
 
@@ -141,7 +111,7 @@ namespace LinaVG
 			{
 				DrawBuffer& buf = m_data.m_defaultBuffers[i];
 
-				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
+				if (buf.drawOrder == drawOrder && buf.shapeType == shapeType && buf.vertexBuffer.m_size != 0 && buf.indexBuffer.m_size != 0)
 				{
 					if (m_callbacks.drawDefault)
 						m_callbacks.drawDefault(&buf);
@@ -153,43 +123,11 @@ namespace LinaVG
 				}
 			}
 
-			for (int i = 0; i < m_data.m_gradientBuffers.m_size; i++)
-			{
-				GradientDrawBuffer& buf = m_data.m_gradientBuffers[i];
-
-				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-				{
-					if (m_callbacks.drawGradient)
-						m_callbacks.drawGradient(&buf);
-					else
-					{
-						if (LinaVG::Config.logCallback)
-							LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawGradient");
-					}
-				}
-			}
-
-			for (int i = 0; i < m_data.m_textureBuffers.m_size; i++)
-			{
-				TextureDrawBuffer& buf = m_data.m_textureBuffers[i];
-
-				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-				{
-					if (m_callbacks.drawTextured)
-						m_callbacks.drawTextured(&buf);
-					else
-					{
-						if (LinaVG::Config.logCallback)
-							LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawTextured");
-					}
-				}
-			}
-
 			for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
 			{
 				SimpleTextDrawBuffer& buf = m_data.m_simpleTextBuffers[i];
 
-				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
+				if (buf.drawOrder == drawOrder && buf.shapeType == shapeType && buf.vertexBuffer.m_size != 0 && buf.indexBuffer.m_size != 0)
 				{
 					if (m_callbacks.drawSimpleText)
 						m_callbacks.drawSimpleText(&buf);
@@ -197,22 +135,6 @@ namespace LinaVG
 					{
 						if (LinaVG::Config.logCallback)
 							LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawSimpleText");
-					}
-				}
-			}
-
-			for (int i = 0; i < m_data.m_sdfTextBuffers.m_size; i++)
-			{
-				SDFTextDrawBuffer& buf = m_data.m_sdfTextBuffers[i];
-
-				if (buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && buf.m_vertexBuffer.m_size != 0 && buf.m_indexBuffer.m_size != 0)
-				{
-					if (m_callbacks.drawSDFText)
-						m_callbacks.drawSDFText(&buf);
-					else
-					{
-						if (LinaVG::Config.logCallback)
-							LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawSDFText");
 					}
 				}
 			}
@@ -225,7 +147,6 @@ namespace LinaVG
 			const int drawOrder = arr[i];
 			renderBuffs(drawOrder, DrawBufferShapeType::DropShadow);
 			renderBuffs(drawOrder, DrawBufferShapeType::Shape);
-			renderBuffs(drawOrder, DrawBufferShapeType::Outline);
 			renderBuffs(drawOrder, DrawBufferShapeType::AA);
 		}
 	}
@@ -250,94 +171,34 @@ namespace LinaVG
 		m_data.m_clipSizeY = sizeY;
 	}
 
-	GradientDrawBuffer& BufferStoreData::GetGradientBuffer(void* userData, Vec4Grad& grad, int drawOrder, DrawBufferShapeType shapeType)
-	{
-		const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
-
-		for (int i = 0; i < m_gradientBuffers.m_size; i++)
-		{
-			auto& buf = m_gradientBuffers[i];
-			if (buf.userData == userData && buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && Math::IsEqual(buf.m_color.start, grad.start) && Math::IsEqual(buf.m_color.end, grad.end) && buf.m_color.gradientType == grad.gradientType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
-			{
-				if (grad.gradientType == GradientType::Radial || grad.gradientType == GradientType::RadialCorner)
-				{
-					if (buf.m_color.radialSize == grad.radialSize && buf.m_isAABuffer == isAABuffer)
-						return m_gradientBuffers[i];
-				}
-				else
-				{
-					if (buf.m_isAABuffer == isAABuffer)
-						return m_gradientBuffers[i];
-				}
-			}
-		}
-
-		SetDrawOrderLimits(drawOrder);
-
-		m_gradientBuffers.push_back(GradientDrawBuffer(userData, grad, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
-		return m_gradientBuffers.last_ref();
-	}
-
-	DrawBuffer& BufferStoreData::GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType)
+	DrawBuffer& BufferStoreData::GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& textureUV)
 	{
 		for (int i = 0; i < m_defaultBuffers.m_size; i++)
 		{
 			auto& buf = m_defaultBuffers[i];
-			if (buf.userData == userData && buf.m_drawOrder == drawOrder && buf.m_shapeType == shapeType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+            if (buf.userData == userData && buf.drawOrder == drawOrder && buf.shapeType == shapeType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY) && buf.textureHandle == txtHandle && Math::IsEqual(buf.textureUV, textureUV))
 				return m_defaultBuffers[i];
 		}
 
 		SetDrawOrderLimits(drawOrder);
 
-		m_defaultBuffers.push_back(DrawBuffer(userData, drawOrder, DrawBufferType::Default, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_defaultBuffers.push_back(DrawBuffer(userData, drawOrder, DrawBufferType::Default, shapeType, txtHandle, textureUV, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
 		return m_defaultBuffers.last_ref();
 	}
 
-	TextureDrawBuffer& BufferStoreData::GetTextureBuffer(void* userData, TextureHandle textureHandle,const Vec2& tiling, const Vec2& uvOffset, const Vec4& tint, int drawOrder, DrawBufferShapeType shapeType)
-	{
-		const bool isAABuffer = shapeType == DrawBufferShapeType::AA;
-		for (int i = 0; i < m_textureBuffers.m_size; i++)
-		{
-			auto& buf = m_textureBuffers[i];
-			if (buf.userData == userData && buf.m_shapeType == shapeType && buf.m_drawOrder == drawOrder && buf.m_textureHandle == textureHandle && Math::IsEqual(buf.m_tint, tint) && Math::IsEqual(buf.m_textureUVTiling, tiling) && Math::IsEqual(buf.m_textureUVOffset, uvOffset) && buf.m_isAABuffer == isAABuffer && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
-				return m_textureBuffers[i];
-		}
-
-		SetDrawOrderLimits(drawOrder);
-
-		m_textureBuffers.push_back(TextureDrawBuffer(userData, textureHandle, tiling, uvOffset, tint, drawOrder, shapeType, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
-		return m_textureBuffers.last_ref();
-	}
-
-	SimpleTextDrawBuffer& BufferStoreData::GetSimpleTextBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow)
+	SimpleTextDrawBuffer& BufferStoreData::GetSimpleTextBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow, bool isSDF)
 	{
 		for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
 		{
 			auto& buf = m_simpleTextBuffers[i];
-			if (buf.userData == userData && buf.m_isDropShadow == isDropShadow && buf.m_drawOrder == drawOrder && buf.m_font == font && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+            if (buf.userData == userData && buf.isDropShadow == isDropShadow && buf.drawOrder == drawOrder && buf.font->atlas == font->atlas && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY) && isSDF == buf.isSDF)
 				return m_simpleTextBuffers[i];
 		}
 
 		SetDrawOrderLimits(drawOrder);
 
-		m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(userData, font, drawOrder, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_simpleTextBuffers.push_back(SimpleTextDrawBuffer(userData, font, drawOrder, isDropShadow, isSDF, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
 		return m_simpleTextBuffers.last_ref();
-	}
-
-	SDFTextDrawBuffer& BufferStoreData::GetSDFTextBuffer(void* userData, Font* font, int drawOrder, const SDFTextOptions& opts, bool isDropShadow)
-	{
-		for (int i = 0; i < m_sdfTextBuffers.m_size; i++)
-		{
-			auto& buf = m_sdfTextBuffers[i];
-			if (buf.userData == userData && buf.m_isDropShadow == isDropShadow  && buf.m_font == font && buf.m_drawOrder == drawOrder && Math::IsEqualMarg(buf.m_thickness, opts.sdfThickness) && Math::IsEqualMarg(buf.m_softness, opts.sdfSoftness) &&
-				Math::IsEqualMarg(buf.m_outlineThickness, opts.sdfOutlineThickness) && buf.m_flipAlpha == opts.flipAlpha && Math::IsEqual(buf.m_outlineColor, opts.sdfOutlineColor) && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
-				return m_sdfTextBuffers[i];
-		}
-
-		SetDrawOrderLimits(drawOrder);
-
-		m_sdfTextBuffers.push_back(SDFTextDrawBuffer(userData, font, drawOrder, opts, isDropShadow, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
-		return m_sdfTextBuffers.last_ref();
 	}
 
 	void BufferStoreData::AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
@@ -347,25 +208,11 @@ namespace LinaVG
 		newCache.indxBuffer.clear();
 		newCache.vtxBuffer.clear();
 
-		for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
-			newCache.vtxBuffer.push_back(buf->m_vertexBuffer[i]);
+		for (int i = vtxStart; i < buf->vertexBuffer.m_size; i++)
+			newCache.vtxBuffer.push_back(buf->vertexBuffer[i]);
 
-		for (int i = indexStart; i < buf->m_indexBuffer.m_size; i++)
-			newCache.indxBuffer.push_back(buf->m_indexBuffer[i] - vtxStart);
-	}
-
-	void BufferStoreData::AddSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
-	{
-		SDFTextCache& newCache = m_sdfTextCache[sid];
-		newCache.opts		   = opts;
-		newCache.indxBuffer.clear();
-		newCache.vtxBuffer.clear();
-
-		for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
-			newCache.vtxBuffer.push_back(buf->m_vertexBuffer[i]);
-
-		for (int i = indexStart; i < buf->m_indexBuffer.m_size; i++)
-			newCache.indxBuffer.push_back(buf->m_indexBuffer[i] - vtxStart);
+		for (int i = indexStart; i < buf->indexBuffer.m_size; i++)
+			newCache.indxBuffer.push_back(buf->indexBuffer[i] - vtxStart);
 	}
 
 	TextCache* BufferStoreData::CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf)
@@ -378,28 +225,7 @@ namespace LinaVG
 		if (!it->second.opts.IsSame(opts))
 			return nullptr;
 
-		const int vtxStart = buf->m_vertexBuffer.m_size;
-
-		for (auto& b : it->second.vtxBuffer)
-			buf->PushVertex(b);
-
-		for (auto& i : it->second.indxBuffer)
-			buf->PushIndex(i + vtxStart);
-
-		return &it->second;
-	}
-
-	SDFTextCache* BufferStoreData::CheckSDFTextCache(uint32_t sid, const SDFTextOptions& opts, DrawBuffer* buf)
-	{
-		const auto& it = m_sdfTextCache.find(sid);
-
-		if (it == m_sdfTextCache.end())
-			return nullptr;
-
-		if (!it->second.opts.IsSame(opts))
-			return nullptr;
-
-		const int vtxStart = buf->m_vertexBuffer.m_size;
+		const int vtxStart = buf->vertexBuffer.m_size;
 
 		for (auto& b : it->second.vtxBuffer)
 			buf->PushVertex(b);
@@ -425,26 +251,6 @@ namespace LinaVG
 		for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
 		{
 			if (buf == &m_simpleTextBuffers[i])
-				return i;
-		}
-		return -1;
-	}
-
-	int BufferStoreData::GetBufferIndexInGradientArray(DrawBuffer* buf)
-	{
-		for (int i = 0; i < m_gradientBuffers.m_size; i++)
-		{
-			if (buf == &m_gradientBuffers[i])
-				return i;
-		}
-		return -1;
-	}
-
-	int BufferStoreData::GetBufferIndexInTextureArray(DrawBuffer* buf)
-	{
-		for (int i = 0; i < m_textureBuffers.m_size; i++)
-		{
-			if (buf == &m_textureBuffers[i])
 				return i;
 		}
 		return -1;

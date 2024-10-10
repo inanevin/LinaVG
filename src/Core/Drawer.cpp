@@ -40,6 +40,79 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace LinaVG
 {
+
+
+namespace {
+    void New_CalculateVertexUVs(DrawBuffer* buf, int startIndex, int endIndex, const Vec2& bbMin, const Vec2& bbMax)
+    {
+        for (int i = startIndex; i < endIndex; i++)
+        {
+            Vertex& vertex = buf->vertexBuffer[i];
+            vertex.uv.x = Math::Remap(vertex.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+            vertex.uv.y = Math::Remap(vertex.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+        }
+    }
+
+    void New_CalculateVertexColors(DrawBuffer* buf, int startIndex, int endIndex, const Vec4Grad& color)
+    {
+        for (int i = startIndex; i < endIndex; i++)
+        {
+            Vertex& vertex = buf->vertexBuffer[i];
+            
+            if(color.gradientType == GradientType::None)
+                vertex.col = color.start;
+            else if(color.gradientType == GradientType::Horizontal)
+                vertex.col = Math::Lerp(color.start, color.end, vertex.uv.x);
+            else
+                vertex.col = Math::Lerp(color.start, color.end, vertex.uv.y);
+        }
+    }
+
+    void New_CalculateVertexUVsAndColor(DrawBuffer* buf, int startIndex, int endIndex, const Vec2& bbMin, const Vec2& bbMax, const Vec4Grad& color, bool preserveAlpha = false)
+    {
+        for (int i = startIndex; i < endIndex; i++)
+        {
+            Vertex& vertex = buf->vertexBuffer[i];
+            vertex.uv.x = Math::Remap(vertex.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+            vertex.uv.y = Math::Remap(vertex.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+            
+            const float alpha = vertex.col.w;
+            
+            if(color.gradientType == GradientType::None)
+                vertex.col = color.start;
+            else if(color.gradientType == GradientType::Horizontal)
+                vertex.col = Math::Lerp(color.start, color.end, vertex.uv.x);
+            else
+                vertex.col = Math::Lerp(color.start, color.end, vertex.uv.y);
+            
+            if(preserveAlpha)
+                vertex.col.w = alpha;
+        }
+    }
+
+    void New_GetConvexBB(DrawBuffer* buf, int startIndex, int endIndex, Vec2& outMin, Vec2& outMax)
+    {
+        outMin = Vec2(99999, 99999);
+        outMax = Vec2(-99999, -99999);
+
+        for (int i = startIndex; i < endIndex; i++)
+        {
+            Vertex& vertex = buf->vertexBuffer[i];
+
+            if (vertex.pos.x < outMin.x)
+                outMin.x = vertex.pos.x;
+            else if (vertex.pos.x > outMax.x)
+                outMax.x = vertex.pos.x;
+            if (vertex.pos.y < outMin.y)
+                outMin.y = vertex.pos.y;
+            else if (vertex.pos.y > outMax.y)
+                outMax.y = vertex.pos.y;
+        }
+    }
+}
+
+
+
 	void Drawer::DrawBezier(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Vec2& p3, StyleOptions& style, LineCapDirection cap, LineJointType jointType, int drawOrder, int segments)
 	{
 		float		acc		 = (float)Math::Clamp(segments, 0, 100);
@@ -109,20 +182,9 @@ namespace LinaVG
 		StyleOptions style = StyleOptions(opts);
 		style.isFilled	   = true;
 
-		const bool useTextureBuffer = style.textureHandle != NULL_TEXTURE;
-		const bool isGradient		= !Math::IsEqual(style.color.start, style.color.end);
-		const bool useGradBuffer	= !useTextureBuffer && isGradient;
-
 		// Determine which buffer to use.
 		// Also correct the buffer pointer if getting a new buffer invalidated it.
-		DrawBuffer* destBuf = nullptr;
-
-		if (useTextureBuffer)
-			destBuf = &m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-		else if (useGradBuffer)
-			destBuf = &m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
-		else
-			destBuf = &m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape);
+        DrawBuffer* destBuf = &m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset);
 
 		// Calculate the line points.
 		Array<Line*>	 lines;
@@ -188,33 +250,12 @@ namespace LinaVG
 			}
 		}
 
-		// Calculate line UVs
-		Array<Vertex> vertices;
-
-		for (int i = 0; i < lines.m_size; i++)
-		{
-			for (int j = 0; j < lines[i]->m_vertices.m_size; j++)
-				vertices.push_back(lines[i]->m_vertices[j]);
-		}
-
-		Vec2 bbMin, bbMax;
-		GetConvexBoundingBox(&vertices[0], vertices.m_size, bbMin, bbMax);
-
-		// Recalculate UVs.
-		for (int i = 0; i < lines.m_size; i++)
-		{
-			for (int j = 0; j < lines[i]->m_vertices.m_size; j++)
-			{
-				lines[i]->m_vertices[j].uv.x = Math::Remap(lines[i]->m_vertices[j].pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-				lines[i]->m_vertices[j].uv.y = Math::Remap(lines[i]->m_vertices[j].pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-			}
-		}
-
-		int drawBufferStartBeforeLines = destBuf->m_vertexBuffer.m_size;
+		const int drawBufferStartBeforeLines = destBuf->vertexBuffer.m_size;
+        
 		// Actually draw the lines after all calculations are done & corrected.
 		for (int i = 0; i < lines.m_size; i++)
 		{
-			int destBufStart = destBuf->m_vertexBuffer.m_size;
+			int destBufStart = destBuf->vertexBuffer.m_size;
 			for (int j = 0; j < lines[i]->m_vertices.m_size; j++)
 			{
 				destBuf->PushVertex(lines[i]->m_vertices[j]);
@@ -227,6 +268,10 @@ namespace LinaVG
 				destBuf->PushIndex(destBufStart + lines[i]->m_tris[j].m_indices[2]);
 			}
 		}
+        
+        Vec2 bbMin, bbMax;
+        New_GetConvexBB(destBuf, drawBufferStartBeforeLines, destBuf->vertexBuffer.m_size, bbMin, bbMax);
+        New_CalculateVertexUVsAndColor(destBuf, drawBufferStartBeforeLines, destBuf->vertexBuffer.m_size, bbMin, bbMax, opts.color);
 
 		if (Math::IsEqualMarg(style.outlineOptions.thickness, 0.0f) && !style.aaEnabled)
 		{
@@ -252,7 +297,7 @@ namespace LinaVG
 
 			drawBufferStartForOutlines += lines[i]->m_vertices.m_size;
 		}
-
+        
 		if (!Math::IsEqualMarg(style.outlineOptions.thickness, 0.0f))
 		{
 			Array<int> indicesOrder;
@@ -278,7 +323,7 @@ namespace LinaVG
 
 			for (int i = 0; i < indicesOrder.m_size; i++)
 			{
-				Vertex& v	= destBuf->m_vertexBuffer[indicesOrder[i]];
+				Vertex& v	= destBuf->vertexBuffer[indicesOrder[i]];
 				Vec4	col = v.col;
 			}
 			DrawOutlineAroundShape(destBuf, opts2, &indicesOrder[0], indicesOrder.m_size, opts2.outlineOptions.thickness, false, drawOrder, OutlineCallType::AA);
@@ -290,15 +335,14 @@ namespace LinaVG
 		lines.clear();
 	}
 
-	void Drawer::DrawImage(TextureHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint, float rotateAngle, int drawOrder, Vec2 uvTiling, Vec2 uvOffset, Vec2 uvTL, Vec2 uvBR)
+	void Drawer::DrawImage(TextureHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint, float rotateAngle, int drawOrder, Vec4 uvTilingAndOffset, Vec2 uvTL, Vec2 uvBR)
 	{
 		StyleOptions style;
 		style.aaEnabled		  = false;
 		style.color			  = tint;
 		style.isFilled		  = true;
 		style.textureHandle	  = textureHandle;
-		style.textureUVOffset = uvOffset;
-		style.textureUVTiling = uvTiling;
+        style.textureTilingAndOffset = uvTilingAndOffset;
 		const Vec2 min		  = Vec2(pos.x - size.x / 2.0f, pos.y - size.y / 2.0f);
 		const Vec2 max		  = Vec2(pos.x + size.x / 2.0f, pos.y + size.y / 2.0f);
 
@@ -319,235 +363,22 @@ namespace LinaVG
 		// NR - VH - text
 
 		if (Math::IsEqualMarg(style.rounding, 0.0f))
-		{
-			if (Math::IsEqual(style.color.start, style.color.end))
-			{
-				if (style.textureHandle == NULL_TEXTURE)
-					FillTri_NoRound_SC(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.start, style, drawOrder);
-				else
-				{
-
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillTri_NoRound_SC(&buf, rotateAngle, top, right, left, style.color.start, style, drawOrder);
-				}
-			}
-			else
-			{
-				if (style.color.gradientType == GradientType::Horizontal)
-				{
-					// Horizontal, non rounded
-					if (style.textureHandle == NULL_TEXTURE)
-						FillTri_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.start, style.color.end, style.color.end, style, drawOrder);
-					else
-					{
-						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-						FillTri_NoRound_VerHorGra(&buf, rotateAngle, top, right, left, style.color.start, style.color.end, style.color.end, style, drawOrder);
-					}
-				}
-				else if (style.color.gradientType == GradientType::Vertical)
-				{
-					// Vertical, non rounded
-					if (style.textureHandle == NULL_TEXTURE)
-						FillTri_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, top, right, left, style.color.end, style.color.end, style.color.start, style, drawOrder);
-					else
-					{
-						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-						FillTri_NoRound_VerHorGra(&buf, rotateAngle, top, right, left, style.color.end, style.color.end, style.color.start, style, drawOrder);
-					}
-				}
-				else if (style.color.gradientType == GradientType::Radial || style.color.gradientType == GradientType::RadialCorner)
-				{
-					// Radial, non rounded
-					if (style.textureHandle == NULL_TEXTURE)
-					{
-						GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
-						FillTri_NoRound_RadialGra(&buf, rotateAngle, top, right, left, style.color.start, style.color.end, style, drawOrder);
-					}
-					else
-					{
-						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-						FillTri_NoRound_RadialGra(&buf, rotateAngle, top, right, left, style.color.start, style.color.end, style, drawOrder);
-					}
-				}
-			}
-		}
+            FillTri_NoRound(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, top, right, left,  style, drawOrder);
 		else
-		{
-			if (Math::IsEqual(style.color.start, style.color.end))
-			{
-				// Rounded, single m_color.
-				if (style.textureHandle == NULL_TEXTURE)
-					FillTri_Round(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.color.start, style.rounding, style, drawOrder);
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillTri_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.color.start, style.rounding, style, drawOrder);
-				}
-			}
-			else
-			{
-				// Rounded, gradient.
-				if (style.textureHandle == NULL_TEXTURE)
-				{
-					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
-					FillTri_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.color.start, style.rounding, style, drawOrder);
-				}
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillTri_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.color.start, style.rounding, style, drawOrder);
-				}
-			}
-		}
+            FillTri_Round(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.rounding, style, drawOrder);
 	}
 
 	void Drawer::DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle, int drawOrder)
 	{
 		if (Math::IsEqualMarg(style.rounding, 0.0f))
-		{
-			// Single m_color
-			if (Math::IsEqual(style.color.start, style.color.end))
-			{
-				if (style.textureHandle == NULL_TEXTURE)
-					FillRect_NoRound_SC(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max, style.color.start, style, drawOrder);
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillRect_NoRound_SC(&buf, rotateAngle, min, max, style.color.start, style, drawOrder);
-				}
-			}
-			else
-			{
-				if (style.color.gradientType == GradientType::Horizontal)
-				{
-					// Horizontal, non rounded
-					if (style.textureHandle == NULL_TEXTURE)
-					{
-						FillRect_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max,
-												   style.color.start, style.color.end, style.color.end, style.color.start, style, drawOrder);
-					}
-					else
-					{
-						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-						FillRect_NoRound_VerHorGra(&buf, rotateAngle, min, max,
-												   style.color.start, style.color.end, style.color.end, style.color.start, style, drawOrder);
-					}
-				}
-				else if (style.color.gradientType == GradientType::Vertical)
-				{
-					// Vertical, non rounded
-					if (style.textureHandle == NULL_TEXTURE)
-					{
-						FillRect_NoRound_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, min, max,
-												   style.color.start, style.color.start, style.color.end, style.color.end, style, drawOrder);
-					}
-					else
-					{
-						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-						FillRect_NoRound_VerHorGra(&buf, rotateAngle, min, max,
-												   style.color.start, style.color.start, style.color.end, style.color.end, style, drawOrder);
-					}
-				}
-				else if (style.color.gradientType == GradientType::Radial || style.color.gradientType == GradientType::RadialCorner)
-				{
-					// Radial, non rounded
-					if (style.textureHandle == NULL_TEXTURE)
-					{
-						GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
-						FillRect_NoRound_RadialGra(&buf, rotateAngle, min, max, style.color.start, style.color.end, style, drawOrder);
-					}
-					else
-					{
-						TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-						FillRect_NoRound_RadialGra(&buf, rotateAngle, min, max, style.color.start, style.color.end, style, drawOrder);
-					}
-				}
-			}
-		}
+            FillRect_NoRound(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, min, max, style, drawOrder);
 		else
-		{
-			if (Math::IsEqual(style.color.start, style.color.end))
-			{
-				// Rounded, single m_color.
-				if (style.textureHandle == NULL_TEXTURE)
-				{
-					FillRect_Round(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), style.onlyRoundTheseCorners, rotateAngle, min, max, style.color.start, style.rounding, style, drawOrder);
-				}
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillRect_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, min, max, style.color.start, style.rounding, style, drawOrder);
-				}
-			}
-			else
-			{
-				if (style.textureHandle == NULL_TEXTURE)
-				{
-					// Rounded, gradient.
-					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
-					FillRect_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, min, max, style.color.start, style.rounding, style, drawOrder);
-				}
-				else
-				{
-					// Rounded, gradient.
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillRect_Round(&buf, style.onlyRoundTheseCorners, rotateAngle, min, max, style.color.start, style.rounding, style, drawOrder);
-				}
-			}
-		}
+            FillRect_Round(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), style.onlyRoundTheseCorners, rotateAngle, min, max, style.rounding, style, drawOrder);
 	}
 
 	void Drawer::DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle, int drawOrder)
 	{
-		if (Math::IsEqual(style.color.start, style.color.end))
-		{
-			if (style.textureHandle == NULL_TEXTURE)
-				FillNGon_SC(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style, drawOrder);
-			else
-			{
-				TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-				FillNGon_SC(&buf, rotateAngle, center, radius, n, style.color.start, style, drawOrder);
-			}
-		}
-		else
-		{
-			if (style.color.gradientType == GradientType::Horizontal)
-			{
-				// Horizontal, non rounded
-				if (style.textureHandle == NULL_TEXTURE)
-					FillNGon_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style.color.end, true, style, drawOrder);
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillNGon_VerHorGra(&buf, rotateAngle, center, radius, n, style.color.start, style.color.end, true, style, drawOrder);
-				}
-			}
-			else if (style.color.gradientType == GradientType::Vertical)
-			{
-				// Vertical, non rounded
-				if (style.textureHandle == NULL_TEXTURE)
-					FillNGon_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, n, style.color.start, style.color.end, false, style, drawOrder);
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillNGon_VerHorGra(&buf, rotateAngle, center, radius, n, style.color.start, style.color.end, false, style, drawOrder);
-				}
-			}
-			else if (style.color.gradientType == GradientType::Radial || style.color.gradientType == GradientType::RadialCorner)
-			{
-				// // Radial, non rounded
-				if (style.textureHandle == NULL_TEXTURE)
-				{
-					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
-					FillNGon_RadialGra(&buf, rotateAngle, center, radius, n, style.color.start, style.color.end, style, drawOrder);
-				}
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillNGon_RadialGra(&buf, rotateAngle, center, radius, n, style.color.start, style.color.end, style, drawOrder);
-				}
-			}
-		}
+        FillNGon(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, center, radius, n, style, drawOrder);
 	}
 
 	void Drawer::DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle, int drawOrder)
@@ -555,208 +386,50 @@ namespace LinaVG
 		if (size < 3)
 		{
 			if (Config.errorCallback)
-				Config.errorCallback("LinaVG: Can draw a convex shape that has less than 3 corners!");
+				Config.errorCallback("LinaVG: Can't draw a convex shape that has less than 3 corners!");
 			return;
 		}
 
-		Vec2 avgCenter = Math::GetPolygonCentroidFast(points, size);
-
-		if (Math::IsEqual(style.color.start, style.color.end))
-		{
-			if (style.textureHandle == NULL_TEXTURE)
-				FillConvex_SC(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style, drawOrder);
-			else
-			{
-				TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-				FillConvex_SC(&buf, rotateAngle, points, size, avgCenter, style.color.start, style, drawOrder);
-			}
-		}
-		else
-		{
-			if (style.color.gradientType == GradientType::Horizontal)
-			{
-				// Horizontal, non rounded
-				if (style.textureHandle == NULL_TEXTURE)
-					FillConvex_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style.color.end, true, style, drawOrder);
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillConvex_VerHorGra(&buf, rotateAngle, points, size, avgCenter, style.color.start, style.color.end, true, style, drawOrder);
-				}
-			}
-			else if (style.color.gradientType == GradientType::Vertical)
-			{
-				// Vertical, non rounded
-				if (style.textureHandle == NULL_TEXTURE)
-					FillConvex_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, points, size, avgCenter, style.color.start, style.color.end, false, style, drawOrder);
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillConvex_VerHorGra(&buf, rotateAngle, points, size, avgCenter, style.color.start, style.color.end, false, style, drawOrder);
-				}
-			}
-			else if (style.color.gradientType == GradientType::Radial || style.color.gradientType == GradientType::RadialCorner)
-			{
-				// // Radial, non rounded
-				if (style.textureHandle == NULL_TEXTURE)
-				{
-					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
-					FillConvex_RadialGra(&buf, rotateAngle, points, size, avgCenter, style.color.start, style.color.end, style, drawOrder);
-				}
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillConvex_RadialGra(&buf, rotateAngle, points, size, avgCenter, style.color.start, style.color.end, style, drawOrder);
-				}
-			}
-		}
+		const Vec2 avgCenter = Math::GetPolygonCentroidFast(points, size);
+        FillConvex(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, points, size, avgCenter, style, drawOrder);
 	}
 
 	void Drawer::DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments, float rotateAngle, float startAngle, float endAngle, int drawOrder)
 	{
 		if (startAngle == endAngle)
-		{
 			endAngle = startAngle + 360.0f;
-		}
-		if (Math::IsEqual(style.color.start, style.color.end))
-		{
-			if (style.textureHandle == NULL_TEXTURE)
-				FillCircle_SC(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, startAngle, endAngle, style, drawOrder);
-			else
-			{
-				TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-				FillCircle_SC(&buf, rotateAngle, center, radius, segments, style.color.start, startAngle, endAngle, style, drawOrder);
-			}
-		}
-		else
-		{
-			if (style.color.gradientType == GradientType::Horizontal)
-			{
-				// Horizontal, non rounded
-				if (style.textureHandle == NULL_TEXTURE)
-					FillCircle_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, style.color.end, true, startAngle, endAngle, style, drawOrder);
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillCircle_VerHorGra(&buf, rotateAngle, center, radius, segments, style.color.start, style.color.end, true, startAngle, endAngle, style, drawOrder);
-				}
-			}
-			else if (style.color.gradientType == GradientType::Vertical)
-			{
-				// Vertical, non rounded
-				if (style.textureHandle == NULL_TEXTURE)
-					FillCircle_VerHorGra(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape), rotateAngle, center, radius, segments, style.color.start, style.color.end, false, startAngle, endAngle, style, drawOrder);
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillCircle_VerHorGra(&buf, rotateAngle, center, radius, segments, style.color.start, style.color.end, false, startAngle, endAngle, style, drawOrder);
-				}
-			}
-			else if (style.color.gradientType == GradientType::Radial || style.color.gradientType == GradientType::RadialCorner)
-			{
-				// // Radial, non rounded
-				if (style.textureHandle == NULL_TEXTURE)
-				{
-					GradientDrawBuffer& buf = m_bufferStore.GetData().GetGradientBuffer(style.userData, style.color, drawOrder, DrawBufferShapeType::Shape);
-					FillCircle_RadialGra(&buf, rotateAngle, center, radius, segments, style.color.start, style.color.end, startAngle, endAngle, style, drawOrder);
-				}
-				else
-				{
-					TextureDrawBuffer& buf = m_bufferStore.GetData().GetTextureBuffer(style.userData, style.textureHandle, style.textureUVTiling, style.textureUVOffset, style.color.start, drawOrder, DrawBufferShapeType::Shape);
-					FillCircle_RadialGra(&buf, rotateAngle, center, radius, segments, style.color.start, style.color.end, startAngle, endAngle, style, drawOrder);
-				}
-			}
-		}
+        
+        FillCircle(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, center, radius, segments, startAngle, endAngle, style, drawOrder);
 	}
 
 #ifndef LINAVG_DISABLE_TEXT_SUPPORT
 
-	LINAVG_API void Drawer::DrawTextSDF(const char* text, const Vec2& position, const SDFTextOptions& opts, float rotateAngle, int drawOrder, bool skipCache, TextOutData* outData)
+	LINAVG_API void Drawer::DrawText(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder, bool skipCache, TextOutData* outData)
 	{
 		if (text == NULL || text[0] == '\0')
 			return;
 
 		Font* font = opts.font;
 
-		if (!font->m_isSDF)
-		{
-			if (Config.errorCallback)
-				Config.errorCallback("LinaVG: The font you are trying to draw is not loaded as an SDF font, but DrawTextSDF was called! Please use DrawTextNormal().");
-			return;
-		}
-
-		const float scale	   = opts.textScale;
-		DrawBuffer* buf		   = &m_bufferStore.GetData().GetSDFTextBuffer(opts.userData, font, drawOrder, opts, false);
-		const bool	isGradient = !Math::IsEqual(opts.color.start, opts.color.end);
-		const int	vtxStart   = buf->m_vertexBuffer.m_size;
-		const int	indexStart = buf->m_indexBuffer.m_size;
-
-		if (!Config.textCachingSDFEnabled || skipCache)
-			ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfSoftness, outData, opts.cpuClipping, opts.wordWrap);
-		else
-		{
-			uint32_t sid = Utility::FnvHash(text);
-			if (m_bufferStore.GetData().CheckSDFTextCache(sid, opts, buf) == nullptr)
-			{
-				ProcessText(buf, font, text, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfSoftness, outData, opts.cpuClipping, opts.wordWrap);
-				m_bufferStore.GetData().AddSDFTextCache(sid, opts, buf, vtxStart, indexStart);
-			}
-
-			// Update position
-			for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
-			{
-				auto& vtx = buf->m_vertexBuffer[i];
-				vtx.pos.x += static_cast<float>(Math::CustomRound(position.x));
-				vtx.pos.y += static_cast<float>(Math::CustomRound(position.y));
-			}
-		}
-
-		if (!Math::IsEqualMarg(opts.dropShadowOffset.x, 0.0f) || !Math::IsEqualMarg(opts.dropShadowOffset.y, 0.0f))
-		{
-			SDFTextOptions usedOpts = SDFTextOptions(opts);
-			usedOpts.sdfThickness	= opts.sdfDropShadowThickness;
-			usedOpts.sdfSoftness	= opts.sdfDropShadowSoftness;
-			DrawBuffer* dsBuf		= &m_bufferStore.GetData().GetSDFTextBuffer(opts.userData, font, drawOrder, usedOpts, true);
-			// const int	dsStart		= buf->m_vertexBuffer.m_size;
-			ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, opts.sdfThickness, outData, opts.cpuClipping, opts.wordWrap);
-		}
-	}
-
-	LINAVG_API void Drawer::DrawTextNormal(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder, bool skipCache, TextOutData* outData)
-	{
-		if (text == NULL || text[0] == '\0')
-			return;
-
-		Font* font = opts.font;
-
-		if (font->m_isSDF)
-		{
-			if (Config.errorCallback)
-				Config.errorCallback("LinaVG: The font you are trying to draw with is loaded SDF font, but DrawTextNormal was called! Please use DrawTextSDF().");
-			return;
-		}
-
-		const float scale	   = opts.textScale;
-		DrawBuffer* buf		   = &m_bufferStore.GetData().GetSimpleTextBuffer(opts.userData, font, drawOrder, false);
-		const bool	isGradient = !Math::IsEqual(opts.color.start, opts.color.end);
-		const int	vtxStart   = buf->m_vertexBuffer.m_size;
-		const int	indexStart = buf->m_indexBuffer.m_size;
+        DrawBuffer* buf		   = &m_bufferStore.GetData().GetSimpleTextBuffer(opts.userData, font, drawOrder, false, font->isSDF);
+		const int	vtxStart   = buf->vertexBuffer.m_size;
+		const int	indexStart = buf->indexBuffer.m_size;
 
 		if (!Config.textCachingEnabled || skipCache)
-			ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping, opts.wordWrap);
+			ProcessText(buf, font, text, position, Vec2(0.0f, 0.0f), opts.color, opts, rotateAngle,outData);
 		else
 		{
 			uint32_t sid = Utility::FnvHash(text);
 			if (m_bufferStore.GetData().CheckTextCache(sid, opts, buf) == nullptr)
 			{
-				ProcessText(buf, font, text, Vec2(0, 0), Vec2(0.0f, 0.0f), opts.color, opts.spacing, isGradient, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping, opts.wordWrap);
+				ProcessText(buf, font, text, Vec2(0, 0), Vec2(0.0f, 0.0f), opts.color, opts, rotateAngle, outData);
 				m_bufferStore.GetData().AddTextCache(sid, opts, buf, vtxStart, indexStart);
 			}
 
 			// Update position
-			for (int i = vtxStart; i < buf->m_vertexBuffer.m_size; i++)
+			for (int i = vtxStart; i < buf->vertexBuffer.m_size; i++)
 			{
-				auto& vtx = buf->m_vertexBuffer[i];
+				auto& vtx = buf->vertexBuffer[i];
 				vtx.pos.x += static_cast<float>(Math::CustomRound(position.x));
 				vtx.pos.y += static_cast<float>(Math::CustomRound(position.y));
 			}
@@ -765,44 +438,28 @@ namespace LinaVG
 		// Drop-shadow texts don't support caching yet.
 		if (!Math::IsEqualMarg(opts.dropShadowOffset.x, 0.0f) || !Math::IsEqualMarg(opts.dropShadowOffset.y, 0.0f))
 		{
-			DrawBuffer* dsBuf = &m_bufferStore.GetData().GetSimpleTextBuffer(opts.userData, font, drawOrder, true);
-			ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x * opts.framebufferScale, opts.dropShadowOffset.y * opts.framebufferScale), opts.dropShadowColor, opts.spacing, false, scale, opts.wrapWidth, rotateAngle, opts.alignment, opts.newLineSpacing, 0.0f, outData, opts.cpuClipping, opts.wordWrap);
+            DrawBuffer* dsBuf = &m_bufferStore.GetData().GetSimpleTextBuffer(opts.userData, font, drawOrder, true, font->isSDF);
+			ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x, opts.dropShadowOffset.y), opts.dropShadowColor, opts, rotateAngle, outData);
 		}
 	}
 
 	LINAVG_API Vec2 Drawer::CalculateTextSize(const char* text, TextOptions& opts)
 	{
-		Font* font  = opts.font;
-		const float scale = opts.textScale;
-
 		if (Math::IsEqualMarg(opts.wrapWidth, 0.0f, 0.1f))
-			return CalcTextSize(text, font, scale, opts.spacing, 0.0f);
+			return CalcTextSize(text, opts);
 		else
-			return CalcTextSizeWrapped(text, font, opts.newLineSpacing, opts.wrapWidth, scale, opts.spacing, 0.0f, opts.wordWrap);
-	}
-
-	LINAVG_API Vec2 Drawer::CalculateTextSize(const char* text, SDFTextOptions& opts)
-	{
-		Font* font  = opts.font;
-		const float scale = opts.textScale;
-
-		if (Math::IsEqualMarg(opts.wrapWidth, 0.0f, 0.1f))
-			return CalcTextSize(text, font, scale, opts.spacing, opts.sdfSoftness);
-		else
-			return CalcTextSizeWrapped(text, font, opts.newLineSpacing, opts.wrapWidth, scale, opts.spacing, opts.sdfSoftness, opts.wordWrap);
+			return CalcTextSizeWrapped(text, opts);
 	}
 
 #endif
 
-	void Drawer::FillRect_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& colorTL, const Vec4& colorTR, const Vec4& colorBR, const Vec4& colorBL, StyleOptions& opts, int drawOrder)
+
+	void Drawer::FillRect_NoRound(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, StyleOptions& opts, int drawOrder)
 	{
 		Vertex v[4];
 		FillRectData(v, false, min, max);
-		const int current = buf->m_vertexBuffer.m_size;
-		v[0].col		  = colorTL;
-		v[1].col		  = colorTR;
-		v[2].col		  = colorBR;
-		v[3].col		  = colorBL;
+
+		const int current = buf->vertexBuffer.m_size;
 
 		for (int i = 0; i < 4; i++)
 			buf->PushVertex(v[i]);
@@ -820,50 +477,11 @@ namespace LinaVG
 		}
 		else
 			ConvexExtrudeVertices(buf, opts, center, current, current + 3, opts.thickness.start);
+        
+        const int currentNow = buf->vertexBuffer.m_size;
+        New_CalculateVertexUVsAndColor(buf, current, currentNow, v[0].pos, v[2].pos, opts.color);
 
-		RotateVertices(buf->m_vertexBuffer, center, current, opts.isFilled ? current + 3 : current + 7, rotateAngle);
-
-		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-		{
-			DrawOutline(buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
-		}
-		else if (opts.aaEnabled)
-		{
-			StyleOptions opts2	 = StyleOptions(opts);
-			opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-			DrawOutline(buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, OutlineCallType::AA);
-		}
-	}
-
-	void Drawer::FillRect_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& color, StyleOptions& opts, int drawOrder)
-	{
-		Vertex v[4];
-		FillRectData(v, false, min, max);
-		v[0].col = color;
-		v[1].col = color;
-		v[2].col = color;
-		v[3].col = color;
-
-		const int current = buf->m_vertexBuffer.m_size;
-
-		for (int i = 0; i < 4; i++)
-			buf->PushVertex(v[i]);
-
-		const Vec2 center = Vec2((min.x + max.x) / 2.0f, (min.y + max.y) / 2.0f);
-
-		if (opts.isFilled)
-		{
-			buf->PushIndex(current);
-			buf->PushIndex(current + 1);
-			buf->PushIndex(current + 3);
-			buf->PushIndex(current + 1);
-			buf->PushIndex(current + 2);
-			buf->PushIndex(current + 3);
-		}
-		else
-			ConvexExtrudeVertices(buf, opts, center, current, current + 3, opts.thickness.start);
-
-		RotateVertices(buf->m_vertexBuffer, center, current, opts.isFilled ? current + 3 : current + 7, rotateAngle);
+		RotateVertices(buf->vertexBuffer, center, current, opts.isFilled ? current + 3 : current + 7, rotateAngle);
 
 		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
 			DrawOutline(buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
@@ -875,45 +493,12 @@ namespace LinaVG
 		}
 	}
 
-	void Drawer::FillRect_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& startColor, const Vec4& endColor, StyleOptions& opts, int drawOrder)
-	{
-		Vertex v[5];
-		FillRectData(v, true, min, max);
-		int startIndex = buf->m_vertexBuffer.m_size;
-
-		const int loopStart = opts.isFilled ? 0 : 1;
-		for (int i = loopStart; i < 5; i++)
-			buf->PushVertex(v[i]);
-
-		const Vec2 center = Vec2((min.x + max.x) / 2.0f, (min.y + max.y) / 2.0f);
-
-		if (opts.isFilled)
-			ConvexFillVertices(startIndex, startIndex + 4, buf->m_indexBuffer);
-		else
-			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + 3, opts.thickness.start);
-
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + 4 : startIndex + 7, rotateAngle);
-
-		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-			DrawOutline(buf, opts, opts.isFilled ? 4 : 8, false, drawOrder);
-		else if (opts.aaEnabled)
-		{
-			StyleOptions opts2	 = StyleOptions(opts);
-			opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-			DrawOutline(buf, opts2, opts2.isFilled ? 4 : 8, false, drawOrder, OutlineCallType::AA);
-		}
-	}
-
-	void Drawer::FillRect_Round(DrawBuffer* buf, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, const Vec4& col, float rounding, StyleOptions& opts, int drawOrder)
+	void Drawer::FillRect_Round(DrawBuffer* buf, Array<int>& roundedCorners, float rotateAngle, const Vec2& min, const Vec2& max, float rounding, StyleOptions& opts, int drawOrder)
 	{
 		rounding = Math::Clamp(rounding, 0.0f, 0.9f);
 
 		Vertex v[4];
 		FillRectData(v, false, min, max);
-		v[0].col = col;
-		v[1].col = col;
-		v[2].col = col;
-		v[3].col = col;
 
 		// Calculate direction vectors
 		const Vec2	center			 = Vec2((min.x + max.x) / 2.0f, (min.y + max.y) / 2.0f);
@@ -932,7 +517,7 @@ namespace LinaVG
 		float		startAngle	  = 180.0f;
 		float		endAngle	  = 270.0f;
 		const float angleIncrease = GetAngleIncrease(rounding);
-		const int	startIndex	  = buf->m_vertexBuffer.m_size;
+		const int	startIndex	  = buf->vertexBuffer.m_size;
 		int			vertexCount	  = 0;
 
 		// Eventually we will be filling a convex shape, so we need a center vertex, it's position is already "center",
@@ -941,8 +526,7 @@ namespace LinaVG
 		{
 			Vertex c;
 			c.pos = center;
-			c.col = col;
-			c.uv  = Vec2(0.5f, 0.5f);
+			// c.uv  = Vec2(0.5f, 0.5f);
 			buf->PushVertex(c);
 		}
 
@@ -953,8 +537,6 @@ namespace LinaVG
 			{
 				Vertex cornerVertex;
 				cornerVertex.pos = v[i].pos;
-				cornerVertex.col = col;
-				cornerVertex.uv	 = v[i].uv;
 				buf->PushVertex(cornerVertex);
 				vertexCount++;
 				startAngle += 90.0f;
@@ -971,26 +553,27 @@ namespace LinaVG
 			for (float k = startAngle; k < endAngle + 2.5f; k += angleIncrease)
 			{
 				const Vec2 p = Math::GetPointOnCircle(inf1, roundingMag, k);
-
 				Vertex cornerVertex;
 				cornerVertex.pos = p;
-				cornerVertex.col = col;
 				buf->PushVertex(cornerVertex);
 				vertexCount++;
 			}
 			startAngle += 90.0f;
 			endAngle += 90.0f;
 		}
-
+        
+        const int currentIndex = buf->vertexBuffer.m_size;
+        New_CalculateVertexUVsAndColor(buf, startIndex, currentIndex, v[0].pos, v[2].pos, opts.color);
+        
 		if (opts.isFilled)
 		{
 			CalculateVertexUVs(buf, startIndex, opts.isFilled ? startIndex + vertexCount : startIndex + vertexCount - 1);
-			ConvexFillVertices(startIndex, startIndex + vertexCount, buf->m_indexBuffer);
+			ConvexFillVertices(startIndex, startIndex + vertexCount, buf->indexBuffer);
 		}
 		else
 			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + vertexCount - 1, opts.thickness.start);
 
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + vertexCount : startIndex + (vertexCount * 2) - 1, rotateAngle);
+		RotateVertices(buf->vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + vertexCount : startIndex + (vertexCount * 2) - 1, rotateAngle);
 
 		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
 			DrawOutline(buf, opts, opts.isFilled ? vertexCount : vertexCount * 2, false, drawOrder);
@@ -1010,7 +593,7 @@ namespace LinaVG
 		if (hasCenter)
 		{
 			v[0].pos = center;
-			v[0].uv	 = Vec2((m_bufferStore.GetData().m_uvOverride.m_uvTL.x + m_bufferStore.GetData().m_uvOverride.m_uvBR.x) / 2.0f, (m_bufferStore.GetData().m_uvOverride.m_uvTL.y + m_bufferStore.GetData().m_uvOverride.m_uvBR.y) / 2.0f);
+			// v[0].uv	 = Vec2((m_bufferStore.GetData().m_uvOverride.m_uvTL.x + m_bufferStore.GetData().m_uvOverride.m_uvBR.x) / 2.0f, (m_bufferStore.GetData().m_uvOverride.m_uvTL.y + m_bufferStore.GetData().m_uvOverride.m_uvBR.y) / 2.0f);
 		}
 
 		if (!m_bufferStore.GetData().m_rectOverrideData.overrideRectPositions)
@@ -1031,21 +614,18 @@ namespace LinaVG
 			v[i + 3].pos = m_bufferStore.GetData().m_rectOverrideData.m_p4;
 		}
 
-		v[i].uv		= m_bufferStore.GetData().m_uvOverride.m_uvTL;
-		v[i + 1].uv = Vec2(m_bufferStore.GetData().m_uvOverride.m_uvBR.x, m_bufferStore.GetData().m_uvOverride.m_uvTL.y);
-		v[i + 2].uv = m_bufferStore.GetData().m_uvOverride.m_uvBR;
-		v[i + 3].uv = Vec2(m_bufferStore.GetData().m_uvOverride.m_uvTL.x, m_bufferStore.GetData().m_uvOverride.m_uvBR.y);
+		// v[i].uv		= m_bufferStore.GetData().m_uvOverride.m_uvTL;
+		// v[i + 1].uv = Vec2(m_bufferStore.GetData().m_uvOverride.m_uvBR.x, m_bufferStore.GetData().m_uvOverride.m_uvTL.y);
+		// v[i + 2].uv = m_bufferStore.GetData().m_uvOverride.m_uvBR;
+		// v[i + 3].uv = Vec2(m_bufferStore.GetData().m_uvOverride.m_uvTL.x, m_bufferStore.GetData().m_uvOverride.m_uvBR.y);
 	}
 
-	void Drawer::FillTri_NoRound_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& colorLeft, const Vec4& colorRight, const Vec4& colorTop, StyleOptions& opts, int drawOrder)
+	void Drawer::FillTri_NoRound(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, StyleOptions& opts, int drawOrder)
 	{
 		Vertex v[3];
-		FillTriData(v, false, true, p3, p2, p1);
-		v[0].col = colorTop;
-		v[1].col = colorRight;
-		v[2].col = colorLeft;
+		FillTriData(v, false, p3, p2, p1);
 
-		const int startIndex = buf->m_vertexBuffer.m_size;
+		const int startIndex = buf->vertexBuffer.m_size;
 
 		for (int i = 0; i < 3; i++)
 			buf->PushVertex(v[i]);
@@ -1061,7 +641,13 @@ namespace LinaVG
 		else
 			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + 2, opts.thickness.start);
 
-		RotateVertices(buf->m_vertexBuffer, center, startIndex, opts.isFilled ? startIndex + 2 : startIndex + 5, rotateAngle);
+        const int currentIndex = buf->vertexBuffer.m_size;
+        
+        Vec2 bbMin, bbMax;
+        GetTriangleBoundingBox(p1, p2, p3, bbMin, bbMax);
+        New_CalculateVertexUVsAndColor(buf, startIndex, currentIndex, bbMin, bbMax, opts.color);
+        
+		RotateVertices(buf->vertexBuffer, center, startIndex, opts.isFilled ? startIndex + 2 : startIndex + 5, rotateAngle);
 
 		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
 			DrawOutline(buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
@@ -1073,84 +659,13 @@ namespace LinaVG
 		}
 	}
 
-	void Drawer::FillTri_NoRound_SC(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& color, StyleOptions& opts, int drawOrder)
-	{
-		Vertex v[3];
-		FillTriData(v, false, true, p3, p2, p1);
-		v[0].col = color;
-		v[1].col = color;
-		v[2].col = color;
-
-		const int startIndex = buf->m_vertexBuffer.m_size;
-
-		for (int i = 0; i < 3; i++)
-			buf->PushVertex(v[i]);
-
-		const Vec2 center = Vec2((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f);
-
-		if (opts.isFilled)
-		{
-			buf->PushIndex(startIndex);
-			buf->PushIndex(startIndex + 1);
-			buf->PushIndex(startIndex + 2);
-		}
-		else
-			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + 2, opts.thickness.start);
-
-		RotateVertices(buf->m_vertexBuffer, center, startIndex, opts.isFilled ? startIndex + 2 : startIndex + 5, rotateAngle);
-
-		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-			DrawOutline(buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
-		else if (opts.aaEnabled)
-		{
-			StyleOptions opts2	 = StyleOptions(opts);
-			opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-			DrawOutline(buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, OutlineCallType::AA);
-		}
-	}
-
-	void Drawer::FillTri_NoRound_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& startcolor, const Vec4& endColor, StyleOptions& opts, int drawOrder)
-	{
-		Vertex v[4];
-		// Vec2   points[3] = {p1, p2, p3};
-		FillTriData(v, true, true, p3, p2, p1);
-		int startIndex = buf->m_vertexBuffer.m_size;
-
-		const int loopStart = opts.isFilled ? 0 : 1;
-		for (int i = loopStart; i < 4; i++)
-			buf->PushVertex(v[i]);
-
-		const Vec2 center = v[0].pos;
-
-		if (opts.isFilled)
-			ConvexFillVertices(startIndex, startIndex + 3, buf->m_indexBuffer);
-		else
-			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + 2, opts.thickness.start);
-
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + 3 : startIndex + 5, rotateAngle);
-
-		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-			DrawOutline(buf, opts, opts.isFilled ? 3 : 6, false, drawOrder);
-		else if (opts.aaEnabled)
-		{
-			StyleOptions opts2	 = StyleOptions(opts);
-			opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-			DrawOutline(buf, opts2, opts2.isFilled ? 3 : 6, false, drawOrder, OutlineCallType::AA);
-		}
-	}
-
-	void Drawer::FillTri_Round(DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, const Vec4& col, float rounding, StyleOptions& opts, int drawOrder)
+	void Drawer::FillTri_Round(DrawBuffer* buf, Array<int>& onlyRoundCorners, float rotateAngle, const Vec2& p3, const Vec2& p2, const Vec2& p1, float rounding, StyleOptions& opts, int drawOrder)
 	{
 		rounding = Math::Clamp(rounding, 0.0f, 1.0f);
 
 		Vertex v[3];
-		FillTriData(v, false, false, p3, p2, p1);
-		v[0].col = col;
-		v[1].col = col;
-		v[2].col = col;
-
-		Vec2 bbMin, bbMax;
-		GetTriangleBoundingBox(p1, p2, p3, bbMin, bbMax);
+		FillTriData(v, false, p3, p2, p1);
+		
 		const Vec2	center			= Vec2((p1.x + p2.x + p3.x) / 3.0f, (p1.y + p2.y + p3.y) / 3.0f);
 		const Vec2	v01Edge			= Vec2(v[0].pos.x - v[1].pos.x, v[0].pos.y - v[1].pos.y);
 		const Vec2	v02Edge			= Vec2(v[0].pos.x - v[2].pos.x, v[0].pos.y - v[2].pos.y);
@@ -1169,7 +684,7 @@ namespace LinaVG
 		const float roundingMag		= rounding * shortestEdgeMag / 2.0f;
 
 		// For each corner vertices, first we inflate them towards the center by the magnitude.
-		const int startIndex  = buf->m_vertexBuffer.m_size;
+		const int startIndex  = buf->vertexBuffer.m_size;
 		int		  vertexCount = 0;
 
 		// Eventually we will be filling a convex shape, so we need a center vertex, it's position is already "center",
@@ -1178,9 +693,6 @@ namespace LinaVG
 		{
 			Vertex c;
 			c.pos  = center;
-			c.col  = col;
-			c.uv.x = Math::Remap(c.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			c.uv.y = Math::Remap(c.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
 			buf->PushVertex(c);
 		}
 
@@ -1192,7 +704,6 @@ namespace LinaVG
 			if (onlyRoundCorners.m_size != 0 && onlyRoundCorners.findIndex(i) == -1)
 			{
 				Vertex cornerVertex;
-				cornerVertex.col = col;
 				cornerVertex.pos = v[i].pos;
 				vertexCount++;
 				buf->PushVertex(cornerVertex);
@@ -1212,7 +723,6 @@ namespace LinaVG
 				for (int j = 0; j < arc.m_size; j++)
 				{
 					Vertex cornerVertex;
-					cornerVertex.col = col;
 					cornerVertex.pos = arc[j];
 					buf->PushVertex(cornerVertex);
 					vertexCount++;
@@ -1229,9 +739,7 @@ namespace LinaVG
 				GetArcPoints(arc, inter1, inter2, v[i].pos, 0.0f, 36, false, angleOffset);
 				for (int j = 0; j < arc.m_size; j++)
 				{
-
 					Vertex cornerVertex;
-					cornerVertex.col = col;
 					cornerVertex.pos = arc[j];
 					buf->PushVertex(cornerVertex);
 					vertexCount++;
@@ -1248,9 +756,7 @@ namespace LinaVG
 				GetArcPoints(arc, inter1, inter2, v[i].pos, 0.0f, 36, false, angleOffset);
 				for (int j = 0; j < arc.m_size; j++)
 				{
-
 					Vertex cornerVertex;
-					cornerVertex.col = col;
 					cornerVertex.pos = arc[j];
 					buf->PushVertex(cornerVertex);
 					vertexCount++;
@@ -1259,14 +765,15 @@ namespace LinaVG
 		}
 
 		if (opts.isFilled)
-		{
-			CalculateVertexUVs(buf, startIndex, opts.isFilled ? startIndex + vertexCount : startIndex + vertexCount - 1);
-			ConvexFillVertices(startIndex, startIndex + vertexCount, buf->m_indexBuffer);
-		}
+			ConvexFillVertices(startIndex, startIndex + vertexCount, buf->indexBuffer);
 		else
 			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + vertexCount - 1, opts.thickness.start);
+        
+        Vec2 bbMin, bbMax;
+        GetTriangleBoundingBox(p1, p2, p3, bbMin, bbMax);
+        New_CalculateVertexUVsAndColor(buf, startIndex, buf->vertexBuffer.m_size, bbMin, bbMax, opts.color);
 
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + vertexCount : startIndex + (vertexCount * 2) - 1, rotateAngle);
+		RotateVertices(buf->vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + vertexCount : startIndex + (vertexCount * 2) - 1, rotateAngle);
 
 		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
 			DrawOutline(buf, opts, opts.isFilled ? vertexCount : vertexCount * 2, false, drawOrder);
@@ -1278,7 +785,7 @@ namespace LinaVG
 		}
 	}
 
-	void Drawer::FillTriData(Vertex* v, bool hasCenter, bool calculateUV, const Vec2& p3, const Vec2& p2, const Vec2& p1)
+	void Drawer::FillTriData(Vertex* v, bool hasCenter, const Vec2& p3, const Vec2& p2, const Vec2& p1)
 	{
 		const int i = hasCenter ? 1 : 0;
 		if (hasCenter)
@@ -1290,41 +797,30 @@ namespace LinaVG
 		v[i].pos	 = p3;
 		v[i + 1].pos = p2;
 		v[i + 2].pos = p1;
-
-		if (calculateUV)
-		{
-			Vec2 min, max;
-			GetTriangleBoundingBox(p1, p2, p3, min, max);
-
-			const int end = hasCenter ? 4 : 3;
-
-			for (int i = 0; i < end; i++)
-			{
-				v[i].uv.x = Math::Remap(v[i].pos.x, min.x, max.x, 0.0f, 1.0f);
-				v[i].uv.y = Math::Remap(v[i].pos.y, min.y, max.y, 0.0f, 1.0f);
-			}
-		}
 	}
 
-	void Drawer::FillNGon_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& color, StyleOptions& opts, int drawOrder)
+	void Drawer::FillNGon(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, StyleOptions& opts, int drawOrder)
 	{
 		Array<Vertex> v;
 		FillNGonData(v, opts.isFilled, center, radius, n);
 
-		const int startIndex = buf->m_vertexBuffer.m_size;
+		const int startIndex = buf->vertexBuffer.m_size;
 
 		for (int i = 0; i < v.m_size; i++)
 		{
-			v[i].col = color;
 			buf->PushVertex(v[i]);
 		}
 
 		if (opts.isFilled)
-			ConvexFillVertices(startIndex, startIndex + n, buf->m_indexBuffer);
+			ConvexFillVertices(startIndex, startIndex + n, buf->indexBuffer);
 		else
 			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + n - 1, opts.thickness.start);
 
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + n : startIndex + (n * 2) - 1, rotateAngle);
+        const Vec2    bbMin          = Vec2(center.x - radius, center.y - radius);
+        const Vec2    bbMax          = Vec2(center.x + radius, center.y + radius);
+        New_CalculateVertexUVsAndColor(buf, startIndex, buf->vertexBuffer.m_size, bbMin, bbMax, opts.color);
+
+		RotateVertices(buf->vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + n : startIndex + (n * 2) - 1, rotateAngle);
 
 		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
 			DrawOutline(buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
@@ -1336,76 +832,14 @@ namespace LinaVG
 		}
 	}
 
-	void Drawer::FillNGon_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts, int drawOrder)
-	{
-		Array<Vertex> v;
-		FillNGonData(v, opts.isFilled, center, radius, n);
-
-		const int startIndex = buf->m_vertexBuffer.m_size;
-
-		for (int i = 0; i < v.m_size; i++)
-		{
-			v[i].col = Math::Lerp(colorStart, colorEnd, isHor ? v[i].uv.x : v[i].uv.y);
-			buf->PushVertex(v[i]);
-		}
-
-		if (opts.isFilled)
-			ConvexFillVertices(startIndex, startIndex + n, buf->m_indexBuffer);
-		else
-			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + n - 1, opts.thickness.start);
-
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + n : startIndex + (n * 2) - 1, rotateAngle);
-
-		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-			DrawOutline(buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
-		else if (opts.aaEnabled)
-		{
-			StyleOptions opts2	 = StyleOptions(opts);
-			opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-			DrawOutline(buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, OutlineCallType::AA);
-		}
-	}
-
-	void Drawer::FillNGon_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int n, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts, int drawOrder)
-	{
-		Array<Vertex> v;
-		FillNGonData(v, opts.isFilled, center, radius, n);
-
-		const int startIndex = buf->m_vertexBuffer.m_size;
-
-		for (int i = 0; i < v.m_size; i++)
-		{
-			buf->PushVertex(v[i]);
-		}
-
-		if (opts.isFilled)
-			ConvexFillVertices(startIndex, startIndex + n, buf->m_indexBuffer);
-		else
-			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + n - 1, opts.thickness.start);
-
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + n : startIndex + (n * 2) - 1, rotateAngle);
-
-		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-			DrawOutline(buf, opts, opts.isFilled ? n : n * 2, false, drawOrder);
-		else if (opts.aaEnabled)
-		{
-			StyleOptions opts2	 = StyleOptions(opts);
-			opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-			DrawOutline(buf, opts2, opts2.isFilled ? n : n * 2, false, drawOrder, OutlineCallType::AA);
-		}
-	}
 
 	void Drawer::FillNGonData(Array<Vertex>& vertArray, bool hasCenter, const Vec2& center, float radius, int n)
 	{
 		const float angleIncrease = 360.0f / (float)n;
-		const Vec2	bbMin		  = Vec2(center.x - radius, center.y - radius);
-		const Vec2	bbMax		  = Vec2(center.x + radius, center.y + radius);
 		if (hasCenter)
 		{
 			Vertex v;
 			v.pos  = center;
-			v.uv.x = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			v.uv.y = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
 			vertArray.push_back(v);
 		}
 
@@ -1414,39 +848,37 @@ namespace LinaVG
 		{
 			Vertex v;
 			v.pos  = Math::GetPointOnCircle(center, radius, i);
-			v.uv.x = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			v.uv.y = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
 			vertArray.push_back(v);
 			count++;
-
 			if (count == n)
 				return;
 		}
 	}
 
-	void Drawer::FillCircle_SC(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& color, float startAngle, float endAngle, StyleOptions& opts, int drawOrder)
+	void Drawer::FillCircle(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, float startAngle, float endAngle, StyleOptions& opts, int drawOrder)
 	{
 		Array<Vertex> v;
 		FillCircleData(v, opts.isFilled, center, radius, segments, startAngle, endAngle);
 
-		const int startIndex = buf->m_vertexBuffer.m_size;
+		const int startIndex = buf->vertexBuffer.m_size;
 
 		for (int i = 0; i < v.m_size; i++)
-		{
-			v[i].col = color;
 			buf->PushVertex(v[i]);
-		}
 
 		const bool isFullCircle = Math::Abs(endAngle - startAngle) == 360.0f;
 		const int  totalSize	= v.m_size - 1;
 
 		if (opts.isFilled)
-			ConvexFillVertices(startIndex, startIndex + totalSize, buf->m_indexBuffer, !isFullCircle);
+			ConvexFillVertices(startIndex, startIndex + totalSize, buf->indexBuffer, !isFullCircle);
 		else
 			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + totalSize, opts.thickness.start, !isFullCircle);
 
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + totalSize : startIndex + (totalSize * 2) + 1, rotateAngle);
+		RotateVertices(buf->vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + totalSize : startIndex + (totalSize * 2) + 1, rotateAngle);
 
+        const Vec2    bbMin          = Vec2(center.x - radius, center.y - radius);
+        const Vec2    bbMax          = Vec2(center.x + radius, center.y + radius);
+        New_CalculateVertexUVsAndColor(buf, startIndex, buf->vertexBuffer.m_size, bbMin, bbMax, opts.color);
+        
 		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
 		{
 			if (isFullCircle)
@@ -1491,197 +923,6 @@ namespace LinaVG
 				{
 					DrawOutline(buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
 				}
-				else
-				{
-					Array<int> indices;
-
-					for (int i = 0; i < v.m_size; i++)
-						indices.push_back(startIndex + i);
-
-					DrawOutlineAroundShape(buf, opts2, &indices[0], v.m_size, opts2.outlineOptions.thickness, true, drawOrder, OutlineCallType::AA);
-				}
-			}
-			else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Both)
-			{
-				Array<int> indices;
-
-				const int halfSize = v.m_size;
-				const int fullSize = halfSize * 2;
-				for (int i = 0; i < halfSize; i++)
-					indices.push_back(startIndex + i);
-
-				for (int i = fullSize - 1; i > halfSize - 1; i--)
-					indices.push_back(startIndex + i);
-
-				DrawOutlineAroundShape(buf, opts2, &indices[0], halfSize * 2, opts2.outlineOptions.thickness, false, drawOrder, OutlineCallType::AA);
-			}
-			else
-				DrawOutline(buf, opts2, opts2.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
-		}
-	}
-
-	void Drawer::FillCircle_VerHorGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, float startAngle, float endAngle, StyleOptions& opts, int drawOrder)
-	{
-		Array<Vertex> v;
-		FillCircleData(v, opts.isFilled, center, radius, segments, startAngle, endAngle);
-
-		const int startIndex = buf->m_vertexBuffer.m_size;
-
-		for (int i = 0; i < v.m_size; i++)
-		{
-			v[i].col = Math::Lerp(colorStart, colorEnd, isHor ? v[i].uv.x : v[i].uv.y);
-			buf->PushVertex(v[i]);
-		}
-
-		const bool isFullCircle = Math::Abs(endAngle - startAngle) == 360.0f;
-		const int  totalSize	= v.m_size - 1;
-
-		if (opts.isFilled)
-			ConvexFillVertices(startIndex, startIndex + totalSize, buf->m_indexBuffer, !isFullCircle);
-		else
-			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + totalSize, opts.thickness.start, !isFullCircle);
-
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + totalSize : startIndex + (totalSize * 2) + 1, rotateAngle);
-
-		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-		{
-			if (isFullCircle)
-				DrawOutline(buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
-			else
-			{
-				if (opts.isFilled)
-				{
-					Array<int> indices;
-
-					for (int i = 0; i < v.m_size; i++)
-						indices.push_back(startIndex + i);
-
-					DrawOutlineAroundShape(buf, opts, &indices[0], v.m_size, opts.outlineOptions.thickness, true, drawOrder);
-				}
-				else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Both)
-				{
-					Array<int> indices;
-
-					const int halfSize = v.m_size;
-					const int fullSize = halfSize * 2;
-					for (int i = 0; i < halfSize; i++)
-						indices.push_back(startIndex + i);
-
-					for (int i = fullSize - 1; i > halfSize - 1; i--)
-						indices.push_back(startIndex + i);
-
-					DrawOutlineAroundShape(buf, opts, &indices[0], halfSize * 2, opts.outlineOptions.thickness, false, drawOrder);
-				}
-				else
-					DrawOutline(buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
-			}
-		}
-		else if (opts.aaEnabled)
-		{
-			StyleOptions opts2	 = StyleOptions(opts);
-			opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-
-			if (opts.isFilled)
-			{
-				if (isFullCircle)
-					DrawOutline(buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
-				else
-				{
-					Array<int> indices;
-
-					for (int i = 0; i < v.m_size; i++)
-						indices.push_back(startIndex + i);
-
-					DrawOutlineAroundShape(buf, opts2, &indices[0], v.m_size, opts2.outlineOptions.thickness, true, drawOrder, OutlineCallType::AA);
-				}
-			}
-			else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Both)
-			{
-				Array<int> indices;
-
-				const int halfSize = v.m_size;
-				const int fullSize = halfSize * 2;
-				for (int i = 0; i < halfSize; i++)
-					indices.push_back(startIndex + i);
-
-				for (int i = fullSize - 1; i > halfSize - 1; i--)
-					indices.push_back(startIndex + i);
-
-				DrawOutlineAroundShape(buf, opts2, &indices[0], halfSize * 2, opts2.outlineOptions.thickness, false, drawOrder, OutlineCallType::AA);
-			}
-			else
-				DrawOutline(buf, opts2, opts2.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
-		}
-	}
-
-	void Drawer::FillCircle_RadialGra(DrawBuffer* buf, float rotateAngle, const Vec2& center, float radius, int segments, const Vec4& colorStart, const Vec4& colorEnd, float startAngle, float endAngle, StyleOptions& opts, int drawOrder)
-	{
-		Array<Vertex> v;
-		FillCircleData(v, opts.isFilled, center, radius, segments, startAngle, endAngle);
-
-		const int startIndex = buf->m_vertexBuffer.m_size;
-
-		for (int i = 0; i < v.m_size; i++)
-		{
-			if (i == 0)
-				v[i].col = opts.color.start;
-			else
-				v[i].col = opts.color.end;
-			buf->PushVertex(v[i]);
-		}
-
-		const bool isFullCircle = Math::Abs(endAngle - startAngle) == 360.0f;
-		const int  totalSize	= v.m_size - 1;
-
-		if (opts.isFilled)
-			ConvexFillVertices(startIndex, startIndex + totalSize, buf->m_indexBuffer, !isFullCircle);
-		else
-			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + totalSize, opts.thickness.start, !isFullCircle);
-
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + totalSize : startIndex + (totalSize * 2) + 1, rotateAngle);
-
-		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-		{
-			if (isFullCircle)
-				DrawOutline(buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
-			else
-			{
-				if (opts.isFilled)
-				{
-					Array<int> indices;
-
-					for (int i = v.m_size - 1; i > -1; i--)
-						indices.push_back(startIndex + i);
-
-					DrawOutlineAroundShape(buf, opts, &indices[0], v.m_size, opts.outlineOptions.thickness, false, drawOrder);
-				}
-				else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Both)
-				{
-					Array<int> indices;
-
-					const int halfSize = v.m_size;
-					const int fullSize = halfSize * 2;
-					for (int i = 0; i < halfSize; i++)
-						indices.push_back(startIndex + i);
-
-					for (int i = fullSize - 1; i > halfSize - 1; i--)
-						indices.push_back(startIndex + i);
-
-					DrawOutlineAroundShape(buf, opts, &indices[0], halfSize * 2, opts.outlineOptions.thickness, false, drawOrder);
-				}
-				else
-					DrawOutline(buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder);
-			}
-		}
-		else if (opts.aaEnabled)
-		{
-			StyleOptions opts2	 = StyleOptions(opts);
-			opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-
-			if (opts.isFilled)
-			{
-				if (isFullCircle)
-					DrawOutline(buf, opts, opts.isFilled ? totalSize : (totalSize + 1) * 2, !isFullCircle, drawOrder, OutlineCallType::AA);
 				else
 				{
 					Array<int> indices;
@@ -1726,15 +967,11 @@ namespace LinaVG
 
 		segments				  = Math::Clamp(segments, 6, 180);
 		const float angleIncrease = 360.0f / (float)segments;
-		const Vec2	bbMin		  = Vec2(center.x - radius, center.y - radius);
-		const Vec2	bbMax		  = Vec2(center.x + radius, center.y + radius);
-
+		
 		if (hasCenter)
 		{
 			Vertex c;
 			c.pos  = center;
-			c.uv.x = Math::Remap(c.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			c.uv.y = Math::Remap(c.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
 			vertices.push_back(c);
 		}
 
@@ -1745,26 +982,18 @@ namespace LinaVG
 		{
 			Vertex v;
 			v.pos	= Math::GetPointOnCircle(center, radius, i);
-			v.uv.x	= Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			v.uv.y	= Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-			v.col.w = 1.0f;
 			vertices.push_back(v);
 		}
 	}
 
-	void Drawer::FillConvex_SC(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& color, StyleOptions& opts, int drawOrder)
+	void Drawer::FillConvex(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center,   StyleOptions& opts, int drawOrder)
 	{
-		const int startIndex = buf->m_vertexBuffer.m_size;
-		Vec2	  bbMin, bbMax;
-		GetConvexBoundingBox(points, size, bbMin, bbMax);
-
+		const int startIndex = buf->vertexBuffer.m_size;
+		
 		if (opts.isFilled)
 		{
 			Vertex c;
 			c.pos  = center;
-			c.uv.x = Math::Remap(c.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			c.uv.y = Math::Remap(c.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-			c.col  = color;
 			buf->PushVertex(c);
 		}
 
@@ -1772,106 +1001,19 @@ namespace LinaVG
 		{
 			Vertex v;
 			v.pos = points[i];
-			// const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
-			v.uv.x = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			v.uv.y = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-			v.col  = color;
 			buf->PushVertex(v);
 		}
 
 		if (opts.isFilled)
-			ConvexFillVertices(startIndex, startIndex + size, buf->m_indexBuffer);
+			ConvexFillVertices(startIndex, startIndex + size, buf->indexBuffer);
 		else
 			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + size - 1, opts.thickness.start);
 
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + size : startIndex + (size * 2) - 1, rotateAngle);
-
-		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-			DrawOutline(buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
-		else if (opts.aaEnabled)
-		{
-			StyleOptions opts2	 = StyleOptions(opts);
-			opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-			DrawOutline(buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, OutlineCallType::AA);
-		}
-	}
-
-	void Drawer::FillConvex_VerHorGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, bool isHor, StyleOptions& opts, int drawOrder)
-	{
-		const int startIndex = buf->m_vertexBuffer.m_size;
-		Vec2	  bbMin, bbMax;
-		GetConvexBoundingBox(points, size, bbMin, bbMax);
-
-		if (opts.isFilled)
-		{
-			Vertex c;
-			c.pos  = center;
-			c.col  = Math::Lerp(colorStart, colorEnd, 0.5f);
-			c.uv.x = Math::Remap(c.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			c.uv.y = Math::Remap(c.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-			buf->PushVertex(c);
-		}
-
-		for (int i = 0; i < size; i++)
-		{
-			Vertex v;
-			v.pos = points[i];
-			// const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
-			v.uv.x = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			v.uv.y = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-			v.col  = Math::Lerp(colorStart, colorEnd, isHor ? v.uv.x : v.uv.y);
-			buf->PushVertex(v);
-		}
-
-		if (opts.isFilled)
-			ConvexFillVertices(startIndex, startIndex + size, buf->m_indexBuffer);
-		else
-			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + size - 1, opts.thickness.start);
-
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + size : startIndex + (size * 2) - 1, rotateAngle);
-
-		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
-			DrawOutline(buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
-		else if (opts.aaEnabled)
-		{
-			StyleOptions opts2	 = StyleOptions(opts);
-			opts2.outlineOptions = OutlineOptions::FromStyle(opts, OutlineDrawDirection::Both);
-			DrawOutline(buf, opts2, opts2.isFilled ? size : size * 2, false, drawOrder, OutlineCallType::AA);
-		}
-	}
-
-	void Drawer::FillConvex_RadialGra(DrawBuffer* buf, float rotateAngle, Vec2* points, int size, const Vec2& center, const Vec4& colorStart, const Vec4& colorEnd, StyleOptions& opts, int drawOrder)
-	{
-		const int startIndex = buf->m_vertexBuffer.m_size;
-
-		Vec2 bbMin, bbMax;
-		GetConvexBoundingBox(points, size, bbMin, bbMax);
-
-		if (opts.isFilled)
-		{
-			Vertex c;
-			c.pos  = center;
-			c.uv.x = Math::Remap(c.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			c.uv.y = Math::Remap(c.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-			buf->PushVertex(c);
-		}
-
-		for (int i = 0; i < size; i++)
-		{
-			Vertex v;
-			v.pos = points[i];
-			// const Vec2 toCenter = Math::Normalized(Vec2(center.x - v.pos.x, center.y - v.pos.y));
-			v.uv.x = Math::Remap(v.pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			v.uv.y = Math::Remap(v.pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
-			buf->PushVertex(v);
-		}
-
-		if (opts.isFilled)
-			ConvexFillVertices(startIndex, startIndex + size, buf->m_indexBuffer);
-		else
-			ConvexExtrudeVertices(buf, opts, center, startIndex, startIndex + size - 1, opts.thickness.start);
-
-		RotateVertices(buf->m_vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + size : startIndex + (size * 2) - 1, rotateAngle);
+        Vec2      bbMin, bbMax;
+        GetConvexBoundingBox(points, size, bbMin, bbMax);
+        New_CalculateVertexUVsAndColor(buf, startIndex, buf->vertexBuffer.m_size, bbMin, bbMax, opts.color);
+        
+		RotateVertices(buf->vertexBuffer, center, opts.isFilled ? startIndex + 1 : startIndex, opts.isFilled ? startIndex + size : startIndex + (size * 2) - 1, rotateAngle);
 
 		if (!Math::IsEqualMarg(opts.outlineOptions.thickness, 0.0f))
 			DrawOutline(buf, opts, opts.isFilled ? size : size * 2, false, drawOrder);
@@ -1905,7 +1047,6 @@ namespace LinaVG
 	void Drawer::ConvexExtrudeVertices(DrawBuffer* buf, const StyleOptions& opts, const Vec2& center, int startIndex, int endIndex, float thickness, bool skipEndClosing)
 	{
 		const int totalSize = endIndex - startIndex + 1;
-		thickness *= opts.framebufferScale;
 
 		// Extrude vertices.
 		for (int i = startIndex; i < startIndex + totalSize; i++)
@@ -1914,30 +1055,30 @@ namespace LinaVG
 			const int previous = i == startIndex ? endIndex : i - 1;
 			const int next	   = i == endIndex ? startIndex : i + 1;
 			Vertex	  v;
-			v.col = buf->m_vertexBuffer[i].col;
+			v.col = buf->vertexBuffer[i].col;
 			if (skipEndClosing && i == startIndex)
 			{
-				const Vec2 toNext  = Math::Normalized(Vec2(buf->m_vertexBuffer[next].pos.x - buf->m_vertexBuffer[i].pos.x, buf->m_vertexBuffer[next].pos.y - buf->m_vertexBuffer[i].pos.y));
+				const Vec2 toNext  = Math::Normalized(Vec2(buf->vertexBuffer[next].pos.x - buf->vertexBuffer[i].pos.x, buf->vertexBuffer[next].pos.y - buf->vertexBuffer[i].pos.y));
 				const Vec2 rotated = Math::Rotate90(toNext, true);
-				v.pos			   = Vec2(buf->m_vertexBuffer[i].pos.x + rotated.x * thickness * 2, buf->m_vertexBuffer[i].pos.y + rotated.y * thickness * 2);
+				v.pos			   = Vec2(buf->vertexBuffer[i].pos.x + rotated.x * thickness * 2, buf->vertexBuffer[i].pos.y + rotated.y * thickness * 2);
 			}
 			else if (skipEndClosing && i == endIndex)
 			{
-				const Vec2 fromPrev = Math::Normalized(Vec2(buf->m_vertexBuffer[i].pos.x - buf->m_vertexBuffer[previous].pos.x, buf->m_vertexBuffer[i].pos.y - buf->m_vertexBuffer[previous].pos.y));
+				const Vec2 fromPrev = Math::Normalized(Vec2(buf->vertexBuffer[i].pos.x - buf->vertexBuffer[previous].pos.x, buf->vertexBuffer[i].pos.y - buf->vertexBuffer[previous].pos.y));
 				const Vec2 rotated	= Math::Rotate90(fromPrev, true);
-				v.pos				= Vec2(buf->m_vertexBuffer[i].pos.x + rotated.x * thickness * 2, buf->m_vertexBuffer[i].pos.y + rotated.y * thickness * 2);
+				v.pos				= Vec2(buf->vertexBuffer[i].pos.x + rotated.x * thickness * 2, buf->vertexBuffer[i].pos.y + rotated.y * thickness * 2);
 			}
 			else
 			{
 				//const Vec2 vertexNormalAverage = Math::GetVertexNormal(buf->m_vertexBuffer[i].pos, buf->m_vertexBuffer[previous].pos, buf->m_vertexBuffer[next].pos);
 				//v.pos						   = Vec2(buf->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, buf->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
-                v.pos = Math::GetExtrudedFromNormal(buf->m_vertexBuffer[i].pos, buf->m_vertexBuffer[previous].pos, buf->m_vertexBuffer[next].pos, thickness);
+                v.pos = Math::GetExtrudedFromNormal(buf->vertexBuffer[i].pos, buf->vertexBuffer[previous].pos, buf->vertexBuffer[next].pos, thickness);
 			}
 
 			buf->PushVertex(v);
 		}
 
-		CalculateVertexUVs(buf, startIndex, endIndex + totalSize);
+		// CalculateVertexUVs(buf, startIndex, endIndex + totalSize);
 
 		for (int i = startIndex; i < startIndex + totalSize; i++)
 		{
@@ -2106,27 +1247,27 @@ namespace LinaVG
 
 		for (int i = startIndex; i < endIndex + 1; i++)
 		{
-			if (buf->m_vertexBuffer[i].pos.x < outMin.x)
-				outMin.x = buf->m_vertexBuffer[i].pos.x;
-			else if (buf->m_vertexBuffer[i].pos.x > outMax.x)
-				outMax.x = buf->m_vertexBuffer[i].pos.x;
-			if (buf->m_vertexBuffer[i].pos.y < outMin.y)
-				outMin.y = buf->m_vertexBuffer[i].pos.y;
-			else if (buf->m_vertexBuffer[i].pos.y > outMax.y)
-				outMax.y = buf->m_vertexBuffer[i].pos.y;
+			if (buf->vertexBuffer[i].pos.x < outMin.x)
+				outMin.x = buf->vertexBuffer[i].pos.x;
+			else if (buf->vertexBuffer[i].pos.x > outMax.x)
+				outMax.x = buf->vertexBuffer[i].pos.x;
+			if (buf->vertexBuffer[i].pos.y < outMin.y)
+				outMin.y = buf->vertexBuffer[i].pos.y;
+			else if (buf->vertexBuffer[i].pos.y > outMax.y)
+				outMax.y = buf->vertexBuffer[i].pos.y;
 		}
 	}
 
 	void Drawer::CalculateVertexUVs(DrawBuffer* buf, int startIndex, int endIndex)
 	{
 		Vec2 bbMin, bbMax;
-		GetConvexBoundingBox(&buf->m_vertexBuffer.m_data[startIndex], endIndex - startIndex + 1, bbMin, bbMax);
+		GetConvexBoundingBox(&buf->vertexBuffer.m_data[startIndex], endIndex - startIndex + 1, bbMin, bbMax);
 
 		// Recalculate UVs.
 		for (int i = startIndex; i <= endIndex; i++)
 		{
-			buf->m_vertexBuffer[i].uv.x = Math::Remap(buf->m_vertexBuffer[i].pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
-			buf->m_vertexBuffer[i].uv.y = Math::Remap(buf->m_vertexBuffer[i].pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
+			buf->vertexBuffer[i].uv.x = Math::Remap(buf->vertexBuffer[i].pos.x, bbMin.x, bbMax.x, 0.0f, 1.0f);
+			buf->vertexBuffer[i].uv.y = Math::Remap(buf->vertexBuffer[i].pos.y, bbMin.y, bbMax.y, 0.0f, 1.0f);
 		}
 	}
 
@@ -2154,8 +1295,8 @@ namespace LinaVG
 
 		for (int i = startIndex; i <= endIndex; i++)
 		{
-			total.x += buf->m_vertexBuffer[i].pos.x;
-			total.y += buf->m_vertexBuffer[i].pos.y;
+			total.x += buf->vertexBuffer[i].pos.x;
+			total.y += buf->vertexBuffer[i].pos.y;
 		}
 
 		const int count = endIndex - startIndex + 1;
@@ -2536,68 +1677,36 @@ namespace LinaVG
 
 	DrawBuffer* Drawer::DrawOutlineAroundShape(DrawBuffer* sourceBuffer, StyleOptions& opts, int* indicesOrder, int vertexCount, float defThickness, bool ccw, int drawOrder, OutlineCallType outlineType)
 	{
-		float	   thickness   = outlineType != OutlineCallType::Normal ? opts.framebufferScale * opts.aaMultiplier * Config.globalAAMultiplier * Config.globalFramebufferScale : (defThickness * opts.framebufferScale * Config.globalFramebufferScale);
+		float	   thickness   = outlineType != OutlineCallType::Normal ? opts.aaMultiplier * Config.globalAAMultiplier : (defThickness);
 		const bool isAAOutline = outlineType != OutlineCallType::Normal;
-
-		bool isGradient = false;
-		if (isAAOutline)
-			isGradient = sourceBuffer->m_drawBufferType == DrawBufferType::Gradient;
-		else
-			isGradient = !Math::IsEqual(opts.outlineOptions.color.start, opts.outlineOptions.color.end);
-
-		bool	   useTextureBuffer = outlineType == OutlineCallType::AA ? (opts.textureHandle != NULL_TEXTURE) : (opts.outlineOptions.textureHandle != NULL_TEXTURE);
-		const bool useGradBuffer	= !useTextureBuffer && isGradient;
 
 		// Determine which buffer to use.
 		// Also correct the buffer pointer if getting a new buffer invalidated it.
 		DrawBuffer* destBuf = nullptr;
 
-		if (useTextureBuffer)
-		{
-			const int			sourceIndex = m_bufferStore.GetData().GetBufferIndexInTextureArray(sourceBuffer);
-			const TextureHandle handle		= outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle;
-			const Vec2			uvOffset	= outlineType == OutlineCallType::AA ? opts.textureUVOffset : opts.outlineOptions.textureUVOffset;
-			const Vec2			uvTiling	= outlineType == OutlineCallType::AA ? opts.textureUVTiling : opts.outlineOptions.textureUVTiling;
-			destBuf							= &m_bufferStore.GetData().GetTextureBuffer(opts.userData, handle, uvTiling, uvOffset, opts.outlineOptions.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
+        const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInDefaultArray(sourceBuffer);
+        destBuf                  = &m_bufferStore.GetData().GetDefaultBuffer(opts.userData, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape, outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle, outlineType == OutlineCallType::AA ? opts.textureTilingAndOffset : opts.outlineOptions.textureTilingAndOffset);
 
-			if (sourceIndex != -1)
-				sourceBuffer = &m_bufferStore.GetData().m_textureBuffers[sourceIndex];
-		}
-		else if (useGradBuffer)
-		{
-			const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInGradientArray(sourceBuffer);
-			Vec4Grad  col		  = outlineType == OutlineCallType::AA ? opts.color : opts.outlineOptions.color;
-			destBuf				  = &m_bufferStore.GetData().GetGradientBuffer(opts.userData, col, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
-
-			if (sourceIndex != -1)
-				sourceBuffer = &m_bufferStore.GetData().m_gradientBuffers[sourceIndex];
-		}
-		else
-		{
-			const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInDefaultArray(sourceBuffer);
-			destBuf				  = &m_bufferStore.GetData().GetDefaultBuffer(opts.userData, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
-
-			if (sourceIndex != -1)
-				sourceBuffer = &m_bufferStore.GetData().m_defaultBuffers[sourceIndex];
-		}
+        if (sourceIndex != -1)
+            sourceBuffer = &m_bufferStore.GetData().m_defaultBuffers[sourceIndex];
 
 		// only used if we are drawing AA.
 		Array<int> copiedVerticesOrder;
 
-		const int destBufStart = destBuf->m_vertexBuffer.m_size;
+		const int destBufStart = destBuf->vertexBuffer.m_size;
 		// First copy the given vertices, add them to the destination buffer.
 		for (int i = 0; i < vertexCount; i++)
 		{
 			Vertex v;
-			v.col = isAAOutline ? sourceBuffer->m_vertexBuffer[indicesOrder[i]].col : opts.outlineOptions.color.start;
-			v.pos = sourceBuffer->m_vertexBuffer[indicesOrder[i]].pos;
-			v.uv  = sourceBuffer->m_vertexBuffer[indicesOrder[i]].uv;
+			v.col = isAAOutline ? sourceBuffer->vertexBuffer[indicesOrder[i]].col : opts.outlineOptions.color.start;
+			v.pos = sourceBuffer->vertexBuffer[indicesOrder[i]].pos;
+			v.uv  = sourceBuffer->vertexBuffer[indicesOrder[i]].uv;
 
 			// if (isAAOutline)
 			//     v.col.w = 1.0f;
 
 			if (opts.aaEnabled && !isAAOutline)
-				copiedVerticesOrder.push_back(destBuf->m_vertexBuffer.m_size);
+				copiedVerticesOrder.push_back(destBuf->vertexBuffer.m_size);
 
 			destBuf->PushVertex(v);
 		}
@@ -2614,25 +1723,25 @@ namespace LinaVG
 			const int next	  = i == vertexCount - 1 ? destBufStart : destBufStart + i + 1;
 			const int current = destBufStart + i;
 			Vertex	  v;
-			v.uv  = destBuf->m_vertexBuffer[current].uv;
-			v.col = isAAOutline ? sourceBuffer->m_vertexBuffer[indicesOrder[i]].col : opts.outlineOptions.color.end;
+			v.uv  = destBuf->vertexBuffer[current].uv;
+			v.col = isAAOutline ? sourceBuffer->vertexBuffer[indicesOrder[i]].col : opts.outlineOptions.color.end;
 
 			if (isAAOutline)
 				v.col.w = 0.0f;
 
-			const Vec2 prevP			   = destBuf->m_vertexBuffer[prev].pos;
-			const Vec2 nextP			   = destBuf->m_vertexBuffer[next].pos;
+			const Vec2 prevP			   = destBuf->vertexBuffer[prev].pos;
+			const Vec2 nextP			   = destBuf->vertexBuffer[next].pos;
 			//const Vec2 vertexNormalAverage = Math::GetVertexNormalFlatCheck(destBuf->m_vertexBuffer[current].pos, prevP, nextP, ccw);
 			//v.pos						   = Vec2(destBuf->m_vertexBuffer[current].pos.x + vertexNormalAverage.x * thickness, destBuf->m_vertexBuffer[current].pos.y + vertexNormalAverage.y * thickness);
-            v.pos = Math::GetExtrudedFromNormalFlatCheck(destBuf->m_vertexBuffer[current].pos, prevP, nextP, thickness, ccw);
+            v.pos = Math::GetExtrudedFromNormalFlatCheck(destBuf->vertexBuffer[current].pos, prevP, nextP, thickness, ccw);
 
 			if (opts.aaEnabled && !isAAOutline)
-				extrudedVerticesOrder.push_back(destBuf->m_vertexBuffer.m_size);
+				extrudedVerticesOrder.push_back(destBuf->vertexBuffer.m_size);
 
 			destBuf->PushVertex(v);
 		}
 
-		if (!isAAOutline && (useTextureBuffer || useGradBuffer))
+		if (!isAAOutline)
 			CalculateVertexUVs(destBuf, destBufStart, (destBufStart + vertexCount * 2) - 1);
 
 		for (int i = 0; i < vertexCount; i++)
@@ -2663,17 +1772,7 @@ namespace LinaVG
 	DrawBuffer* Drawer::DrawOutline(DrawBuffer* sourceBuffer, StyleOptions& opts, int vertexCount, bool skipEnds, int drawOrder, OutlineCallType outlineType, bool reverseDrawDir)
 	{
 		const bool isAAOutline = outlineType != OutlineCallType::Normal;
-		float	   thickness   = isAAOutline ? opts.framebufferScale * opts.aaMultiplier * Config.globalAAMultiplier * Config.globalFramebufferScale : (opts.outlineOptions.thickness * opts.framebufferScale * Config.globalFramebufferScale);
-
-		bool isGradient = false;
-
-		if (isAAOutline)
-			isGradient = sourceBuffer->m_drawBufferType == DrawBufferType::Gradient;
-		else
-			isGradient = !Math::IsEqual(opts.outlineOptions.color.start, opts.outlineOptions.color.end);
-
-		bool	   useTextureBuffer = outlineType == OutlineCallType::AA ? (opts.textureHandle != 0) : (opts.outlineOptions.textureHandle != 0);
-		const bool useGradBuffer	= !useTextureBuffer && isGradient;
+		float	   thickness   = isAAOutline ? opts.aaMultiplier * Config.globalAAMultiplier : (opts.outlineOptions.thickness);
 
 		if (reverseDrawDir)
 			thickness = -thickness;
@@ -2682,60 +1781,36 @@ namespace LinaVG
 		// Also correct the buffer pointer if getting a new buffer invalidated it.
 		DrawBuffer* destBuf = nullptr;
 
-		if (useTextureBuffer)
-		{
-			const int			sourceIndex = m_bufferStore.GetData().GetBufferIndexInTextureArray(sourceBuffer);
-			const TextureHandle handle		= outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle;
-			const Vec2			uvOffset	= outlineType == OutlineCallType::AA ? opts.textureUVOffset : opts.outlineOptions.textureUVOffset;
-			const Vec2			uvTiling	= outlineType == OutlineCallType::AA ? opts.textureUVTiling : opts.outlineOptions.textureUVTiling;
-			destBuf							= &m_bufferStore.GetData().GetTextureBuffer(opts.userData, handle, uvTiling, uvOffset, opts.outlineOptions.color.start, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
-
-			if (sourceIndex != -1)
-				sourceBuffer = &m_bufferStore.GetData().m_textureBuffers[sourceIndex];
-		}
-		else if (useGradBuffer)
-		{
-			const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInGradientArray(sourceBuffer);
-			Vec4Grad  col		  = outlineType == OutlineCallType::AA ? opts.color : opts.outlineOptions.color;
-			destBuf				  = &m_bufferStore.GetData().GetGradientBuffer(opts.userData, col, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
-
-			if (sourceIndex != -1)
-				sourceBuffer = &m_bufferStore.GetData().m_gradientBuffers[sourceIndex];
-		}
-		else
-		{
-			const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInDefaultArray(sourceBuffer);
-
-			destBuf = &m_bufferStore.GetData().GetDefaultBuffer(opts.userData, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape);
-
-			if (sourceIndex != -1)
-				sourceBuffer = &m_bufferStore.GetData().m_defaultBuffers[sourceIndex];
-		}
+        const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInDefaultArray(sourceBuffer);
+        destBuf = &m_bufferStore.GetData().GetDefaultBuffer(opts.userData, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape, opts.outlineOptions.textureHandle, opts.outlineOptions.textureTilingAndOffset);
+        
+        if (sourceIndex != -1)
+            sourceBuffer = &m_bufferStore.GetData().m_defaultBuffers[sourceIndex];
 
 		int startIndex, endIndex;
 
 		if (opts.isFilled)
 		{
-			endIndex   = sourceBuffer->m_vertexBuffer.m_size - 1;
-			startIndex = sourceBuffer->m_vertexBuffer.m_size - vertexCount;
+			endIndex   = sourceBuffer->vertexBuffer.m_size - 1;
+			startIndex = sourceBuffer->vertexBuffer.m_size - vertexCount;
 		}
 		else
 		{
 			// Take the outer half.
 			if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Outwards)
 			{
-				endIndex   = sourceBuffer->m_vertexBuffer.m_size - 1;
-				startIndex = sourceBuffer->m_vertexBuffer.m_size - vertexCount / 2;
+				endIndex   = sourceBuffer->vertexBuffer.m_size - 1;
+				startIndex = sourceBuffer->vertexBuffer.m_size - vertexCount / 2;
 			}
 			else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Inwards)
 			{
-				endIndex   = sourceBuffer->m_vertexBuffer.m_size - vertexCount / 2 - 1;
-				startIndex = sourceBuffer->m_vertexBuffer.m_size - vertexCount;
+				endIndex   = sourceBuffer->vertexBuffer.m_size - vertexCount / 2 - 1;
+				startIndex = sourceBuffer->vertexBuffer.m_size - vertexCount;
 			}
 			else
 			{
-				endIndex   = sourceBuffer->m_vertexBuffer.m_size - 1;
-				startIndex = sourceBuffer->m_vertexBuffer.m_size - vertexCount;
+				endIndex   = sourceBuffer->vertexBuffer.m_size - 1;
+				startIndex = sourceBuffer->vertexBuffer.m_size - vertexCount;
 			}
 		}
 
@@ -2744,25 +1819,18 @@ namespace LinaVG
 		// const bool reCalcUVs	= useTextureBuffer || useGradBuffer;
 		// const int  destBufStart = destBuf->m_vertexBuffer.m_size;
 
-		auto copyAndFill = [&](DrawBuffer* sourceBuffer, DrawBuffer* destBuf, int startIndex, int endIndex, float thickness, bool reCalcUVs) {
-			const int destBufStart = destBuf->m_vertexBuffer.m_size;
+        auto copyAndFill = [&](DrawBuffer* sourceBuffer, DrawBuffer* destBuf, int startIndex, int endIndex, float thickness) {
+			const int destBufStart = destBuf->vertexBuffer.m_size;
 			const int totalSize	   = endIndex - startIndex + 1;
 
 			// First copy vertices.
 			for (int i = startIndex; i < endIndex + 1; i++)
 			{
+                Vertex& srcVertex = sourceBuffer->vertexBuffer[i];
 				Vertex v;
-				v.pos = sourceBuffer->m_vertexBuffer[i].pos;
-				v.uv  = sourceBuffer->m_vertexBuffer[i].uv;
-
-				if (isAAOutline)
-				{
-					v.col = sourceBuffer->m_vertexBuffer[i].col;
-					// v.col.w = 1.0f;
-				}
-				else
-					v.col = opts.outlineOptions.color.start;
-
+                v.pos = srcVertex.pos;
+                v.uv = srcVertex.uv;
+                v.col = srcVertex.col;
 				destBuf->PushVertex(v);
 			}
 
@@ -2773,45 +1841,35 @@ namespace LinaVG
 				const int previous = i == startIndex ? endIndex : i - 1;
 				const int next	   = i == endIndex ? startIndex : i + 1;
 				Vertex	  v;
-				v.uv = sourceBuffer->m_vertexBuffer[i].uv;
-
-				if (isAAOutline)
-				{
-					v.col	= sourceBuffer->m_vertexBuffer[i].col;
-					v.col.w = 0.0f;
-				}
-				else
-					v.col = opts.outlineOptions.color.end;
+				v.uv = sourceBuffer->vertexBuffer[i].uv;
+                v.col = sourceBuffer->vertexBuffer[i].col;
+                v.col.w = 0.0f; // Color will be recalculated if not AA outline.
 
 				if (skipEnds && i == startIndex)
 				{
-					const Vec2 nextP			   = sourceBuffer->m_vertexBuffer[next].pos;
-					// const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, Vec2(-1, -1), nextP);
-                    v.pos = Math::GetExtrudedFromNormal(sourceBuffer->m_vertexBuffer[i].pos, Vec2(-1, -1), nextP, thickness);
-					//v.pos						   = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+					const Vec2 nextP			   = sourceBuffer->vertexBuffer[next].pos;
+                    v.pos = Math::GetExtrudedFromNormal(sourceBuffer->vertexBuffer[i].pos, Vec2(-1, -1), nextP, thickness);
 				}
 				else if (skipEnds && i == endIndex)
 				{
-					const Vec2 prevP			   = sourceBuffer->m_vertexBuffer[previous].pos;
-                    // const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, Vec2(-1, -1));
-					v.pos = Math::GetExtrudedFromNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, Vec2(-1, -1), thickness);
-					//v.pos						   = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+					const Vec2 prevP			   = sourceBuffer->vertexBuffer[previous].pos;
+					v.pos = Math::GetExtrudedFromNormal(sourceBuffer->vertexBuffer[i].pos, prevP, Vec2(-1, -1), thickness);
 				}
 				else
 				{
-					const Vec2 prevP			   = sourceBuffer->m_vertexBuffer[previous].pos;
-					const Vec2 nextP			   = sourceBuffer->m_vertexBuffer[next].pos;
-                    v.pos = Math::GetExtrudedFromNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, nextP, thickness);
-					//const Vec2 vertexNormalAverage = Math::GetVertexNormal(sourceBuffer->m_vertexBuffer[i].pos, prevP, nextP);
-					//v.pos						   = Vec2(sourceBuffer->m_vertexBuffer[i].pos.x + vertexNormalAverage.x * thickness, sourceBuffer->m_vertexBuffer[i].pos.y + vertexNormalAverage.y * thickness);
+					const Vec2 prevP			   = sourceBuffer->vertexBuffer[previous].pos;
+					const Vec2 nextP			   = sourceBuffer->vertexBuffer[next].pos;
+                    v.pos = Math::GetExtrudedFromNormal(sourceBuffer->vertexBuffer[i].pos, prevP, nextP, thickness);
 				}
 				destBuf->PushVertex(v);
 			}
+            
+            Vec2 bbMin, bbMax;
+            New_GetConvexBB(destBuf, destBufStart, destBuf->vertexBuffer.m_size, bbMin, bbMax);
+            
+            if(!isAAOutline)
+                New_CalculateVertexUVsAndColor(destBuf, destBufStart, destBuf->vertexBuffer.m_size, bbMin, bbMax, opts.outlineOptions.color);
 
-			if (!isAAOutline && reCalcUVs)
-				CalculateVertexUVs(destBuf, destBufStart, (destBufStart + totalSize * 2) - 1);
-
-			// const int halfIndex = (destBufStart + totalSize) / 2;
 			for (int i = destBufStart; i < destBufStart + totalSize; i++)
 			{
 				int next = i + 1;
@@ -2830,14 +1888,13 @@ namespace LinaVG
 			}
 		};
 
-		const bool recalcUvs = useTextureBuffer || useGradBuffer;
 		const bool useAA	 = opts.aaEnabled && !isAAOutline;
 
 		if (opts.isFilled)
 		{
 			if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Outwards || opts.outlineOptions.drawDirection == OutlineDrawDirection::Both)
 			{
-				copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, thickness, recalcUvs);
+				copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, thickness);
 
 				if (useAA)
 				{
@@ -2852,7 +1909,7 @@ namespace LinaVG
 			}
 			else if (opts.outlineOptions.drawDirection == OutlineDrawDirection::Inwards)
 			{
-				copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, -thickness, recalcUvs);
+				copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, -thickness);
 
 				if (useAA)
 				{
@@ -2879,7 +1936,7 @@ namespace LinaVG
 					DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
 				}
 
-				copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, thickness, recalcUvs);
+				copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, thickness);
 
 				if (useAA)
 				{
@@ -2902,7 +1959,7 @@ namespace LinaVG
 					DrawOutline(sourceBuffer, opts3, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA);
 				}
 
-				copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, -thickness, recalcUvs);
+				copyAndFill(sourceBuffer, destBuf, startIndex, endIndex, -thickness);
 
 				if (useAA)
 				{
@@ -2917,7 +1974,7 @@ namespace LinaVG
 			}
 			else
 			{
-				copyAndFill(sourceBuffer, destBuf, startIndex, startIndex + vertexCount / 2 - 1, -thickness, recalcUvs);
+				copyAndFill(sourceBuffer, destBuf, startIndex, startIndex + vertexCount / 2 - 1, -thickness);
 
 				if (useAA)
 				{
@@ -2930,7 +1987,7 @@ namespace LinaVG
 					DrawOutline(destBuf, opts2, vertexCount, skipEnds, drawOrder, OutlineCallType::OutlineAA, true);
 				}
 
-				copyAndFill(sourceBuffer, destBuf, startIndex + vertexCount / 2, endIndex, thickness, recalcUvs);
+				copyAndFill(sourceBuffer, destBuf, startIndex + vertexCount / 2, endIndex, thickness);
 
 				if (useAA)
 				{
@@ -2974,7 +2031,7 @@ namespace LinaVG
 			}
 			else
 			{
-				auto& ch = font->m_characterGlyphs[x];
+				auto& ch = font->glyphs[x];
 				size.y	 = Math::Max(size.y, (ch.m_size.y) * scale);
 				size.x += ch.m_advance.x * scale + spacing;
 				word  = word + x;
@@ -2988,9 +2045,9 @@ namespace LinaVG
 		arr.push_back(w);
 	}
 
-	void Drawer::ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, Font* font, float scale, float spacing, float wrapWidth, float sdfThickness)
+	void Drawer::ParseWordsIntoLines(Array<TextPart*>& lines, const Array<TextPart*>& words, Font* font, float scale, float spacing, float wrapWidth)
 	{
-		const float	  spaceAdvance = font->m_spaceAdvance * scale + spacing;
+		const float	  spaceAdvance = font->spaceAdvance * scale + spacing;
 		float		  maxHeight	   = 0.0f;
 		float		  totalWidth   = 0.0f;
 		LINAVG_STRING append	   = "";
@@ -3064,18 +2121,18 @@ namespace LinaVG
 		}
 	}
 
-	void Drawer::WrapText(LINAVG_VEC<TextPart>& lines, Font* font, const char* text, float spacing, float scale, float wrapWidth, bool wordWrap)
+	void Drawer::WrapText(LINAVG_VEC<TextPart>& lines, const char* text, const TextOptions& opts)
 	{
 		TextPart line = {};
 		TextPart word = {};
 
 		const uint8_t* c;
-		const float	   spaceAdvance = font->m_spaceAdvance * scale + spacing;
+        const float	   spaceAdvance = opts.font->spaceAdvance * opts.textScale + opts.spacing;
 
 		auto process = [&](TextCharacter& ch, GlyphEncoding c) {
-			if (!wordWrap)
+            if (!opts.wordWrap)
 			{
-				if (line.m_size.x + ch.m_size.x * scale > wrapWidth)
+                if (line.m_size.x + ch.m_size.x * opts.textScale > opts.wrapWidth)
 				{
 					lines.push_back(line);
 					line.m_str.clear();
@@ -3083,28 +2140,28 @@ namespace LinaVG
 				}
 
 				line.m_str += static_cast<char>(c);
-				line.m_size.x += ch.m_advance.x * scale;
-				line.m_size.y = Math::Max(ch.m_size.y * scale, line.m_size.y);
+				line.m_size.x += ch.m_advance.x * opts.textScale;
+				line.m_size.y = Math::Max(ch.m_size.y * opts.textScale, line.m_size.y);
 				return;
 			}
 
 			// Add character to current word
 			if (c != ' ')
 			{
-				if (font->m_supportsUnicode)
+				if (opts.font->supportsUnicode)
 					AppendUTF8(word.m_str, c);
 				else
 					word.m_str += static_cast<char>(c);
 
-				word.m_size.x += ch.m_advance.x * scale;
-				word.m_size.y = Math::Max(word.m_size.y, ch.m_size.y * scale);
+				word.m_size.x += ch.m_advance.x * opts.textScale;
+				word.m_size.y = Math::Max(word.m_size.y, ch.m_size.y * opts.textScale);
 			}
 			else
 			{
 				// If adding the current word to the current line would
 				// make it too long, add the current line to the list of
 				// lines and start a new line with the current word.
-				if (!line.m_str.empty() && line.m_size.x + word.m_size.x > wrapWidth)
+				if (!line.m_str.empty() && line.m_size.x + word.m_size.x > opts.wrapWidth)
 				{
 					lines.push_back(line);
 					line.m_str.clear();
@@ -3128,13 +2185,13 @@ namespace LinaVG
 			}
 		};
 
-		if (font->m_supportsUnicode)
+		if (opts.font->supportsUnicode)
 		{
 			auto codepoints = GetUtf8Codepoints(text);
 
 			for (auto cp : codepoints)
 			{
-				auto ch = font->m_characterGlyphs[cp];
+				auto ch = opts.font->glyphs[cp];
 				process(ch, cp);
 			}
 		}
@@ -3143,7 +2200,7 @@ namespace LinaVG
 			for (c = (uint8_t*)text; *c; c++)
 			{
 				auto character = *c;
-				auto ch		   = font->m_characterGlyphs[character];
+				auto ch		   = opts.font->glyphs[character];
 				process(ch, character);
 			}
 		}
@@ -3151,7 +2208,7 @@ namespace LinaVG
 		// If there's still a word left that wasn't added to the lines, try to add it
 		if (!word.m_str.empty())
 		{
-			if (!line.m_str.empty() && line.m_size.x + word.m_size.x > wrapWidth)
+			if (!line.m_str.empty() && line.m_size.x + word.m_size.x > opts.wrapWidth)
 			{
 				lines.push_back(line);
 				line = word;
@@ -3177,10 +2234,10 @@ namespace LinaVG
 		}
 	}
 
-	void Drawer::ProcessText(DrawBuffer* buf, Font* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, float wrapWidth, float rotateAngle, TextAlignment alignment, float newLineSpacing, float sdfThickness, TextOutData* outData, const Vec4& clip, bool wordWrap)
+	void Drawer::ProcessText(DrawBuffer* buf, Font* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, const TextOptions& opts, float rotateAngle, TextOutData* outData)
 	{
-		const int  bufStart = buf->m_vertexBuffer.m_size;
-		const Vec2 size		= CalcTextSize(text, font, scale, spacing, sdfThickness);
+		const int  bufStart = buf->vertexBuffer.m_size;
+        const Vec2 size		= CalcTextSize(text, opts);
 		Vec2	   usedPos	= pos;
 		// usedPos.y += size.y;
 
@@ -3196,30 +2253,29 @@ namespace LinaVG
 			outData->lineInfo.reserve(10);
 		}
 
-		if (Math::IsEqualMarg(wrapWidth, 0.0f) || size.x < wrapWidth)
+        if (Math::IsEqualMarg(opts.wrapWidth, 0.0f) || size.x < opts.wrapWidth)
 		{
-			if (alignment == TextAlignment::Center)
+            if (opts.alignment == TextAlignment::Center)
 			{
 				usedPos.x -= size.x / 2.0f;
 			}
-			else if (alignment == TextAlignment::Right)
+            else if (opts.alignment == TextAlignment::Right)
 				usedPos.x -= size.x;
 
-			DrawText(buf, font, text, usedPos, offset, color, spacing, isGradient, scale, outData, clip);
+            DrawText(buf, text, usedPos, offset, color, opts, outData);
 		}
 		else
 		{
 			LINAVG_VEC<TextPart> lines;
 			lines.reserve(20);
-			WrapText(lines, font, text, spacing, scale, wrapWidth, wordWrap);
+            WrapText(lines, text, opts);
 
 			const size_t sz	 = lines.size();
 			size_t		 ctr = 0;
 			for (const auto& line : lines)
 			{
 				if (ctr < sz - 1)
-					usedPos.y -= font->m_newLineHeight * scale + newLineSpacing;
-
+                    usedPos.y -= font->newLineHeight * opts.textScale + opts.newLineSpacing;
 				ctr++;
 			}
 
@@ -3234,15 +2290,15 @@ namespace LinaVG
 					outData->lineInfo.push_back(lineInfo);
 				}
 
-				if (alignment == TextAlignment::Center)
+				if (opts.alignment == TextAlignment::Center)
 				{
 					usedPos.x = pos.x - line.m_size.x / 2.0f;
 				}
-				else if (alignment == TextAlignment::Right)
+				else if (opts.alignment == TextAlignment::Right)
 					usedPos.x = pos.x - line.m_size.x;
 
-				DrawText(buf, font, line.m_str.c_str(), usedPos, offset, color, spacing, isGradient, scale, outData, clip);
-				usedPos.y += font->m_newLineHeight * scale + newLineSpacing;
+                DrawText(buf, line.m_str.c_str(), usedPos, offset, color, opts, outData);
+                usedPos.y += font->newLineHeight * opts.textScale + opts.newLineSpacing;
 
 				if (outData != nullptr)
 				{
@@ -3256,8 +2312,8 @@ namespace LinaVG
 
 		if (!Math::IsEqualMarg(rotateAngle, 0.0f))
 		{
-			const Vec2 center = GetVerticesCenter(buf, bufStart, buf->m_vertexBuffer.m_size - 1);
-			RotateVertices(buf->m_vertexBuffer, center, bufStart, buf->m_vertexBuffer.m_size - 1, rotateAngle);
+			const Vec2 center = GetVerticesCenter(buf, bufStart, buf->vertexBuffer.m_size - 1);
+			RotateVertices(buf->vertexBuffer, center, bufStart, buf->vertexBuffer.m_size - 1, rotateAngle);
 		}
 	}
 
@@ -3271,7 +2327,7 @@ namespace LinaVG
 		// As well as line breaks based on wrapping.
 		for (c = (const uint8_t*)text; *c; c++)
 		{
-			auto& ch = font->m_characterGlyphs[*c];
+			auto& ch = font->glyphs[*c];
 			// float x	 = ch.m_advance.x * scale;
 			// float y	 = ch.m_size.y * scale;
 
@@ -3284,7 +2340,7 @@ namespace LinaVG
 		return offset;
 	}
 
-	void Drawer::DrawText(DrawBuffer* buf, Font* font, const char* text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, float spacing, bool isGradient, float scale, TextOutData* outData, const Vec4& clip)
+	void Drawer::DrawText(DrawBuffer* buf, const char* text, const Vec2& position, const Vec2& offset, const Vec4Grad& color, const TextOptions& opts,  TextOutData* outData)
 	{
 		const uint8_t* c;
 		const int	   totalCharacterCount = Utility::GetTextCharacterSize(text);
@@ -3300,72 +2356,69 @@ namespace LinaVG
 		GlyphEncoding previousCharacter = 0;
 
 		auto drawChar = [&](TextCharacter& ch, GlyphEncoding c) {
-			const int startIndex = buf->m_vertexBuffer.m_size;
+			const int startIndex = buf->vertexBuffer.m_size;
 
 			unsigned long kerning = 0;
-			if (font->m_supportsKerning && previousCharacter != 0)
+			if (opts.font->supportsKerning && previousCharacter != 0)
 			{
-				auto& table = font->m_kerningTable[previousCharacter];
+				auto& table = opts.font->kerningTable[previousCharacter];
 				auto  it	= table.xAdvances.find(c);
 				if (it != table.xAdvances.end())
 					kerning = it->second / 64;
 			}
 
 			previousCharacter = c;
-			float ytop		  = pos.y - ch.m_bearing.y * scale;
-			float ybot		  = pos.y + (ch.m_size.y - ch.m_bearing.y) * scale;
+            float ytop		  = pos.y - ch.m_bearing.y * opts.textScale;
+			float ybot		  = pos.y + (ch.m_size.y - ch.m_bearing.y) * opts.textScale;
 
-			float x2 = pos.x + (kerning + ch.m_bearing.x) * scale;
-			float w	 = ch.m_size.x * scale;
-			float h	 = ch.m_size.y * scale;
+			float x2 = pos.x + (kerning + ch.m_bearing.x) * opts.textScale;
+			float w	 = ch.m_size.x * opts.textScale;
+			float h	 = ch.m_size.y * opts.textScale;
 
-			pos.x += (kerning + ch.m_advance.x) * scale + spacing;
-			pos.y += ch.m_advance.y * scale;
+			pos.x += (kerning + ch.m_advance.x) * opts.textScale + opts.spacing;
+			pos.y += ch.m_advance.y * opts.textScale;
 
 			Vertex v0, v1, v2, v3;
 
-			if (isGradient)
-			{
-				if (color.gradientType == GradientType::Horizontal)
-				{
-					const float maxT	   = static_cast<float>(characterCount + 1) / static_cast<float>(totalCharacterCount);
-					const Vec4	currentMin = lastMinGrad;
-					const Vec4	currentMax = Math::Lerp(color.start, color.end, maxT);
-					lastMinGrad			   = currentMax;
+            if(color.gradientType == GradientType::None)
+                v0.col = v1.col = v2.col = v3.col = color.start;
+            else if (color.gradientType == GradientType::Horizontal)
+            {
+                const float maxT       = static_cast<float>(characterCount + 1) / static_cast<float>(totalCharacterCount);
+                const Vec4    currentMin = lastMinGrad;
+                const Vec4    currentMax = Math::Lerp(color.start, color.end, maxT);
+                lastMinGrad               = currentMax;
 
-					v0.col = currentMin;
-					v1.col = currentMax;
-					v2.col = currentMax;
-					v3.col = currentMin;
-				}
-				else // fallback is vertical since radial gradients are not supported.
-				{
-					v0.col = color.start;
-					v1.col = color.start;
-					v2.col = color.end;
-					v3.col = color.end;
-				}
-			}
-			else
-				v0.col = v1.col = v2.col = v3.col = color.start;
+                v0.col = currentMin;
+                v1.col = currentMax;
+                v2.col = currentMax;
+                v3.col = currentMin;
+            }
+            else // fallback is vertical
+            {
+                v0.col = color.start;
+                v1.col = color.start;
+                v2.col = color.end;
+                v3.col = color.end;
+            }
 
 			v0.pos = Vec2(x2 + offset.x, ytop + offset.y);
 			v1.pos = Vec2(x2 + offset.x + w, ytop + offset.y);
 			v2.pos = Vec2(x2 + offset.x + w, ybot + offset.y);
 			v3.pos = Vec2(x2 + offset.x, ybot + offset.y);
 
-			if (!Math::IsEqualMarg(clip.z, 0.0f) && !Math::IsEqualMarg(clip.w, 0.0f))
+            if (!Math::IsEqualMarg(opts.cpuClipping.z, 0.0f) && !Math::IsEqualMarg(opts.cpuClipping.w, 0.0f))
 			{
-				if (!IsPointInside(v0.pos, clip))
+				if (!IsPointInside(v0.pos, opts.cpuClipping))
 					return;
 
-				if (!IsPointInside(v1.pos, clip))
+				if (!IsPointInside(v1.pos, opts.cpuClipping))
 					return;
 
-				if (!IsPointInside(v2.pos, clip))
+				if (!IsPointInside(v2.pos, opts.cpuClipping))
 					return;
 
-				if (!IsPointInside(v3.pos, clip))
+				if (!IsPointInside(v3.pos, opts.cpuClipping))
 					return;
 			}
 
@@ -3379,7 +2432,7 @@ namespace LinaVG
 				CharacterInfo ci;
 				ci.x	 = v0.pos.x;
 				ci.y	 = v3.pos.y;
-				ci.sizeX = Math::IsEqualMarg(w, 0.0f) ? (kerning + ch.m_advance.x) * scale : w;
+				ci.sizeX = Math::IsEqualMarg(w, 0.0f) ? (kerning + ch.m_advance.x) * opts.textScale : w;
 				ci.sizeY = ybot - ytop;
 				outData->characterInfo.push_back(ci);
 			}
@@ -3401,13 +2454,13 @@ namespace LinaVG
 			characterCount++;
 		};
 
-		if (font->m_supportsUnicode)
+		if (opts.font->supportsUnicode)
 		{
 			auto codepoints = GetUtf8Codepoints(text);
 
 			for (auto cp : codepoints)
 			{
-				auto ch = font->m_characterGlyphs[cp];
+				auto ch = opts.font->glyphs[cp];
 				drawChar(ch, cp);
 			}
 		}
@@ -3416,7 +2469,7 @@ namespace LinaVG
 			for (c = (uint8_t*)text; *c; c++)
 			{
 				auto character = *c;
-				auto ch		   = font->m_characterGlyphs[character];
+				auto ch		   = opts.font->glyphs[character];
 				drawChar(ch, character);
 			}
 		}
@@ -3456,17 +2509,17 @@ namespace LinaVG
 		return codepoints;
 	}
 
-	Vec2 Drawer::CalcTextSize(const char* text, Font* font, float scale, float spacing, float sdfSoftness)
+	Vec2 Drawer::CalcTextSize(const char* text, const TextOptions& opts)
 	{
 		float		   maxCharacterHeight = 0.0f;
 		float		   totalWidth		  = 0.0f;
 		const uint8_t* c;
 
 		auto calcSizeChar = [&](TextCharacter& ch, GlyphEncoding c) {
-			float x = ch.m_advance.x * scale;
-			float y = ch.m_bearing.y * scale;
+			float x = ch.m_advance.x * opts.textScale;
+            float y = ch.m_bearing.y * opts.textScale;
 
-			if (font->m_isSDF)
+			if (opts.font->isSDF)
 			{
 				// const float ratio = ch.m_advance.x / ch.m_size.x;
 				// const float yBase = ch.m_size.y * ratio;
@@ -3479,11 +2532,11 @@ namespace LinaVG
 				// x = std::floor(Math::Lerp(xBase, xFull, sdfSoftness));
 				// x *= scale;
 			}
-			totalWidth += x + spacing;
+            totalWidth += x + opts.spacing;
 			maxCharacterHeight = Math::Max(maxCharacterHeight, y);
 		};
 
-		if (font->m_supportsUnicode)
+		if (opts.font->supportsUnicode)
 		{
 			auto codepoints = GetUtf8Codepoints(text);
 
@@ -3491,7 +2544,7 @@ namespace LinaVG
 
 			for (auto cp : codepoints)
 			{
-				auto ch = font->m_characterGlyphs[cp];
+				auto ch = opts.font->glyphs[cp];
 				calcSizeChar(ch, cp);
 			}
 		}
@@ -3500,35 +2553,33 @@ namespace LinaVG
 			for (c = (uint8_t*)text; *c; c++)
 			{
 				auto character = *c;
-				auto ch		   = font->m_characterGlyphs[character];
+				auto ch		   = opts.font->glyphs[character];
 				calcSizeChar(ch, character);
 			}
 		}
 
-		if (font->m_isSDF)
+        /*
+        if (opts.font->m_isSDF)
 		{
-			//  maxCharacterHeight += font->m_descent;
-		}
-
-		// if (font->m_isSDF)
-		// {
-		//     float remapY   = Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f);
-		//     float remapX   = Math::Remap(sdfThickness, 0.5f, 1.0f, 0.0f, 1.0f);
-		//     remapX         = Math::Clamp(remapX, 0.0f, 1.0f);
-		//     remapY         = Math::Clamp(remapY, 0.0f, 2.0f);
-		//     const Vec2 off = CalcMaxCharOffset(text, font, scale);
-		//     maxCharacterHeight -= off.y * remapY;
-		//     totalWidth += Math::Abs(off.x) * remapX;
-		// }
+			maxCharacterHeight += font->m_descent;
+            
+            float remapY   = Math::Remap(sdfThickness, 0.5f, 1.0f, 2.0f, 0.0f);
+            float remapX   = Math::Remap(sdfThickness, 0.5f, 1.0f, 0.0f, 1.0f);
+            remapX         = Math::Clamp(remapX, 0.0f, 1.0f);
+            remapY         = Math::Clamp(remapY, 0.0f, 2.0f);
+            const Vec2 off = CalcMaxCharOffset(text, font, scale);
+            maxCharacterHeight -= off.y * remapY;
+            totalWidth += Math::Abs(off.x) * remapX;
+		}*/
 
 		return Vec2(totalWidth, maxCharacterHeight);
 	}
 
-	Vec2 Drawer::CalcTextSizeWrapped(const char* text, Font* font, float newLineSpacing, float wrapWidth, float scale, float spacing, float sdfThickness, bool wordWrap)
+	Vec2 Drawer::CalcTextSizeWrapped(const char* text, const TextOptions& opts)
 	{
 		LINAVG_VEC<TextPart> lines;
 		lines.reserve(15);
-		WrapText(lines, font, text, spacing, scale, wrapWidth, wordWrap);
+		WrapText(lines, text, opts);
 
 		if (lines.size() == 1)
 		{
@@ -3546,7 +2597,7 @@ namespace LinaVG
 			const Vec2 calcSize = lines[i].m_size;
 			size.x				= Math::Max(calcSize.x, size.x);
 			if (i < sz - 1)
-				size.y += font->m_newLineHeight * scale + newLineSpacing;
+				size.y += opts.font->newLineHeight * opts.textScale + opts.newLineSpacing;
 			else
 				size.y += calcSize.y;
 

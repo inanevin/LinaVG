@@ -72,44 +72,24 @@ namespace LinaVG::Examples
 										   "}\0";
 
 		m_backendData.m_defaultFragShader = "#version 330 core\n"
-											"out vec4 fragColor;\n"
-											"in vec4 fCol;\n"
-											"void main()\n"
-											"{\n"
-											"   fragColor = fCol;\n"
-											"}\0";
-
-		m_backendData.m_texturedFragShader = "#version 330 core\n"
 											 "out vec4 fragColor;\n"
 											 "in vec2 fUV;\n"
 											 "in vec4 fCol;\n"
-											 "uniform sampler2D diffuse;\n"
-											 "uniform vec2 tiling;\n"
-											 "uniform vec2 offset;\n"
-											 "uniform vec4 tint;\n"
-											 "uniform int isAABuffer;\n"
+                                             "uniform sampler2D diffuse;\n"
+											 "uniform int hasTexture;\n"
+											 "uniform vec4 tilingAndOffset;\n"
 											 "void main()\n"
 											 "{\n"
-											 "   vec4 col = texture(diffuse, fUV * tiling + offset);\n"
-											 "   fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a) * tint; \n"
+											 "   vec4 textureColor = hasTexture != 0 ? texture(diffuse, fUV * tilingAndOffset.rg + tilingAndOffset.ba) : vec4(1.0);\n"
+											 "   fragColor = fCol * textureColor; \n"
 											 "}\0";
 
 		m_backendData.m_simpleTextFragShader = "#version 330 core\n"
-											   "out vec4 fragColor;\n"
-											   "in vec2 fUV;\n"
-											   "in vec4 fCol;\n"
-											   "uniform sampler2D diffuse;\n"
-											   "void main()\n"
-											   "{\n"
-											   "float a = texture(diffuse, fUV).r; \n"
-											   "fragColor = vec4(fCol.rgb, a * fCol.a); \n"
-											   "}\0";
-
-		m_backendData.m_sdfTextFragShader = "#version 330 core\n"
 											"out vec4 fragColor;\n"
 											"in vec2 fUV;\n"
 											"in vec4 fCol;\n"
-											"uniform sampler2D diffuse;\n"
+                                            "uniform sampler2D diffuse;\n"
+											"uniform int isSDF;\n"
 											"uniform float softness; \n"
 											"uniform float thickness; \n"
 											"uniform int outlineEnabled; \n"
@@ -117,9 +97,11 @@ namespace LinaVG::Examples
 											"uniform vec2 outlineOffset; \n"
 											"uniform float outlineThickness; \n"
 											"uniform vec4 outlineColor; \n"
-											"uniform int flipAlpha; \n"
 											"void main()\n"
 											"{\n"
+                                            "if(isSDF == 0)\n"
+                                            "fragColor = vec4(fCol.rgb, texture(diffuse, fUV).r * fCol.a);\n"
+                                            "else {\n"
 											"float distance = texture(diffuse, fUV).r;\n"
 											"float alpha = smoothstep(thickness - softness, thickness + softness, distance);\n"
 											"vec3 baseColor = fCol.rgb;\n"
@@ -127,50 +109,15 @@ namespace LinaVG::Examples
 											" float border = smoothstep(thickness + outlineThickness - softness, thickness + outlineThickness + softness, distance);\n"
 											" baseColor = mix(outlineColor, fCol, border).rgb;\n"
 											"} \n"
-											"fragColor = vec4(baseColor, flipAlpha == 1 ? 1.0f - alpha : alpha);\n"
+                                            "fragColor = vec4(baseColor, alpha);\n"
+											"}\n"
 											"}\0";
 
-		m_backendData.m_roundedGradientFragShader = "#version 330 core\n"
-													"out vec4 fragColor;\n"
-													"in vec2 fUV;\n"
-													"in vec4 fCol;\n"
-													"uniform vec4 startColor;\n"
-													"uniform vec4 endColor;\n"
-													"uniform int  gradientType;\n"
-													"uniform float radialSize;\n"
-													"uniform int isAABuffer;\n"
-													"void main()\n"
-													"{\n"
-													"   if(gradientType == 0) {\n"
-													"     vec4 col = mix(startColor, endColor, fUV.x);\n"
-													"     fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
-													"}\n"
-													"   else if(gradientType == 1){\n"
-													"     vec4 col = mix(startColor, endColor, fUV.y);\n"
-													"     fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
-													"}\n"
-													"   else if(gradientType == 2) \n"
-													"   {\n"
-													"       vec2 uv = fUV - vec2(0.5, 0.5);\n"
-													"       float dist = length(uv * radialSize);\n"
-													"       vec4 col = mix(startColor, endColor, dist);\n"
-													"       fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
-													"    }\n"
-													"   else if(gradientType == 3) \n"
-													"   {\n"
-													"       float dist = length(fUV * radialSize);\n"
-													"       vec4 col = mix(startColor, endColor, dist);\n"
-													"       fragColor = vec4(col.rgb, isAABuffer == 1 ? fCol.a : col.a); \n"
-													"    }\n"
-													"}\n\0";
 
 		try
 		{
 			CreateShader(m_backendData.m_defaultShaderData, m_backendData.m_defaultVtxShader, m_backendData.m_defaultFragShader);
-			CreateShader(m_backendData.m_gradientShaderData, m_backendData.m_defaultVtxShader, m_backendData.m_roundedGradientFragShader);
-			CreateShader(m_backendData.m_texturedShaderData, m_backendData.m_defaultVtxShader, m_backendData.m_texturedFragShader);
 			CreateShader(m_backendData.m_simpleTextShaderData, m_backendData.m_defaultVtxShader, m_backendData.m_simpleTextFragShader);
-			CreateShader(m_backendData.m_sdfTextShaderData, m_backendData.m_defaultVtxShader, m_backendData.m_sdfTextFragShader);
 		}
 		catch (const std::runtime_error& err)
 		{
@@ -225,6 +172,8 @@ namespace LinaVG::Examples
 		// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
 		// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
 		glBindVertexArray(0);
+        
+        m_demoSDFMaterials.resize(100);
 	}
 
 	void GLBackend::StartFrame()
@@ -302,91 +251,38 @@ namespace LinaVG::Examples
 		glBindVertexArray(m_backendData.m_vao);
 	}
 
-	void GLBackend::DrawGradient(GradientDrawBuffer* buf)
-	{
-		if (m_backendData.m_skipDraw)
-			return;
-
-		SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
-
-		ShaderData& data = m_backendData.m_gradientShaderData;
-		glUseProgram(data.m_handle);
-
-		glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
-		glUniform4f(data.m_uniformMap["startColor"], (GLfloat)buf->m_color.start.x, (GLfloat)buf->m_color.start.y, (GLfloat)buf->m_color.start.z, (GLfloat)buf->m_color.start.w);
-		glUniform4f(data.m_uniformMap["endColor"], (GLfloat)buf->m_color.end.x, (GLfloat)buf->m_color.end.y, (GLfloat)buf->m_color.end.z, (GLfloat)buf->m_color.end.w);
-		glUniform1i(data.m_uniformMap["gradientType"], (GLint)((int)buf->m_color.gradientType));
-		glUniform1f(data.m_uniformMap["radialSize"], (GLfloat)buf->m_color.radialSize);
-		glUniform1i(data.m_uniformMap["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
-		glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-		Config.debugCurrentDrawCalls++;
-		Config.debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-		Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
-	}
-
-	void GLBackend::DrawTextured(TextureDrawBuffer* buf)
-	{
-		if (m_backendData.m_skipDraw)
-			return;
-
-		SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
-
-		const Vec2	uv	 = buf->m_textureUVTiling;
-		ShaderData& data = m_backendData.m_texturedShaderData;
-		glUseProgram(data.m_handle);
-		glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
-
-		glUniform1i(data.m_uniformMap["diffuse"], 0);
-		glUniform2f(data.m_uniformMap["tiling"], (GLfloat)uv.x, (GLfloat)uv.y);
-		glUniform2f(data.m_uniformMap["offset"], (GLfloat)buf->m_textureUVOffset.x, (GLfloat)buf->m_textureUVOffset.y);
-		glUniform4f(data.m_uniformMap["tint"], (GLfloat)buf->m_tint.x, (GLfloat)buf->m_tint.y, (GLfloat)buf->m_tint.z, (GLfloat)buf->m_tint.w);
-		glUniform1i(data.m_uniformMap["isAABuffer"], (GLint)((int)buf->m_isAABuffer));
-		glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, static_cast<Texture*>(buf->m_textureHandle)->handle);
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
-		glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-		Config.debugCurrentDrawCalls++;
-		Config.debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-		Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
-	}
-
 	void GLBackend::DrawDefault(DrawBuffer* buf)
 	{
 		if (m_backendData.m_skipDraw)
 			return;
 
+        
 		SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
 		ShaderData& data = m_backendData.m_defaultShaderData;
+        const Vec4    uv     = buf->textureUV;
 
 		glUseProgram(data.m_handle);
 		glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, buf->textureHandle == NULL_TEXTURE ? 0 : static_cast<Texture*>(buf->textureHandle)->handle);
+
+        glUniform1i(data.m_uniformMap["diffuse"], 0);
+        glUniform1i(data.m_uniformMap["hasTexture"], buf->textureHandle != NULL_TEXTURE);
+        glUniform4f(data.m_uniformMap["tilingAndOffset"], (GLfloat)uv.x, (GLfloat)uv.y, (GLfloat)uv.z, (GLfloat)uv.w);
+
+
 		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
-		glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, buf->vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->vertexBuffer.begin(), GL_STREAM_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->indexBuffer.begin(), GL_STREAM_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, (GLsizei)buf->indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
 		Config.debugCurrentDrawCalls++;
-		Config.debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-		Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
+		Config.debugCurrentTriangleCount += int((float)buf->indexBuffer.m_size / 3.0f);
+		Config.debugCurrentVertexCount += buf->vertexBuffer.m_size;
 	}
 
 	void GLBackend::DrawSimpleText(SimpleTextDrawBuffer* buf)
@@ -399,60 +295,38 @@ namespace LinaVG::Examples
 		glUseProgram(data.m_handle);
 
 		glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
+        glUniform1i(data.m_uniformMap["isSDF"], buf->isSDF);
+        glUniform1i(data.m_uniformMap["diffuse"], 0);
 
-		glUniform1i(data.m_uniformMap["diffuse"], 0);
-		glActiveTexture(GL_TEXTURE0);
+        if(buf->isSDF)
+        {
+            SDFMaterial* mat = static_cast<SDFMaterial*>(buf->userData);
+            const float thickness         = 1.0f - Math::Clamp(mat->thickness, 0.0f, 1.0f);
+            const float softness         = Math::Clamp(mat->softness, 0.0f, 10.0f) * 0.1f;
+            const float outlineThickness = Math::Clamp(mat->outlineThickness, 0.0f, 1.0f);
+            glUniform1f(data.m_uniformMap["thickness"], thickness);
+            glUniform1f(data.m_uniformMap["softness"], softness);
+            glUniform1i(data.m_uniformMap["outlineEnabled"], outlineThickness != 0.0f ? 1 : 0);
+            glUniform1f(data.m_uniformMap["outlineThickness"], outlineThickness);
+            glUniform4f(data.m_uniformMap["outlineColor"], mat->outlineColor.x, mat->outlineColor.y,mat->outlineColor.z, mat->outlineColor.w);
+        }
+
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_fontTexture);
-
+        
 		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
-		glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, buf->vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->vertexBuffer.begin(), GL_STREAM_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->indexBuffer.begin(), GL_STREAM_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, (GLsizei)buf->indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
 		Config.debugCurrentDrawCalls++;
-		Config.debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-		Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
+		Config.debugCurrentTriangleCount += int((float)buf->indexBuffer.m_size / 3.0f);
+		Config.debugCurrentVertexCount += buf->vertexBuffer.m_size;
 	}
-
-	void GLBackend::DrawSDFText(SDFTextDrawBuffer* buf)
-	{
-		if (m_backendData.m_skipDraw)
-			return;
-
-		SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
-		ShaderData& data = m_backendData.m_sdfTextShaderData;
-		glUseProgram(data.m_handle);
-		glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
-
-		const float thickness		 = 1.0f - Math::Clamp(buf->m_thickness, 0.0f, 1.0f);
-		const float softness		 = Math::Clamp(buf->m_softness, 0.0f, 10.0f) * 0.1f;
-		const float outlineThickness = Math::Clamp(buf->m_outlineThickness, 0.0f, 1.0f);
-		glUniform1i(data.m_uniformMap["diffuse"], 0);
-		glUniform1f(data.m_uniformMap["thickness"], thickness);
-		glUniform1f(data.m_uniformMap["softness"], softness);
-		glUniform1i(data.m_uniformMap["outlineEnabled"], outlineThickness != 0.0f ? 1 : 0);
-		glUniform1i(data.m_uniformMap["flipAlpha"], buf->m_flipAlpha ? 1 : 0);
-		glUniform1f(data.m_uniformMap["outlineThickness"], outlineThickness);
-		glUniform4f(data.m_uniformMap["outlineColor"], buf->m_outlineColor.x, buf->m_outlineColor.y, buf->m_outlineColor.z, buf->m_outlineColor.w);
-		glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_fontTexture);
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
-		glBufferData(GL_ARRAY_BUFFER, buf->m_vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->m_vertexBuffer.begin(), GL_STREAM_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->m_indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->m_indexBuffer.begin(), GL_STREAM_DRAW);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDrawElements(GL_TRIANGLES, (GLsizei)buf->m_indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-		Config.debugCurrentDrawCalls++;
-		Config.debugCurrentTriangleCount += int((float)buf->m_indexBuffer.m_size / 3.0f);
-		Config.debugCurrentVertexCount += buf->m_vertexBuffer.m_size;
-	}
-
+	
 	void GLBackend::SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height)
 	{
 		if (width == 0 || height == 0)
