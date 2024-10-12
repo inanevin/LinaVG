@@ -486,12 +486,11 @@ namespace LinaVG
 			//*************************** ROW 1 ***************************/
 
 			// Filled
-			defaultStyle.thickness				  = 5.0f;
 			defaultStyle.outlineOptions.color	  = Vec4(0, 0, 0, 1);
-            defaultStyle.outlineOptions.thickness = 3.0f;
+            defaultStyle.outlineOptions.thickness = 1.0f;
             defaultStyle.outlineOptions.drawDirection = OutlineDrawDirection::Outwards;
             defaultStyle.aaEnabled = true;
-            defaultStyle.aaMultiplier = 2;
+            defaultStyle.aaMultiplier = 1;
 			ExampleApp::Get()->GetLVGDrawer().DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
 
            
@@ -527,7 +526,7 @@ namespace LinaVG
 			defaultStyle.isFilled					  = true;
 			defaultStyle.thickness					  = 8.0f;
 			defaultStyle.outlineOptions.color		  = Vec4(1, 1, 1, 1);
-			defaultStyle.outlineOptions.thickness	  = 5.0f;
+			defaultStyle.outlineOptions.thickness	  = 2.0f;
 			defaultStyle.outlineOptions.textureHandle = ExampleApp::Get()->GetCheckeredTexture();
 			defaultStyle.color						  = Vec4(0.7f, 0.1f, 0.1f, 1.0f);
 			ExampleApp::Get()->GetLVGDrawer().DrawTriangle(Vec2(startPos.x + 75, startPos.y), Vec2(startPos.x + 150, startPos.y + 150), Vec2(startPos.x, startPos.y + 150), defaultStyle, m_rotateAngle, 1);

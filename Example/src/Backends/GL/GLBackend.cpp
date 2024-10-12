@@ -51,12 +51,12 @@ namespace LinaVG::Examples
 	unsigned int GLBackend::s_displayPosY	= 0;
 	unsigned int GLBackend::s_displayWidth	= 0;
 	unsigned int GLBackend::s_displayHeight = 0;
-    static bool  GLBackend::s_debugWireframe = 0;
-    static int   GLBackend::s_debugTriCount = 0;
-    static int   GLBackend::s_debugVtxCount = 0;
-    static int   GLBackend::s_debugDrawCalls = 0;
-    static float GLBackend::s_debugZoom = 1.0f;
-    static Vec2  GLBackend::s_debugOffset = Vec2(0.0f, 0.0f);
+    bool  GLBackend::s_debugWireframe = 0;
+    int   GLBackend::s_debugTriCount = 0;
+    int   GLBackend::s_debugVtxCount = 0;
+    int   GLBackend::s_debugDrawCalls = 0;
+    float GLBackend::s_debugZoom = 1.0f;
+    Vec2  GLBackend::s_debugOffset = Vec2(0.0f, 0.0f);
 
 #define FONT_ATLAS_WIDTH 2048
 #define FONT_ATLAS_HEIGHT 2048
