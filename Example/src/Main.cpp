@@ -184,12 +184,12 @@ namespace LinaVG
 
 		void ExampleApp::OnHorizontalKeyCallback(float input)
 		{
-			LinaVG::Config.debugOrthoOffset.x += input * m_deltaTime * 1000;
+            GLBackend::s_debugOffset.x += input * m_deltaTime * 1000;
 		}
 
 		void ExampleApp::OnVerticalKeyCallback(float input)
 		{
-			LinaVG::Config.debugOrthoOffset.y -= input * m_deltaTime * 1000;
+            GLBackend::s_debugOffset.y -= input * m_deltaTime * 1000;
 		}
 
 		void ExampleApp::OnNumKeyCallback(int key)
@@ -213,7 +213,7 @@ namespace LinaVG
 
 		void ExampleApp::OnFCallback()
 		{
-			LinaVG::Config.debugWireframeEnabled = !LinaVG::Config.debugWireframeEnabled;
+            GLBackend::s_debugWireframe = !GLBackend::s_debugWireframe;
 		}
 
 		void ExampleApp::OnCCallback()
@@ -229,7 +229,7 @@ namespace LinaVG
 
 		void ExampleApp::OnMouseScrollCallback(float val)
 		{
-			LinaVG::Config.debugOrthoProjectionZoom -= val * m_deltaTime * 10;
+            GLBackend::s_debugZoom -= val * m_deltaTime * 10;
 		}
 
 		void ExampleApp::OnWindowResizeCallback(int width, int height)

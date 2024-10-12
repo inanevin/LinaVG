@@ -1312,9 +1312,9 @@ namespace LinaVG
 			if (m_rotate)
 				m_rotateAngle += ExampleApp::Get()->GetFrameTime() * 20;
 
-			m_drawCount		= Config.debugCurrentDrawCalls;
-			m_triangleCount = Config.debugCurrentTriangleCount;
-			m_vertexCount	= Config.debugCurrentVertexCount;
+            m_drawCount		= GLBackend::s_debugDrawCalls;
+            m_triangleCount = GLBackend::s_debugTriCount;
+            m_vertexCount	= GLBackend::s_debugVtxCount;
 		}
 	} // namespace Examples
 } // namespace LinaVG

@@ -51,6 +51,12 @@ namespace LinaVG::Examples
 	unsigned int GLBackend::s_displayPosY	= 0;
 	unsigned int GLBackend::s_displayWidth	= 0;
 	unsigned int GLBackend::s_displayHeight = 0;
+    static bool  GLBackend::s_debugWireframe = 0;
+    static int   GLBackend::s_debugTriCount = 0;
+    static int   GLBackend::s_debugVtxCount = 0;
+    static int   GLBackend::s_debugDrawCalls = 0;
+    static float GLBackend::s_debugZoom = 1.0f;
+    static Vec2  GLBackend::s_debugOffset = Vec2(0.0f, 0.0f);
 
 #define FONT_ATLAS_WIDTH 2048
 #define FONT_ATLAS_HEIGHT 2048
@@ -178,9 +184,9 @@ namespace LinaVG::Examples
 
 	void GLBackend::StartFrame()
 	{
-		Config.debugCurrentDrawCalls	 = 0;
-		Config.debugCurrentTriangleCount = 0;
-		Config.debugCurrentVertexCount	 = 0;
+        s_debugDrawCalls = 0;
+        s_debugTriCount = 0;
+        s_debugVtxCount = 0;
 
 		// Save GL state
 		SaveAPIState();
@@ -194,7 +200,7 @@ namespace LinaVG::Examples
 		glDisable(GL_STENCIL_TEST);
 		glEnable(GL_SCISSOR_TEST);
 
-		if (Config.debugWireframeEnabled)
+        if (s_debugWireframe)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		else
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -216,17 +222,17 @@ namespace LinaVG::Examples
 		float		R	 = static_cast<float>(s_displayPosX + s_displayWidth);
 		float		T	 = static_cast<float>(s_displayPosY);
 		float		B	 = static_cast<float>(s_displayPosY + s_displayHeight);
-		const float zoom = Config.debugOrthoProjectionZoom;
+        const float zoom = s_debugZoom;
 
 		L *= zoom;
 		R *= zoom;
 		T *= zoom;
 		B *= zoom;
 
-		L += Config.debugOrthoOffset.x;
-		R += Config.debugOrthoOffset.x;
-		T += Config.debugOrthoOffset.y;
-		B += Config.debugOrthoOffset.y;
+		L += s_debugOffset.x;
+		R += s_debugOffset.x;
+		T += s_debugOffset.y;
+		B += s_debugOffset.y;
 
 		m_backendData.m_proj[0][0] = 2.0f / (R - L);
 		m_backendData.m_proj[0][1] = 0.0f;
@@ -309,45 +315,11 @@ namespace LinaVG::Examples
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glDrawElements(GL_TRIANGLES, (GLsizei)buf->indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-		Config.debugCurrentDrawCalls++;
-		Config.debugCurrentTriangleCount += int((float)buf->indexBuffer.m_size / 3.0f);
-		Config.debugCurrentVertexCount += buf->vertexBuffer.m_size;
+        s_debugDrawCalls++;
+        s_debugTriCount += int((float)buf->indexBuffer.m_size / 3.0f);
+        s_debugVtxCount += buf->vertexBuffer.m_size;
 	}
-/*
-	void GLBackend::DrawText(DrawBufferText* buf)
-	{
-		if (m_backendData.m_skipDraw)
-			return;
 
-		SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
-		ShaderData& data = m_backendData.m_simpleTextShaderData;
-		glUseProgram(data.m_handle);
-
-		glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
-        glUniform1i(data.m_uniformMap["isSDF"], buf->isSDF);
-        glUniform1i(data.m_uniformMap["diffuse"], 0);
-
-        if(buf->isSDF)
-        {
-            
-        }
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_fontTexture);
-        
-		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
-		glBufferData(GL_ARRAY_BUFFER, buf->vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->vertexBuffer.begin(), GL_STREAM_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_backendData.m_ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, buf->indexBuffer.m_size * sizeof(Index), (const GLvoid*)buf->indexBuffer.begin(), GL_STREAM_DRAW);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDrawElements(GL_TRIANGLES, (GLsizei)buf->indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-		Config.debugCurrentDrawCalls++;
-		Config.debugCurrentTriangleCount += int((float)buf->indexBuffer.m_size / 3.0f);
-		Config.debugCurrentVertexCount += buf->vertexBuffer.m_size;
-	}*/
-	
 	void GLBackend::SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height)
 	{
 		if (width == 0 || height == 0)

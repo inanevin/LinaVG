@@ -654,42 +654,6 @@ namespace LinaVG
 		std::function<void(const LINAVG_STRING&)> logCallback;
 
 		/// <summary>
-		/// For debugging purposes, sets to draw polygon/wireframe mode.
-		/// Unused while using custom backends, you can fill with your own data.
-		/// </summary>
-		bool debugWireframeEnabled = false;
-
-		/// <summary>
-		/// For debugging purposes, current count of the trianlges being drawn.
-		/// Unused while using custom backends, you can fill with your own data.
-		/// </summary>
-		int debugCurrentTriangleCount = 0;
-
-		/// <summary>
-		/// For debugging purposes, current count of the vertices sent to backend buffers.
-		/// Unused while using custom backends, you can fill with your own data.
-		/// </summary>
-		int debugCurrentVertexCount = 0;
-
-		/// <summary>
-		/// For debugging purposes, current draw calls.
-		/// Unused while using custom backends, you can fill with your own data.
-		/// </summary>
-		int debugCurrentDrawCalls = 0;
-
-		/// <summary>
-		/// For debugging purposes, zooms the rendering ortho projection.
-		/// Unused while using custom backends, you can fill with your own data.
-		/// </summary>
-		float debugOrthoProjectionZoom = 1.0f;
-
-		/// <summary>
-		/// For debugging purposes, offsets the rendering ortho projection.
-		/// Unused while using custom backends, you can fill with your own data.
-		/// </summary>
-		Vec2 debugOrthoOffset = Vec2(0.0f, 0.0f);
-
-		/// <summary>
 		/// Enabling caching allows faster text rendering in exchange for more memory consumption.
         /// Note: dynamic texts you render will not benefit from this.
 		/// </summary>

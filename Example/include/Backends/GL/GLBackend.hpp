@@ -109,6 +109,12 @@ struct Texture
 		static unsigned int s_displayPosY;
 		static unsigned int s_displayWidth;
 		static unsigned int s_displayHeight;
+        static bool s_debugWireframe;
+        static int s_debugTriCount;
+        static int s_debugVtxCount;
+        static int s_debugDrawCalls;
+        static float s_debugZoom;
+        static Vec2 s_debugOffset;
         
         SDFMaterial* GetSDFMaterialPointer(unsigned int index)
         {
@@ -128,5 +134,42 @@ struct Texture
         bool m_fontTextureCreated = false;
         LINAVG_VEC<SDFMaterial> m_demoSDFMaterials;
 	};
+
+
+/// <summary>
+/// For debugging purposes, sets to draw polygon/wireframe mode.
+/// Unused while using custom backends, you can fill with your own data.
+/// </summary>
+bool debugWireframeEnabled = false;
+
+/// <summary>
+/// For debugging purposes, current count of the trianlges being drawn.
+/// Unused while using custom backends, you can fill with your own data.
+/// </summary>
+int debugCurrentTriangleCount = 0;
+
+/// <summary>
+/// For debugging purposes, current count of the vertices sent to backend buffers.
+/// Unused while using custom backends, you can fill with your own data.
+/// </summary>
+int debugCurrentVertexCount = 0;
+
+/// <summary>
+/// For debugging purposes, current draw calls.
+/// Unused while using custom backends, you can fill with your own data.
+/// </summary>
+int debugCurrentDrawCalls = 0;
+
+/// <summary>
+/// For debugging purposes, zooms the rendering ortho projection.
+/// Unused while using custom backends, you can fill with your own data.
+/// </summary>
+float debugOrthoProjectionZoom = 1.0f;
+
+/// <summary>
+/// For debugging purposes, offsets the rendering ortho projection.
+/// Unused while using custom backends, you can fill with your own data.
+/// </summary>
+Vec2 debugOrthoOffset = Vec2(0.0f, 0.0f);
 
 } // namespace LinaVG::Examples
