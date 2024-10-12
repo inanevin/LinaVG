@@ -89,8 +89,7 @@ namespace LinaVG
 			// Init LinaVG
 			m_renderingBackend = new GLBackend();
 
-			m_lvgDrawer.GetCallbacks().drawDefault	  = std::bind(&GLBackend::DrawDefault, m_renderingBackend, std::placeholders::_1);
-			m_lvgDrawer.GetCallbacks().drawText = std::bind(&GLBackend::DrawText, m_renderingBackend, std::placeholders::_1);
+			m_lvgDrawer.GetCallbacks().draw	  = std::bind(&GLBackend::DrawDefault, m_renderingBackend, std::placeholders::_1);
             m_lvgText.GetCallbacks().atlasNeedsUpdate  = std::bind(&GLBackend::OnAtlasUpdate, m_renderingBackend, std::placeholders::_1);
 			m_demoScreens.Initialize();
 

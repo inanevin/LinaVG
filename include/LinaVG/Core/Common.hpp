@@ -425,8 +425,6 @@ namespace LinaVG
 			font			 = opts.font;
 			color			 = opts.color;
 			textScale		 = opts.textScale;
-			dropShadowColor	 = opts.dropShadowColor;
-			dropShadowOffset = opts.dropShadowOffset;
 			alignment		 = opts.alignment;
 			spacing			 = opts.spacing;
 			newLineSpacing	 = opts.newLineSpacing;
@@ -463,12 +461,6 @@ namespace LinaVG
 
 			if (wordWrap != opts.wordWrap)
 				return false;
-
-			if (dropShadowOffset.x != 0.0f || dropShadowOffset.y != 0.0f)
-			{
-				if (!CheckColors(dropShadowColor, opts.dropShadowColor))
-					return false;
-			}
 
 			return alignment == opts.alignment && textScale == opts.textScale && spacing == opts.spacing && newLineSpacing == opts.newLineSpacing && wrapWidth == opts.wrapWidth;
 		}
@@ -514,16 +506,6 @@ namespace LinaVG
 		/// </summary>
 		bool wordWrap = true;
 
-		/// <summary>
-		/// Drop shadow m_color, lol.
-		/// </summary>
-		Vec4 dropShadowColor = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-		/// <summary>
-		/// Defines how far the drop shadow is rendered, in screen-units.
-		/// Set to 0.0f, 0.0f to disable drop-shadows.
-		/// </summary>
-		Vec2 dropShadowOffset = Vec2(0.0f, 0.0f);
 
 		/// <summary>
 		/// Defines custom clip rectangle for text vertices.
@@ -657,14 +639,9 @@ namespace LinaVG
 		int gcCollectInterval = 600;
 
 		/// <summary>
-		/// This amount of default buffers are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
+		/// This amount of buffers are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
 		/// </summary>
-		int defaultBufferReserve = 10;
-        
-        /// <summary>
-        /// This amount of default buffers are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
-        /// </summary>
-        int textBuffersReserve = 10;
+		int defaultBufferReserve = 50;
 
 		/// <summary>
 		/// Set this to your own function to receive error callbacks from LinaVG.
@@ -737,21 +714,23 @@ namespace LinaVG
 	enum class DrawBufferType
 	{
 		Default,
-		SimpleText,
+		Text,
+        SDFText,
 	};
 
 	enum class DrawBufferShapeType
 	{
-		DropShadow,
 		Shape,
+        Text,
+        SDFText,
 		AA,
 	};
 
 	struct DrawBuffer
 	{
 		DrawBuffer(){};
-        DrawBuffer(void* userData, int drawOrder, DrawBufferType type, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& txtUV, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: drawOrder(drawOrder), drawBufferType(type), shapeType(shapeType), userData(userData), textureHandle(txtHandle), textureUV(txtUV)
+        DrawBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& txtUV, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
+			: drawOrder(drawOrder),  shapeType(shapeType), userData(userData), textureHandle(txtHandle), textureUV(txtUV)
 		{
 			this->clipPosX	= clipPosX;
 			this->clipPosY	= clipPosY;
@@ -761,7 +740,6 @@ namespace LinaVG
 
 		Array<Vertex>		vertexBuffer;
 		Array<Index>		indexBuffer;
-		DrawBufferType		drawBufferType = DrawBufferType::Default;
 		DrawBufferShapeType shapeType		 = DrawBufferShapeType::Shape;
         TextureHandle       textureHandle    = NULL_TEXTURE;
         Vec4                textureUV = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
@@ -804,17 +782,5 @@ namespace LinaVG
 			return vertexBuffer.last();
 		}
 	};
-
-	struct DrawBufferText : public DrawBuffer
-	{
-		DrawBufferText(){};
-		DrawBufferText(void* userData, Font* font, int drawOrder, bool isDropShadow, bool sdf, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-        : DrawBuffer(userData, drawOrder, DrawBufferType::SimpleText, isDropShadow ? DrawBufferShapeType::DropShadow : DrawBufferShapeType::Shape, 0, Vec4(), clipPosX, clipPosY, clipSizeX, clipSizeY), font(font), isDropShadow(isDropShadow), isSDF(sdf){};
-
-        Font* font = nullptr;
-		bool  isDropShadow  = false;
-        bool isSDF = false;
-	};
-
 
 } // namespace LinaVG

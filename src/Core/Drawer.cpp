@@ -411,7 +411,7 @@ namespace {
 
 		Font* font = opts.font;
 
-        DrawBuffer* buf		   = &m_bufferStore.GetData().GetSimpleTextBuffer(opts.userData, font, drawOrder, false, font->isSDF);
+        DrawBuffer* buf		   = &m_bufferStore.GetData().GetDefaultBuffer(opts.userData, drawOrder, font->isSDF ? DrawBufferShapeType::SDFText : DrawBufferShapeType::Text, font->atlas, Vec4(1,1,0,0));
 		const int	vtxStart   = buf->vertexBuffer.m_size;
 		const int	indexStart = buf->indexBuffer.m_size;
 
@@ -433,13 +433,6 @@ namespace {
 				vtx.pos.x += static_cast<float>(Math::CustomRound(position.x));
 				vtx.pos.y += static_cast<float>(Math::CustomRound(position.y));
 			}
-		}
-
-		// Drop-shadow texts don't support caching yet.
-		if (!Math::IsEqualMarg(opts.dropShadowOffset.x, 0.0f) || !Math::IsEqualMarg(opts.dropShadowOffset.y, 0.0f))
-		{
-            DrawBuffer* dsBuf = &m_bufferStore.GetData().GetSimpleTextBuffer(opts.userData, font, drawOrder, true, font->isSDF);
-			ProcessText(dsBuf, font, text, position, Vec2(opts.dropShadowOffset.x, opts.dropShadowOffset.y), opts.dropShadowColor, opts, rotateAngle, outData);
 		}
 	}
 

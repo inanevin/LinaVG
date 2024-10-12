@@ -256,21 +256,50 @@ namespace LinaVG::Examples
 		if (m_backendData.m_skipDraw)
 			return;
 
-        
 		SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
-		ShaderData& data = m_backendData.m_defaultShaderData;
-        const Vec4    uv     = buf->textureUV;
-
-		glUseProgram(data.m_handle);
-		glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, buf->textureHandle == NULL_TEXTURE ? 0 : static_cast<Texture*>(buf->textureHandle)->handle);
-
-        glUniform1i(data.m_uniformMap["diffuse"], 0);
-        glUniform1i(data.m_uniformMap["hasTexture"], buf->textureHandle != NULL_TEXTURE);
-        glUniform4f(data.m_uniformMap["tilingAndOffset"], (GLfloat)uv.x, (GLfloat)uv.y, (GLfloat)uv.z, (GLfloat)uv.w);
-
+        
+        if(buf->shapeType == DrawBufferShapeType::Text || buf->shapeType == DrawBufferShapeType::SDFText)
+        {
+            ShaderData& data = m_backendData.m_simpleTextShaderData;
+            glUseProgram(data.m_handle);
+            
+            glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
+            
+            const bool isSDF = buf->shapeType == DrawBufferShapeType::SDFText;
+            glUniform1i(data.m_uniformMap["isSDF"], isSDF);
+            glUniform1i(data.m_uniformMap["diffuse"], 0);
+            
+            if(isSDF)
+            {
+                SDFMaterial* mat = static_cast<SDFMaterial*>(buf->userData);
+                const float thickness         = 1.0f - Math::Clamp(mat->thickness, 0.0f, 1.0f);
+                const float softness         = Math::Clamp(mat->softness, 0.0f, 10.0f) * 0.1f;
+                const float outlineThickness = Math::Clamp(mat->outlineThickness, 0.0f, 1.0f);
+                glUniform1f(data.m_uniformMap["thickness"], thickness);
+                glUniform1f(data.m_uniformMap["softness"], softness);
+                glUniform1i(data.m_uniformMap["outlineEnabled"], outlineThickness != 0.0f ? 1 : 0);
+                glUniform1f(data.m_uniformMap["outlineThickness"], outlineThickness);
+                glUniform4f(data.m_uniformMap["outlineColor"], mat->outlineColor.x, mat->outlineColor.y,mat->outlineColor.z, mat->outlineColor.w);
+            }
+            
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, m_fontTexture);
+        }
+        else
+        {
+            ShaderData& data = m_backendData.m_defaultShaderData;
+            const Vec4    uv     = buf->textureUV;
+            
+            glUseProgram(data.m_handle);
+            glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
+            
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, buf->textureHandle == NULL_TEXTURE ? 0 : static_cast<Texture*>(buf->textureHandle)->handle);
+            
+            glUniform1i(data.m_uniformMap["diffuse"], 0);
+            glUniform1i(data.m_uniformMap["hasTexture"], buf->textureHandle != NULL_TEXTURE);
+            glUniform4f(data.m_uniformMap["tilingAndOffset"], (GLfloat)uv.x, (GLfloat)uv.y, (GLfloat)uv.z, (GLfloat)uv.w);
+        }
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
 		glBufferData(GL_ARRAY_BUFFER, buf->vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->vertexBuffer.begin(), GL_STREAM_DRAW);
@@ -284,7 +313,7 @@ namespace LinaVG::Examples
 		Config.debugCurrentTriangleCount += int((float)buf->indexBuffer.m_size / 3.0f);
 		Config.debugCurrentVertexCount += buf->vertexBuffer.m_size;
 	}
-
+/*
 	void GLBackend::DrawText(DrawBufferText* buf)
 	{
 		if (m_backendData.m_skipDraw)
@@ -300,15 +329,7 @@ namespace LinaVG::Examples
 
         if(buf->isSDF)
         {
-            SDFMaterial* mat = static_cast<SDFMaterial*>(buf->userData);
-            const float thickness         = 1.0f - Math::Clamp(mat->thickness, 0.0f, 1.0f);
-            const float softness         = Math::Clamp(mat->softness, 0.0f, 10.0f) * 0.1f;
-            const float outlineThickness = Math::Clamp(mat->outlineThickness, 0.0f, 1.0f);
-            glUniform1f(data.m_uniformMap["thickness"], thickness);
-            glUniform1f(data.m_uniformMap["softness"], softness);
-            glUniform1i(data.m_uniformMap["outlineEnabled"], outlineThickness != 0.0f ? 1 : 0);
-            glUniform1f(data.m_uniformMap["outlineThickness"], outlineThickness);
-            glUniform4f(data.m_uniformMap["outlineColor"], mat->outlineColor.x, mat->outlineColor.y,mat->outlineColor.z, mat->outlineColor.w);
+            
         }
 
         glActiveTexture(GL_TEXTURE0);
@@ -325,7 +346,7 @@ namespace LinaVG::Examples
 		Config.debugCurrentDrawCalls++;
 		Config.debugCurrentTriangleCount += int((float)buf->indexBuffer.m_size / 3.0f);
 		Config.debugCurrentVertexCount += buf->vertexBuffer.m_size;
-	}
+	}*/
 	
 	void GLBackend::SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height)
 	{

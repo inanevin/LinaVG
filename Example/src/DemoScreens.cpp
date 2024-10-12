@@ -76,7 +76,7 @@ namespace LinaVG
 			m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
 			m_screenDescriptions.push_back("LinaVG supports inner as well as outer outlines. Outlines also support all previous coloring and texturing options, as well as both filled & non-filled objects.");
 			m_screenDescriptions.push_back("LinaVG supports single lines, multi-lines as well as bezier curves. Lines can have left/right or both caps, multi-lines can have 4 different types of joints. All lines also support outlines, coloring & texturing.");
-			m_screenDescriptions.push_back("Texts support drop shadows, flat colors & vertical/horizontal gradients. SDF texts also support outlines, individual thickness as well as softness factors. LinaVG also provides alignment, wrapping & spacing options.");
+			m_screenDescriptions.push_back("Texts support alignment, wrapping, spacing options, along with flat / gradient colors.");
 			m_screenDescriptions.push_back("You can suply varying draw order to DrawXXX commands in order to support z-ordering.");
 			m_screenDescriptions.push_back("You can use global clipping variables to create clipping rectangles for any shape you are drawing. Press C to toggle clipping.");
 			m_screenDescriptions.push_back("Here are some examples of animated shapes you can draw with LinaVG.");
@@ -127,7 +127,8 @@ namespace LinaVG
             m_sdfMaterial5->softness = 0.5f;
             m_sdfMaterial5->outlineThickness = 0.3f;
             m_sdfMaterial5->outlineColor = Vec4(0,0,0,1);
-            m_sdfMaterial6->thickness = 0.5f;
+            m_sdfMaterial6->thickness = 0.6f;
+            m_sdfMaterial6->softness = 0.8f;
             m_sdfMaterial6->outlineThickness = 0.0f;
 		}
 
@@ -709,25 +710,19 @@ namespace LinaVG
 			ExampleApp::Get()->GetLVGDrawer().DrawText("This is a normal text.", startPos, textOpts, m_rotateAngle, 1);
 
 			startPos.x += 350;
-			textOpts.dropShadowOffset = Vec2(2, 2);
-			ExampleApp::Get()->GetLVGDrawer().DrawText("Drop shadow.", startPos, textOpts, m_rotateAngle, 1);
-
-			startPos.x += 350;
-			textOpts.color.start = Vec4(1, 0, 0, 1);
-			textOpts.color.start = Vec4(0, 0, 1, 1);
-			ExampleApp::Get()->GetLVGDrawer().DrawText("Gradient color.", startPos, textOpts, m_rotateAngle, 1);
-
+            textOpts.color.start = Vec4(1, 0, 0, 1);
+            textOpts.color.start = Vec4(0, 0, 1, 1);
+			ExampleApp::Get()->GetLVGDrawer().DrawText("This is one with a gradient color.", startPos, textOpts, m_rotateAngle, 1);
+			
 			startPos.x = screenSize.x * 0.05f;
 			startPos.y += 350;
 			textOpts.wrapWidth		 = 100;
-			textOpts.dropShadowColor = Vec4(1, 0, 0, 1);
 			textOpts.color			 = Vec4(1, 1, 1, 1);
-			ExampleApp::Get()->GetLVGDrawer().DrawText("This is a wrapped text with a colored drop shadow.", startPos, textOpts, m_rotateAngle, 1);
+			ExampleApp::Get()->GetLVGDrawer().DrawText("This is a wrapped text.", startPos, textOpts, m_rotateAngle, 1);
 
 			startPos.x += 365;
 			textOpts.wrapWidth			= 100;
 			textOpts.alignment			= TextAlignment::Center;
-			textOpts.dropShadowOffset	= Vec2(0.0f, 0.0f);
 			textOpts.color.start		= Vec4(0.6f, 0.6f, 0.6f, 1);
 			textOpts.color.end			= Vec4(1, 1, 1, 1);
 			textOpts.color.gradientType = GradientType::Vertical;
@@ -782,9 +777,8 @@ namespace LinaVG
 			ExampleApp::Get()->GetLVGDrawer().DrawText("Thicker outline.", startPos, sdfTextOptions, m_rotateAngle, 1);
 
 			startPos.y += 50;
-			sdfTextOptions.dropShadowOffset	   = Vec2(5, 5);
             sdfTextOptions.userData = m_sdfMaterial5;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("Drop shadow.", startPos, sdfTextOptions, m_rotateAngle, 1);
+			ExampleApp::Get()->GetLVGDrawer().DrawText("Just lose it.", startPos, sdfTextOptions, m_rotateAngle, 1);
 
 			startPos.y = beforeSDFStartPos;
 			startPos.x += 930;

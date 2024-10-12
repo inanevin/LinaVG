@@ -47,7 +47,6 @@ namespace LinaVG
 	BufferStore::BufferStore()
 	{
 		m_data.m_defaultBuffers.reserve(Config.defaultBufferReserve);
-		m_data.m_simpleTextBuffers.reserve(Config.textBuffersReserve);
 
 		if (Config.textCachingEnabled)
 			m_data.m_textCache.reserve(Config.textCacheReserve);
@@ -67,11 +66,6 @@ namespace LinaVG
 
 		m_data.m_defaultBuffers.clear();
 
-		for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
-			m_data.m_simpleTextBuffers[i].Clear();
-
-		m_data.m_simpleTextBuffers.clear();
-
 		m_data.m_drawOrders.clear();
 	}
 
@@ -87,9 +81,6 @@ namespace LinaVG
 		{
 			for (int i = 0; i < m_data.m_defaultBuffers.m_size; i++)
 				m_data.m_defaultBuffers[i].ShrinkZero();
-
-			for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
-				m_data.m_simpleTextBuffers[i].ShrinkZero();
 
 		}
 
@@ -113,28 +104,12 @@ namespace LinaVG
 
 				if (buf.drawOrder == drawOrder && buf.shapeType == shapeType && buf.vertexBuffer.m_size != 0 && buf.indexBuffer.m_size != 0)
 				{
-					if (m_callbacks.drawDefault)
-						m_callbacks.drawDefault(&buf);
+					if (m_callbacks.draw)
+						m_callbacks.draw(&buf);
 					else
 					{
 						if (LinaVG::Config.logCallback)
-							LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawDefault");
-					}
-				}
-			}
-
-			for (int i = 0; i < m_data.m_simpleTextBuffers.m_size; i++)
-			{
-				DrawBufferText& buf = m_data.m_simpleTextBuffers[i];
-
-				if (buf.drawOrder == drawOrder && buf.shapeType == shapeType && buf.vertexBuffer.m_size != 0 && buf.indexBuffer.m_size != 0)
-				{
-					if (m_callbacks.drawText)
-						m_callbacks.drawText(&buf);
-					else
-					{
-						if (LinaVG::Config.logCallback)
-							LinaVG::Config.logCallback("LinaVG: No callback is setup for DrawSimpleText");
+							LinaVG::Config.logCallback("LinaVG: No callback is setup for Draw");
 					}
 				}
 			}
@@ -145,8 +120,9 @@ namespace LinaVG
 		for (int i = 0; i < arr.m_size; i++)
 		{
 			const int drawOrder = arr[i];
-			renderBuffs(drawOrder, DrawBufferShapeType::DropShadow);
-			renderBuffs(drawOrder, DrawBufferShapeType::Shape);
+            renderBuffs(drawOrder, DrawBufferShapeType::Shape);
+            renderBuffs(drawOrder, DrawBufferShapeType::Text);
+            renderBuffs(drawOrder, DrawBufferShapeType::SDFText);
 			renderBuffs(drawOrder, DrawBufferShapeType::AA);
 		}
 	}
@@ -176,29 +152,31 @@ namespace LinaVG
 		for (int i = 0; i < m_defaultBuffers.m_size; i++)
 		{
 			auto& buf = m_defaultBuffers[i];
-            if (buf.userData == userData && buf.drawOrder == drawOrder && buf.shapeType == shapeType && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY) && buf.textureHandle == txtHandle && Math::IsEqual(buf.textureUV, textureUV))
-				return m_defaultBuffers[i];
+            
+            if(buf.shapeType != shapeType)
+                continue;
+            
+            if(buf.userData != userData)
+                continue;
+            
+            if(buf.drawOrder != drawOrder)
+                continue;
+         
+            if(buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
+                continue;
+            
+            if(buf.textureHandle != txtHandle)
+                continue;
+            
+            if(!Math::IsEqual(buf.textureUV, textureUV))
+                continue;
+     
+            return buf;
 		}
 
 		SetDrawOrderLimits(drawOrder);
-
-		m_defaultBuffers.push_back(DrawBuffer(userData, drawOrder, DrawBufferType::Default, shapeType, txtHandle, textureUV, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_defaultBuffers.push_back(DrawBuffer(userData, drawOrder, shapeType, txtHandle, textureUV, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
 		return m_defaultBuffers.last_ref();
-	}
-
-	DrawBufferText& BufferStoreData::GetSimpleTextBuffer(void* userData, Font* font, int drawOrder, bool isDropShadow, bool isSDF)
-	{
-		for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
-		{
-			auto& buf = m_simpleTextBuffers[i];
-            if (buf.userData == userData && buf.isDropShadow == isDropShadow && buf.drawOrder == drawOrder && buf.font->atlas == font->atlas && !buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY) && isSDF == buf.isSDF)
-				return m_simpleTextBuffers[i];
-		}
-
-		SetDrawOrderLimits(drawOrder);
-
-		m_simpleTextBuffers.push_back(DrawBufferText(userData, font, drawOrder, isDropShadow, isSDF, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
-		return m_simpleTextBuffers.last_ref();
 	}
 
 	void BufferStoreData::AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
@@ -241,16 +219,6 @@ namespace LinaVG
 		for (int i = 0; i < m_defaultBuffers.m_size; i++)
 		{
 			if (buf == &m_defaultBuffers[i])
-				return i;
-		}
-		return -1;
-	}
-
-	int BufferStoreData::GetBufferIndexInCharArray(DrawBuffer* buf)
-	{
-		for (int i = 0; i < m_simpleTextBuffers.m_size; i++)
-		{
-			if (buf == &m_simpleTextBuffers[i])
 				return i;
 		}
 		return -1;
