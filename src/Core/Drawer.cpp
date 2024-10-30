@@ -404,7 +404,7 @@ namespace {
 
 #ifndef LINAVG_DISABLE_TEXT_SUPPORT
 
-	LINAVG_API void Drawer::DrawText(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder, bool skipCache, TextOutData* outData)
+	LINAVG_API void Drawer::DrawTextDefault(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle, int drawOrder, bool skipCache, TextOutData* outData)
 	{
 		if (text == NULL || text[0] == '\0')
 			return;

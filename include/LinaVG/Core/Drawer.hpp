@@ -235,7 +235,7 @@ namespace LinaVG
 		/// <param name="skipCache">Even if text caching is enabled globally, setting this to true will skip it for this call. Best used for dynamically changing text such as number counters. </param>
 		/// <param name="outData"> Fill character related information if not nullptr. </param>
 		/// <returns></returns>
-		LINAVG_API void DrawText(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
+		LINAVG_API void DrawTextDefault(const char* text, const Vec2& position, const TextOptions& opts, float rotateAngle = 0.0f, int drawOrder = 0, bool skipCache = false, TextOutData* outData = nullptr);
 
 		/// <summary>
 		/// Returns a Vec2 containing max width and height this text will occupy.
