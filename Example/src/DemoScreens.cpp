@@ -59,18 +59,26 @@ namespace LinaVG
 		std::vector<StarData> stars;
 
 		Font* fontDefault = nullptr;
-		Font* fontTitle	= nullptr;
-		Font* fontDesc	= nullptr;
-		Font* fontDemo	= nullptr;
-		Font* fontSDF		= nullptr;
+		Font* fontTitle	  = nullptr;
+		Font* fontDesc	  = nullptr;
+		Font* fontDemo	  = nullptr;
+		Font* fontSDF	  = nullptr;
 
 		void DemoScreens::Initialize()
 		{
-			fontDefault = ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 18);
-			fontTitle	= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 52);
-			fontDesc	= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
-			fontDemo	= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
-			fontSDF		= ExampleApp::Get()->GetLVGText().LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
+			auto& lvgText = ExampleApp::Get()->GetLVGText();
+
+			fontDefault = lvgText.LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 18);
+			fontTitle	= lvgText.LoadFont("Resources/Fonts/SourceSansPro-Regular.ttf", true, 52);
+			fontDesc	= lvgText.LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 20);
+			fontDemo	= lvgText.LoadFont("Resources/Fonts/NotoSans-Regular.ttf", false, 30);
+			fontSDF		= lvgText.LoadFont("Resources/Fonts/NotoSans-Regular.ttf", true, 40);
+
+			lvgText.AddFontToAtlas(fontDefault);
+			lvgText.AddFontToAtlas(fontTitle);
+			lvgText.AddFontToAtlas(fontDesc);
+			lvgText.AddFontToAtlas(fontDemo);
+			lvgText.AddFontToAtlas(fontSDF);
 
 			m_screenDescriptions.push_back("LinaVG supports variety of convex shapes, which can be partially or fully rounded, and all shapes also support filled & non-filled versions.");
 			m_screenDescriptions.push_back("You can use flat colors, alphas, vertical / horizontal gradients and rounded gradients. Also, textures w/ custom UV offset & tiling are supported.");
@@ -101,35 +109,35 @@ namespace LinaVG
 				star.endCol			   = Vec4(0.6f + redFactor2, 0.6f, 0.6f, 0.0f);
 				stars.push_back(star);
 			}
-            
-            // Dummy material setup.
-            unsigned int sdfMaterialIndex = 0;
-            m_sdfMaterial0 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
-            m_sdfMaterial1 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
-            m_sdfMaterial2 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
-            m_sdfMaterial3 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
-            m_sdfMaterial4 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
-            m_sdfMaterial5 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
-            m_sdfMaterial6 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
-            m_sdfMaterial0->thickness = 0.55f;
-            m_sdfMaterial1->thickness = 0.6f;
-            m_sdfMaterial2->thickness = 0.7f;
-            m_sdfMaterial2->softness = 2.0f;
-            m_sdfMaterial3->thickness = 0.6f;
-            m_sdfMaterial3->softness = 0.1f;
-            m_sdfMaterial3->outlineThickness = 0.1f;
-            m_sdfMaterial3->outlineColor = Vec4(0,0,0,1);
-            m_sdfMaterial4->thickness = 0.8f;
-            m_sdfMaterial4->softness = 0.5f;
-            m_sdfMaterial4->outlineThickness = 0.3f;
-            m_sdfMaterial4->outlineColor = Vec4(0,0,0,1);
-            m_sdfMaterial5->thickness = 0.8f;
-            m_sdfMaterial5->softness = 0.5f;
-            m_sdfMaterial5->outlineThickness = 0.3f;
-            m_sdfMaterial5->outlineColor = Vec4(0,0,0,1);
-            m_sdfMaterial6->thickness = 0.6f;
-            m_sdfMaterial6->softness = 0.8f;
-            m_sdfMaterial6->outlineThickness = 0.0f;
+
+			// Dummy material setup.
+			unsigned int sdfMaterialIndex	 = 0;
+			m_sdfMaterial0					 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
+			m_sdfMaterial1					 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
+			m_sdfMaterial2					 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
+			m_sdfMaterial3					 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
+			m_sdfMaterial4					 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
+			m_sdfMaterial5					 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
+			m_sdfMaterial6					 = ExampleApp::Get()->GetGLBackend()->GetSDFMaterialPointer(sdfMaterialIndex++);
+			m_sdfMaterial0->thickness		 = 0.55f;
+			m_sdfMaterial1->thickness		 = 0.6f;
+			m_sdfMaterial2->thickness		 = 0.7f;
+			m_sdfMaterial2->softness		 = 2.0f;
+			m_sdfMaterial3->thickness		 = 0.6f;
+			m_sdfMaterial3->softness		 = 0.1f;
+			m_sdfMaterial3->outlineThickness = 0.1f;
+			m_sdfMaterial3->outlineColor	 = Vec4(0, 0, 0, 1);
+			m_sdfMaterial4->thickness		 = 0.8f;
+			m_sdfMaterial4->softness		 = 0.5f;
+			m_sdfMaterial4->outlineThickness = 0.3f;
+			m_sdfMaterial4->outlineColor	 = Vec4(0, 0, 0, 1);
+			m_sdfMaterial5->thickness		 = 0.8f;
+			m_sdfMaterial5->softness		 = 0.5f;
+			m_sdfMaterial5->outlineThickness = 0.3f;
+			m_sdfMaterial5->outlineColor	 = Vec4(0, 0, 0, 1);
+			m_sdfMaterial6->thickness		 = 0.6f;
+			m_sdfMaterial6->softness		 = 0.8f;
+			m_sdfMaterial6->outlineThickness = 0.0f;
 		}
 
 		void DemoScreens::Terminate()
@@ -147,11 +155,11 @@ namespace LinaVG
 			StyleOptions style;
 
 			// Draw background gradient.
-            style.color	   = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
+			style.color	   = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
 			style.isFilled = true;
 			ExampleApp::Get()->GetLVGDrawer().DrawRect(Vec2(0.0f, 0.0f), screenSize, style, 0.0f, 0);
-			
-            // Draw stats window.
+
+			// Draw stats window.
 			if (m_statsWindowOn)
 			{
 				const float statsWindowX = screenSize.x - screenSize.x * 0.18f;
@@ -171,19 +179,19 @@ namespace LinaVG
 				const std::string screenTimeStr	   = "Screen: " + std::to_string(m_screenMS) + " ms";
 				const std::string fpsStr		   = "FPS: " + std::to_string(ExampleApp::Get()->GetFPS()) + " " + frameTimeStr;
 
-				Vec2		   textPosition = Vec2(statsWindowX + 10, statsWindowY + 22);
+				Vec2		textPosition = Vec2(statsWindowX + 10, statsWindowY + 22);
 				TextOptions textStyle;
 				textStyle.textScale = 0.82f;
 				textStyle.font		= fontDefault;
-				ExampleApp::Get()->GetLVGDrawer().DrawText(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(drawCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
 				textPosition.y += 25;
-				ExampleApp::Get()->GetLVGDrawer().DrawText(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(vertexCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
 				textPosition.y += 25;
-				ExampleApp::Get()->GetLVGDrawer().DrawText(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(triangleCountStr.c_str(), textPosition, textStyle, 0.0f, 4);
 				textPosition.y += 25;
-				ExampleApp::Get()->GetLVGDrawer().DrawText(fpsStr.c_str(), textPosition, textStyle, 0.0f, 4);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(fpsStr.c_str(), textPosition, textStyle, 0.0f, 4);
 				textPosition.y += 25;
-				ExampleApp::Get()->GetLVGDrawer().DrawText(screenTimeStr.c_str(), textPosition, textStyle, 0.0f, 4);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(screenTimeStr.c_str(), textPosition, textStyle, 0.0f, 4);
 			}
 
 			// Draw semi-transparent black rectangle on the bottom of the screen.
@@ -207,16 +215,16 @@ namespace LinaVG
 			const Vec2 titlePos		= Vec2(rectMin.x + 20, rectMin.y + rectHeight / 2.0f + size.y / 2.0f);
 			sdfStyle.newLineSpacing = 10.0f;
 			sdfStyle.color			= Utility::HexToVec4(0xFCAA67);
-            sdfStyle.userData = m_sdfMaterial4;
+			sdfStyle.userData		= m_sdfMaterial4;
 			sdfStyle.spacing		= 3.0f;
-			ExampleApp::Get()->GetLVGDrawer().DrawText(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), titlePos, sdfStyle, 0, 4);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(m_screenTitles[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), titlePos, sdfStyle, 0, 4);
 
 			// Current screen description.
 			TextOptions descText;
 			descText.font	   = fontDesc;
 			descText.wrapWidth = rectWidth * 0.45f;
 			const Vec2 sz	   = ExampleApp::Get()->GetLVGDrawer().CalculateTextSize(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), descText);
-			ExampleApp::Get()->GetLVGDrawer().DrawText(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), Vec2(rectWidth * 0.25f, rectMin.y + sz.y + 10), descText, 0, 4);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(m_screenDescriptions[ExampleApp::Get()->GetCurrentScreen() - 1].c_str(), Vec2(rectWidth * 0.25f, rectMin.y + sz.y + 10), descText, 0, 4);
 
 			// Draw version text.
 			TextOptions versionText;
@@ -226,17 +234,17 @@ namespace LinaVG
 			versionText.alignment  = TextAlignment::Right;
 			std::string versionStr = "Inan Evin, LinaVG v";
 			versionStr += std::to_string(LINAVG_VERSION_MAJOR) + "." + std::to_string(LINAVG_VERSION_MINOR) + "." + std::to_string(LINAVG_VERSION_PATCH);
-			ExampleApp::Get()->GetLVGDrawer().DrawText(versionStr.c_str(), Vec2(screenSize.x - 10, rectMin.y - 30), versionText, 0.0f, 1);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(versionStr.c_str(), Vec2(screenSize.x - 10, rectMin.y - 30), versionText, 0.0f, 1);
 
 			// Draw controls info
 			TextOptions controlsText;
 			controlsText.font	   = fontDesc;
 			controlsText.textScale = 0.8f;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("Num keys[1-9]: switch screen", Vec2(rectWidth * 0.725f + 20, rectMin.y + 20), controlsText, 0, 4);
-			ExampleApp::Get()->GetLVGDrawer().DrawText("P: toggle performance stats.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 40), controlsText, 0, 4);
-			ExampleApp::Get()->GetLVGDrawer().DrawText("F: toggle wireframe rendering.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 60), controlsText, 0, 4);
-			ExampleApp::Get()->GetLVGDrawer().DrawText("R: start/stop rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 80), controlsText, 0, 4);
-			ExampleApp::Get()->GetLVGDrawer().DrawText("E: reset rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 100), controlsText, 0, 4);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Num keys[1-9]: switch screen", Vec2(rectWidth * 0.725f + 20, rectMin.y + 20), controlsText, 0, 4);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("P: toggle performance stats.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 40), controlsText, 0, 4);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("F: toggle wireframe rendering.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 60), controlsText, 0, 4);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("R: start/stop rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 80), controlsText, 0, 4);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("E: reset rotation.", Vec2(rectWidth * 0.725f + 20, rectMin.y + 100), controlsText, 0, 4);
 		}
 
 		void DemoScreens::ShowDemoScreen1_Shapes()
@@ -398,11 +406,11 @@ namespace LinaVG
 
 			// Horizontal gradient.
 			startPos.x += 200;
-			defaultStyle.rounding	 = 0.0f;
-			defaultStyle.color.start = Vec4(0.2f, 0.2f, 1.0f, 1.0f);
-			defaultStyle.color.end	 = Vec4(1.0f, 0.2f, 0.2f, 1.0f);
-            defaultStyle.rounding = 0.5f;
-            defaultStyle.color.gradientType = GradientType::Horizontal;
+			defaultStyle.rounding			= 0.0f;
+			defaultStyle.color.start		= Vec4(0.2f, 0.2f, 1.0f, 1.0f);
+			defaultStyle.color.end			= Vec4(1.0f, 0.2f, 0.2f, 1.0f);
+			defaultStyle.rounding			= 0.5f;
+			defaultStyle.color.gradientType = GradientType::Horizontal;
 			ExampleApp::Get()->GetLVGDrawer().DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
 
 			// Vertical gradient
@@ -467,7 +475,7 @@ namespace LinaVG
 			// Lina Logo
 			startPos.x += 200;
 			defaultStyle.textureTilingAndOffset = Vec4(1, 1, 0, 0);
-			defaultStyle.textureHandle	 = ExampleApp::Get()->GetLinaLogoTexture();
+			defaultStyle.textureHandle			= ExampleApp::Get()->GetLinaLogoTexture();
 			ExampleApp::Get()->GetLVGDrawer().DrawImage(ExampleApp::Get()->GetLinaLogoTexture(), Vec2(startPos.x + 75, startPos.y + 75), Vec2(150, 150), Vec4(1, 1, 1, 1), m_rotateAngle, 1);
 
 			// Lina Logo
@@ -486,14 +494,13 @@ namespace LinaVG
 			//*************************** ROW 1 ***************************/
 
 			// Filled
-			defaultStyle.outlineOptions.color	  = Vec4(0, 0, 0, 1);
-            defaultStyle.outlineOptions.thickness = 1.0f;
-            defaultStyle.outlineOptions.drawDirection = OutlineDrawDirection::Outwards;
-            defaultStyle.aaEnabled = true;
-            defaultStyle.aaMultiplier = 1;
+			defaultStyle.outlineOptions.color		  = Vec4(0, 0, 0, 1);
+			defaultStyle.outlineOptions.thickness	  = 1.0f;
+			defaultStyle.outlineOptions.drawDirection = OutlineDrawDirection::Outwards;
+			defaultStyle.aaEnabled					  = true;
+			defaultStyle.aaMultiplier				  = 1;
 			ExampleApp::Get()->GetLVGDrawer().DrawRect(startPos, Vec2(startPos.x + 150, startPos.y + 150), defaultStyle, m_rotateAngle, 1);
 
-           
 			// Non filled outer
 			startPos.x += 200;
 			defaultStyle.outlineOptions.color.start = Vec4(1, 0, 0, 1);
@@ -641,10 +648,10 @@ namespace LinaVG
 			LineCapDirection lineCap   = LineCapDirection::None;
 			LineJointType	 jointType = LineJointType::Miter;
 
-            defaultStyle.thickness = 15.0f;
-           // defaultStyle.aaEnabled = true;
-            defaultStyle.aaMultiplier = 3;
-			defaultStyle.color	   = Vec4(1, 1, 1, 1);
+			defaultStyle.thickness = 15.0f;
+			// defaultStyle.aaEnabled = true;
+			defaultStyle.aaMultiplier = 3;
+			defaultStyle.color		  = Vec4(1, 1, 1, 1);
 			ExampleApp::Get()->GetLVGDrawer().DrawLine(startPos, Vec2(startPos.x + 700, startPos.y), defaultStyle, lineCap, m_rotateAngle, 1);
 
 			lineCap = LineCapDirection::Left;
@@ -706,18 +713,18 @@ namespace LinaVG
 			Vec2		startPos   = Vec2(screenSize.x * 0.05f, screenSize.y * 0.05f);
 			TextOptions textOpts;
 			textOpts.font = fontDemo;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("This is a normal text.", startPos, textOpts, m_rotateAngle, 1);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("This is a normal text.", startPos, textOpts, m_rotateAngle, 1);
 
 			startPos.x += 350;
-            textOpts.color.start = Vec4(1, 0, 0, 1);
-            textOpts.color.start = Vec4(0, 0, 1, 1);
-			ExampleApp::Get()->GetLVGDrawer().DrawText("This is one with a gradient color.", startPos, textOpts, m_rotateAngle, 1);
-			
+			textOpts.color.start = Vec4(1, 0, 0, 1);
+			textOpts.color.start = Vec4(0, 0, 1, 1);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("This is one with a gradient color.", startPos, textOpts, m_rotateAngle, 1);
+
 			startPos.x = screenSize.x * 0.05f;
 			startPos.y += 350;
-			textOpts.wrapWidth		 = 100;
-			textOpts.color			 = Vec4(1, 1, 1, 1);
-			ExampleApp::Get()->GetLVGDrawer().DrawText("This is a wrapped text.", startPos, textOpts, m_rotateAngle, 1);
+			textOpts.wrapWidth = 100;
+			textOpts.color	   = Vec4(1, 1, 1, 1);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("This is a wrapped text.", startPos, textOpts, m_rotateAngle, 1);
 
 			startPos.x += 365;
 			textOpts.wrapWidth			= 100;
@@ -727,14 +734,14 @@ namespace LinaVG
 			textOpts.color.gradientType = GradientType::Vertical;
 			const Vec2 size				= ExampleApp::Get()->GetLVGDrawer().CalculateTextSize("Center alignment and vertical gradient.", textOpts);
 			startPos.x += size.x / 2.0f;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("Center alignment and vertical gradient.", startPos, textOpts, m_rotateAngle, 1);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Center alignment and vertical gradient.", startPos, textOpts, m_rotateAngle, 1);
 
 			startPos.x += 335;
 			textOpts.color	   = Vec4(0.8f, 0.1f, 0.1f, 1.0f);
 			textOpts.alignment = TextAlignment::Right;
 			const Vec2 size2   = ExampleApp::Get()->GetLVGDrawer().CalculateTextSize("Same, but it's right alignment", textOpts);
 			startPos.x += size.x;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("Same, but it's right alignment", startPos, textOpts, m_rotateAngle, 1);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Same, but it's right alignment", startPos, textOpts, m_rotateAngle, 1);
 
 			startPos.x = screenSize.x * 0.05f;
 			startPos.y += 50;
@@ -742,50 +749,49 @@ namespace LinaVG
 			textOpts.wrapWidth = 0.0f;
 			textOpts.alignment = TextAlignment::Left;
 			textOpts.color	   = Vec4(1, 1, 1, 1);
-			ExampleApp::Get()->GetLVGDrawer().DrawText("And this is a normal text with higher spacing.", startPos, textOpts, m_rotateAngle, 1);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("And this is a normal text with higher spacing.", startPos, textOpts, m_rotateAngle, 1);
 
 			startPos.y += 70;
-			startPos.x						 = screenSize.x * 0.05f;
-			const float	   beforeSDFStartPos = startPos.y + 200;
-            
-    
+			startPos.x					  = screenSize.x * 0.05f;
+			const float beforeSDFStartPos = startPos.y + 200;
+
 			TextOptions sdfTextOptions;
-			sdfTextOptions.font		 = fontSDF;
-            sdfTextOptions.userData = m_sdfMaterial0;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("An SDF text.", startPos, sdfTextOptions, m_rotateAngle, 1);
+			sdfTextOptions.font		= fontSDF;
+			sdfTextOptions.userData = m_sdfMaterial0;
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("An SDF text.", startPos, sdfTextOptions, m_rotateAngle, 1);
 
 			startPos.y += 50;
-			sdfTextOptions.color.start	 = Vec4(1, 0, 0, 1);
-            sdfTextOptions.color.end     = Vec4(0, 0, 1, 1);
-            sdfTextOptions.color.gradientType = GradientType::Horizontal;
-            sdfTextOptions.userData = m_sdfMaterial1;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("Thicker SDF text", startPos, sdfTextOptions, m_rotateAngle, 1);
+			sdfTextOptions.color.start		  = Vec4(1, 0, 0, 1);
+			sdfTextOptions.color.end		  = Vec4(0, 0, 1, 1);
+			sdfTextOptions.color.gradientType = GradientType::Horizontal;
+			sdfTextOptions.userData			  = m_sdfMaterial1;
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Thicker SDF text", startPos, sdfTextOptions, m_rotateAngle, 1);
 
 			startPos.y += 50;
-			sdfTextOptions.color		 = Vec4(0.1f, 0.8f, 0.1f, 1.0f);
-            sdfTextOptions.userData = m_sdfMaterial2;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("Smoother text", startPos, sdfTextOptions, m_rotateAngle, 1);
+			sdfTextOptions.color	= Vec4(0.1f, 0.8f, 0.1f, 1.0f);
+			sdfTextOptions.userData = m_sdfMaterial2;
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Smoother text", startPos, sdfTextOptions, m_rotateAngle, 1);
 
 			startPos.y += 50;
-			sdfTextOptions.color				= Vec4(1, 1, 1, 1);
-            sdfTextOptions.userData = m_sdfMaterial3;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("Outlined SDF text", startPos, sdfTextOptions, m_rotateAngle, 1);
+			sdfTextOptions.color	= Vec4(1, 1, 1, 1);
+			sdfTextOptions.userData = m_sdfMaterial3;
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Outlined SDF text", startPos, sdfTextOptions, m_rotateAngle, 1);
 
 			startPos.y += 50;
-            sdfTextOptions.userData = m_sdfMaterial4;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("Thicker outline.", startPos, sdfTextOptions, m_rotateAngle, 1);
+			sdfTextOptions.userData = m_sdfMaterial4;
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Thicker outline.", startPos, sdfTextOptions, m_rotateAngle, 1);
 
 			startPos.y += 50;
-            sdfTextOptions.userData = m_sdfMaterial5;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("Just lose it.", startPos, sdfTextOptions, m_rotateAngle, 1);
+			sdfTextOptions.userData = m_sdfMaterial5;
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Just lose it.", startPos, sdfTextOptions, m_rotateAngle, 1);
 
 			startPos.y = beforeSDFStartPos;
 			startPos.x += 930;
-			sdfTextOptions.wrapWidth			   = 450;
-			sdfTextOptions.newLineSpacing		   = 10.0f;
-			sdfTextOptions.alignment			   = TextAlignment::Right;
-            sdfTextOptions.userData = m_sdfMaterial6;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("This is an SDF, wrapped and right aligned text, with higher line spacing.", startPos, sdfTextOptions, m_rotateAngle, 1);
+			sdfTextOptions.wrapWidth	  = 450;
+			sdfTextOptions.newLineSpacing = 10.0f;
+			sdfTextOptions.alignment	  = TextAlignment::Right;
+			sdfTextOptions.userData		  = m_sdfMaterial6;
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("This is an SDF, wrapped and right aligned text, with higher line spacing.", startPos, sdfTextOptions, m_rotateAngle, 1);
 		}
 
 		void DemoScreens::ShowDemoScreen6_DrawOrder()
@@ -812,7 +818,7 @@ namespace LinaVG
 				ExampleApp::Get()->GetLVGDrawer().DrawRect(startPos, Vec2(startPos.x + 120, startPos.y + 120), opts, 0.0f, i);
 
 				std::string orderStr = std::to_string(i / 2);
-				ExampleApp::Get()->GetLVGDrawer().DrawText(orderStr.c_str(), Vec2(startPos.x + 5, startPos.y + 25), textOpts, 0.0f, i + 1);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(orderStr.c_str(), Vec2(startPos.x + 5, startPos.y + 25), textOpts, 0.0f, i + 1);
 
 				startPos.x += 20;
 				startPos.y += 20;
@@ -853,7 +859,7 @@ namespace LinaVG
 
 			TextOptions textOpts;
 			textOpts.font = fontDefault;
-			ExampleApp::Get()->GetLVGDrawer().DrawText("This text is clipped by the black rectangle.", Vec2(min.x - 50, min.y + 250), textOpts, 0.0f, 2);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("This text is clipped by the black rectangle.", Vec2(min.x - 50, min.y + 250), textOpts, 0.0f, 2);
 
 			ExampleApp::Get()->GetLVGDrawer().SetClipPosX(0);
 			ExampleApp::Get()->GetLVGDrawer().SetClipPosY(0);
@@ -909,7 +915,7 @@ namespace LinaVG
 				std::string loadingStr = "Loading " + std::to_string(fillX / 600.0f);
 				const Vec2	txtSize	   = ExampleApp::Get()->GetLVGDrawer().CalculateTextSize(loadingStr.c_str(), textOpts);
 
-				ExampleApp::Get()->GetLVGDrawer().DrawText(loadingStr.c_str(), Vec2(pos.x + 300 - txtSize.x / 2.0f, pos.y + 12.5f + txtSize.y / 2.0f), textOpts, 0.0f, 2);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(loadingStr.c_str(), Vec2(pos.x + 300 - txtSize.x / 2.0f, pos.y + 12.5f + txtSize.y / 2.0f), textOpts, 0.0f, 2);
 			};
 
 			auto drawLoadingBar2 = [&](const Vec2& pos) {
@@ -937,7 +943,7 @@ namespace LinaVG
 				std::string loadingStr = "Loading " + std::to_string(t);
 				const Vec2	txtSize	   = ExampleApp::Get()->GetLVGDrawer().CalculateTextSize(loadingStr.c_str(), textOpts);
 
-				ExampleApp::Get()->GetLVGDrawer().DrawText(loadingStr.c_str(), Vec2(pos.x, pos.y + 50), textOpts, 0.0f, 2);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(loadingStr.c_str(), Vec2(pos.x, pos.y + 50), textOpts, 0.0f, 2);
 			};
 
 			auto drawLoadingCircle1 = [&](const Vec2& pos) {
@@ -957,7 +963,7 @@ namespace LinaVG
 
 				TextOptions textOpts;
 				textOpts.font = fontDefault;
-				ExampleApp::Get()->GetLVGDrawer().DrawText("Loading", Vec2(pos.x - 28.0f, pos.y + 80), textOpts, 0.0f, 2);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Loading", Vec2(pos.x - 28.0f, pos.y + 80), textOpts, 0.0f, 2);
 			};
 
 			auto drawLoadingRect = [&](const Vec2& pos) {
@@ -1007,7 +1013,7 @@ namespace LinaVG
 
 				TextOptions textOpts;
 				textOpts.font = fontDefault;
-				ExampleApp::Get()->GetLVGDrawer().DrawText("Loading", Vec2(pos.x, pos.y + 150), textOpts, 0.0f, 2);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Loading", Vec2(pos.x, pos.y + 150), textOpts, 0.0f, 2);
 			};
 
 			auto drawMovingTri = [&](const Vec2& startPos) {
@@ -1036,7 +1042,7 @@ namespace LinaVG
 				textOpts.font	   = fontDesc;
 				textOpts.textScale = 0.7f;
 				std::string str	   = "Property_" + std::to_string(index);
-				ExampleApp::Get()->GetLVGDrawer().DrawText(str.c_str(), pos, textOpts, 0.0f, 3);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault(str.c_str(), pos, textOpts, 0.0f, 3);
 
 				StyleOptions opts;
 				opts.color					  = Vec4(0.05f, 0.05f, 0.05f, 0.9f);
@@ -1057,7 +1063,7 @@ namespace LinaVG
 				TextOptions textOpts;
 				textOpts.font	   = fontDesc;
 				textOpts.textScale = 0.85f;
-				ExampleApp::Get()->GetLVGDrawer().DrawText("Demo Title", Vec2(pos.x + 10, pos.y + 18.5f), textOpts, 0.0f, 3);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Demo Title", Vec2(pos.x + 10, pos.y + 18.5f), textOpts, 0.0f, 3);
 
 				Vec2 usedPos = Vec2(pos.x + 10, pos.y + 55);
 				drawProperty(usedPos, 0);
@@ -1080,7 +1086,7 @@ namespace LinaVG
 				textOpts.textScale	= 0.7f;
 				const Vec2 textSize = ExampleApp::Get()->GetLVGDrawer().CalculateTextSize("Button", textOpts);
 				const Vec2 textPos	= Vec2(startPos.x + buttonSize.x / 2.0f - textSize.x / 2.0f, startPos.y + buttonSize.y / 2.0f + textSize.y * 0.5f);
-				ExampleApp::Get()->GetLVGDrawer().DrawText("Button", textPos, textOpts, 0.0f, 3);
+				ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("Button", textPos, textOpts, 0.0f, 3);
 			};
 
 			drawSinBezier(Vec2(screenSize.x * 0.05f, screenSize.y * 0.15f));
@@ -1129,13 +1135,13 @@ namespace LinaVG
 			TextOptions sdf;
 			sdf.font = fontTitle;
 			start.y += 170.0f;
-			start.x					= screenSize.x * 0.6f;
-            sdf.userData = m_sdfMaterial4;
-			sdf.textScale			= 2.0f;
-			sdf.spacing				= 9.0f;
-			sdf.color.start			= Vec4(0.0f, 0.8f * colLerp1, 1.0f * colLerp2, 1.0f);
-			sdf.color.end			= Vec4(0.1f, 0.1f, 0.85f * colLerp2, 1.0f);
-			ExampleApp::Get()->GetLVGDrawer().DrawText("SDF TEXT", start, sdf, 0.0f, 1);
+			start.x			= screenSize.x * 0.6f;
+			sdf.userData	= m_sdfMaterial4;
+			sdf.textScale	= 2.0f;
+			sdf.spacing		= 9.0f;
+			sdf.color.start = Vec4(0.0f, 0.8f * colLerp1, 1.0f * colLerp2, 1.0f);
+			sdf.color.end	= Vec4(0.1f, 0.1f, 0.85f * colLerp2, 1.0f);
+			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("SDF TEXT", start, sdf, 0.0f, 1);
 		}
 
 		void DemoScreens::ShowDemoScreen9_Final()
@@ -1311,9 +1317,9 @@ namespace LinaVG
 			if (m_rotate)
 				m_rotateAngle += ExampleApp::Get()->GetFrameTime() * 20;
 
-            m_drawCount		= GLBackend::s_debugDrawCalls;
-            m_triangleCount = GLBackend::s_debugTriCount;
-            m_vertexCount	= GLBackend::s_debugVtxCount;
+			m_drawCount		= GLBackend::s_debugDrawCalls;
+			m_triangleCount = GLBackend::s_debugTriCount;
+			m_vertexCount	= GLBackend::s_debugVtxCount;
 		}
 	} // namespace Examples
 } // namespace LinaVG
