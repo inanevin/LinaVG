@@ -71,9 +71,7 @@ namespace LinaVG
 		for (auto& [glyph, textChar] : glyphs)
 			LINAVG_FREE(textChar.m_buffer);
 		glyphs.clear();
-
-		if (atlas != nullptr)
-			atlas->RemoveFont(this);
+		assert(atlas == nullptr);
 	}
 
 	Atlas::Atlas(const Vec2ui& size, std::function<void(Atlas* atlas)> updateFunc)
@@ -183,9 +181,9 @@ namespace LinaVG
 		return true;
 	}
 
-	void Atlas::RemoveFont(Font* font)
+	void Atlas::RemoveFont(unsigned int pos, unsigned int height)
 	{
-		Slice* slice = new Slice(font->atlasRectPos, font->atlasRectHeight);
+		Slice* slice = new Slice(pos, height);
 		m_availableSlices.push_back(slice);
 
 		const size_t start = static_cast<size_t>(slice->pos * m_size.x);
@@ -376,6 +374,7 @@ namespace LinaVG
 		Config.logCallback("LinaVG: Successfuly loaded font!");
 		return font;
 	}
+
 	LINAVG_API void Text::AddFontToAtlas(Font* font)
 	{
 		Atlas* foundAtlas = nullptr;
@@ -402,6 +401,15 @@ namespace LinaVG
 			}
 			m_atlases.push_back(newAtlas);
 		}
+	}
+
+	LINAVG_API void Text::RemoveFontFromAtlas(Font* font)
+	{
+		if (font->atlas)
+			return;
+
+		font->atlas->RemoveFont(font->atlasRectPos, font->atlasRectHeight);
+		font->atlas = nullptr;
 	}
 } // namespace LinaVG
 #endif

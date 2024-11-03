@@ -109,7 +109,7 @@ namespace LinaVG
 
 		void Destroy();
 		bool AddFont(Font* font);
-		void RemoveFont(Font* font);
+		void RemoveFont(unsigned int pos, unsigned int height);
 
 		inline const Vec2ui& GetSize() const
 		{
@@ -164,7 +164,7 @@ namespace LinaVG
 		/// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
 		/// <param name="useKerningIfAvailable">If the font face contains a kern table this font will be drawn using kerning information. </param>
 		/// <returns></returns>
-		LINAVG_API Font* LoadFont(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
+		LINAVG_API static Font* LoadFont(const char* file, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
 
 		/// <summary>
 		/// Loads the given font and generates textures based on given size.
@@ -181,12 +181,12 @@ namespace LinaVG
 		/// <param name="customRangesSize">Size of the range array, each 2 pair in the array is treated as a range. Needs to be power of 2! </param>
 		/// <param name="useKerningIfAvailable">If the font face contains a kern table this font will be drawn using kerning information. </param>
 		/// <returns></returns>
-		LINAVG_API Font* LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
+		LINAVG_API static Font* LoadFontFromMemory(void* data, size_t dataSize, bool loadAsSDF, int size = 48, GlyphEncoding* customRanges = nullptr, int customRangesSize = 0, bool useKerningIfAvailable = true);
 
 		/// <summary>
 		/// Uses loaded face (from file or mem) to setup rest of the font data.
 		/// </summary>
-		LINAVG_API Font* SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable);
+		LINAVG_API static Font* SetupFont(FT_Face& face, bool loadAsSDF, int size, GlyphEncoding* customRanges, int customRangesSize, bool useKerningIfAvailable);
 
 		/// <summary>
 		/// Call after SetupFont to fit the loaded font into an atlas.
@@ -194,6 +194,13 @@ namespace LinaVG
 		/// <param name="font"></param>
 		/// <returns></returns>
 		LINAVG_API void AddFontToAtlas(Font* font);
+
+		/// <summary>
+		/// Call before deallocating your font to remove from its dedicated atlas.
+		/// </summary>
+		/// <param name="font"></param>
+		/// <returns></returns>
+		LINAVG_API void RemoveFontFromAtlas(Font* font);
 
 		/// <summary>
 		/// Returns the kerning vector between two given glphys.

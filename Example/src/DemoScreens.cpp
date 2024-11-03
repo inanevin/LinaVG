@@ -142,11 +142,12 @@ namespace LinaVG
 
 		void DemoScreens::Terminate()
 		{
-			delete fontDefault;
-			delete fontTitle;
-			delete fontDemo;
-			delete fontDesc;
-			delete fontSDF;
+			auto& lvgText = ExampleApp::Get()->GetLVGText();
+			lvgText.RemoveFontFromAtlas(fontDefault);
+			lvgText.RemoveFontFromAtlas(fontTitle);
+			lvgText.RemoveFontFromAtlas(fontDemo);
+			lvgText.RemoveFontFromAtlas(fontDesc);
+			lvgText.RemoveFontFromAtlas(fontSDF);
 		}
 
 		void DemoScreens::ShowBackground()
