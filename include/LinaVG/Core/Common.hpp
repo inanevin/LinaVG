@@ -58,19 +58,18 @@ namespace LinaVG
 #define LVG_DEG2RAD	   0.0174533f
 #define LINAVG_API	   // TODO
 
-
 	typedef unsigned short Index;
 	typedef unsigned int   BackendHandle;
-    typedef void* TextureHandle;
+	typedef void*		   TextureHandle;
 	class Font;
 
 #define NULL_TEXTURE nullptr
 
 	LINAVG_API enum class GradientType
 	{
-		Horizontal	 = 0,
-		Vertical	 = 1,
-        None = 4,
+		Horizontal = 0,
+		Vertical,
+		None,
 	};
 
 	LINAVG_API struct Vec4Grad
@@ -345,7 +344,6 @@ namespace LinaVG
 		/// Defines the texture uv and offset.
 		/// </summary>
 		Vec4 textureTilingAndOffset = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
-
 	};
 
 	enum class TextAlignment
@@ -411,7 +409,6 @@ namespace LinaVG
 		}
 	};
 
-
 	/// <summary>
 	/// Text styling, DrawText will render the given text as normal or via signed-distance-field (SDF) methods.
 	/// This depends on the font handle given with options (or default font if not-provided).
@@ -422,16 +419,15 @@ namespace LinaVG
 		TextOptions(){};
 		TextOptions(const TextOptions& opts)
 		{
-			font			 = opts.font;
-			color			 = opts.color;
-			textScale		 = opts.textScale;
-			alignment		 = opts.alignment;
-			spacing			 = opts.spacing;
-			newLineSpacing	 = opts.newLineSpacing;
-			wrapWidth		 = opts.wrapWidth;
-			cpuClipping		 = opts.cpuClipping;
-			wordWrap		 = opts.wordWrap;
-            userData = opts.userData;
+			font		   = opts.font;
+			color		   = opts.color;
+			textScale	   = opts.textScale;
+			alignment	   = opts.alignment;
+			spacing		   = opts.spacing;
+			newLineSpacing = opts.newLineSpacing;
+			wrapWidth	   = opts.wrapWidth;
+			wordWrap	   = opts.wordWrap;
+			userData	   = opts.userData;
 		}
 
 		bool CheckColors(const Vec4& c1, const Vec4& c2)
@@ -441,9 +437,9 @@ namespace LinaVG
 
 		bool IsSame(const TextOptions& opts)
 		{
-            if(userData != opts.userData)
-                return false;
-            
+			if (userData != opts.userData)
+				return false;
+
 			if (font != opts.font)
 				return false;
 
@@ -506,18 +502,16 @@ namespace LinaVG
 		/// </summary>
 		bool wordWrap = true;
 
+		/// <summary>
+		/// Use to store user data to be passed back to your call handler.
+		/// </summary>
+		void* userData = nullptr;
 
 		/// <summary>
 		/// Defines custom clip rectangle for text vertices.
 		/// </summary>
 		Vec4 cpuClipping = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
-        
-        /// <summary>
-        /// Use to store user data to be passed back to your call handler.
-        /// </summary>
-        void* userData = nullptr;
 	};
-
 
 	/// <summary>
 	/// Style options used to draw various effects around the target shape.
@@ -528,17 +522,17 @@ namespace LinaVG
 		StyleOptions(){};
 		StyleOptions(const StyleOptions& opts)
 		{
-			color			 = opts.color;
-			thickness		 = opts.thickness;
-			rounding		 = opts.rounding;
-			aaMultiplier	 = opts.aaMultiplier;
+			color		 = opts.color;
+			thickness	 = opts.thickness;
+			rounding	 = opts.rounding;
+			aaMultiplier = opts.aaMultiplier;
 			onlyRoundTheseCorners.from(opts.onlyRoundTheseCorners);
-			outlineOptions	= opts.outlineOptions;
-			textureHandle	= opts.textureHandle;
+			outlineOptions		   = opts.outlineOptions;
+			textureHandle		   = opts.textureHandle;
 			textureTilingAndOffset = opts.textureTilingAndOffset;
-			isFilled		= opts.isFilled;
-			aaEnabled		= opts.aaEnabled;
-            userData = opts.userData;
+			isFilled			   = opts.isFilled;
+			aaEnabled			   = opts.aaEnabled;
+			userData			   = opts.userData;
 		}
 
 		/// <summary>
@@ -587,20 +581,20 @@ namespace LinaVG
 		/// </summary>
 		TextureHandle textureHandle = 0;
 
-        /// <summary>
-        /// Defines the texture uv and offset.
-        /// </summary>
-        Vec4 textureTilingAndOffset = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
+		/// <summary>
+		/// Defines the texture uv and offset.
+		/// </summary>
+		Vec4 textureTilingAndOffset = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
 		/// <summary>
 		/// Fills inside the target shape, e.g. rect, tris, convex, circles, ngons, has no effect on lines.
 		/// </summary>
 		bool isFilled = true;
-        
-        /// <summary>
-        /// Use to store user data to be passed back to your call handler.
-        /// </summary>
-        void* userData = nullptr;
+
+		/// <summary>
+		/// Use to store user data to be passed back to your call handler.
+		/// </summary>
+		void* userData = nullptr;
 	};
 
 	struct Vertex
@@ -655,7 +649,7 @@ namespace LinaVG
 
 		/// <summary>
 		/// Enabling caching allows faster text rendering in exchange for more memory consumption.
-        /// Note: dynamic texts you render will not benefit from this.
+		/// Note: dynamic texts you render will not benefit from this.
 		/// </summary>
 		bool textCachingEnabled = false;
 
@@ -679,44 +673,38 @@ namespace LinaVG
 	{
 		Default,
 		Text,
-        SDFText,
+		SDFText,
 	};
 
 	enum class DrawBufferShapeType
 	{
 		Shape,
-        Text,
-        SDFText,
+		Text,
+		SDFText,
 		AA,
 	};
 
 	struct DrawBuffer
 	{
 		DrawBuffer(){};
-        DrawBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& txtUV, BackendHandle clipPosX, BackendHandle clipPosY, BackendHandle clipSizeX, BackendHandle clipSizeY)
-			: drawOrder(drawOrder),  shapeType(shapeType), userData(userData), textureHandle(txtHandle), textureUV(txtUV)
+		DrawBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& txtUV, const Vec4i& clip)
+			: drawOrder(drawOrder), shapeType(shapeType), userData(userData), textureHandle(txtHandle), textureUV(txtUV)
 		{
-			this->clipPosX	= clipPosX;
-			this->clipPosY	= clipPosY;
-			this->clipSizeX = clipSizeX;
-			this->clipSizeY = clipSizeY;
+			this->clip = clip;
 		};
 
 		Array<Vertex>		vertexBuffer;
 		Array<Index>		indexBuffer;
-		DrawBufferShapeType shapeType		 = DrawBufferShapeType::Shape;
-        TextureHandle       textureHandle    = NULL_TEXTURE;
-        Vec4                textureUV = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
-		BackendHandle		clipPosX		 = 0;
-		BackendHandle		clipPosY		 = 0;
-		BackendHandle		clipSizeX		 = 0;
-		BackendHandle		clipSizeY		 = 0;
-        void*               userData = nullptr;
-        int                 drawOrder         = -1;
+		DrawBufferShapeType shapeType	  = DrawBufferShapeType::Shape;
+		TextureHandle		textureHandle = NULL_TEXTURE;
+		Vec4				textureUV	  = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
+		Vec4i				clip		  = {0, 0, 0, 0};
+		void*				userData	  = nullptr;
+		int					drawOrder	  = -1;
 
-		bool IsClipDifferent(BackendHandle cpx, BackendHandle cpy, BackendHandle csx, BackendHandle csy)
+		bool IsClipDifferent(const Vec4i& clip)
 		{
-			return (this->clipPosX != cpx || this->clipPosY != cpy || this->clipSizeX != csx || this->clipSizeY != csy);
+			return !(this->clip == clip);
 		}
 
 		inline void Clear()

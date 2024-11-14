@@ -74,19 +74,93 @@ namespace LinaVG
 		float y = 0.0f;
 	};
 
-    struct Vec2ui
-    {
-        Vec2ui(){};
-        Vec2ui(unsigned int x, unsigned int y)
-            : x(x), y(y){};
-        Vec2ui(const Vec2ui& v)
-        {
-            x = v.x;
-            y = v.y;
-        }
-        
-        unsigned int x = 0;
-        unsigned int y = 0;
-    };
+	struct Vec2ui
+	{
+		Vec2ui(){};
+		Vec2ui(unsigned int x, unsigned int y)
+			: x(x), y(y){};
+		Vec2ui(const Vec2ui& v)
+		{
+			x = v.x;
+			y = v.y;
+		}
+		Vec2ui(const Vec2& v)
+		{
+			x = static_cast<unsigned int>(v.x);
+			y = static_cast<unsigned int>(v.y);
+		}
+
+		unsigned int x = 0;
+		unsigned int y = 0;
+	};
+
+	struct Vec4i
+	{
+		Vec4i(){};
+		Vec4i(int x, int y, int z, int w)
+			: x(x), y(y), z(z), w(w){};
+		Vec4i(const Vec4i& v)
+		{
+			x = v.x;
+			y = v.y;
+			z = v.z;
+			w = v.w;
+		}
+
+		bool operator==(const Vec4i& other) const
+		{
+			return x == other.x && y == other.y && z == other.z && w == other.w;
+		}
+		bool IsOtherInside(const Vec4i& other) const
+		{
+			return other.x >= x && other.y >= y && other.x + other.z <= x + z && other.y + other.w <= y + w;
+		}
+
+
+		int x = 0;
+		int y = 0;
+		int z = 0;
+		int w = 0;
+	};
+	struct Vec4ui
+	{
+		Vec4ui(){};
+		Vec4ui(unsigned int x, unsigned int y, unsigned int z, unsigned int w)
+			: x(x), y(y), z(z), w(w){};
+		Vec4ui(const Vec4ui& v)
+		{
+			x = v.x;
+			y = v.y;
+			z = v.z;
+			w = v.w;
+		}
+
+		Vec4ui(const Vec2ui& p, const Vec2ui& s)
+		{
+			x = p.x;
+			y = p.y;
+			z = s.x;
+			w = s.y;
+		}
+
+		bool operator==(const Vec4ui& other) const
+		{
+			return x == other.x && y == other.y && z == other.z && w == other.w;
+		}
+		bool IsOtherInside(const Vec4ui& other) const
+		{
+			return other.x >= x && other.y >= y && other.x + other.z <= x + z && other.y + other.w <= y + w;
+		}
+
+		bool IsPointInside(const Vec2ui& point) const
+		{
+			return point.x >= x && point.x <= x + z && point.y >= y && point.y <= y + w;
+		}
+
+		unsigned int x = 0;
+		unsigned int y = 0;
+		unsigned int z = 0;
+		unsigned int w = 0;
+	};
 
 } // namespace LinaVG

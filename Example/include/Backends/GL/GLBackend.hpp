@@ -53,27 +53,26 @@ namespace LinaVG::Examples
 		BackendHandle m_ebo = 0;
 		ShaderData	  m_defaultShaderData;
 		ShaderData	  m_simpleTextShaderData;
-		float		  m_proj[4][4]				  = {0};
-		const char*	  m_defaultVtxShader		  = nullptr;
-		const char*	  m_defaultFragShader		  = nullptr;
-		const char*	  m_simpleTextFragShader	  = nullptr;
-		bool		  m_skipDraw				  = false;
+		float		  m_proj[4][4]			 = {0};
+		const char*	  m_defaultVtxShader	 = nullptr;
+		const char*	  m_defaultFragShader	 = nullptr;
+		const char*	  m_simpleTextFragShader = nullptr;
+		bool		  m_skipDraw			 = false;
 	};
 
+	struct Texture
+	{
+		unsigned int handle = 0;
+	};
 
-struct Texture
-{
-    unsigned int handle = 0;
-};
-
-    struct SDFMaterial
-    {
-        float thickness = 0.5f;
-        float softness = 0.0f;
-        float outlineThickness = 0.0f;
-        float outlineSoftness = 0.1f;
-        Vec4 outlineColor = Vec4(1, 1, 1, 1);
-    };
+	struct SDFMaterial
+	{
+		float thickness		   = 0.5f;
+		float softness		   = 0.0f;
+		float outlineThickness = 0.0f;
+		float outlineSoftness  = 0.1f;
+		Vec4  outlineColor	   = Vec4(1, 1, 1, 1);
+	};
 
 	class GLBackend
 	{
@@ -97,42 +96,42 @@ struct Texture
 			int	 m_unpackAlignment	  = 0;
 		};
 
-		void		  StartFrame();
-		void		  DrawDefault(DrawBuffer* buf);
-		void		  EndFrame();
-		void		  SaveAPIState();
-		void		  RestoreAPIState();
-        void OnAtlasUpdate(Atlas* atlas);
-        static Texture* LoadTexture(const char* file);
+		void			StartFrame();
+		void			DrawDefault(DrawBuffer* buf);
+		void			EndFrame();
+		void			SaveAPIState();
+		void			RestoreAPIState();
+		void			OnAtlasUpdate(Atlas* atlas);
+		static Texture* LoadTexture(const char* file);
 
 		static unsigned int s_displayPosX;
 		static unsigned int s_displayPosY;
 		static unsigned int s_displayWidth;
 		static unsigned int s_displayHeight;
-        static bool s_debugWireframe;
-        static int s_debugTriCount;
-        static int s_debugVtxCount;
-        static int s_debugDrawCalls;
-        static float s_debugZoom;
-        static Vec2 s_debugOffset;
-        
-        SDFMaterial* GetSDFMaterialPointer(unsigned int index)
-        {
-            return &m_demoSDFMaterials[index];
-        }
+		static bool			s_debugWireframe;
+		static int			s_debugTriCount;
+		static int			s_debugVtxCount;
+		static int			s_debugDrawCalls;
+		static float		s_debugZoom;
+		static Vec2			s_debugOffset;
+
+		SDFMaterial* GetSDFMaterialPointer(unsigned int index)
+		{
+			return &m_demoSDFMaterials[index];
+		}
 
 	private:
-		void SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height);
+		void SetScissors(const Vec4i& clip);
 		void AddShaderUniforms(ShaderData& data);
 		void CreateShader(ShaderData& data, const char* vert, const char* frag);
-        void CreateFontTexture(unsigned int width, unsigned int height);
-        
+		void CreateFontTexture(unsigned int width, unsigned int height);
+
 	private:
-		GLState		m_glState;
-		BackendData m_backendData;
-        uint32_t m_fontTexture = 0;
-        bool m_fontTextureCreated = false;
-        LINAVG_VEC<SDFMaterial> m_demoSDFMaterials;
+		GLState					m_glState;
+		BackendData				m_backendData;
+		uint32_t				m_fontTexture		 = 0;
+		bool					m_fontTextureCreated = false;
+		LINAVG_VEC<SDFMaterial> m_demoSDFMaterials;
 	};
 
 } // namespace LinaVG::Examples

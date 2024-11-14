@@ -840,11 +840,12 @@ namespace LinaVG
 
 			if (m_clippingEnabled)
 			{
-
-				ExampleApp::Get()->GetLVGDrawer().SetClipPosX(static_cast<BackendHandle>(min.x));
-				ExampleApp::Get()->GetLVGDrawer().SetClipPosY(static_cast<BackendHandle>(min.y));
-				ExampleApp::Get()->GetLVGDrawer().SetClipSizeX(static_cast<BackendHandle>(size.x));
-				ExampleApp::Get()->GetLVGDrawer().SetClipSizeY(static_cast<BackendHandle>(size.y));
+				Vec4i rect = {};
+				rect.x	   = static_cast<int>(min.x);
+				rect.y	   = static_cast<int>(min.y);
+				rect.z	   = static_cast<int>(size.x);
+				rect.w	   = static_cast<int>(size.y);
+				ExampleApp::Get()->GetLVGDrawer().SetClipRect(rect);
 			}
 
 			// Main rect.
@@ -862,10 +863,7 @@ namespace LinaVG
 			textOpts.font = fontDefault;
 			ExampleApp::Get()->GetLVGDrawer().DrawTextDefault("This text is clipped by the black rectangle.", Vec2(min.x - 50, min.y + 250), textOpts, 0.0f, 2);
 
-			ExampleApp::Get()->GetLVGDrawer().SetClipPosX(0);
-			ExampleApp::Get()->GetLVGDrawer().SetClipPosY(0);
-			ExampleApp::Get()->GetLVGDrawer().SetClipSizeX(0);
-			ExampleApp::Get()->GetLVGDrawer().SetClipSizeY(0);
+			ExampleApp::Get()->GetLVGDrawer().SetClipRect({0, 0, 0, 0});
 		}
 
 		void DemoScreens::ShowDemoScreen8_Animated()

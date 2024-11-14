@@ -40,25 +40,24 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <stdio.h>
 
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "Utility/stb_image.h"
 
 namespace LinaVG::Examples
 {
 
-	unsigned int GLBackend::s_displayPosX	= 0;
-	unsigned int GLBackend::s_displayPosY	= 0;
-	unsigned int GLBackend::s_displayWidth	= 0;
-	unsigned int GLBackend::s_displayHeight = 0;
-    bool  GLBackend::s_debugWireframe = 0;
-    int   GLBackend::s_debugTriCount = 0;
-    int   GLBackend::s_debugVtxCount = 0;
-    int   GLBackend::s_debugDrawCalls = 0;
-    float GLBackend::s_debugZoom = 1.0f;
-    Vec2  GLBackend::s_debugOffset = Vec2(0.0f, 0.0f);
+	unsigned int GLBackend::s_displayPosX	 = 0;
+	unsigned int GLBackend::s_displayPosY	 = 0;
+	unsigned int GLBackend::s_displayWidth	 = 0;
+	unsigned int GLBackend::s_displayHeight	 = 0;
+	bool		 GLBackend::s_debugWireframe = 0;
+	int			 GLBackend::s_debugTriCount	 = 0;
+	int			 GLBackend::s_debugVtxCount	 = 0;
+	int			 GLBackend::s_debugDrawCalls = 0;
+	float		 GLBackend::s_debugZoom		 = 1.0f;
+	Vec2		 GLBackend::s_debugOffset	 = Vec2(0.0f, 0.0f);
 
-#define FONT_ATLAS_WIDTH 2048
+#define FONT_ATLAS_WIDTH  2048
 #define FONT_ATLAS_HEIGHT 2048
 
 	GLBackend::GLBackend()
@@ -78,47 +77,46 @@ namespace LinaVG::Examples
 										   "}\0";
 
 		m_backendData.m_defaultFragShader = "#version 330 core\n"
-											 "out vec4 fragColor;\n"
-											 "in vec2 fUV;\n"
-											 "in vec4 fCol;\n"
-                                             "uniform sampler2D diffuse;\n"
-											 "uniform int hasTexture;\n"
-											 "uniform vec4 tilingAndOffset;\n"
-											 "void main()\n"
-											 "{\n"
-											 "   vec4 textureColor = hasTexture != 0 ? texture(diffuse, fUV * tilingAndOffset.rg + tilingAndOffset.ba) : vec4(1.0);\n"
-											 "   fragColor = fCol * textureColor; \n"
-											 "}\0";
-
-		m_backendData.m_simpleTextFragShader = "#version 330 core\n"
 											"out vec4 fragColor;\n"
 											"in vec2 fUV;\n"
 											"in vec4 fCol;\n"
-                                            "uniform sampler2D diffuse;\n"
-											"uniform int isSDF;\n"
-											"uniform float softness; \n"
-											"uniform float thickness; \n"
-											"uniform int outlineEnabled; \n"
-											"uniform int useOutlineOffset; \n"
-											"uniform vec2 outlineOffset; \n"
-											"uniform float outlineThickness; \n"
-											"uniform vec4 outlineColor; \n"
+											"uniform sampler2D diffuse;\n"
+											"uniform int hasTexture;\n"
+											"uniform vec4 tilingAndOffset;\n"
 											"void main()\n"
 											"{\n"
-                                            "if(isSDF == 0)\n"
-                                            "fragColor = vec4(fCol.rgb, texture(diffuse, fUV).r * fCol.a);\n"
-                                            "else {\n"
-											"float distance = texture(diffuse, fUV).r;\n"
-											"float alpha = smoothstep(thickness - softness, thickness + softness, distance);\n"
-											"vec3 baseColor = fCol.rgb;\n"
-											"if(outlineEnabled == 1){\n"
-											" float border = smoothstep(thickness + outlineThickness - softness, thickness + outlineThickness + softness, distance);\n"
-											" baseColor = mix(outlineColor, fCol, border).rgb;\n"
-											"} \n"
-                                            "fragColor = vec4(baseColor, alpha);\n"
-											"}\n"
+											"   vec4 textureColor = hasTexture != 0 ? texture(diffuse, fUV * tilingAndOffset.rg + tilingAndOffset.ba) : vec4(1.0);\n"
+											"   fragColor = fCol * textureColor; \n"
 											"}\0";
 
+		m_backendData.m_simpleTextFragShader = "#version 330 core\n"
+											   "out vec4 fragColor;\n"
+											   "in vec2 fUV;\n"
+											   "in vec4 fCol;\n"
+											   "uniform sampler2D diffuse;\n"
+											   "uniform int isSDF;\n"
+											   "uniform float softness; \n"
+											   "uniform float thickness; \n"
+											   "uniform int outlineEnabled; \n"
+											   "uniform int useOutlineOffset; \n"
+											   "uniform vec2 outlineOffset; \n"
+											   "uniform float outlineThickness; \n"
+											   "uniform vec4 outlineColor; \n"
+											   "void main()\n"
+											   "{\n"
+											   "if(isSDF == 0)\n"
+											   "fragColor = vec4(fCol.rgb, texture(diffuse, fUV).r * fCol.a);\n"
+											   "else {\n"
+											   "float distance = texture(diffuse, fUV).r;\n"
+											   "float alpha = smoothstep(thickness - softness, thickness + softness, distance);\n"
+											   "vec3 baseColor = fCol.rgb;\n"
+											   "if(outlineEnabled == 1){\n"
+											   " float border = smoothstep(thickness + outlineThickness - softness, thickness + outlineThickness + softness, distance);\n"
+											   " baseColor = mix(outlineColor, fCol, border).rgb;\n"
+											   "} \n"
+											   "fragColor = vec4(baseColor, alpha);\n"
+											   "}\n"
+											   "}\0";
 
 		try
 		{
@@ -178,15 +176,15 @@ namespace LinaVG::Examples
 		// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
 		// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
 		glBindVertexArray(0);
-        
-        m_demoSDFMaterials.resize(100);
+
+		m_demoSDFMaterials.resize(100);
 	}
 
 	void GLBackend::StartFrame()
 	{
-        s_debugDrawCalls = 0;
-        s_debugTriCount = 0;
-        s_debugVtxCount = 0;
+		s_debugDrawCalls = 0;
+		s_debugTriCount	 = 0;
+		s_debugVtxCount	 = 0;
 
 		// Save GL state
 		SaveAPIState();
@@ -200,7 +198,7 @@ namespace LinaVG::Examples
 		glDisable(GL_STENCIL_TEST);
 		glEnable(GL_SCISSOR_TEST);
 
-        if (s_debugWireframe)
+		if (s_debugWireframe)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		else
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -222,7 +220,7 @@ namespace LinaVG::Examples
 		float		R	 = static_cast<float>(s_displayPosX + s_displayWidth);
 		float		T	 = static_cast<float>(s_displayPosY);
 		float		B	 = static_cast<float>(s_displayPosY + s_displayHeight);
-        const float zoom = s_debugZoom;
+		const float zoom = s_debugZoom;
 
 		L *= zoom;
 		R *= zoom;
@@ -262,50 +260,50 @@ namespace LinaVG::Examples
 		if (m_backendData.m_skipDraw)
 			return;
 
-		SetScissors(buf->clipPosX, buf->clipPosY, buf->clipSizeX, buf->clipSizeY);
-        
-        if(buf->shapeType == DrawBufferShapeType::Text || buf->shapeType == DrawBufferShapeType::SDFText)
-        {
-            ShaderData& data = m_backendData.m_simpleTextShaderData;
-            glUseProgram(data.m_handle);
-            
-            glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
-            
-            const bool isSDF = buf->shapeType == DrawBufferShapeType::SDFText;
-            glUniform1i(data.m_uniformMap["isSDF"], isSDF);
-            glUniform1i(data.m_uniformMap["diffuse"], 0);
-            
-            if(isSDF)
-            {
-                SDFMaterial* mat = static_cast<SDFMaterial*>(buf->userData);
-                const float thickness         = 1.0f - Math::Clamp(mat->thickness, 0.0f, 1.0f);
-                const float softness         = Math::Clamp(mat->softness, 0.0f, 10.0f) * 0.1f;
-                const float outlineThickness = Math::Clamp(mat->outlineThickness, 0.0f, 1.0f);
-                glUniform1f(data.m_uniformMap["thickness"], thickness);
-                glUniform1f(data.m_uniformMap["softness"], softness);
-                glUniform1i(data.m_uniformMap["outlineEnabled"], outlineThickness != 0.0f ? 1 : 0);
-                glUniform1f(data.m_uniformMap["outlineThickness"], outlineThickness);
-                glUniform4f(data.m_uniformMap["outlineColor"], mat->outlineColor.x, mat->outlineColor.y,mat->outlineColor.z, mat->outlineColor.w);
-            }
-            
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, m_fontTexture);
-        }
-        else
-        {
-            ShaderData& data = m_backendData.m_defaultShaderData;
-            const Vec4    uv     = buf->textureUV;
-            
-            glUseProgram(data.m_handle);
-            glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
-            
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, buf->textureHandle == NULL_TEXTURE ? 0 : static_cast<Texture*>(buf->textureHandle)->handle);
-            
-            glUniform1i(data.m_uniformMap["diffuse"], 0);
-            glUniform1i(data.m_uniformMap["hasTexture"], buf->textureHandle != NULL_TEXTURE);
-            glUniform4f(data.m_uniformMap["tilingAndOffset"], (GLfloat)uv.x, (GLfloat)uv.y, (GLfloat)uv.z, (GLfloat)uv.w);
-        }
+		SetScissors(buf->clip);
+
+		if (buf->shapeType == DrawBufferShapeType::Text || buf->shapeType == DrawBufferShapeType::SDFText)
+		{
+			ShaderData& data = m_backendData.m_simpleTextShaderData;
+			glUseProgram(data.m_handle);
+
+			glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
+
+			const bool isSDF = buf->shapeType == DrawBufferShapeType::SDFText;
+			glUniform1i(data.m_uniformMap["isSDF"], isSDF);
+			glUniform1i(data.m_uniformMap["diffuse"], 0);
+
+			if (isSDF)
+			{
+				SDFMaterial* mat			  = static_cast<SDFMaterial*>(buf->userData);
+				const float	 thickness		  = 1.0f - Math::Clamp(mat->thickness, 0.0f, 1.0f);
+				const float	 softness		  = Math::Clamp(mat->softness, 0.0f, 10.0f) * 0.1f;
+				const float	 outlineThickness = Math::Clamp(mat->outlineThickness, 0.0f, 1.0f);
+				glUniform1f(data.m_uniformMap["thickness"], thickness);
+				glUniform1f(data.m_uniformMap["softness"], softness);
+				glUniform1i(data.m_uniformMap["outlineEnabled"], outlineThickness != 0.0f ? 1 : 0);
+				glUniform1f(data.m_uniformMap["outlineThickness"], outlineThickness);
+				glUniform4f(data.m_uniformMap["outlineColor"], mat->outlineColor.x, mat->outlineColor.y, mat->outlineColor.z, mat->outlineColor.w);
+			}
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, m_fontTexture);
+		}
+		else
+		{
+			ShaderData& data = m_backendData.m_defaultShaderData;
+			const Vec4	uv	 = buf->textureUV;
+
+			glUseProgram(data.m_handle);
+			glUniformMatrix4fv(data.m_uniformMap["proj"], 1, GL_FALSE, &m_backendData.m_proj[0][0]);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, buf->textureHandle == NULL_TEXTURE ? 0 : static_cast<Texture*>(buf->textureHandle)->handle);
+
+			glUniform1i(data.m_uniformMap["diffuse"], 0);
+			glUniform1i(data.m_uniformMap["hasTexture"], buf->textureHandle != NULL_TEXTURE);
+			glUniform4f(data.m_uniformMap["tilingAndOffset"], (GLfloat)uv.x, (GLfloat)uv.y, (GLfloat)uv.z, (GLfloat)uv.w);
+		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_backendData.m_vbo);
 		glBufferData(GL_ARRAY_BUFFER, buf->vertexBuffer.m_size * sizeof(Vertex), (const GLvoid*)buf->vertexBuffer.begin(), GL_STREAM_DRAW);
@@ -315,22 +313,24 @@ namespace LinaVG::Examples
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glDrawElements(GL_TRIANGLES, (GLsizei)buf->indexBuffer.m_size, sizeof(Index) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, 0);
-        s_debugDrawCalls++;
-        s_debugTriCount += int((float)buf->indexBuffer.m_size / 3.0f);
-        s_debugVtxCount += buf->vertexBuffer.m_size;
+		s_debugDrawCalls++;
+		s_debugTriCount += int((float)buf->indexBuffer.m_size / 3.0f);
+		s_debugVtxCount += buf->vertexBuffer.m_size;
 	}
 
-	void GLBackend::SetScissors(BackendHandle x, BackendHandle y, BackendHandle width, BackendHandle height)
+	void GLBackend::SetScissors(const Vec4i& clip)
 	{
-		if (width == 0 || height == 0)
+		Vec4i usedClip = clip;
+
+		if (usedClip.z == 0 || usedClip.w == 0)
 		{
-			x	   = static_cast<BackendHandle>(s_displayPosX);
-			y	   = static_cast<BackendHandle>(s_displayPosY);
-			width  = static_cast<BackendHandle>(s_displayWidth);
-			height = static_cast<BackendHandle>(s_displayHeight);
+			usedClip.x = static_cast<int>(s_displayPosX);
+			usedClip.y = static_cast<int>(s_displayPosY);
+			usedClip.z = static_cast<int>(s_displayWidth);
+			usedClip.w = static_cast<int>(s_displayHeight);
 		}
 
-		glScissor(x, static_cast<GLint>(s_displayHeight - (y + height)), static_cast<GLint>(width), static_cast<GLint>(height));
+		glScissor(usedClip.x, static_cast<GLint>(s_displayHeight - (usedClip.y + usedClip.w)), static_cast<GLint>(usedClip.z), static_cast<GLint>(usedClip.w));
 	}
 
 	void GLBackend::SaveAPIState()
@@ -510,63 +510,63 @@ namespace LinaVG::Examples
 		}
 	}
 
-    void GLBackend::CreateFontTexture(unsigned int width, unsigned int height)
-    {
-        GLuint tex;
-        glActiveTexture(GL_TEXTURE0);
-        glGenTextures(1, &tex);
-        glBindTexture(GL_TEXTURE_2D, tex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+	void GLBackend::CreateFontTexture(unsigned int width, unsigned int height)
+	{
+		GLuint tex;
+		glActiveTexture(GL_TEXTURE0);
+		glGenTextures(1, &tex);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
 
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        m_fontTexture = static_cast<uint32_t>(tex);
-        m_fontTextureCreated = true;
-    }
-    
-    void GLBackend::OnAtlasUpdate(Atlas *atlas)
-    {
-        SaveAPIState();
-        if(!m_fontTextureCreated)
-            CreateFontTexture(atlas->GetSize().x, atlas->GetSize().y);
-        
-        glBindTexture(GL_TEXTURE_2D, m_fontTexture);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, atlas->GetSize().x, atlas->GetSize().y, GL_RED, GL_UNSIGNED_BYTE, atlas->GetData());
-        RestoreAPIState();
-    }
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		m_fontTexture		 = static_cast<uint32_t>(tex);
+		m_fontTextureCreated = true;
+	}
 
-    Texture* GLBackend::LoadTexture(const char *file)
-    {
-        Texture* txt = new Texture();
-        unsigned int texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        // set the texture wrapping/filtering options (on the currently bound texture object)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // load and generate the texture
-        int               width, height, nrChannels;
-        unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 4);
-        if (data)
-        {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-        }
-        else
-        {
-            std::cout << "Failed to load texture" << std::endl;
-        }
-        stbi_image_free(data);
-        txt->handle = texture;
-        return txt;
-    }
+	void GLBackend::OnAtlasUpdate(Atlas* atlas)
+	{
+		SaveAPIState();
+		if (!m_fontTextureCreated)
+			CreateFontTexture(atlas->GetSize().x, atlas->GetSize().y);
+
+		glBindTexture(GL_TEXTURE_2D, m_fontTexture);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, atlas->GetSize().x, atlas->GetSize().y, GL_RED, GL_UNSIGNED_BYTE, atlas->GetData());
+		RestoreAPIState();
+	}
+
+	Texture* GLBackend::LoadTexture(const char* file)
+	{
+		Texture*	 txt = new Texture();
+		unsigned int texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		// set the texture wrapping/filtering options (on the currently bound texture object)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// load and generate the texture
+		int			   width, height, nrChannels;
+		unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 4);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+		else
+		{
+			std::cout << "Failed to load texture" << std::endl;
+		}
+		stbi_image_free(data);
+		txt->handle = texture;
+		return txt;
+	}
 
 } // namespace LinaVG::Examples

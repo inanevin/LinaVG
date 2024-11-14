@@ -81,7 +81,6 @@ namespace LinaVG
 		{
 			for (int i = 0; i < m_data.m_defaultBuffers.m_size; i++)
 				m_data.m_defaultBuffers[i].ShrinkZero();
-
 		}
 
 		if (Config.textCachingEnabled)
@@ -120,31 +119,16 @@ namespace LinaVG
 		for (int i = 0; i < arr.m_size; i++)
 		{
 			const int drawOrder = arr[i];
-            renderBuffs(drawOrder, DrawBufferShapeType::Shape);
-            renderBuffs(drawOrder, DrawBufferShapeType::Text);
-            renderBuffs(drawOrder, DrawBufferShapeType::SDFText);
+			renderBuffs(drawOrder, DrawBufferShapeType::Shape);
+			renderBuffs(drawOrder, DrawBufferShapeType::Text);
+			renderBuffs(drawOrder, DrawBufferShapeType::SDFText);
 			renderBuffs(drawOrder, DrawBufferShapeType::AA);
 		}
 	}
 
-	LINAVG_API void BufferStore::SetClipPosX(BackendHandle posX)
+	LINAVG_API void BufferStore::SetClipRect(const Vec4i& rect)
 	{
-		m_data.m_clipPosX = posX;
-	}
-
-	LINAVG_API void BufferStore::SetClipPosY(BackendHandle posY)
-	{
-		m_data.m_clipPosY = posY;
-	}
-
-	LINAVG_API void BufferStore::SetClipSizeX(BackendHandle sizeX)
-	{
-		m_data.m_clipSizeX = sizeX;
-	}
-
-	LINAVG_API void BufferStore::SetClipSizeY(BackendHandle sizeY)
-	{
-		m_data.m_clipSizeY = sizeY;
+		m_data.m_clipRect = rect;
 	}
 
 	DrawBuffer& BufferStoreData::GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& textureUV)
@@ -152,30 +136,30 @@ namespace LinaVG
 		for (int i = 0; i < m_defaultBuffers.m_size; i++)
 		{
 			auto& buf = m_defaultBuffers[i];
-            
-            if(buf.shapeType != shapeType)
-                continue;
-            
-            if(buf.userData != userData)
-                continue;
-            
-            if(buf.drawOrder != drawOrder)
-                continue;
-         
-            if(buf.IsClipDifferent(m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY))
-                continue;
-            
-            if(buf.textureHandle != txtHandle)
-                continue;
-            
-            if(!Math::IsEqual(buf.textureUV, textureUV))
-                continue;
-     
-            return buf;
+
+			if (buf.shapeType != shapeType)
+				continue;
+
+			if (buf.userData != userData)
+				continue;
+
+			if (buf.drawOrder != drawOrder)
+				continue;
+
+			if (buf.IsClipDifferent(m_clipRect))
+				continue;
+
+			if (buf.textureHandle != txtHandle)
+				continue;
+
+			if (!Math::IsEqual(buf.textureUV, textureUV))
+				continue;
+
+			return buf;
 		}
 
 		SetDrawOrderLimits(drawOrder);
-		m_defaultBuffers.push_back(DrawBuffer(userData, drawOrder, shapeType, txtHandle, textureUV, m_clipPosX, m_clipPosY, m_clipSizeX, m_clipSizeY));
+		m_defaultBuffers.push_back(DrawBuffer(userData, drawOrder, shapeType, txtHandle, textureUV, m_clipRect));
 		return m_defaultBuffers.last_ref();
 	}
 
@@ -195,7 +179,7 @@ namespace LinaVG
 
 	TextCache* BufferStoreData::CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf)
 	{
-        auto it = m_textCache.find(sid);
+		auto it = m_textCache.find(sid);
 
 		if (it == m_textCache.end())
 			return nullptr;

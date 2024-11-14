@@ -67,24 +67,20 @@ namespace LinaVG
 	/// </summary>
 	struct BufferStoreData
 	{
-		Array<DrawBuffer>				   m_defaultBuffers;
-		Array<int>						   m_drawOrders;
-		LINAVG_MAP<uint32_t, TextCache>	   m_textCache;
-		int								   m_gcFrameCounter		   = 0;
-		int								   m_textCacheFrameCounter = 0;
-		RectOverrideData				   m_rectOverrideData;
-		UVOverrideData					   m_uvOverride;
-		BackendHandle					   m_clipPosX  = 0;
-		BackendHandle					   m_clipPosY  = 0;
-		BackendHandle					   m_clipSizeX = 0;
-		BackendHandle					   m_clipSizeY = 0;
+		Array<DrawBuffer>				m_defaultBuffers;
+		Array<int>						m_drawOrders;
+		LINAVG_MAP<uint32_t, TextCache> m_textCache;
+		int								m_gcFrameCounter		= 0;
+		int								m_textCacheFrameCounter = 0;
+		RectOverrideData				m_rectOverrideData;
+		UVOverrideData					m_uvOverride;
+		Vec4i							m_clipRect = {0, 0, 0, 0};
 
-		void				  SetDrawOrderLimits(int drawOrder);
-		int					  GetBufferIndexInDefaultArray(DrawBuffer* buf);
-		int					  GetBufferIndexInCharArray(DrawBuffer* buf);
-		DrawBuffer&			  GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& textureUV);
-		void				  AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart);
-		TextCache*			  CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf);
+		void		SetDrawOrderLimits(int drawOrder);
+		int			GetBufferIndexInDefaultArray(DrawBuffer* buf);
+		DrawBuffer& GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& textureUV);
+		void		AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart);
+		TextCache*	CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf);
 	};
 
 	struct BufferStoreCallbacks
@@ -114,10 +110,7 @@ namespace LinaVG
 		/// Sets the scissors/clipping data.
 		/// </summary>
 		/// <returns></returns>
-		LINAVG_API void SetClipPosX(BackendHandle posX);
-		LINAVG_API void SetClipPosY(BackendHandle posY);
-		LINAVG_API void SetClipSizeX(BackendHandle sizeX);
-		LINAVG_API void SetClipSizeY(BackendHandle sizeY);
+		LINAVG_API void SetClipRect(const Vec4i& pos);
 
 		/// <summary>
 		/// Erases all vertex & index data on all buffers.

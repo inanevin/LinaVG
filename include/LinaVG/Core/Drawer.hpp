@@ -159,7 +159,7 @@ namespace LinaVG
 		/// <param name="uvTilingAndOffset">Texture tiling and offset..</param>
 		/// <param name="uvTL">Top-left UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
 		/// <param name="uvBR">Bottom-right UV coordinates, default is top-left to bottom-right, 0,0 to 1,1.</param>
-		LINAVG_API void DrawImage(TextureHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint = Vec4(1, 1, 1, 1), float rotateAngle = 0.0f, int drawOrder = 0, Vec4 uvTilingAndOffset = Vec4(1,1, 0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
+		LINAVG_API void DrawImage(TextureHandle textureHandle, const Vec2& pos, const Vec2& size, Vec4 tint = Vec4(1, 1, 1, 1), float rotateAngle = 0.0f, int drawOrder = 0, Vec4 uvTilingAndOffset = Vec4(1, 1, 0, 0), Vec2 uvTL = Vec2(0, 0), Vec2 uvBR = Vec2(1, 1));
 
 		/// <summary>
 		/// Your points for the triangle must follow the given parameter order -- left, right and top edges.
@@ -248,24 +248,9 @@ namespace LinaVG
 
 #endif
 
-		inline LINAVG_API void SetClipPosX(BackendHandle posX)
+		inline LINAVG_API void SetClipRect(const Vec4i& rect)
 		{
-			m_bufferStore.SetClipPosX(posX);
-		}
-
-		inline LINAVG_API void SetClipPosY(BackendHandle posY)
-		{
-			m_bufferStore.SetClipPosY(posY);
-		}
-
-		inline LINAVG_API void SetClipSizeX(BackendHandle sizeX)
-		{
-			m_bufferStore.SetClipSizeX(sizeX);
-		}
-
-		inline LINAVG_API void SetClipSizeY(BackendHandle sizeY)
-		{
-			m_bufferStore.SetClipSizeY(sizeY);
+			m_bufferStore.SetClipRect(rect);
 		}
 
 		inline LINAVG_API void FlushBuffers()
@@ -410,12 +395,12 @@ namespace LinaVG
 		/// <summary>
 		/// Process, parse & draw text according to options.
 		/// </summary>
-		void ProcessText(DrawBuffer* buf, Font* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, const TextOptions& opts, float rotateAngle, TextOutData* outData);
+		void ProcessText(DrawBuffer* buf, Font* font, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, const TextOptions& opts, float rotateAngle, TextOutData* outData, bool checkClip);
 
 		/// <summary>
 		/// DrawText implementation.
 		/// </summary>
-		void DrawText(DrawBuffer* buf, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, const TextOptions& opts, TextOutData* outData);
+		void DrawText(DrawBuffer* buf, const char* text, const Vec2& pos, const Vec2& offset, const Vec4Grad& color, const TextOptions& opts, TextOutData* outData, bool checkClip);
 
 		/// <summary>
 		/// Returns the total text size for non-wrapped text.
