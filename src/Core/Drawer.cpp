@@ -2573,7 +2573,7 @@ namespace LinaVG
 
 		auto calcSizeChar = [&](TextCharacter& ch, GlyphEncoding c) {
 			float x = ch.m_advance.x * opts.textScale;
-			float y = ch.m_bearing.y * opts.textScale;
+			float y = (ch.m_bearing.y + ch.m_ascent) * opts.textScale;
 
 			if (opts.font->isSDF)
 			{
