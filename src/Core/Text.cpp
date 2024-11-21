@@ -239,12 +239,13 @@ namespace LinaVG
 			return nullptr;
 		}
 
-		Font* font			  = new Font();
-		font->supportsUnicode = customRanges != nullptr;
-		font->size			  = size;
-		font->isSDF			  = loadAsSDF;
-		font->newLineHeight	  = static_cast<float>(face->size->metrics.height) / 64.0f;
-		font->supportsKerning = useKerningIfAvailable && FT_HAS_KERNING(face) != 0;
+		Font* font				= new Font();
+		font->supportsUnicode	= customRanges != nullptr;
+		font->size				= size;
+		font->isSDF				= loadAsSDF;
+		font->newLineHeight		= static_cast<float>(face->size->metrics.height) / 64.0f;
+		font->supportsKerning	= useKerningIfAvailable && FT_HAS_KERNING(face) != 0;
+		font->structSizeInBytes = sizeof(Font);
 
 		// int		 maxHeight		   = 0;
 		auto&		 characterMap = font->glyphs;
@@ -264,6 +265,8 @@ namespace LinaVG
 
 			err				  = FT_Load_Glyph(face, i, FT_LOAD_DEFAULT);
 			TextCharacter& ch = characterMap[c];
+			font->structSizeInBytes += sizeof(GlyphEncoding);
+			font->structSizeInBytes += sizeof(TextCharacter);
 
 			if (err)
 			{
@@ -294,6 +297,7 @@ namespace LinaVG
 				ch.m_buffer = (unsigned char*)LINAVG_MALLOC(bufSize);
 				if (ch.m_buffer != 0)
 					LINAVG_MEMCPY(ch.m_buffer, slot->bitmap.buffer, bufSize);
+				font->structSizeInBytes += bufSize;
 			}
 
 			ch.m_size	 = Vec2(static_cast<float>(glyphWidth), static_cast<float>(glyphRows));
@@ -325,6 +329,7 @@ namespace LinaVG
 				Config.errorCallback("LinaVG: Error on FT_Get_Kerning!");
 
 			font->kerningTable[first].xAdvances[second] = delta.x;
+			font->structSizeInBytes += sizeof(unsigned long) * 3;
 		};
 
 		for (FT_ULong c = 32; c < 128; c++)
