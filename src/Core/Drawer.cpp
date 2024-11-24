@@ -204,7 +204,8 @@ namespace LinaVG
 		DrawBuffer* destBuf = &m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset);
 
 		// Calculate the line points.
-		Array<Line*>	 lines;
+		Array<Line*> lines;
+		lines.reserve(count - 1);
 		LineCapDirection usedCapDir = LineCapDirection::None;
 
 		for (int i = 0; i < count - 1; i++)
@@ -2463,7 +2464,7 @@ namespace LinaVG
 			v2.pos = Vec2(x2 + offset.x + w, ybot + offset.y);
 			v3.pos = Vec2(x2 + offset.x, ybot + offset.y);
 
-			if (!Math::IsEqualMarg(opts.cpuClipping.z, 0.0f) && !Math::IsEqualMarg(opts.cpuClipping.w, 0.0f))
+			if (!Math::IsEqualMarg(opts.cpuClipping.z, 0.0f, 0.1f) && !Math::IsEqualMarg(opts.cpuClipping.w, 0.0f, 0.1f))
 			{
 				if (!IsPointInside(v0.pos, opts.cpuClipping))
 					return;
