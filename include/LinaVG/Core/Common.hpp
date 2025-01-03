@@ -629,13 +629,29 @@ namespace LinaVG
 		/// Every interval ticks system will garbage collect all vertex and index buffers, meaning that will clear all the arrays.
 		/// On other ticks, arrays are simply resized to 0, avoiding re-allocations on the next frame.
 		/// Set to 0 for instant flush on buffers at the end of every frame.
+		/// Disable using gcCollectEnabled
 		/// </summary>
 		int gcCollectInterval = 600;
+
+		/// <summary>
+		/// Whether gcCollectInterval is used to clear all vertex/index buffers.
+		/// </summary>
+		bool gcCollectEnabled = true;
 
 		/// <summary>
 		/// This amount of buffers are reserved upon Renderer initialization. Saves time from allocating/deallocating buffers in runtime.
 		/// </summary>
 		int defaultBufferReserve = 50;
+
+		/// <summary>
+		/// Amount of vertex buffers reserved for each buffer reserve upon initialization.
+		/// </summary>
+		int defaultVtxBufferReserve = 100;
+
+		/// <summary>
+		/// Amount of idx buffers reserved for each buffer reserve upon initialization.
+		/// </summary>
+		int defaultIdxBufferReserve = 100;
 
 		/// <summary>
 		/// Set this to your own function to receive error callbacks from LinaVG.

@@ -303,7 +303,7 @@ namespace LinaVG
 			ch.m_size	 = Vec2(static_cast<float>(glyphWidth), static_cast<float>(glyphRows));
 			ch.m_bearing = Vec2(static_cast<float>(slot->bitmap_left), static_cast<float>(slot->bitmap_top));
 			ch.m_advance = Vec2(static_cast<float>(slot->advance.x >> 6), static_cast<float>(slot->advance.y >> 6));
-			ch.m_ascent	 = (face->size->metrics.ascender >> 6) - slot->bitmap_top;
+			ch.m_ascent	 = static_cast<float>((face->size->metrics.ascender >> 6)) - static_cast<float>(slot->bitmap_top);
 
 			sizeCtrY = Math::Max(sizeCtrY, glyphRows);
 

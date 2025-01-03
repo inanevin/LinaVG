@@ -73,7 +73,7 @@ namespace LinaVG
 	{
 		m_data.m_gcFrameCounter++;
 
-		if (m_data.m_gcFrameCounter > Config.gcCollectInterval)
+		if (Config.gcCollectEnabled && m_data.m_gcFrameCounter > Config.gcCollectInterval)
 		{
 			ClearAllBuffers();
 		}
@@ -160,7 +160,10 @@ namespace LinaVG
 
 		SetDrawOrderLimits(drawOrder);
 		m_defaultBuffers.push_back(DrawBuffer(userData, drawOrder, shapeType, txtHandle, textureUV, m_clipRect));
-		return m_defaultBuffers.last_ref();
+		DrawBuffer& buf = m_defaultBuffers.last_ref();
+		buf.vertexBuffer.reserve(Config.defaultVtxBufferReserve);
+		buf.indexBuffer.reserve(Config.defaultIdxBufferReserve);
+		return buf;
 	}
 
 	void BufferStoreData::AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart)
