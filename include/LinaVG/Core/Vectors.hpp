@@ -116,7 +116,6 @@ namespace LinaVG
 			return other.x >= x && other.y >= y && other.x + other.z <= x + z && other.y + other.w <= y + w;
 		}
 
-
 		int x = 0;
 		int y = 0;
 		int z = 0;

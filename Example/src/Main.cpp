@@ -78,19 +78,19 @@ namespace LinaVG
 			};
 
 			LinaVG::Config.defaultBufferReserve = 100000;
-            LinaVG::Config.gcCollectInterval    = 20000;
-            LinaVG::Config.maxFontAtlasSize = 1024;
+			LinaVG::Config.gcCollectInterval	= 20000;
+			LinaVG::Config.maxFontAtlasSize		= 1024;
 
-            LinaVG::InitializeText();
+			LinaVG::InitializeText();
 
 			m_checkeredTexture = GLBackend::LoadTexture("Resources/Textures/Checkered.png");
-			m_linaTexture	   =  GLBackend::LoadTexture("Resources/Textures/Lina.png");
+			m_linaTexture	   = GLBackend::LoadTexture("Resources/Textures/Lina.png");
 
 			// Init LinaVG
 			m_renderingBackend = new GLBackend();
 
-			m_lvgDrawer.GetCallbacks().draw	  = std::bind(&GLBackend::DrawDefault, m_renderingBackend, std::placeholders::_1);
-            m_lvgText.GetCallbacks().atlasNeedsUpdate  = std::bind(&GLBackend::OnAtlasUpdate, m_renderingBackend, std::placeholders::_1);
+			m_lvgDrawer.GetCallbacks().draw			  = std::bind(&GLBackend::DrawDefault, m_renderingBackend, std::placeholders::_1);
+			m_lvgText.GetCallbacks().atlasNeedsUpdate = std::bind(&GLBackend::OnAtlasUpdate, m_renderingBackend, std::placeholders::_1);
 			m_demoScreens.Initialize();
 
 			float prevTime	  = window.GetTime();
@@ -130,7 +130,7 @@ namespace LinaVG
 				style.outlineOptions.color.end	 = Vec4(0, 0, 1, 1);
 
 				// Same options as style.m_textureXXX
-				style.outlineOptions.textureHandle	 = ExampleApp::Get()->GetCheckeredTexture();
+				style.outlineOptions.textureHandle			= ExampleApp::Get()->GetCheckeredTexture();
 				style.outlineOptions.textureTilingAndOffset = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
 				m_demoScreens.ShowBackground();
@@ -172,24 +172,23 @@ namespace LinaVG
 				frameCount++;
 			}
 
-            delete m_linaTexture;
-            delete m_checkeredTexture;
+			delete m_linaTexture;
+			delete m_checkeredTexture;
 			// Terminate Lina VG & example exampleBackend.
 			m_demoScreens.Terminate();
 			delete m_renderingBackend;
-            LinaVG::TerminateText();
+			LinaVG::TerminateText();
 			window.Terminate();
-            
 		}
 
 		void ExampleApp::OnHorizontalKeyCallback(float input)
 		{
-            GLBackend::s_debugOffset.x += input * m_deltaTime * 1000;
+			GLBackend::s_debugOffset.x += input * m_deltaTime * 1000;
 		}
 
 		void ExampleApp::OnVerticalKeyCallback(float input)
 		{
-            GLBackend::s_debugOffset.y -= input * m_deltaTime * 1000;
+			GLBackend::s_debugOffset.y -= input * m_deltaTime * 1000;
 		}
 
 		void ExampleApp::OnNumKeyCallback(int key)
@@ -213,7 +212,7 @@ namespace LinaVG
 
 		void ExampleApp::OnFCallback()
 		{
-            GLBackend::s_debugWireframe = !GLBackend::s_debugWireframe;
+			GLBackend::s_debugWireframe = !GLBackend::s_debugWireframe;
 		}
 
 		void ExampleApp::OnCCallback()
@@ -229,7 +228,7 @@ namespace LinaVG
 
 		void ExampleApp::OnMouseScrollCallback(float val)
 		{
-            GLBackend::s_debugZoom -= val * m_deltaTime * 10;
+			GLBackend::s_debugZoom -= val * m_deltaTime * 10;
 		}
 
 		void ExampleApp::OnWindowResizeCallback(int width, int height)

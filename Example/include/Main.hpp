@@ -42,8 +42,8 @@ namespace LinaVG
 	namespace Examples
 	{
 		class GLBackend;
-        struct Texture;
-    
+		struct Texture;
+
 		class ExampleApp
 		{
 		public:
@@ -105,11 +105,11 @@ namespace LinaVG
 			{
 				return m_lvgDrawer;
 			}
-            
-            inline Text& GetLVGText()
-            {
-                return m_lvgText;
-            }
+
+			inline Text& GetLVGText()
+			{
+				return m_lvgText;
+			}
 
 			inline GLBackend* GetGLBackend()
 			{
@@ -118,8 +118,8 @@ namespace LinaVG
 
 		private:
 			DemoScreens		   m_demoScreens;
-			Texture*	   m_linaTexture	   = nullptr;
-			Texture*	   m_checkeredTexture  = nullptr;
+			Texture*		   m_linaTexture	   = nullptr;
+			Texture*		   m_checkeredTexture  = nullptr;
 			int				   m_currentDemoScreen = 1;
 			float			   m_deltaTime		   = 0.0f;
 			float			   m_deltaTimeRead	   = 0.0f;
@@ -128,7 +128,7 @@ namespace LinaVG
 			bool			   m_shouldClose	   = false;
 			static ExampleApp* s_exampleApp;
 			LinaVG::Drawer	   m_lvgDrawer;
-            LinaVG::Text m_lvgText;
+			LinaVG::Text	   m_lvgText;
 			GLBackend*		   m_renderingBackend = nullptr;
 		};
 	} // namespace Examples

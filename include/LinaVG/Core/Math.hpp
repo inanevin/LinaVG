@@ -1,4 +1,4 @@
-/* 
+/*
 This file is a part of: LinaVG
 https://github.com/inanevin/LinaVG
 
@@ -13,11 +13,11 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
    1. Redistributions of source code must retain the above copyright notice, this
-      list of conditions and the following disclaimer.
+	  list of conditions and the following disclaimer.
 
    2. Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
+	  this list of conditions and the following disclaimer in the documentation
+	  and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -60,12 +60,12 @@ namespace LinaVG
 		static Vec2	 ScalePoint(const Vec2& p, const Vec2& center, float scale);
 		static Vec2	 GetVertexAverage(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint);
 		static Vec2	 GetVertexNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw = true);
-        static Vec2  GetExtrudedFromNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, float thickness = 1.0f, bool ccw = true);
-        static Vec2     GetVertexNormalFlatCheck(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw = true);
+		static Vec2	 GetExtrudedFromNormal(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, float thickness = 1.0f, bool ccw = true);
+		static Vec2	 GetVertexNormalFlatCheck(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, bool ccw = true);
 		static Vec2	 GetExtrudedFromNormalFlatCheck(const Vec2& point, const Vec2& previousPoint, const Vec2& nextPoint, float thickness, bool ccw = true);
 		static float InverseLerp(float a, float b, float v);
-        static int CustomRound(float val);
-        
+		static int	 CustomRound(float val);
+
 		/// <summary>
 		/// Returns the centroid of a given polygon.
 		/// https://stackoverflow.com/questions/2792443/finding-the-centroid-of-a-polygon

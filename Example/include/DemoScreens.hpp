@@ -41,9 +41,9 @@ namespace LinaVG
 {
 	namespace Examples
 	{
-    
-    struct SDFMaterial;
-    
+
+		struct SDFMaterial;
+
 		class DemoScreens
 		{
 		public:
@@ -72,14 +72,14 @@ namespace LinaVG
 			int						 m_vertexCount	   = 0;
 			std::vector<std::string> m_screenTitles	   = {"SHAPES", "COLORS", "OUTLINES", "LINES", "TEXTS", "Z-ORDER", "CLIPPING", "ANIMATED", "FINAL"};
 			std::vector<std::string> m_screenDescriptions;
-            
-            SDFMaterial* m_sdfMaterial0 = nullptr;
-            SDFMaterial* m_sdfMaterial1 = nullptr;
-            SDFMaterial* m_sdfMaterial2 = nullptr;
-            SDFMaterial* m_sdfMaterial3 = nullptr;
-            SDFMaterial* m_sdfMaterial4 = nullptr;
-            SDFMaterial* m_sdfMaterial5 = nullptr;
-            SDFMaterial* m_sdfMaterial6 = nullptr;
+
+			SDFMaterial* m_sdfMaterial0 = nullptr;
+			SDFMaterial* m_sdfMaterial1 = nullptr;
+			SDFMaterial* m_sdfMaterial2 = nullptr;
+			SDFMaterial* m_sdfMaterial3 = nullptr;
+			SDFMaterial* m_sdfMaterial4 = nullptr;
+			SDFMaterial* m_sdfMaterial5 = nullptr;
+			SDFMaterial* m_sdfMaterial6 = nullptr;
 		};
 	} // namespace Examples
 } // namespace LinaVG
