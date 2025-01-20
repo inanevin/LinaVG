@@ -714,7 +714,7 @@ namespace LinaVG
 		DrawBufferShapeType shapeType	  = DrawBufferShapeType::Shape;
 		TextureHandle		textureHandle = NULL_TEXTURE;
 		Vec4				textureUV	  = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
-		Vec4i				clip		  = {0, 0, 0, 0};
+        Vec4i				clip		  = Vec4i(0.0f, 0.0f, 0.0f, 0.0f);
 		void*				userData	  = nullptr;
 		int					drawOrder	  = -1;
 

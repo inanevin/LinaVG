@@ -33,7 +33,6 @@
 
 cmake_minimum_required (VERSION 3.10...3.31)
 project(LinaVG)
-set(CMAKE_CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #--------------------------------------------------------------------
