@@ -1,13 +1,13 @@
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# This file is a part of: LinaVG
-# https://github.com/inanevin/LinaVG
+# This file is a part of: LinaGX
+# https://github.com/inanevin/LinaGX
 # 
 # Author: Inan Evin
 # http://www.inanevin.com
 # 
 # The 2-Clause BSD License
 # 
-# Copyright (c) [2022-] Inan Evin
+# Copyright (c) [2023-] Inan Evin
 # 
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
@@ -32,84 +32,244 @@
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 cmake_minimum_required (VERSION 3.10...3.31)
-project(LinaVG)
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+project(LinaGX)
+
+set(TARGET_ARCHITECTURE "x64")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 #--------------------------------------------------------------------
 # Options & Definitions
 #--------------------------------------------------------------------
 
-option(LINAVG_BUILD_EXAMPLES "Builds example backend projects." OFF)
-option(LINAVG_DISABLE_TEXT_SUPPORT "Disables text support and linking to FreeType." OFF)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+if(NOT DEFINED LINAGX_ITERATOR_DEBUG_LEVEL)
+set(LINAGX_ITERATOR_DEBUG_LEVEL 0)
+endif()
+
+option(LINAGX_BUILD_EXAMPLES "Builds example projects." OFF)
+
+if(WIN32)
+	option(LINAGX_DISABLE_DX12 "Disables DX12 backend." OFF)
+	option(LINAGX_DISABLE_VK "Disables Vulkan backend." OFF)
+endif()
+
+set(LINAGX_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(MSVC)
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
 endif()
 
+if(LINAGX_DISABLE_DX12 AND LINAGX_DISABLE_VK)
+	message(FATAL_ERROR "Error: Can not disable both DX12 and Vulkan!")
+endif()
 #--------------------------------------------------------------------
 # Set sources
 #--------------------------------------------------------------------
 
-set(LinaVG_SOURCES 
 
-# Core
-include/LinaVG/LinaVG.hpp
-include/LinaVG/Utility/Utility.hpp
-include/LinaVG/Core/BufferStore.hpp
-include/LinaVG/Core/Text.hpp
-include/LinaVG/Core/Drawer.hpp
-include/LinaVG/Core/Common.hpp
-include/LinaVG/Core/Math.hpp
-include/LinaVG/Core/Vectors.hpp
+set(LinaGX_HEADERS
+	include/LinaGX/LinaGX.hpp
+	include/LinaGX/LinaGXExports.hpp
+	include/LinaGX/Common/CommonData.hpp
+	include/LinaGX/Common/CommonInput.hpp
+	include/LinaGX/Common/CommonConfig.hpp
+	include/LinaGX/Common/Types.hpp
+	include/LinaGX/Common/CommonGfx.hpp
+	include/LinaGX/Common/Math.hpp
+	include/LinaGX/Common/Vectors.hpp
+	include/LinaGX/Common/Defines/Format.hpp
+	include/LinaGX/Common/Defines/DataBuffers.hpp
+	include/LinaGX/Common/Defines/SamplerDesc.hpp
+	include/LinaGX/Core/Backend.hpp
+	include/LinaGX/Core/Input.hpp
+	include/LinaGX/Core/InputMappings.hpp
+	include/LinaGX/Core/Instance.hpp
+	include/LinaGX/Core/CommandStream.hpp
+	include/LinaGX/Core/Commands.hpp
+	include/LinaGX/Core/WindowManager.hpp
+	include/LinaGX/Core/Window.hpp
+	include/LinaGX/Core/WindowListener.hpp
+	include/LinaGX/Utility/SPIRVUtility.hpp
+	include/LinaGX/Utility/PlatformUtility.hpp
+	include/LinaGX/Utility/ImageUtility.hpp
+	include/LinaGX/Utility/ModelUtility.hpp
+	include/LinaGX/Utility/stb/stb_image_write.h
+	include/LinaGX/Utility/stb/stb_image_resize.h
+	include/LinaGX/Utility/stb/stb_image.h
+	include/LinaGX/Utility/tinygltf/tiny_gltf.h
+	include/LinaGX/Utility/tinygltf/json.hpp
+)
+
+set(LinaGX_SOURCES
+	src/Common/CommonConfig.cpp
+	src/Common/CommonData.cpp
+	src/Common/Math.cpp
+	src/Core/Backend.cpp
+	src/Core/Instance.cpp
+	src/Core/CommandStream.cpp
+	src/Core/WindowManager.cpp
+	src/Core/Commands.cpp
+	src/Utility/SPIRVUtility.cpp
+	src/Utility/ImageUtility.cpp
+	src/Utility/ModelUtility.cpp
+	src/Utility/PlatformUtility.cpp
+)
+
+set(LinaGX_VK_HEADERS
+	include/LinaGX/Platform/Vulkan/VKBackend.hpp
+	include/LinaGX/Platform/Vulkan/SDK/VkBootstrap.h
+	include/LinaGX/Platform/Vulkan/SDK/VkBootstrapDispatch.h
+	include/LinaGX/Platform/Vulkan/SDK/vk_mem_alloc.h
+)
+
+set(LinaGX_DX12_HEADERS
+	include/LinaGX/Platform/DX12/DX12Backend.hpp
+	include/LinaGX/Platform/DX12/DX12HeapStaging.hpp
+	include/LinaGX/Platform/DX12/DX12HeapGPU.hpp
+	include/LinaGX/Platform/DX12/DX12Common.hpp
+	include/LinaGX/Platform/DX12/SDK/ID3DIncludeInterface.hpp
+	include/LinaGX/Platform/DX12/SDK/d3d12.h
+	include/LinaGX/Platform/DX12/SDK/d3d12compatibility.h
+	include/LinaGX/Platform/DX12/SDK/d3d12sdklayers.h
+	include/LinaGX/Platform/DX12/SDK/d3d12shader.h
+	include/LinaGX/Platform/DX12/SDK/d3d12video.h
+	include/LinaGX/Platform/DX12/SDK/d3dcommon.h
+	include/LinaGX/Platform/DX12/SDK/d3dx12.h
+	include/LinaGX/Platform/DX12/SDK/d3dx12_barriers.h
+	include/LinaGX/Platform/DX12/SDK/d3dx12_check_feature_support.h
+	include/LinaGX/Platform/DX12/SDK/d3dx12_core.h
+	include/LinaGX/Platform/DX12/SDK/d3dx12_default.h
+	include/LinaGX/Platform/DX12/SDK/d3dx12_pipeline_state_stream.h
+	include/LinaGX/Platform/DX12/SDK/d3dx12_property_format_table.h
+	include/LinaGX/Platform/DX12/SDK/d3dx12_render_pass.h
+	include/LinaGX/Platform/DX12/SDK/d3dx12_resource_helpers.h
+	include/LinaGX/Platform/DX12/SDK/d3dx12_root_signature.h
+	include/LinaGX/Platform/DX12/SDK/d3dx12_state_object.h
+	include/LinaGX/Platform/DX12/SDK/dxcore.h
+	include/LinaGX/Platform/DX12/SDK/dxcore_interface.h
+	include/LinaGX/Platform/DX12/SDK/dxgicommon.h
+	include/LinaGX/Platform/DX12/SDK/dxgiformat.h
+	include/LinaGX/Platform/DX12/SDK/Residency/d3dx12Residency.h
+	include/LinaGX/Platform/DX12/SDK/D3D12MemAlloc.h
+)
+
+set(LinaGX_VK_SOURCES
+	src/Platform/Vulkan/VKBackend.cpp
+	src/Platform/Vulkan/SDK/VkBootstrap.cpp
+)
+
+set(LinaGX_DX12_SOURCES
+	src/Platform/DX12/DX12Backend.cpp
+	src/Platform/DX12/DX12HeapStaging.cpp
+	src/Platform/DX12/DX12HeapGPU.cpp
+	src/Platform/DX12/SDK/D3D12MemAlloc.cpp
+	src/Platform/DX12/SDK/ID3DIncludeInterface.cpp
 )
 
 
-set(LinaVG_HEADERS
+if(WIN32)
 
-# Core
-src/Utility/Utility.cpp
-src/Core/BufferStore.cpp
-src/Core/Text.cpp
-src/Core/Drawer.cpp
-src/Core/Common.cpp
-src/Core/Math.cpp
+	set(LinaGX_PLATFORM_HEADERS
+		include/LinaGX/Platform/Windows/Win32Window.hpp
+	)
 
-)
+	set(LinaGX_PLATFORM_SOURCES
+		src/Platform/Windows/Win32Window.cpp
+		src/Platform/Windows/Win32Input.cpp
+	)
 
-#--------------------------------------------------------------------
-# Create executable project
-#--------------------------------------------------------------------
+	if(NOT LINAGX_DISABLE_DX12 AND NOT LINAGX_DISABLE_VK)
+		set(LinaGX_API_HEADERS ${LinaGX_VK_HEADERS} ${LinaGX_DX12_HEADERS})
+		set(LinaGX_API_SOURCES ${LinaGX_VK_SOURCES} ${LinaGX_DX12_SOURCES})
+	elseif(LINAGX_DISABLE_DX12)
+		set(LinaGX_API_HEADERS ${LinaGX_VK_HEADERS})
+		set(LinaGX_API_SOURCES ${LinaGX_VK_SOURCES})
+	elseif(LINAGX_DISABLE_VK)
+		set(LinaGX_API_HEADERS ${LinaGX_DX12_HEADERS})
+		set(LinaGX_API_SOURCES ${LinaGX_DX12_SOURCES})
+	endif()
 
-if(NOT DEFINED LINAVG_FOLDER_BASE)
-set(LINAVG_FOLDER_BASE LinaVGProject)
 endif()
 
-add_library(${PROJECT_NAME} ${LinaVG_SOURCES} ${LinaVG_HEADERS})
-add_library(Lina::VG ALIAS ${PROJECT_NAME})
+if(APPLE)
+	set(LinaGX_PLATFORM_HEADERS
+		include/LinaGX/Platform/Apple/OSXWindow.hpp
+		include/LinaGX/Platform/Apple/OSXNSWindow.hh
+	)
+
+	set(LinaGX_PLATFORM_SOURCES
+		src/Platform/Apple/OSXWindow.mm
+		src/Platform/Apple/OSXNSWindow.mm
+		src/Platform/Apple/OSXInput.mm
+	)
+
+	set(LinaGX_API_HEADERS
+		include/LinaGX/Platform/Metal/MTLBackend.hpp
+	)
+
+	set(LinaGX_API_SOURCES
+		src/Platform/Metal/MTLBackend.mm
+	)
+endif()
+
+
+
+#--------------------------------------------------------------------
+# Create project
+#--------------------------------------------------------------------
+
+if(NOT DEFINED LINAGX_FOLDER_BASE)
+set(LINAGX_FOLDER_BASE LinaGXProject)
+endif()
+
+add_library(${PROJECT_NAME} ${LinaGX_SOURCES} ${LinaGX_HEADERS} ${LinaGX_PLATFORM_SOURCES} ${LinaGX_PLATFORM_HEADERS} ${LinaGX_API_SOURCES} ${LinaGX_API_HEADERS})
+add_library(Lina::GX ALIAS ${PROJECT_NAME})
+set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER ${LINAGX_FOLDER_BASE})
+include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/ProjectSettings.cmake)
 
 #--------------------------------------------------------------------
 # Set include directories
 #--------------------------------------------------------------------
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MAJOR=2)
-target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_MINOR=2)
-target_compile_definitions(${PROJECT_NAME} PUBLIC LINAVG_VERSION_PATCH=3)
+target_compile_definitions(${PROJECT_NAME} PUBLIC LINAGX_VERSION_MAJOR=1)
+target_compile_definitions(${PROJECT_NAME} PUBLIC LINAGX_VERSION_MINOR=1)
+target_compile_definitions(${PROJECT_NAME} PUBLIC LINAGX_VERSION_PATCH=0)
 
-#--------------------------------------------------------------------
-# Subdirectories & linking
-#--------------------------------------------------------------------
-set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER ${LINAVG_FOLDER_BASE})
+if(LINAGX_DISABLE_DX12)
+	target_compile_definitions(${PROJECT_NAME} PUBLIC LINAGX_DISABLE_DX12=1)
+endif()
+
+if(LINAGX_DISABLE_VK)
+	target_compile_definitions(${PROJECT_NAME} PUBLIC LINAGX_DISABLE_VK=1)
+endif()
+
 
 include(Dependencies/Dependencies.cmake)
-#--------------------------------------------------------------------
-# Folder structuring in visual studio
-#--------------------------------------------------------------------
+
+if(LINAGX_BUILD_EXAMPLES)
+	add_subdirectory(Examples/_Common)
+	add_subdirectory(Examples/00-WindowCreation)
+	add_subdirectory(Examples/01-Triangle)
+	add_subdirectory(Examples/02-TexturesAndBinding)
+	add_subdirectory(Examples/03-RenderTargetsGLTF)
+	add_subdirectory(Examples/04-BindlessIndirectComputeQueue)
+	add_subdirectory(Examples/05-FoxLounge)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT 01-Triangle)
+endif()
+
+if(DEFINED ${LINAGX_RUNTIME_OUTPUT_DIRECTORY})
+add_custom_command(
+TARGET ${PROJECT_NAME}
+POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/Dependencies/bin/" "${LINAGX_RUNTIME_OUTPUT_DIRECTORY}")
+endif()
+
 
 if(MSVC_IDE OR APPLE)
-	foreach(source IN LISTS LinaGX_HEADERS LinaVG_SOURCES LinaVG_HEADERS)
+	foreach(source IN LISTS LinaGX_HEADERS LinaGX_SOURCES LinaGX_PLATFORM_HEADERS LinaGX_PLATFORM_SOURCES LinaGX_API_HEADERS LinaGX_API_SOURCES)
 		get_filename_component(source_path "${source}" PATH)
 		string(REPLACE "${LinaGX_SOURCE_DIR}" "" relative_source_path "${source_path}")
 
@@ -121,9 +281,4 @@ if(MSVC_IDE OR APPLE)
 
 		source_group("${source_path_ide}" FILES "${source}")
 	endforeach()
-endif()
-
-if(LINAVG_BUILD_EXAMPLES)
-	add_subdirectory(Example)
-	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Example)
 endif()
