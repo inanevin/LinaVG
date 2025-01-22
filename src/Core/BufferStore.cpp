@@ -131,7 +131,7 @@ namespace LinaVG
 		m_data.m_clipRect = rect;
 	}
 
-	DrawBuffer& BufferStoreData::GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& textureUV)
+	DrawBuffer& BufferStoreData::GetDefaultBuffer(void* userData, uint64_t uid, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& textureUV)
 	{
 		for (int i = 0; i < m_defaultBuffers.m_size; i++)
 		{
@@ -155,11 +155,14 @@ namespace LinaVG
 			if (!Math::IsEqual(buf.textureUV, textureUV))
 				continue;
 
+			if (buf.uid != uid)
+				continue;
+
 			return buf;
 		}
 
 		SetDrawOrderLimits(drawOrder);
-		m_defaultBuffers.push_back(DrawBuffer(userData, drawOrder, shapeType, txtHandle, textureUV, m_clipRect));
+		m_defaultBuffers.push_back(DrawBuffer(userData, uid, drawOrder, shapeType, txtHandle, textureUV, m_clipRect));
 		DrawBuffer& buf = m_defaultBuffers.last_ref();
 		buf.vertexBuffer.reserve(Config.defaultVtxBufferReserve);
 		buf.indexBuffer.reserve(Config.defaultIdxBufferReserve);

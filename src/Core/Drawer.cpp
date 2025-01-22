@@ -201,7 +201,7 @@ namespace LinaVG
 
 		// Determine which buffer to use.
 		// Also correct the buffer pointer if getting a new buffer invalidated it.
-		DrawBuffer* destBuf = &m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset);
+		DrawBuffer* destBuf = &m_bufferStore.GetData().GetDefaultBuffer(style.userData, style.uniqueID, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset);
 
 		// Calculate the line points.
 		Array<Line*> lines;
@@ -390,9 +390,9 @@ namespace LinaVG
 		}*/
 
 		if (Math::IsEqualMarg(style.rounding, 0.0f))
-			FillTri_NoRound(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, top, right, left, style, drawOrder);
+			FillTri_NoRound(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, style.uniqueID, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, top, right, left, style, drawOrder);
 		else
-			FillTri_Round(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.rounding, style, drawOrder);
+			FillTri_Round(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, style.uniqueID, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), style.onlyRoundTheseCorners, rotateAngle, top, right, left, style.rounding, style, drawOrder);
 	}
 
 	void Drawer::DrawRect(const Vec2& min, const Vec2& max, StyleOptions& style, float rotateAngle, int drawOrder)
@@ -405,9 +405,9 @@ namespace LinaVG
 		}*/
 
 		if (Math::IsEqualMarg(style.rounding, 0.0f))
-			FillRect_NoRound(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, min, max, style, drawOrder);
+			FillRect_NoRound(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, style.uniqueID, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, min, max, style, drawOrder);
 		else
-			FillRect_Round(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), style.onlyRoundTheseCorners, rotateAngle, min, max, style.rounding, style, drawOrder);
+			FillRect_Round(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, style.uniqueID, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), style.onlyRoundTheseCorners, rotateAngle, min, max, style.rounding, style, drawOrder);
 	}
 
 	void Drawer::DrawNGon(const Vec2& center, float radius, int n, StyleOptions& style, float rotateAngle, int drawOrder)
@@ -421,7 +421,7 @@ namespace LinaVG
 				return;
 		}*/
 
-		FillNGon(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, center, radius, n, style, drawOrder);
+		FillNGon(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, style.uniqueID, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, center, radius, n, style, drawOrder);
 	}
 
 	void Drawer::DrawConvex(Vec2* points, int size, StyleOptions& style, float rotateAngle, int drawOrder)
@@ -443,7 +443,7 @@ namespace LinaVG
 		}*/
 
 		const Vec2 avgCenter = Math::GetPolygonCentroidFast(points, size);
-		FillConvex(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, points, size, avgCenter, style, drawOrder);
+		FillConvex(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, style.uniqueID, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, points, size, avgCenter, style, drawOrder);
 	}
 
 	void Drawer::DrawCircle(const Vec2& center, float radius, StyleOptions& style, int segments, float rotateAngle, float startAngle, float endAngle, int drawOrder)
@@ -460,7 +460,7 @@ namespace LinaVG
 				return;
 		}*/
 
-		FillCircle(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, center, radius, segments, startAngle, endAngle, style, drawOrder);
+		FillCircle(&m_bufferStore.GetData().GetDefaultBuffer(style.userData, style.uniqueID, drawOrder, DrawBufferShapeType::Shape, style.textureHandle, style.textureTilingAndOffset), rotateAngle, center, radius, segments, startAngle, endAngle, style, drawOrder);
 	}
 
 #ifndef LINAVG_DISABLE_TEXT_SUPPORT
@@ -472,7 +472,7 @@ namespace LinaVG
 
 		Font* font = opts.font;
 
-		DrawBuffer* buf		   = &m_bufferStore.GetData().GetDefaultBuffer(opts.userData, drawOrder, font->isSDF ? DrawBufferShapeType::SDFText : DrawBufferShapeType::Text, font->atlas, Vec4(1, 1, 0, 0));
+		DrawBuffer* buf		   = &m_bufferStore.GetData().GetDefaultBuffer(opts.userData, opts.uniqueID, drawOrder, font->isSDF ? DrawBufferShapeType::SDFText : DrawBufferShapeType::Text, font->atlas, Vec4(1, 1, 0, 0));
 		const int	vtxStart   = buf->vertexBuffer.m_size;
 		const int	indexStart = buf->indexBuffer.m_size;
 
@@ -1742,7 +1742,7 @@ namespace LinaVG
 		DrawBuffer* destBuf = nullptr;
 
 		const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInDefaultArray(sourceBuffer);
-		destBuf				  = &m_bufferStore.GetData().GetDefaultBuffer(opts.userData, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape, outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle, outlineType == OutlineCallType::AA ? opts.textureTilingAndOffset : opts.outlineOptions.textureTilingAndOffset);
+		destBuf				  = &m_bufferStore.GetData().GetDefaultBuffer(opts.userData, opts.uniqueID, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape, outlineType == OutlineCallType::AA ? opts.textureHandle : opts.outlineOptions.textureHandle, outlineType == OutlineCallType::AA ? opts.textureTilingAndOffset : opts.outlineOptions.textureTilingAndOffset);
 
 		if (sourceIndex != -1)
 			sourceBuffer = &m_bufferStore.GetData().m_defaultBuffers[sourceIndex];
@@ -1839,7 +1839,7 @@ namespace LinaVG
 		DrawBuffer* destBuf = nullptr;
 
 		const int sourceIndex = m_bufferStore.GetData().GetBufferIndexInDefaultArray(sourceBuffer);
-		destBuf				  = &m_bufferStore.GetData().GetDefaultBuffer(opts.userData, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape, opts.outlineOptions.textureHandle, opts.outlineOptions.textureTilingAndOffset);
+		destBuf				  = &m_bufferStore.GetData().GetDefaultBuffer(opts.userData, opts.uniqueID, drawOrder, isAAOutline ? DrawBufferShapeType::AA : DrawBufferShapeType::Shape, opts.outlineOptions.textureHandle, opts.outlineOptions.textureTilingAndOffset);
 
 		if (sourceIndex != -1)
 			sourceBuffer = &m_bufferStore.GetData().m_defaultBuffers[sourceIndex];

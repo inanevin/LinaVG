@@ -74,12 +74,12 @@ namespace LinaVG
 
 	LINAVG_API struct Vec4Grad
 	{
-		Vec4Grad(){};
+		Vec4Grad() {};
 		Vec4Grad(const Vec4& c1)
-			: start(c1), end(c1){};
+			: start(c1), end(c1) {};
 
 		Vec4Grad(const Vec4& c1, const Vec4& c2)
-			: start(c1), end(c2){};
+			: start(c1), end(c2) {};
 
 		Vec4		 start		  = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
 		Vec4		 end		  = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -88,11 +88,11 @@ namespace LinaVG
 
 	LINAVG_API struct ThicknessGrad
 	{
-		ThicknessGrad(){};
+		ThicknessGrad() {};
 		ThicknessGrad(float start)
-			: start(start), end(start){};
+			: start(start), end(start) {};
 		ThicknessGrad(float start, float end)
-			: start(start), end(end){};
+			: start(start), end(end) {};
 
 		float start = 1.0f;
 		float end	= 1.0f;
@@ -416,7 +416,7 @@ namespace LinaVG
 	/// </summary>
 	LINAVG_API struct TextOptions
 	{
-		TextOptions(){};
+		TextOptions() {};
 		TextOptions(const TextOptions& opts)
 		{
 			font		   = opts.font;
@@ -428,6 +428,7 @@ namespace LinaVG
 			wrapWidth	   = opts.wrapWidth;
 			wordWrap	   = opts.wordWrap;
 			userData	   = opts.userData;
+			uniqueID	   = opts.uniqueID;
 		}
 
 		bool CheckColors(const Vec4& c1, const Vec4& c2)
@@ -456,6 +457,9 @@ namespace LinaVG
 				return false;
 
 			if (wordWrap != opts.wordWrap)
+				return false;
+
+			if (uniqueID != opts.uniqueID)
 				return false;
 
 			return alignment == opts.alignment && textScale == opts.textScale && spacing == opts.spacing && newLineSpacing == opts.newLineSpacing && wrapWidth == opts.wrapWidth;
@@ -511,6 +515,11 @@ namespace LinaVG
 		/// Defines custom clip rectangle for text vertices.
 		/// </summary>
 		Vec4 cpuClipping = Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+		/// <summary>
+		/// User supplied id.
+		/// </summary>
+		uint64_t uniqueID = 0;
 	};
 
 	/// <summary>
@@ -519,7 +528,7 @@ namespace LinaVG
 	LINAVG_API struct StyleOptions
 	{
 
-		StyleOptions(){};
+		StyleOptions() {};
 		StyleOptions(const StyleOptions& opts)
 		{
 			color		 = opts.color;
@@ -595,6 +604,11 @@ namespace LinaVG
 		/// Use to store user data to be passed back to your call handler.
 		/// </summary>
 		void* userData = nullptr;
+
+		/// <summary>
+		/// Use to store 64 bit unique ID per draw.
+		/// </summary>
+		uint64_t uniqueID = 0;
 	};
 
 	struct Vertex
@@ -702,9 +716,9 @@ namespace LinaVG
 
 	struct DrawBuffer
 	{
-		DrawBuffer(){};
-		DrawBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& txtUV, const Vec4i& clip)
-			: drawOrder(drawOrder), shapeType(shapeType), userData(userData), textureHandle(txtHandle), textureUV(txtUV)
+		DrawBuffer() {};
+		DrawBuffer(void* userData, uint64_t uniqueID, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& txtUV, const Vec4i& clip)
+			: drawOrder(drawOrder), uid(uniqueID), shapeType(shapeType), userData(userData), textureHandle(txtHandle), textureUV(txtUV)
 		{
 			this->clip = clip;
 		};
@@ -714,9 +728,10 @@ namespace LinaVG
 		DrawBufferShapeType shapeType	  = DrawBufferShapeType::Shape;
 		TextureHandle		textureHandle = NULL_TEXTURE;
 		Vec4				textureUV	  = Vec4(1.0f, 1.0f, 0.0f, 0.0f);
-        Vec4i				clip		  = Vec4i(0.0f, 0.0f, 0.0f, 0.0f);
+		Vec4i				clip		  = Vec4i(0.0f, 0.0f, 0.0f, 0.0f);
 		void*				userData	  = nullptr;
 		int					drawOrder	  = -1;
+		uint64_t			uid			  = 0;
 
 		bool IsClipDifferent(const Vec4i& clip)
 		{

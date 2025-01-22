@@ -78,7 +78,7 @@ namespace LinaVG
 
 		void		SetDrawOrderLimits(int drawOrder);
 		int			GetBufferIndexInDefaultArray(DrawBuffer* buf);
-		DrawBuffer& GetDefaultBuffer(void* userData, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& textureUV);
+		DrawBuffer& GetDefaultBuffer(void* userData, uint64_t uid, int drawOrder, DrawBufferShapeType shapeType, TextureHandle txtHandle, const Vec4& textureUV);
 		void		AddTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf, int vtxStart, int indexStart);
 		TextCache*	CheckTextCache(uint32_t sid, const TextOptions& opts, DrawBuffer* buf);
 	};
