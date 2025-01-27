@@ -17,7 +17,9 @@
 
 LinaVG is a 2D vector graphics library providing low-level functionality to draw variety of anti-aliased convex shapes & lines, along with traditional and Signed-Distance-Field (SDF) text rendering. LinaVG also provides rich styling options including gradients, outlines, drop shadows, varying thickness, filled & non-filled shapes, text alignment/spacing and many more!
 
-![image](https://user-images.githubusercontent.com/3519379/173692019-f624a50f-5ae5-41e2-bed2-8a8e1b2c9f47.png)
+<img src="https://user-images.githubusercontent.com/3519379/173692019-f624a50f-5ae5-41e2-bed2-8a8e1b2c9f47.png" style="display: block; margin: auto;">
+<img src="Images/saunastein.png" style="display: block; margin: auto;">
+<p align="center"><em>Lina Engine's editor is drawn using LinaVG</em></p>
 
 LinaVG does not provide a "rendering" functionality on its own. It generates buffers according to your draw calls and sends them back to a custom backend you determine in batches of optimized buffers.
 
